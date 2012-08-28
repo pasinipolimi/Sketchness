@@ -18,6 +18,10 @@
             window.setTimeout(callback, 1000 / 60);
           };
           })();
+		  
+
+		  
+  
 
   if (!window.WebSocket) {
     if (window.MozWebSocket)
@@ -38,16 +42,21 @@
   var isMobile = /ipad|iphone|android/i.test(navigator.userAgent)
 
   // CONSTANTS
-  var COLORS = ['red', 'blue', 'yellow', 'green', 'white'];
-  var SIZES = [2, 5, 8, 10, 14];
+  var PEN = 'red';
+  var ERASER = 'white';
+  var SIZE = 5;
   var MIN_SEND_RATE = 50; // the min interval in ms between 2 send
 
   // STATES
-  var color = COLORS[0];
-  var size = SIZES[1];
+  var color = PEN;
+  var size = SIZE;
   var pid;
   var pname;
   var meCtx;
+  
+  //GAME STATUS
+  var score = 0;
+  var time = 90;
 
   var numTrace = 1;
   var onSocketMessage;
@@ -57,6 +66,37 @@
   var players = {};
 
   var viewport = document.getElementById('viewport');
+  
+  
+  
+  
+  
+  /*****************************UTILITY FUNCTIONS********************************************/
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius, fill, stroke) {
+    if (typeof stroke == "undefined") {
+        stroke = true;
+    }
+    if (typeof radius === "undefined") {
+        radius = 5;
+    }
+    this.beginPath();
+    this.moveTo(x + radius, y);
+    this.lineTo(x + width - radius, y);
+    this.quadraticCurveTo(x + width, y, x + width, y + radius);
+    this.lineTo(x + width, y + height - radius);
+    this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    this.lineTo(x + radius, y + height);
+    this.quadraticCurveTo(x, y + height, x, y + height - radius);
+    this.lineTo(x, y + radius);
+    this.quadraticCurveTo(x, y, x + radius, y);
+    this.closePath();
+    if (stroke) {
+        this.stroke(stroke);
+    }
+    if (fill) {
+        this.fill(fill);
+    }
+  };
 
   // Init pname
   function queryPname() {
@@ -299,8 +339,19 @@
 (function(){
   var canvas = document.getElementById("controls");
   var ctx = canvas.getContext("2d");
+  var drawTool = true;
   var dirty = true;
-
+  
+  //ICONS
+  var penEnabled = new Image();
+  var penDisabled = new Image();
+  var eraserEnabled = new Image();
+  var eraserDisabled = new Image();
+  penEnabled.src = 'assets/images/Pen-2-icon.jpg';
+  eraserEnabled.src = 'assets/images/Eraser-icon.jpg';
+  penDisabled.src='assets/images/Pen-2-iconWhite.jpg';
+  eraserDisabled.src='assets/images/Eraser-iconWhite.jpg';
+  
   var BUTTON = 40;
   var RADIUS = 10;
   var SELECT = 4;
@@ -320,48 +371,65 @@
     canvas.addEventListener("click", function (e) {
       var o = $(canvas).offset();
       var p = { x: e.clientX-o.left, y: e.clientY-o.top };
-      var i = Math.floor(p.x / BUTTON);
-      if (i < COLORS.length) {
-        setColor(COLORS[i]);
+      if ((p.y>=245)&&(p.y<345)) 
+	  {
+        setColor(PEN);
+		setSize(SIZE);
+		drawTool=true;
       }
-      else {
-        i -= COLORS.length;
-        if ( i < SIZES.length) {
-          setSize(SIZES[i]);
-        }
-      }
+	  else if ((p.y>=345)&&(p.y<=450))
+	  {
+		setColor(ERASER);
+		setSize(25);
+		drawTool=false;
+	  }
       dirty = true;
     });
   }
 
-  function handleKeyDown (e) {
-    switch(e.keyCode) {
-      case COLOR_PREV:
-        setColor( COLORS[ COLORS.indexOf(color)-1 ] || COLORS[COLORS.length-1] );
-        break;
-      case COLOR_NEXT:
-        setColor( COLORS[ COLORS.indexOf(color)+1 ] || COLORS[0] );
-        break;
-      case SIZE_UP:
-        setSize( SIZES[ SIZES.indexOf(size)+1 ] || SIZES[SIZES.length-1] );
-        break;
-      case SIZE_DOWN:
-        setSize( SIZES[ SIZES.indexOf(size)-1 ] || SIZES[0] );
-        break;
-      default:
-        return false;
-    }
-    return true;
+  function render() 
+  {
+	
+	
+	//Score rectangle
+	ctx.strokeStyle = "#abc";
+	ctx.fillStyle = "#abc";
+	ctx.roundRect(5, 5, 80, 90, 5, true);
+	ctx.font = "bold 18px sans-serif";
+	ctx.fillStyle = "#000000";
+	ctx.fillRect(10,15,70,25);
+	ctx.fillStyle = "#FFFFFF";
+	ctx.fillText("Score", 20, 33);
+	ctx.fillStyle = "#000000";
+	ctx.font = "bold 30 px sans-serif";
+	ctx.fillText(score,40,70);
+	
+	//Time rectangle
+	ctx.strokeStyle = "#abc";
+	ctx.fillStyle = "#abc";
+	ctx.roundRect(5, 110, 80, 90, 5, true);
+	ctx.font = "bold 18px sans-serif";
+	ctx.fillStyle = "#000000";
+	ctx.fillRect(10,120,70,25);
+	ctx.fillStyle = "#FFFFFF";
+	ctx.fillText("Time", 20, 138);
+	ctx.fillStyle = "#000000";
+	ctx.font = "bold 30 px sans-serif";
+	ctx.fillText(time,35,175);
+	
+	//Drawing tools
+	if(drawTool)
+	{
+		ctx.drawImage(penEnabled,0,250,90,90);
+		ctx.drawImage(eraserDisabled,0,350,90,90);
+	}
+	else
+	{
+		ctx.drawImage(penDisabled,0,250,90,90);
+		ctx.drawImage(eraserEnabled,0,350,90,90);
+	}
   }
-
-  document.addEventListener("keydown", function (e) {
-    if(handleKeyDown(e)) {
-      dirty = true;
-      //e.preventDefault();
-    }
-  });
-
-  function render() {
+  /*function render() {
     if (!dirty) return;
     dirty = false;
     var w = canvas.width, h = canvas.height;
@@ -405,7 +473,7 @@
       }
       x += BUTTON;
     });
-  }
+  }*/
 
   setup();
   requestAnimFrame(function loop(){

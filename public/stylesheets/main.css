@@ -19,7 +19,7 @@ body {
 .content {
     background-color: #fff;
     padding: 20px;
-    margin: 0 -20px; /* negative indent the amount of the padding to maintain the grid system */
+    margin: 0 -90px; /* negative indent the amount of the padding to maintain the grid system */
     -webkit-border-radius: 0 0 6px 6px;
        -moz-border-radius: 0 0 6px 6px;
             border-radius: 0 0 6px 6px;
@@ -61,7 +61,7 @@ body {
     width: 200px;
 }
 
-#messagesPanel {
+#chatPanel {
     position: relative;
     overflow: hidden;
 }
@@ -95,6 +95,8 @@ body {
 #viewport {
     width: 500px;
     height: 450px;
+	top: -439.5px;
+	left: 89.5px;
     background: white;
     position: relative;
 }
@@ -123,9 +125,13 @@ position: absolute;
 
 #controls {
 		position: relative;
-        top: 450;
+        top: 0;
         left: 0;
 		border: 1px solid #CCCCCC;
+}
+
+#gameArea {
+    width: 580px;
 }
 
 .playername {

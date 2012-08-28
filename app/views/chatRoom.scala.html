@@ -12,31 +12,29 @@
         </p>
     </div>
     
-    <div id="onChat" class="row">
-		<div id="canvasArea" class="span10">
-			<div id="main">
-			  <div id="viewport">
+    <div id="mainPage" class="row">
+		<div id="gameArea" class="span10">
+			  <span id="viewport">
 				  <canvas id="me" width="500" height="450"></canvas>
 				  <canvas id="positions" width="500" height="450"></canvas>
 				  <canvas id="draws" width="500" height="450"></canvas>
-			  </div>
-			  <div>
-				  <canvas id="controls" width="500" height="50"></canvas>
-			  </div>
-			</div>
+			  </span>
+			  <span>
+				  <canvas id="controls" width="160" height="450"></canvas>
+			  </span>
 		</div>
 		<script type="text/javascript" src="/assets/javascripts/main.js"></script>
 		
-        <div class="span4" id="messagesPanel">
+        <div id="chatPanel" class="span4">
             <div id="messages">
             </div>
             <textarea id="talk"></textarea>
-			<div class="span4">
-				<h2>Members</h2>
+		</div>
+		<div class="span2">
+				<h2>Players</h2>
 				<ul id="members">
 				</ul>
 			</div>
-		</div>
 	</div>
         
     
