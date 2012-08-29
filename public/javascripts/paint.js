@@ -46,17 +46,20 @@
   var ERASER = 'white';
   var SIZE = 5;
   var MIN_SEND_RATE = 50; // the min interval in ms between 2 send
-
+  
   // STATES
-  var color = PEN;
-  var size = SIZE;
   var pid;
   var pname;
   var meCtx;
   
+  // TOOLS STATUS
+  var color = PEN;
+  var size = SIZE;
+  
   //GAME STATUS
   var score = 0;
   var time = 90;
+  var matchStarted = false;
 
   var numTrace = 1;
   var onSocketMessage;
@@ -336,6 +339,10 @@
   }, canvas);
 })();
 
+
+
+
+/*************************TOOLS PANEL MANAGEMENT**********************/
 (function(){
   var canvas = document.getElementById("controls");
   var ctx = canvas.getContext("2d");
@@ -352,11 +359,6 @@
   penDisabled.src='assets/images/Pen-2-iconWhite.jpg';
   eraserDisabled.src='assets/images/Eraser-iconWhite.jpg';
   
-  var BUTTON = 40;
-  var RADIUS = 10;
-  var SELECT = 4;
-
-  var COLOR_PREV = 37, SIZE_UP = 38, COLOR_NEXT = 39, SIZE_DOWN = 40;
 
   function setColor (c) {
     color = c;
@@ -387,10 +389,10 @@
     });
   }
 
+  
+  /************TOOLS PANEL RENDERING***********************/
   function render() 
   {
-	
-	
 	//Score rectangle
 	ctx.strokeStyle = "#abc";
 	ctx.fillStyle = "#abc";
@@ -415,7 +417,14 @@
 	ctx.fillText("Time", 20, 138);
 	ctx.fillStyle = "#000000";
 	ctx.font = "bold 30 px sans-serif";
-	ctx.fillText(time,35,175);
+	if(!matchStarted)
+	{
+		ctx.fillText('Waiting',12,175);
+	}
+	else
+	{
+		ctx.fillText(time,35,175);
+	}
 	
 	//Drawing tools
 	if(drawTool)
@@ -429,51 +438,6 @@
 		ctx.drawImage(eraserEnabled,0,350,90,90);
 	}
   }
-  /*function render() {
-    if (!dirty) return;
-    dirty = false;
-    var w = canvas.width, h = canvas.height;
-    var x, y, radius;
-
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, w, h);
-
-    // draw colors
-    x = BUTTON/2, y = h/2, radius = RADIUS;
-    COLORS.forEach(function(c) {
-      ctx.fillStyle = c;
-      ctx.beginPath();
-      ctx.arc(x, y, radius, 0, 2*Math.PI);
-      ctx.fill();
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-      ctx.stroke();
-      if (c == color) {
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = 'black';
-        ctx.beginPath();
-        ctx.arc(x, y, radius+SELECT, 0, 2*Math.PI);
-        ctx.stroke();
-      }
-      x += BUTTON;
-    });
-
-    // draw sizes
-    ctx.fillStyle = 'black';
-    SIZES.forEach(function(s) {
-      ctx.beginPath();
-      ctx.arc(x, y, s, 0, 2*Math.PI);
-      ctx.fill();
-      if (s == size) {
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = 'black';
-        ctx.beginPath();
-        ctx.arc(x, y, s+SELECT, 0, 2*Math.PI);
-        ctx.stroke();
-      }
-      x += BUTTON;
-    });
-  }*/
 
   setup();
   requestAnimFrame(function loop(){

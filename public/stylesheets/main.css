@@ -64,6 +64,7 @@ body {
 #chatPanel {
     position: relative;
     overflow: hidden;
+	top: -43px;
 }
 
 #onError, #onChat {
@@ -192,7 +193,7 @@ footer {
 }
 
 .message span {
-    width: 70px;
+    width: 80px;
     overflow: hidden;
     text-align: right;
     font-weight: bold;
@@ -215,4 +216,8 @@ footer {
 
 .message.join, .message.quit {
     background: #D9E7FB;
+}
+
+.message.system {
+    background: #FFCC99;
 }

@@ -20,6 +20,14 @@ import static java.util.concurrent.TimeUnit.*;
  * A chat room is an Actor.
  */
 public class ChatRoom extends UntypedActor {
+
+
+	//Control Variables
+	
+	private int requiredPlayers=3;
+	private boolean gameStarted=false;
+	private String currentDrawer;
+	
     
     // Default room.
     static ActorRef defaultRoom = Akka.system().actorOf(new Props(ChatRoom.class));
@@ -73,22 +81,46 @@ public class ChatRoom extends UntypedActor {
     }
     
     // Members of this room.
-    Map<String, WebSocket.Out<JsonNode>> members = new HashMap<String, WebSocket.Out<JsonNode>>();
+    Map<String, WebSocket.Out<JsonNode>> playersMap = new HashMap<String, WebSocket.Out<JsonNode>>();
+    Vector<String> playersVect = new Vector<String>();
     
     public void onReceive(Object message) throws Exception {
         
-        if(message instanceof Join) {
+        if(message instanceof Join) 
+        {
             
             // Received a Join message
             Join join = (Join)message;
             
             // Check if this username is free.
-            if(members.containsKey(join.username)) {
+            if(playersMap.containsKey(join.username)) {
                 getSender().tell("This username is already used");
-            } else {
-                members.put(join.username, join.channel);
+            } 
+            else if(!gameStarted) 
+            {
+                playersMap.put(join.username, join.channel);
+                playersVect.add(join.username);
                 notifyAll("join", join.username, "has entered the room");
+                if(playersMap.size()>=requiredPlayers)
+                {
+                	gameStarted=true;
+                	notifyAll("system", "Sketchness", "The game has started!");
+                	notifyAll("system", "Sketchness", "Randomly selecting roles...");
+                	currentDrawer=playersVect.elementAt(1 + (int)(Math.random() * ((requiredPlayers - 1) + 1)));
+                	notifyAll("system", "Sketchness", "The DRAWER is "+currentDrawer);
+                }
+                else
+                {
+					if(requiredPlayers-playersMap.size()>1)
+						notifyAll("system", "Sketchness", "Waiting for "+(requiredPlayers-playersMap.size())+" players to start.");
+					else
+						notifyAll("system", "Sketchness", "Waiting for "+(requiredPlayers-playersMap.size())+" player to start.");
+                }
                 getSender().tell("OK");
+            }
+            else
+            {
+            	getSender().tell("The game has already started");
             }
             
         } else if(message instanceof Talk)  {
@@ -103,7 +135,7 @@ public class ChatRoom extends UntypedActor {
             // Received a Quit message
             Quit quit = (Quit)message;
             
-            members.remove(quit.username);
+            playersMap.remove(quit.username);
             
             notifyAll("quit", quit.username, "has leaved the room");
         
@@ -115,7 +147,7 @@ public class ChatRoom extends UntypedActor {
     
     // Send a Json event to all members
     public void notifyAll(String kind, String user, String text) {
-        for(WebSocket.Out<JsonNode> channel: members.values()) {
+        for(WebSocket.Out<JsonNode> channel: playersMap.values()) {
             
             ObjectNode event = Json.newObject();
             event.put("kind", kind);
@@ -123,7 +155,7 @@ public class ChatRoom extends UntypedActor {
             event.put("message", text);
             
             ArrayNode m = event.putArray("members");
-            for(String u: members.keySet()) {
+            for(String u: playersMap.keySet()) {
                 m.add(u);
             }
             
