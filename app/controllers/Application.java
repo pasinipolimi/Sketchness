@@ -10,7 +10,7 @@ import models.*;
 
 public class Application extends Controller {
   
-	static PaintRoom env = new PaintRoom("Public");
+    static PaintRoom env = new PaintRoom("Public");
   
     /**
      * Display the home page.
@@ -27,7 +27,7 @@ public class Application extends Controller {
             flash("error", "Please choose a valid username.");
             return redirect(routes.Application.index());
         }
-        return ok(chatRoom.render(username,"Drawer",env));
+        return ok(chatRoom.render(username,env));
     }
     
     /**
@@ -41,7 +41,7 @@ public class Application extends Controller {
                 
                 // Join the chat room.
                 try { 
-                    ChatRoom.join(username, in, out);
+                    ChatRoom.join(username, in, out, env);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

@@ -20,13 +20,18 @@ import static java.util.concurrent.TimeUnit.*;
  * A chat room is an Actor.
  */
 public class ChatRoom extends UntypedActor {
-
-
+    
+    
+        //Reference to the drawing logic
+        static PaintRoom paintLogic;
+    
 	//Control Variables
 	
 	private int requiredPlayers=3;
 	private boolean gameStarted=false;
-	private String currentDrawer;
+	private String currentSketcher;
+        
+        
 	
     
     // Default room.
@@ -40,13 +45,15 @@ public class ChatRoom extends UntypedActor {
     /**
      * Join the default room.
      */
-    public static void join(final String username, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception{
+    public static void join(final String username, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out, PaintRoom paintRoom) throws Exception{
         
         // Send the Join message to the room
         String result = (String)Await.result(ask(defaultRoom,new Join(username, out), 1000), Duration.create(1, SECONDS));
         
-        if("OK".equals(result)) {
+        if("OK".equals(result)) 
+        {
             
+            paintLogic=paintRoom;
             // For each event received on the socket,
             in.onMessage(new Callback<JsonNode>() {
                public void invoke(JsonNode event) {
@@ -106,15 +113,16 @@ public class ChatRoom extends UntypedActor {
                 	gameStarted=true;
                 	notifyAll("system", "Sketchness", "The game has started!");
                 	notifyAll("system", "Sketchness", "Randomly selecting roles...");
-                	currentDrawer=playersVect.elementAt(1 + (int)(Math.random() * ((requiredPlayers - 1) + 1)));
-                	notifyAll("system", "Sketchness", "The DRAWER is "+currentDrawer);
+                	currentSketcher=playersVect.elementAt((int)(Math.random() * ((requiredPlayers - 1) + 1)));
+                	notifyAll("system", "Sketchness", "The SKETCHER is "+currentSketcher);
+                        paintLogic.matchStarted(currentSketcher);
                 }
                 else
                 {
-					if(requiredPlayers-playersMap.size()>1)
-						notifyAll("system", "Sketchness", "Waiting for "+(requiredPlayers-playersMap.size())+" players to start.");
-					else
-						notifyAll("system", "Sketchness", "Waiting for "+(requiredPlayers-playersMap.size())+" player to start.");
+                    if(requiredPlayers-playersMap.size()>1)
+                        notifyAll("system", "Sketchness", "Waiting for "+(requiredPlayers-playersMap.size())+" players to start.");
+                    else
+                        notifyAll("system", "Sketchness", "Waiting for "+(requiredPlayers-playersMap.size())+" player to start.");
                 }
                 getSender().tell("OK");
             }
@@ -174,7 +182,6 @@ public class ChatRoom extends UntypedActor {
             this.username = username;
             this.channel = channel;
         }
-        
     }
     
     public static class Talk {
