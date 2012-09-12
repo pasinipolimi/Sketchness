@@ -7,6 +7,11 @@
     $('#error').empty().append($('<span class="error" />').text(message)).fadeIn(500);
   }
 
+
+   
+
+
+
   // Polyfills
   window.requestAnimFrame = (function(){
   return  window.requestAnimationFrame       || 
@@ -33,7 +38,7 @@
     return;
   }
 
-  if (!(function(e){ return e.getContext && e.getContext('2d') }(document.getElementById("me")))) {
+  if (!(function(e){return e.getContext && e.getContext('2d')}(document.getElementById("me")))) {
     setError("Canvas is not supported by your browser.");
     return;
   }
@@ -44,6 +49,7 @@
   // CONSTANTS
   var PEN = 'red';
   var ERASER = 'white';
+  var TRACKER = 'black';
   var SIZE = 5;
   var MIN_SEND_RATE = 50; // the min interval in ms between 2 send
   
@@ -51,6 +57,7 @@
   var pid;
   var pname;
   var meCtx;
+  var role;
   
   // TOOLS STATUS
   var color = PEN;
@@ -63,7 +70,7 @@
 
   var numTrace = 1;
   var onSocketMessage;
-  var dirty_positions = false;
+  var dirtyPositions = false;
 
   // every player positions
   var players = {};
@@ -72,7 +79,37 @@
   
   
   
-  
+    var RemainingSeconds;
+    
+    
+    
+    /**********UTILITY FUNCTION FOR TIMER CREATION********************/
+
+    function TimerTick() 
+    {
+        if (RemainingSeconds <= 0) {
+                alert("Time's up!")
+                return;
+        }
+
+        RemainingSeconds -= 1;
+        UpdateTimer()
+        window.setTimeout(TimerTick, 1000);
+    }
+
+    function CreateTimer(Countdown) 
+    {
+        RemainingSeconds = Countdown;
+        UpdateTimer()
+        window.setTimeout(TimerTick, 1000);
+    }
+
+
+    //Timing Functions
+    function UpdateTimer() 
+    {
+        time=RemainingSeconds;
+    }
   
   /*****************************UTILITY FUNCTIONS********************************************/
   CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius, fill, stroke) {
@@ -145,7 +182,7 @@
           return;
         }
         connected = true;
-        send({ type: 'change', size: size, color: color, name: pname });
+        send({type: 'change', size: size, color: color, name: pname});
       }
 	  
       socket.onclose = function(evt) { 
@@ -153,7 +190,7 @@
         tryConnectAgain();
       };
 	  
-      socket.onerror = function(evt) { console.error("error", evt); };
+      socket.onerror = function(evt) {console.error("error", evt);};
     }
     catch (e) {
       setError("WebSocket connection failed.");
@@ -166,18 +203,37 @@
   }
 
 
+
+
+//***************************TAKING CARE OF THE LINE STROKES*****************************/
 (function(){
   var canvas = document.getElementById("draws");
   var ctx = canvas.getContext("2d");
 
   onSocketMessage = function (e) {
     var m = JSON.parse(e.data);
-    var player = players[m.pid];
-    if (player === undefined) {
-      player = players[m.pid] = m;
+    if(m.type=="role")
+    {
+        role=m.role;
+        matchStarted=true;
+        if(role=="SKETCHER")
+            $('#roleSpan').text("the Sketcher");
+        else
+            $('#roleSpan').text("a Guesser");
+        CreateTimer(time)
     }
-    if (m.type=="youAre") pid = m.pid;
-    
+    else
+    {
+        var player = players[m.pid];
+        if (player === undefined) {
+        player = players[m.pid] = m;
+        }
+        if (m.type=="youAre") 
+        {
+            pid = m.pid;
+            role = m.role;
+        }
+    }
     if (m.type != "disconnect") {
       if (m.type == "trace") {
         ctx.strokeStyle = player.color;
@@ -204,7 +260,7 @@
       delete players[m.pid];
     }
 
-    dirty_positions = true;
+    dirtyPositions = true;
   }
 
   var w = canvas.width, h = canvas.height;
@@ -214,6 +270,11 @@
   ctx.lineJoin = 'round';
 
 })();
+
+
+
+
+
 
 // "me" canvas is where you draw before the painter sends your own events (before synchronization)
 (function(){
@@ -226,16 +287,16 @@
   var lastSent = 0;
 
   function addPoint (x, y) {
-    points.push({ x: x, y: y });
+    points.push({x: x, y: y});
   }
   function sendPoints () {
     lastSent = +new Date();
-    send({ type: "trace", points: points, num: numTrace });
+    send({type: "trace", points: points, num: numTrace});
     points = [];
   }
   function sendMove (x, y) {
     lastSent = +new Date();
-    send({ type: "move", x: x, y: y });
+    send({type: "move", x: x, y: y});
   }
 
   function canSendNow () {
@@ -255,7 +316,7 @@
         y = touch.pageY;
       }
     }
-    return { x: x-(o.left-$(window).scrollLeft()), y: y-(o.top-$(window).scrollTop()) };
+    return {x: x-(o.left-$(window).scrollLeft()), y: y-(o.top-$(window).scrollTop())};
   }
 
   function lineTo(x, y) {
@@ -270,7 +331,7 @@
   function onMouseMove (e) {
     e.preventDefault();
     var o = positionWithE(e);
-    if (pressed) {
+    if (pressed && role=="SKETCHER") {
       lineTo(o.x, o.y);
       addPoint(o.x, o.y);
       ++ numTrace;
@@ -280,7 +341,7 @@
       }
     }
     else {
-      if (canSendNow()) {
+      if (canSendNow() && role=="SKETCHER") {
         sendMove(o.x, o.y);
       }
     }
@@ -288,19 +349,23 @@
   }
 
   function onMouseDown (e) {
-    //e.preventDefault();
-    var o = positionWithE(e);
-    position = o;
-    addPoint(o.x, o.y);
-    pressed = true;
+    if(role=="SKETCHER")
+        {
+            var o = positionWithE(e);
+            position = o;
+            addPoint(o.x, o.y);
+            pressed = true;
+        }
   }
 
   function onMouseUp (e) {
-    //e.preventDefault();
-    lineTo(position.x, position.y);
-    addPoint(position.x, position.y);
-    sendPoints();
-    pressed = false;
+    if(role=="SKETCHER")
+        {
+            lineTo(position.x, position.y);
+            addPoint(position.x, position.y);
+            sendPoints();
+            pressed = false;
+        }
   }
 
 
@@ -318,19 +383,30 @@
   ctx.font = "9px monospace";
   ctx.textAlign = "center";
   ctx.textBaseline = "bottom";
-  function render () {
-    if(!dirty_positions) return;
-    dirty_positions = false;
+  function render () 
+  {
+    if(!dirtyPositions) return;
+    dirtyPositions = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (var pid in players) { var player = players[pid];
-      if (!player || player.x===undefined) continue;
-      ctx.beginPath();
-      ctx.strokeStyle = player.color;
-      ctx.arc(player.x, player.y, player.size/2, 0, 2*Math.PI);
-      ctx.stroke();
-      ctx.fillStyle = player.color;
-      ctx.fillText((player.name+"").substring(0,20), player.x, player.y-Math.round(player.size/2)-4);
+    if(!matchStarted)
+    {
+        ctx.fillStyle = "#000000";
+        ctx.font = "bold 30px sans-serif";
+        ctx.fillText('Waiting for the match to start',250,250);
     }
+    else
+        for (var pid in players) 
+        {   
+            var player = players[pid];
+            if (!player || player.x===undefined) continue;
+            ctx.beginPath();
+            ctx.strokeStyle = TRACKER;
+            ctx.arc(player.x, player.y, player.size/2, 0, 2*Math.PI);
+            ctx.stroke();
+            ctx.font = "10px sans-serif";
+            ctx.fillStyle = TRACKER;
+            ctx.fillText((player.name+"").substring(0,20), player.x, player.y-Math.round(player.size/2)-4);
+        }
   }
 
   requestAnimFrame(function loop () {
@@ -354,25 +430,26 @@
   var penDisabled = new Image();
   var eraserEnabled = new Image();
   var eraserDisabled = new Image();
+  var errorCross = new Image();
   penEnabled.src = 'assets/images/Pen-2-icon.jpg';
   eraserEnabled.src = 'assets/images/Eraser-icon.jpg';
   penDisabled.src='assets/images/Pen-2-iconWhite.jpg';
   eraserDisabled.src='assets/images/Eraser-iconWhite.jpg';
-  
+  errorCross.src='assets/images/ErrorCross-icon.png';
 
   function setColor (c) {
     color = c;
-    send({ type: 'change', color: color });
+    send({type: 'change', color: color});
   }
   function setSize (s) {
     size = s;
-    send({ type: 'change', size: size });
+    send({type: 'change', size: size});
   }
 
   function setup() {
     canvas.addEventListener("click", function (e) {
       var o = $(canvas).offset();
-      var p = { x: e.clientX-o.left, y: e.clientY-o.top };
+      var p = {x: e.clientX-o.left, y: e.clientY-o.top};
       if ((p.y>=245)&&(p.y<345)) 
 	  {
         setColor(PEN);
@@ -426,17 +503,28 @@
 		ctx.fillText(time,35,175);
 	}
 	
-	//Drawing tools
-	if(drawTool)
+        
+        if(!matchStarted || role=="GUESSER")
 	{
-		ctx.drawImage(penEnabled,0,250,90,90);
-		ctx.drawImage(eraserDisabled,0,350,90,90);
-	}
-	else
-	{
-		ctx.drawImage(penDisabled,0,250,90,90);
-		ctx.drawImage(eraserEnabled,0,350,90,90);
-	}
+            ctx.drawImage(penDisabled,0,250,90,90);
+            ctx.drawImage(eraserDisabled,0,350,90,90);
+            ctx.drawImage(errorCross,0,250,90,90);
+            ctx.drawImage(errorCross,0,350,90,90);
+        }
+        else
+        {
+            //Drawing tools
+            if(drawTool)
+            {
+                    ctx.drawImage(penEnabled,0,250,90,90);
+                    ctx.drawImage(eraserDisabled,0,350,90,90);
+            }
+            else
+            {
+                    ctx.drawImage(penDisabled,0,250,90,90);
+                    ctx.drawImage(eraserEnabled,0,350,90,90);
+            }
+        }
   }
 
   setup();

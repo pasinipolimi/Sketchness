@@ -1,9 +1,9 @@
-@(username: String)(role: String)(env: PaintRoom)
+@(username: String)(env: PaintRoom)
 
 @main(username) {
     
     <div class="page-header" id="pageheader">
-        <h1>You are a @role  <small>You are playing as <span id="nickname">@username</span></small></h1>
+        <h1>You are <span id="roleSpan">waiting...</span>  <small>You are playing as <span id="nickname">@username</span></small></h1>
     </div>
     
     <div id="onError" class="alert-message error">
@@ -84,7 +84,7 @@
 						} 
 					}
 					
-					$("talk").keypress(handleReturnKey) 
+					$("#talk").keypress(handleReturnKey) 
 					
 					chatSocket.onmessage = receiveEvent
 					
