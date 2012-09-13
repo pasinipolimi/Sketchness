@@ -100,10 +100,18 @@ public class PaintRoom {
         for(Map.Entry<Integer, Painter> entry : painters.entrySet()) {
             if(entry.getValue().name.equals(sketcher))
             {
-                ObjectNode self = Json.newObject();
-                self.put("type", "role");
-                self.put("role","SKETCHER");
-                entry.getValue().channel.write(self);
+                ObjectNode roleMessage = Json.newObject();
+                roleMessage.put("type", "role");
+                roleMessage.put("role","SKETCHER");
+                entry.getValue().channel.write(roleMessage);
+                
+                
+                //RETRIEVE THE IMAGE AND THE TAG TO SEND TO THE SKETCHER
+                ObjectNode guessWord = Json.newObject();
+                guessWord.put("type", "task");
+                guessWord.put("word","skirt");
+                guessWord.put("image","/assets/taskImages/skirt.png");
+                entry.getValue().channel.write(guessWord);
             }
             else
             {

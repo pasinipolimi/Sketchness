@@ -48,7 +48,7 @@
 
   // CONSTANTS
   var PEN = 'red';
-  var ERASER = 'white';
+  var ERASER = "rgba(255,255,255,1.0)";
   var TRACKER = 'black';
   var SIZE = 5;
   var MIN_SEND_RATE = 50; // the min interval in ms between 2 send
@@ -67,6 +67,9 @@
   var score = 0;
   var time = 90;
   var matchStarted = false;
+  var guessWord="";
+  var drawTool = true;
+  var taskImage;
 
   var numTrace = 1;
   var onSocketMessage;
@@ -77,9 +80,9 @@
 
   var viewport = document.getElementById('viewport');
   
+  var RemainingSeconds;
   
   
-    var RemainingSeconds;
     
     
     
@@ -217,7 +220,10 @@
 (function(){
   var canvas = document.getElementById("draws");
   var ctx = canvas.getContext("2d");
+  var taskCanvas = document.getElementById("task");
+  var taskContext = taskCanvas.getContext("2d");
 
+  /*******************************MANAGING THE INCOMING MESSAGES*****************/
   onSocketMessage = function (e) {
     var m = JSON.parse(e.data);
     if(m.type=="role")
@@ -233,18 +239,32 @@
     else
     {
         var player = players[m.pid];
-        if (player === undefined) {
-        player = players[m.pid] = m;
-        }
+        if (player === undefined) 
+            player = players[m.pid] = m;
         if (m.type=="youAre") 
         {
             pid = m.pid;
             role = m.role;
         }
     }
+    
+    //Managing the task to provide to the users
+    if(m.type=="task")
+    {
+        guessWord=m.word;
+        taskImage=new Image();
+        taskImage.src=m.image;
+        taskContext.drawImage(taskImage,0,0,500,450);
+    }
+    
+    
     if (m.type != "disconnect") {
       if (m.type == "trace") {
         ctx.strokeStyle = player.color;
+        if(!drawTool)
+            ctx.globalCompositeOperation = "destination-out";
+        else
+           ctx.globalCompositeOperation = "source-over";
         ctx.lineWidth = player.size;
         ctx.beginPath();
         var points = m.points;
@@ -272,8 +292,6 @@
   }
 
   var w = canvas.width, h = canvas.height;
-  ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, w, h);
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
 
@@ -396,13 +414,7 @@
     if(!dirtyPositions) return;
     dirtyPositions = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if(!matchStarted)
-    {
-        ctx.fillStyle = "#000000";
-        ctx.font = "bold 30px sans-serif";
-        ctx.fillText('Waiting for the match to start',250,250);
-    }
-    else
+    if(matchStarted)
         for (var pid in players) 
         {   
             var player = players[pid];
@@ -426,11 +438,56 @@
 
 
 
+/************************CONTROL MESSAGES PANEL MANAGEMENT************/
+(function(){
+  var canvas = document.getElementById("gameMessages");
+  var ctx = canvas.getContext("2d");
+
+  ctx.font = "9px monospace";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+  function render () 
+  {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if(!matchStarted)
+    {
+        ctx.fillStyle = "#000000";
+        ctx.font = "bold 30px sans-serif";
+        ctx.fillText('Waiting for the match to start',220,50);
+    }
+    else
+    {
+        if(role=="SKETCHER")
+        {
+            ctx.fillStyle = "#000000";
+            ctx.font = "bold 30px sans-serif";
+            ctx.fillText('Target:',50,50);
+            ctx.fillStyle = "#FF0000";
+            ctx.font = "bold 30px sans-serif";
+            ctx.fillText(guessWord,150,50);
+        }
+        else
+        {
+            ctx.fillStyle = "#000000";
+            ctx.font = "bold 30px sans-serif";
+            ctx.fillText('Guess the word!',150,50);
+        }
+    }
+  }
+
+  requestAnimFrame(function loop () {
+    requestAnimFrame(loop);
+    render();
+  }, canvas);
+})();
+
+
+
+
 /*************************TOOLS PANEL MANAGEMENT**********************/
 (function(){
   var canvas = document.getElementById("controls");
   var ctx = canvas.getContext("2d");
-  var drawTool = true;
   var dirty = true;
   
   //ICONS
@@ -445,10 +502,12 @@
   eraserDisabled.src='assets/images/Eraser-iconWhite.jpg';
   errorCross.src='assets/images/ErrorCross-icon.png';
 
-  function setColor (c) {
+  function setColor (c) 
+  {
     color = c;
     send({type: 'change', color: color});
   }
+  
   function setSize (s) {
     size = s;
     send({type: 'change', size: size});
@@ -459,17 +518,17 @@
       var o = $(canvas).offset();
       var p = {x: e.clientX-o.left, y: e.clientY-o.top};
       if ((p.y>=245)&&(p.y<345)) 
-	  {
+      {
         setColor(PEN);
-		setSize(SIZE);
-		drawTool=true;
+	setSize(SIZE);
+	drawTool=true;
       }
-	  else if ((p.y>=345)&&(p.y<=450))
-	  {
-		setColor(ERASER);
-		setSize(25);
-		drawTool=false;
-	  }
+      else if ((p.y>=345)&&(p.y<=450))
+      {
+	setColor(ERASER);
+	setSize(25);
+	drawTool=false;
+      }
       dirty = true;
     });
   }
