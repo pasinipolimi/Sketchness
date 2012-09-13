@@ -64,7 +64,6 @@ body {
 #chatPanel {
     position: relative;
     overflow: hidden;
-	top: -43px;
 }
 
 #onError, #onChat {
@@ -102,31 +101,38 @@ body {
     position: relative;
 }
 
+#gameMessagesSpan {
+    width: 500px;
+    height: 50px;
+	left: 89.5px;
+    background: white;
+    position: relative;
+}
+
 
 #positions {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 456px;
+  left: -500px;
   z-index: 8;
 }
 #me {
- position: absolute;
-        top: 0;
-        left: 0;
+  position: absolute;
+  top: 456px;
+  left: -500px;
   z-index: 6;
 }
 
 #draws {
-position: absolute;
-        top: 0;
-        left: 0;
-		border: 1px solid #CCCCCC;
+  position: absolute;
+  top: 456px;
+  left: -500px;
+  border: 1px solid #CCCCCC;
   z-index: 4;
 }
 
 #controls {
 		position: relative;
-        top: 0;
         left: 0;
 		border: 1px solid #CCCCCC;
 }

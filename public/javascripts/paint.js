@@ -105,11 +105,6 @@
     }
 
 
-        RemainingSeconds -= 1;
-        UpdateTimer()
-        window.setTimeout(TimerTick, 1000);
-    }
-
     function CreateTimer(Countdown) 
     {
         RemainingSeconds = Countdown;
