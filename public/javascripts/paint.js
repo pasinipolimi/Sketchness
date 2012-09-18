@@ -49,7 +49,7 @@
   // CONSTANTS
   var PEN = 'red';
   var ERASER = "rgba(255,255,255,1.0)";
-  var TRACKER = 'black';
+  var TRACKER = 'red';
   var SIZE = 5;
   var MIN_SEND_RATE = 50; // the min interval in ms between 2 send
   
@@ -65,7 +65,8 @@
   
   //GAME STATUS
   var score = 0;
-  var time = 90;
+  var defaultRoundTime=90;
+  var time = defaultRoundTime;
   var matchStarted = false;
   var guessWord="";
   var drawTool = true;
@@ -90,28 +91,22 @@
 
     function TimerTick() 
     {
-        if (RemainingSeconds <= 0) {
-                alert("Time's up!")
-                return;
+        if (RemainingSeconds == 0) {
+           //Round End
+              send({type: 'roundEnded', player: pname});
+              RemainingSeconds='waiting';
         }
-
-        RemainingSeconds -= 1;
-        UpdateTimer()
-        window.setTimeout(TimerTick, 1000);
+        else {
+            RemainingSeconds -= 1;
+            UpdateTimer();
+            window.setTimeout(TimerTick, 1000);
+        }
     }
 
     function CreateTimer(Countdown) 
     {
         RemainingSeconds = Countdown;
-        UpdateTimer()
-        window.setTimeout(TimerTick, 1000);
-    }
-
-
-    function CreateTimer(Countdown) 
-    {
-        RemainingSeconds = Countdown;
-        UpdateTimer()
+        UpdateTimer();
         window.setTimeout(TimerTick, 1000);
     }
 
@@ -234,7 +229,9 @@
             $('#roleSpan').text("the Sketcher");
         else
             $('#roleSpan').text("a Guesser");
-        CreateTimer(time)
+        CreateTimer(defaultRoundTime);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        taskContext.clearRect(0, 0, canvas.width, canvas.height);
     }
     else
     {
@@ -254,9 +251,24 @@
         guessWord=m.word;
         taskImage=new Image();
         taskImage.src=m.image;
-        taskContext.drawImage(taskImage,0,0,500,450);
+        //Wait for the image to be loaded before drawing it to canvas to avoid
+        //errors
+        taskImage.onload = function() {
+          taskContext.drawImage(taskImage,0,0,500,450);
+        };
     }
     
+    if(m.type=="guesser")
+    {
+        if(m.name==pname)
+            score=score+m.points;
+    }
+    
+    if(m.type=="timeChange")
+    {
+        if(RemainingSeconds>m.amount)
+            RemainingSeconds=m.amount;
+    }
     
     if (m.type != "disconnect") {
       if (m.type == "trace") {
@@ -282,7 +294,7 @@
         }
       }
 
-      players[m.pid] = $.extend(players[m.pid], m);
+     players[m.pid] = $.extend(players[m.pid], m);
     }
     else {
       delete players[m.pid];

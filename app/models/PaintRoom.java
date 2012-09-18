@@ -19,10 +19,23 @@ public class PaintRoom {
     public AtomicInteger counter = new AtomicInteger(0);
     public AtomicInteger connections = new AtomicInteger(0);
     
+    private String currentGuess;
+    private Boolean guessedWord;
+    
+    private ChatRoom chatRoom;
+    
+    private int remainingTimeOnGuess=6;
+    private int pointsRemaining=10;
+    private int defaultTime=90;
+    private int roundNumber=1;
+    
     private boolean matchStarted = false;
+    private String currentSketcher;
 
 	public PaintRoom(String name) {
 		this.name = name;
+                currentGuess="";
+                guessedWord=false;
 	}
 
     public void createPainter(final WebSocket.In<JsonNode> in, final WebSocket.Out<JsonNode> out) {
@@ -59,7 +72,10 @@ public class PaintRoom {
                     }
                     painter.updateFromJson(json);
                 }
-
+                else if("roundEnded".equals(type))
+                {
+                        chatRoom.playerTimeExpired(json.get("player").getTextValue());
+                }
                 ObjectNode node = ((ObjectNode)json);
                 node.put("pid", pid);
                 PaintRoom.this.notifyAll(node);
@@ -97,6 +113,7 @@ public class PaintRoom {
     public void matchStarted(String sketcher) 
     {
         matchStarted=true;
+        currentSketcher=sketcher;
         for(Map.Entry<Integer, Painter> entry : painters.entrySet()) {
             if(entry.getValue().name.equals(sketcher))
             {
@@ -107,11 +124,67 @@ public class PaintRoom {
                 
                 
                 //RETRIEVE THE IMAGE AND THE TAG TO SEND TO THE SKETCHER
-                ObjectNode guessWord = Json.newObject();
-                guessWord.put("type", "task");
-                guessWord.put("word","skirt");
-                guessWord.put("image","/assets/taskImages/skirt.png");
+                ObjectNode guessWord = retrieveTaskImage();
                 entry.getValue().channel.write(guessWord);
+                currentGuess=guessWord.get("word").asText();
+            }
+            else
+            {
+                ObjectNode self = Json.newObject();
+                self.put("type", "role");
+                self.put("role","GUESSER");
+                entry.getValue().channel.write(self);
+            }
+        }
+    }
+    
+    public String getCurrentGuess()
+    {
+        return currentGuess;
+    }
+    
+    public void guessedWord(String guesser)
+    {
+        for(Map.Entry<Integer, Painter> entry : painters.entrySet()) {
+            if(entry.getValue().name.equals(guesser)&&entry.getValue().guessed==false)
+            {
+                ObjectNode guesserJson =  Json.newObject();
+                guesserJson.put("type", "guesser");
+                guesserJson.put("name",guesser);
+                guesserJson.put("points",pointsRemaining);
+                entry.getValue().channel.write(guesserJson);
+                entry.getValue().setCorrectGuess();
+                if(pointsRemaining>=5)
+                    pointsRemaining--;
+            }
+            if(!guessedWord)
+            {
+                ObjectNode timeChange = Json.newObject();
+                timeChange.put("type", "timeChange");
+                timeChange.put("amount",remainingTimeOnGuess);
+                entry.getValue().channel.write(timeChange);    
+            }
+        }
+        guessedWord=true;
+    }
+    
+    
+    public void nextRound(String sketcher) 
+    {
+        pointsRemaining=10;
+        for(Map.Entry<Integer, Painter> entry : painters.entrySet()) {
+            if(entry.getValue().name.equals(sketcher))
+            {
+                ObjectNode roleMessage = Json.newObject();
+                roleMessage.put("type", "role");
+                roleMessage.put("role","SKETCHER");
+                entry.getValue().channel.write(roleMessage);
+                
+                
+                //RETRIEVE THE IMAGE AND THE TAG TO SEND TO THE SKETCHER
+                ObjectNode guessWord =  retrieveTaskImage();
+                entry.getValue().channel.write(guessWord);
+                currentGuess=guessWord.get("word").asText();
             }
             else
             {
@@ -123,4 +196,18 @@ public class PaintRoom {
         }
     }
 	
+    
+    public ObjectNode retrieveTaskImage()
+    {
+         ObjectNode guessWord = Json.newObject();
+         guessWord.put("type", "task");
+         guessWord.put("word","skirt");
+         guessWord.put("image","/assets/taskImages/skirt.png");
+         return guessWord;
+    }
+    
+    public void setChatRoom(ChatRoom chatRoom)
+    {
+        this.chatRoom=chatRoom;
+    }
 }

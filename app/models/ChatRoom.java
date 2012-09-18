@@ -14,6 +14,8 @@ import org.codehaus.jackson.node.*;
 
 import java.util.*;
 
+import models.Messages.*;
+
 import static java.util.concurrent.TimeUnit.*;
 
 /**
@@ -27,20 +29,18 @@ public class ChatRoom extends UntypedActor {
     
 	//Control Variables
 	
-	private int requiredPlayers=3;
+	private static int requiredPlayers=3;
+        private static int missingPlayers=requiredPlayers;
 	private boolean gameStarted=false;
 	private String currentSketcher;
+        private String currentGuess;
         
         
 	
     
     // Default room.
     static ActorRef defaultRoom = Akka.system().actorOf(new Props(ChatRoom.class));
-    
-    // Create a Robot, just for fun.
-    //static {
-      //  new Robot(defaultRoom);
-    //}
+
     
     /**
      * Join the default room.
@@ -60,7 +60,6 @@ public class ChatRoom extends UntypedActor {
                    
                    // Send a Talk message to the room.
                    defaultRoom.tell(new Talk(username, event.get("text").asText()));
-                   
                } 
             });
             
@@ -89,7 +88,7 @@ public class ChatRoom extends UntypedActor {
     
     // Members of this room.
     Map<String, WebSocket.Out<JsonNode>> playersMap = new HashMap<String, WebSocket.Out<JsonNode>>();
-    Vector<String> playersVect = new Vector<String>();
+    ArrayList<Painter> playersVect = new ArrayList<>();
     
     public void onReceive(Object message) throws Exception {
         
@@ -106,16 +105,15 @@ public class ChatRoom extends UntypedActor {
             else if(!gameStarted) 
             {
                 playersMap.put(join.username, join.channel);
-                playersVect.add(join.username);
+                playersVect.add(new Painter(join.username,false));
                 notifyAll("join", join.username, "has entered the room");
                 if(playersMap.size()>=requiredPlayers)
                 {
                 	gameStarted=true;
-                	notifyAll("system", "Sketchness", "The game has started!");
-                	notifyAll("system", "Sketchness", "Randomly selecting roles...");
-                	currentSketcher=playersVect.elementAt((int)(Math.random() * ((requiredPlayers - 1) + 1)));
-                	notifyAll("system", "Sketchness", "The SKETCHER is "+currentSketcher);
+                	nextSketcher();
                         paintLogic.matchStarted(currentSketcher);
+                        paintLogic.setChatRoom(this);
+                        currentGuess=paintLogic.getCurrentGuess();
                 }
                 else
                 {
@@ -126,17 +124,28 @@ public class ChatRoom extends UntypedActor {
                 }
                 getSender().tell("OK");
             }
-            else
+            //[TODO]Disabling game started control for debug messages
+            /*else
             {
             	getSender().tell("The game has already started");
-            }
+            }*/
             
         } else if(message instanceof Talk)  {
             
             // Received a Talk message
             Talk talk = (Talk)message;
-            
-            notifyAll("talk", talk.username, talk.text);
+            if(gameStarted){
+                //Compare the message sent with the tag in order to establish if we have a right guess
+                if(talk.text.equalsIgnoreCase(currentGuess))
+                {
+                    paintLogic.guessedWord(talk.username);
+                }
+                else
+                    notifyAll("talk", talk.username, talk.text);
+            }
+            else
+                //The players are just chatting, not playing
+                notifyAll("talk", talk.username, talk.text);
             
         } else if(message instanceof Quit)  {
             
@@ -169,41 +178,63 @@ public class ChatRoom extends UntypedActor {
             
             channel.write(event);
         }
-    }
+    }   
     
-    // -- Messages
-    
-    public static class Join {
-        
-        final String username;
-        final WebSocket.Out<JsonNode> channel;
-        
-        public Join(String username, WebSocket.Out<JsonNode> channel) {
-            this.username = username;
-            this.channel = channel;
+    // Send a Json event to all members
+    public void notifyGuesser(String kind, String user, String text) {
+        for(WebSocket.Out<JsonNode> channel: playersMap.values()) {
+            
+            ObjectNode event = Json.newObject();
+            event.put("kind", kind);
+            event.put("user", user);
+            event.put("message", text);
+            
+            ArrayNode m = event.putArray("members");
+            for(String u: playersMap.keySet()) {
+                m.add(u);
+            }
+            
+            channel.write(event);
         }
-    }
+    } 
     
-    public static class Talk {
-        
-        final String username;
-        final String text;
-        
-        public Talk(String username, String text) {
-            this.username = username;
-            this.text = text;
-        }
-        
-    }
-    
-    public static class Quit {
-        
-        final String username;
-        
-        public Quit(String username) {
-            this.username = username;
-        }
-        
-    }
-    
+     public void nextRound()
+     {
+         nextSketcher();
+         paintLogic.nextRound(currentSketcher);
+         currentGuess=paintLogic.getCurrentGuess();
+     }
+     
+     public String nextSketcher()
+     {
+         currentSketcher=null;
+         notifyAll("system", "Sketchness", "The next round has started!");
+         notifyAll("system", "Sketchness", "Randomly selecting roles...");
+         while(currentSketcher==null)
+         {
+            int index = (int)(Math.random() * ((requiredPlayers - 1) + 1));
+            if(!playersVect.get(index).hasBeenSketcher)
+            {
+                    currentSketcher=playersVect.get(index).name;
+                    playersVect.get(index).hasBeenSketcher=true;
+            }
+         }
+         notifyAll("system", "Sketchness", "The SKETCHER is "+currentSketcher);
+         return currentSketcher;
+     }
+     
+     
+     public void playerTimeExpired(String name)
+     {
+         for (Iterator<Painter> it = playersVect.iterator(); it.hasNext();) {
+             Painter painter = it.next();
+             if(painter.name.equals(name))
+                 missingPlayers--;
+         }
+         if(missingPlayers==0)
+         {
+             nextRound();
+             missingPlayers=requiredPlayers;
+         }
+     }
 }
