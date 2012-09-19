@@ -217,7 +217,8 @@
   var ctx = canvas.getContext("2d");
   var taskCanvas = document.getElementById("task");
   var taskContext = taskCanvas.getContext("2d");
-
+  var positionCanvas = document.getElementById("positions");
+  var positionContext = positionCanvas.getContext("2d");
   /*******************************MANAGING THE INCOMING MESSAGES*****************/
   onSocketMessage = function (e) {
     var m = JSON.parse(e.data);
@@ -232,6 +233,7 @@
         CreateTimer(defaultRoundTime);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         taskContext.clearRect(0, 0, canvas.width, canvas.height);
+        positionContext.clearRect(0, 0, canvas.width, canvas.height);
     }
     else
     {

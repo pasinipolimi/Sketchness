@@ -172,7 +172,9 @@ public class PaintRoom {
     public void nextRound(String sketcher) 
     {
         pointsRemaining=10;
+        guessedWord=false;
         for(Map.Entry<Integer, Painter> entry : painters.entrySet()) {
+            entry.getValue().guessed=false;
             if(entry.getValue().name.equals(sketcher))
             {
                 ObjectNode roleMessage = Json.newObject();
