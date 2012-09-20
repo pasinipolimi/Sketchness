@@ -226,6 +226,9 @@
     var m = JSON.parse(e.data);
     if(m.type=="role")
     {
+        //Fix the drawing style for the player
+        ctx.globalCompositeOperation = "destination-out";
+        
         role=m.role;
         matchStarted=true;
         if(role=="SKETCHER")
@@ -291,17 +294,17 @@
     if (m.type != "disconnect") {
       if (m.type == "trace") {
         ctx.strokeStyle = player.color;
-        if(!drawTool)
+        if(player.color=="rgba(255,255,255,1.0)")
             ctx.globalCompositeOperation = "destination-out";
         else
            ctx.globalCompositeOperation = "source-over";
         ctx.lineWidth = player.size;
         ctx.beginPath();
-        var points = m.points;
-        points[0] && ctx.moveTo(points[0].x, points[0].y);
-        points.forEach(function (p) {
-          ctx.lineTo(p.x, p.y);
-        });
+            var points = m.points;
+            points[0] && ctx.moveTo(points[0].x, points[0].y);
+            points.forEach(function (p) {
+            ctx.lineTo(p.x, p.y);
+            });
         ctx.stroke();
         m.x = points[points.length-1].x;
         m.y = points[points.length-1].y;
