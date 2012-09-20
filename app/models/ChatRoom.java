@@ -35,6 +35,8 @@ public class ChatRoom extends UntypedActor {
 	private String currentSketcher;
         private String currentGuess;
         
+        private int roundNumber=1;
+        private static int maxRound=3;
         
 	
     
@@ -203,9 +205,18 @@ public class ChatRoom extends UntypedActor {
     
      public void nextRound()
      {
-         nextSketcher();
-         paintLogic.nextRound(currentSketcher);
-         currentGuess=paintLogic.getCurrentGuess();
+         roundNumber++;
+         if(roundNumber<=maxRound)
+         {
+            nextSketcher();
+            paintLogic.nextRound(currentSketcher);
+            currentGuess=paintLogic.getCurrentGuess();
+         }
+         else
+         {
+             //Manage round end
+             notifyAll("system", "Sketchness", "The game has ended!");
+         } 
      }
      
      public String nextSketcher()

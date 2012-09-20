@@ -247,7 +247,9 @@
     {
         var player = players[m.pid];
         if (player === undefined) 
+        {
             player = players[m.pid] = m;
+        }
         if (m.type=="youAre") 
         {
             pid = m.pid;
@@ -454,6 +456,8 @@
             ctx.font = "10px sans-serif";
             ctx.fillStyle = TRACKER;
             ctx.fillText((player.name+"").substring(0,20), player.x, player.y-Math.round(player.size/2)-4);
+            players[pid].x=-200;
+            players[pid].y=-200;
         }
   }
 
@@ -462,8 +466,6 @@
     render();
   }, canvas);
 })();
-
-
 
 
 /************************CONTROL MESSAGES PANEL MANAGEMENT************/
