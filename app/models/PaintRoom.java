@@ -156,6 +156,12 @@ public class PaintRoom {
                 currentPlayer.setPoints(currentPlayer.getPoints()+guesserPointsRemaining);
                 currentPlayer.channel.write(guesserJson);
                 currentPlayer.setCorrectGuess();
+                
+                
+                //Send the underlying image also to the guesser
+                ObjectNode guessWord = retrieveCurrentTaskImage();
+                entry.getValue().channel.write(guessWord);
+                
                 //Only if less than 5 players have already guessed assign the points to the sketcher
                 if(guesserPointsRemaining>5)
                 {
@@ -223,6 +229,15 @@ public class PaintRoom {
 	
     
     public ObjectNode retrieveTaskImage()
+    {
+         ObjectNode guessWord = Json.newObject();
+         guessWord.put("type", "task");
+         guessWord.put("word","skirt");
+         guessWord.put("image","/assets/taskImages/skirt.png");
+         return guessWord;
+    }
+    
+    public ObjectNode retrieveCurrentTaskImage()
     {
          ObjectNode guessWord = Json.newObject();
          guessWord.put("type", "task");
