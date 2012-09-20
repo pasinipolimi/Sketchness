@@ -29,7 +29,7 @@ public class ChatRoom extends UntypedActor {
     
 	//Control Variables
 	
-	private static int requiredPlayers=3;
+	private static final int requiredPlayers=3;
         private static int missingPlayers=requiredPlayers;
 	private boolean gameStarted=false;
 	private String currentSketcher;
@@ -56,6 +56,7 @@ public class ChatRoom extends UntypedActor {
             paintLogic=paintRoom;
             // For each event received on the socket,
             in.onMessage(new Callback<JsonNode>() {
+                @Override
                public void invoke(JsonNode event) {
                    
                    // Send a Talk message to the room.
@@ -65,6 +66,7 @@ public class ChatRoom extends UntypedActor {
             
             // When the socket is closed.
             in.onClose(new Callback0() {
+                @Override
                public void invoke() {
                    
                    // Send a Quit message to the room.
@@ -87,9 +89,10 @@ public class ChatRoom extends UntypedActor {
     }
     
     // Members of this room.
-    Map<String, WebSocket.Out<JsonNode>> playersMap = new HashMap<String, WebSocket.Out<JsonNode>>();
+    Map<String, WebSocket.Out<JsonNode>> playersMap = new HashMap<>();
     ArrayList<Painter> playersVect = new ArrayList<>();
     
+    @Override
     public void onReceive(Object message) throws Exception {
         
         if(message instanceof Join) 

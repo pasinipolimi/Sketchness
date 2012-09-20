@@ -144,22 +144,24 @@
     }
   };
 
+
   // Init pname
   function queryPname() {
 	n=$('#nickname').text();
-    if (n) {
+   if (n) {
       localStorage.setItem("pname", n);
     }
     return n || pname;
   }
   
-  //pname = localStorage.getItem("pname");
+ //pname = localStorage.getItem("pname");
   if (!insideIframe && !pname) {
      pname = queryPname();
   }
   if (!pname) {
     pname = "iam"+Math.floor(100*Math.random())
-  }
+}
+
 
   // WebSocket
   var socket;
@@ -227,9 +229,15 @@
         role=m.role;
         matchStarted=true;
         if(role=="SKETCHER")
+        {
             $('#roleSpan').text("the Sketcher");
+            $('#talk').attr('disabled', 'disabled');
+        }
         else
+        {
             $('#roleSpan').text("a Guesser");
+            $('#talk').removeAttr('disabled');
+        }
         CreateTimer(defaultRoundTime);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         taskContext.clearRect(0, 0, canvas.width, canvas.height);
@@ -261,6 +269,12 @@
     }
     
     if(m.type=="guesser")
+    {
+        if(m.name==pname)
+            score=score+m.points;
+    }
+    
+    if(m.type=="sketcher")
     {
         if(m.name==pname)
             score=score+m.points;
