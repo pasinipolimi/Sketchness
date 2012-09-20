@@ -1,5 +1,6 @@
 package models;
 
+import java.util.HashSet;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
 import play.Logger;
@@ -8,6 +9,7 @@ import play.libs.Json;
 import play.mvc.WebSocket;
 
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -18,6 +20,8 @@ public class PaintRoom {
     public Map<Integer, Painter> painters = new ConcurrentHashMap<>();
     public AtomicInteger counter = new AtomicInteger(0);
     public AtomicInteger connections = new AtomicInteger(0);
+    
+    private HashSet<ObjectNode> taskHashSet = new HashSet<>();
     
     private String currentGuess;
     private Boolean guessedWord;
@@ -32,11 +36,56 @@ public class PaintRoom {
     
     private Painter sketcherPainter;
     
+    private ObjectNode guessObject;
+    
 
     public PaintRoom(String name) {
 		this.name = name;
                 currentGuess="";
                 guessedWord=false;
+                taskSetInitialization();
+    }
+    
+    
+    //Stub function to save the task objects in the system
+    public final void taskSetInitialization()
+    {
+       //First item in the task set
+       ObjectNode guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","skirt");
+       guessWord.put("image","/assets/taskImages/skirt.png");
+       taskHashSet.add(guessWord);
+       guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","trousers");
+       guessWord.put("image","/assets/taskImages/trousers.jpg");
+       taskHashSet.add(guessWord);
+       guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","hat");
+       guessWord.put("image","/assets/taskImages/hat.jpg");
+       taskHashSet.add(guessWord);
+       guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","bra");
+       guessWord.put("image","/assets/taskImages/bra.jpg");
+       taskHashSet.add(guessWord);
+       guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","scarf");
+       guessWord.put("image","/assets/taskImages/scarf.jpg");
+       taskHashSet.add(guessWord);
+       guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","boots");
+       guessWord.put("image","/assets/taskImages/boots.jpg");
+       taskHashSet.add(guessWord);
+       guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","shirt");
+       guessWord.put("image","/assets/taskImages/shirt.jpg");
+       taskHashSet.add(guessWord);
     }
 
     public void createPainter(final WebSocket.In<JsonNode> in, final WebSocket.Out<JsonNode> out) {
@@ -230,21 +279,32 @@ public class PaintRoom {
     
     public ObjectNode retrieveTaskImage()
     {
-         ObjectNode guessWord = Json.newObject();
-         guessWord.put("type", "task");
-         guessWord.put("word","skirt");
-         guessWord.put("image","/assets/taskImages/skirt.png");
-         return guessWord;
+         guessObject=null;
+         int size = taskHashSet.size();
+         int item = new Random().nextInt(size); // In real life, the Random object should be rather more shared than this
+         int i = 0;
+         for(ObjectNode obj : taskHashSet)
+         {
+            if (i == item)
+            {
+                guessObject=obj;
+                break;
+            }
+            i = i + 1;
+         }
+         taskHashSet.remove(guessObject);
+         return guessObject;
     }
     
     public ObjectNode retrieveCurrentTaskImage()
     {
-         ObjectNode guessWord = Json.newObject();
-         guessWord.put("type", "task");
-         guessWord.put("word","skirt");
-         guessWord.put("image","/assets/taskImages/skirt.png");
-         return guessWord;
+         return guessObject;
     }
+    
+    
+    
+
+
     
     public void setChatRoom(ChatRoom chatRoom)
     {

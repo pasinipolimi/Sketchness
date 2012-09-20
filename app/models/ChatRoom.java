@@ -163,8 +163,7 @@ public class ChatRoom extends UntypedActor {
         
         } else {
             unhandled(message);
-        }
-        
+        } 
     }
     
     // Send a Json event to all members
@@ -216,6 +215,9 @@ public class ChatRoom extends UntypedActor {
          {
              //Manage round end
              notifyAll("system", "Sketchness", "The game has ended!");
+             playersMap = new HashMap<>();
+             gameStarted=false;
+             playersVect = new ArrayList<>();
          } 
      }
      
