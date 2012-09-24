@@ -36,7 +36,7 @@ public class ChatRoom extends UntypedActor {
         private String currentGuess;
         
         private int roundNumber=1;
-        private static int maxRound=3;
+        private static int maxRound=6;
         
 	
     
@@ -91,8 +91,8 @@ public class ChatRoom extends UntypedActor {
     }
     
     // Members of this room.
-    Map<String, WebSocket.Out<JsonNode>> playersMap = new HashMap<>();
-    ArrayList<Painter> playersVect = new ArrayList<>();
+    Map<String, WebSocket.Out<JsonNode>> playersMap = new HashMap<String, WebSocket.Out<JsonNode>>();
+    ArrayList<Painter> playersVect = new ArrayList<Painter>();
     
     @Override
     public void onReceive(Object message) throws Exception {
@@ -163,8 +163,7 @@ public class ChatRoom extends UntypedActor {
         
         } else {
             unhandled(message);
-        }
-        
+        } 
     }
     
     // Send a Json event to all members
@@ -216,21 +215,37 @@ public class ChatRoom extends UntypedActor {
          {
              //Manage round end
              notifyAll("system", "Sketchness", "The game has ended!");
+             playersMap = new HashMap<String, WebSocket.Out<JsonNode>>();
+             gameStarted=false;
+             playersVect = new ArrayList<Painter>();
          } 
      }
      
      public String nextSketcher()
      {
          currentSketcher=null;
+         int count=0;
          notifyAll("system", "Sketchness", "The next round has started!");
          notifyAll("system", "Sketchness", "Randomly selecting roles...");
          while(currentSketcher==null)
          {
-            int index = (int)(Math.random() * ((requiredPlayers - 1) + 1));
-            if(!playersVect.get(index).hasBeenSketcher)
+            if(count>requiredPlayers)
             {
-                    currentSketcher=playersVect.get(index).name;
-                    playersVect.get(index).hasBeenSketcher=true;
+                for(int i=0;i<requiredPlayers;i++)
+                {
+                    playersVect.get(i).hasBeenSketcher=false;
+                }
+                count=0;
+            }
+            else
+            {
+                int index = (int)(Math.random() * ((requiredPlayers - 1) + 1));
+                if(!playersVect.get(index).hasBeenSketcher)
+                {
+                        currentSketcher=playersVect.get(index).name;
+                        playersVect.get(index).hasBeenSketcher=true;
+                }
+                count++;
             }
          }
          notifyAll("system", "Sketchness", "The SKETCHER is "+currentSketcher);
