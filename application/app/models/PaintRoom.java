@@ -99,8 +99,7 @@ public class PaintRoom {
             public void invoke(JsonNode json) throws Throwable {
                 String type = json.get("type").getTextValue();
                 // The painter wants to change some of his property
-                switch (type) {
-                    case "change":
+                if(type.equalsIgnoreCase("change")) {
                         Painter painter = painters.get(pid);
                         if(painter == null) {
                             painter = new Painter(out);
@@ -121,10 +120,9 @@ public class PaintRoom {
                             }
                         }
                         painter.updateFromJson(json);
-                        break;
-                    case "roundEnded":
+                }
+                else if (type.equalsIgnoreCase("roundEnded")) {
                         chatRoom.playerTimeExpired(json.get("player").getTextValue());
-                        break;
                 }
                 ObjectNode node = ((ObjectNode)json);
                 node.put("pid", pid);
