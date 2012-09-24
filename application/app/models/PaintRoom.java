@@ -21,11 +21,8 @@ public class PaintRoom {
     public AtomicInteger counter = new AtomicInteger(0);
     public AtomicInteger connections = new AtomicInteger(0);
     
-<<<<<<< HEAD:application/app/models/PaintRoom.java
     private HashSet<ObjectNode> taskHashSet = new HashSet<ObjectNode>();
-=======
-    private HashSet<ObjectNode> taskHashSet = new HashSet<>();
->>>>>>> 181bf2f604cd2e6dbbd04ae284fe7f4328c73407:app/models/PaintRoom.java
+
     
     private String currentGuess;
     private Boolean guessedWord;

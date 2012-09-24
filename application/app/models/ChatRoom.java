@@ -215,15 +215,9 @@ public class ChatRoom extends UntypedActor {
          {
              //Manage round end
              notifyAll("system", "Sketchness", "The game has ended!");
-<<<<<<< HEAD:application/app/models/ChatRoom.java
              playersMap = new HashMap<String, WebSocket.Out<JsonNode>>();
              gameStarted=false;
              playersVect = new ArrayList<Painter>();
-=======
-             playersMap = new HashMap<>();
-             gameStarted=false;
-             playersVect = new ArrayList<>();
->>>>>>> 181bf2f604cd2e6dbbd04ae284fe7f4328c73407:app/models/ChatRoom.java
          } 
      }
      
