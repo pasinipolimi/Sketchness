@@ -1,6 +1,5 @@
 package models;
 
-import play.mvc.*;
 import play.libs.*;
 import play.libs.F.*;
 
@@ -9,12 +8,17 @@ import akka.actor.*;
 import akka.dispatch.*;
 import static akka.pattern.Patterns.ask;
 
-import org.codehaus.jackson.*;
 import org.codehaus.jackson.node.*;
 
 import java.util.*;
 
 import models.Messages.*;
+
+import play.mvc.*;
+
+import org.codehaus.jackson.*;
+
+
 
 import static java.util.concurrent.TimeUnit.*;
 
@@ -31,6 +35,7 @@ public class ChatRoom extends UntypedActor {
 	
 	private static final int requiredPlayers=3;
         private static int missingPlayers=requiredPlayers;
+        private int disconnectedPlayers=0;
 	private boolean gameStarted=false;
 	private String currentSketcher;
         private String currentGuess;
@@ -114,6 +119,7 @@ public class ChatRoom extends UntypedActor {
                 notifyAll("join", join.username, "has entered the room");
                 if(playersMap.size()>=requiredPlayers)
                 {
+                        disconnectedPlayers=0;
                 	gameStarted=true;
                 	nextSketcher();
                         paintLogic.matchStarted(currentSketcher);
@@ -130,10 +136,10 @@ public class ChatRoom extends UntypedActor {
                 getSender().tell("OK");
             }
             //[TODO]Disabling game started control for debug messages
-            /*else
+            else
             {
             	getSender().tell("The game has already started");
-            }*/
+            }
             
         } else if(message instanceof Talk)  {
             
@@ -158,9 +164,29 @@ public class ChatRoom extends UntypedActor {
             Quit quit = (Quit)message;
             
             playersMap.remove(quit.username);
+            for (Painter painter : playersVect) {
+                if(painter.name.equalsIgnoreCase(quit.username)){
+                    playersVect.remove(painter);
+                    break;
+                }
+            }
+            for (int key : paintLogic.painters.keySet())
+            {
+                if(paintLogic.painters.get(key).name.equalsIgnoreCase(quit.username)){
+                   paintLogic.painters.remove(key);
+                   break;
+                }
+            }
             
             notifyAll("quit", quit.username, "has leaved the room");
-        
+            disconnectedPlayers++;
+            //End the game if there's just one player or less
+            if(((requiredPlayers-disconnectedPlayers)<=1)&&gameStarted)
+            {
+                //Restart the game
+                paintLogic.gameEnded();
+                newGameSetup();
+            }
         } else {
             unhandled(message);
         } 
@@ -196,8 +222,7 @@ public class ChatRoom extends UntypedActor {
             ArrayNode m = event.putArray("members");
             for(String u: playersMap.keySet()) {
                 m.add(u);
-            }
-            
+            }            
             channel.write(event);
         }
     } 
@@ -215,23 +240,23 @@ public class ChatRoom extends UntypedActor {
          {
              //Manage round end
              notifyAll("system", "Sketchness", "The game has ended!");
-             playersMap = new HashMap<String, WebSocket.Out<JsonNode>>();
-             gameStarted=false;
-             playersVect = new ArrayList<Painter>();
+             paintLogic.gameEnded();
+             newGameSetup();
          } 
      }
      
      public String nextSketcher()
      {
          currentSketcher=null;
+         int currentPlayers=requiredPlayers-disconnectedPlayers;
          int count=0;
          notifyAll("system", "Sketchness", "The next round has started!");
          notifyAll("system", "Sketchness", "Randomly selecting roles...");
          while(currentSketcher==null)
          {
-            if(count>requiredPlayers)
+            if(count>currentPlayers)
             {
-                for(int i=0;i<requiredPlayers;i++)
+                for(int i=0;i<currentPlayers;i++)
                 {
                     playersVect.get(i).hasBeenSketcher=false;
                 }
@@ -239,7 +264,7 @@ public class ChatRoom extends UntypedActor {
             }
             else
             {
-                int index = (int)(Math.random() * ((requiredPlayers - 1) + 1));
+                int index = (int)(Math.random() * ((currentPlayers - 1) + 1));
                 if(!playersVect.get(index).hasBeenSketcher)
                 {
                         currentSketcher=playersVect.get(index).name;
@@ -255,15 +280,40 @@ public class ChatRoom extends UntypedActor {
      
      public void playerTimeExpired(String name)
      {
-         for (Iterator<Painter> it = playersVect.iterator(); it.hasNext();) {
-             Painter painter = it.next();
-             if(painter.name.equals(name))
-                 missingPlayers--;
-         }
-         if(missingPlayers==0)
+         if(((requiredPlayers-disconnectedPlayers)<=1)&&gameStarted)
          {
-             nextRound();
-             missingPlayers=requiredPlayers;
+             //Restart the game
+             paintLogic.gameEnded();
+             newGameSetup();
+         }
+         else
+         {
+            for (Iterator<Painter> it = playersVect.iterator(); it.hasNext();) {
+                Painter painter = it.next();
+                if(painter.name.equals(name))
+                    missingPlayers--;
+            }
+            if((missingPlayers-disconnectedPlayers)==0)
+            {
+                nextRound();
+                missingPlayers=requiredPlayers;
+            }
          }
      }
+     
+     
+     private void newGameSetup()
+     {
+         disconnectedPlayers=0;
+         roundNumber=1;
+         playersMap = new HashMap<String, WebSocket.Out<JsonNode>>();
+         gameStarted=false;
+         playersVect = new ArrayList<Painter>();
+     }
+
+    public String getCurrentGuess() {
+        return currentGuess;
+    }
+     
+     
 }

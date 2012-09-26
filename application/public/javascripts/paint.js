@@ -1,11 +1,6 @@
 (function(){
 	
-  function removeError () {
-    $('#error').fadeOut(500);
-  }
-  function setError (message) {
-    $('#error').empty().append($('<span class="error" />').text(message)).fadeIn(500);
-  }
+  
 
 
    
@@ -33,15 +28,6 @@
       window.WebSocket = window.MozWebSocket
   }
 
-  if (!window.WebSocket) {
-    setError("WebSocket is not supported by your browser.");
-    return;
-  }
-
-  if (!(function(e){return e.getContext && e.getContext('2d')}(document.getElementById("me")))) {
-    setError("Canvas is not supported by your browser.");
-    return;
-  }
 
   var insideIframe = (window.parent != window);
   var isMobile = /ipad|iphone|android/i.test(navigator.userAgent)
@@ -69,6 +55,7 @@
   var time = defaultRoundTime;
   var matchStarted = false;
   var guessWord="";
+  var guessed=false;
   var drawTool = true;
   var taskImage;
 
@@ -84,7 +71,12 @@
   var RemainingSeconds;
   
   
-    
+  function setError (message) {
+      $("#onError span").text(message)
+      $("#onError").show()
+      $("#pageheader").hide()
+      $("#mainPage").hide()
+  }
     
     
     /**********UTILITY FUNCTION FOR TIMER CREATION********************/
@@ -228,7 +220,7 @@
     {
         //Fix the drawing style for the player
         ctx.globalCompositeOperation = "destination-out";
-        
+        guessed=false;
         role=m.role;
         matchStarted=true;
         if(role=="SKETCHER")
@@ -276,7 +268,11 @@
     if(m.type=="guesser")
     {
         if(m.name==pname)
+        {
             score=score+m.points;
+            guessed=true;
+            guessWord=m.guessWord;
+        }
     }
     
     if(m.type=="sketcher")
@@ -289,6 +285,25 @@
     {
         if(RemainingSeconds>m.amount)
             RemainingSeconds=m.amount;
+    }
+    
+    if(m.type=="leaderboard")
+    {
+        role="ENDED";
+        //Clear all the canvas and draw the leaderboard
+        time=0;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        taskContext.clearRect(0, 0, canvas.width, canvas.height);
+        positionContext.clearRect(0, 0, canvas.width, canvas.height);    
+   
+        //Disable the chat
+        $('#talk').attr('disabled', 'disabled');
+        for(var i=1;i<=m.playersNumber;i++)
+        {
+            taskContext.fillStyle = "#000000";
+            taskContext.font = "bold 30px sans-serif";
+            taskContext.fillText(i+"): "+m.playerList[i-1].name+" = "+m.playerList[i-1].points+" points",30,50+50*(i-1));
+        }
     }
     
     if (m.type != "disconnect") {
@@ -450,7 +465,7 @@
     if(matchStarted)
         for (var pid in players) 
         {   
-            var player = players[pid];
+            var player = players[pid]; 
             if (!player || player.x===undefined) continue;
             ctx.beginPath();
             ctx.strokeStyle = TRACKER;
@@ -497,13 +512,27 @@
             ctx.fillText('Target:',50,50);
             ctx.fillStyle = "#FF0000";
             ctx.font = "bold 30px sans-serif";
-            ctx.fillText(guessWord,150,50);
+            ctx.fillText(guessWord,60+20*guessWord.length,50);
         }
-        else
+        else if (role=="GUESSER")
         {
             ctx.fillStyle = "#000000";
             ctx.font = "bold 30px sans-serif";
-            ctx.fillText('Guess the word!',150,50);
+            if(!guessed)
+                ctx.fillText('Guess the word!',150,50);
+            else
+                {
+                    ctx.fillText('Guessed!:',80,50);
+                    ctx.fillStyle = "#FF0000";
+                    ctx.font = "bold 30px sans-serif";
+                    ctx.fillText(guessWord,120+20*guessWord.length,50);
+                }
+        }
+        else if (role=="ENDED")
+        {
+            ctx.fillStyle = "#000000";
+            ctx.font = "bold 30px sans-serif";
+            ctx.fillText('Positions and Scores!',170,50);
         }
     }
   }
@@ -604,7 +633,7 @@
 	}
 	
         
-        if(!matchStarted || role=="GUESSER")
+        if(!matchStarted || role=="GUESSER" || role=="ENDED")
 	{
             ctx.drawImage(penDisabled,0,250,90,90);
             ctx.drawImage(eraserDisabled,0,350,90,90);

@@ -1,6 +1,6 @@
 package models;
 
-import java.util.HashSet;
+import java.util.*;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
 import play.Logger;
@@ -8,10 +8,10 @@ import play.libs.F;
 import play.libs.Json;
 import play.mvc.WebSocket;
 
-import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
 
 public class PaintRoom {
 	
@@ -34,7 +34,8 @@ public class PaintRoom {
     private int sketcherPointsRemaining=0;
     private int roundNumber=1;
     private static int maxRound=6;
-    
+    private int numberGuessed=0;
+   
     private Painter sketcherPainter;
     
     private ObjectNode guessObject;
@@ -211,6 +212,11 @@ public class PaintRoom {
     
     public void matchStarted(String sketcher) 
     {
+        roundNumber=1;
+        guesserPointsRemaining=10;
+        sketcherPointsRemaining=0;
+        numberGuessed=0;
+        guessedWord=false;
         for(Map.Entry<Integer, Painter> entry : painters.entrySet()) {
             if(entry.getValue().name.equals(sketcher))
             {
@@ -246,10 +252,12 @@ public class PaintRoom {
         for(Map.Entry<Integer, Painter> entry : painters.entrySet()) {
             if(entry.getValue().name.equals(guesser)&&entry.getValue().guessed==false&&!entry.getValue().role.equalsIgnoreCase("SKETCHER"))
             {
+                numberGuessed++;
                 Painter currentPlayer=entry.getValue();
                 ObjectNode guesserJson =  Json.newObject();
                 guesserJson.put("type", "guesser");
                 guesserJson.put("name",guesser);
+                guesserJson.put("guessWord",chatRoom.getCurrentGuess());
                 guesserJson.put("points",guesserPointsRemaining);
                 currentPlayer.setPoints(currentPlayer.getPoints()+guesserPointsRemaining);
                 currentPlayer.channel.write(guesserJson);
@@ -276,12 +284,13 @@ public class PaintRoom {
             }
             if(!guessedWord)
             {
-                ObjectNode timeChange = Json.newObject();
-                timeChange.put("type", "timeChange");
-                timeChange.put("amount",remainingTimeOnGuess);
-                entry.getValue().channel.write(timeChange);    
+                entry.getValue().channel.write(timerChange(remainingTimeOnGuess));    
             }
         }
+        //Every player has guessed, reduce the remaining time
+        if(numberGuessed==(chatRoom.playersMap.size()-1))
+        for(Map.Entry<Integer, Painter> entry : painters.entrySet())
+                entry.getValue().channel.write(timerChange(3));
         guessedWord=true;
     }
     
@@ -291,6 +300,7 @@ public class PaintRoom {
         roundNumber++;
         guesserPointsRemaining=10;
         sketcherPointsRemaining=0;
+        numberGuessed=0;
         guessedWord=false;
         //We need to play another round
         if(roundNumber<=maxRound)
@@ -319,10 +329,31 @@ public class PaintRoom {
                 }
             }
         }
-        else
-        {
-            //Print the leaderboard information
-        }
+    }
+    
+    public void gameEnded()
+    {
+            JsonNodeFactory factory = JsonNodeFactory.instance;
+            ObjectNode leaderboard = new ObjectNode(factory);
+            leaderboard.put("type", "leaderboard");
+            leaderboard.put("playersNumber", painters.size());
+            //[TODO] order the list
+            List<Painter> list = new ArrayList<Painter>(painters.values());
+            Collections.sort(list);
+            ArrayNode playersOrder=new ArrayNode(factory);
+            for (Painter painter : list) {
+                ObjectNode row = new ObjectNode(factory);
+                row.put("name", painter.name);
+                row.put("points", painter.getPoints());
+                playersOrder.add(row);
+            }
+            leaderboard.put("playerList",playersOrder);
+            //Send the leaderboard information to all the players
+            for(Map.Entry<Integer, Painter> entry : painters.entrySet()) {
+                //Set the remaining time to 0
+                entry.getValue().channel.write(timerChange(0));
+                entry.getValue().channel.write(leaderboard);
+            }
     }
 	
     
@@ -352,7 +383,13 @@ public class PaintRoom {
     
     
     
-
+    public ObjectNode timerChange(int remainingTime)
+    {
+        ObjectNode timeChange = Json.newObject();
+        timeChange.put("type", "timeChange");
+        timeChange.put("amount",remainingTime);
+        return timeChange;
+    }
 
     
     public void setChatRoom(ChatRoom chatRoom)

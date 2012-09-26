@@ -7,7 +7,7 @@ import play.mvc.WebSocket;
 
 
 
-public class Painter extends Player{
+public class Painter extends Player implements Comparable<Painter>{
     
 	public String name;
 	public String color;
@@ -77,4 +77,16 @@ public class Painter extends Player{
     {
         guessed=true;
     }
+
+    @Override
+    public int compareTo(Painter t) {
+        //If we have more points we are in lower positions
+        if(this.getPoints()>t.getPoints())
+            return -1;
+        else if (this.getPoints()<t.getPoints())
+            return 1;
+        return 0;
+    }
+    
+    
 }
