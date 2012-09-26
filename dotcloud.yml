@@ -1,6 +1,6 @@
 play:
   type: custom
-  buildscript: builder
+  buildscript: playframework/builder
   ports:
     www: http
   process: ~/run
