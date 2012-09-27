@@ -178,7 +178,7 @@ public class ChatRoom extends UntypedActor {
                 }
             }
             
-            notifyAll("quit", quit.username, "has leaved the room");
+            notifyAll("quit", quit.username, "has left the room");
             disconnectedPlayers++;
             //End the game if there's just one player or less
             if(((requiredPlayers-disconnectedPlayers)<=1)&&gameStarted)
