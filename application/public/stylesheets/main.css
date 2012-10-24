@@ -64,6 +64,7 @@ body {
 #chatPanel {
     position: relative;
     overflow: hidden;
+    left: 65px;
 }
 
 #onError, #onChat {
@@ -252,3 +253,38 @@ footer {
 	font-weight: bold;
 }
 
+
+/**
+*	CSS PANNELLO DI CONTROLLO
+*/
+
+#contrl-panel{
+	float: left;
+	margin-top: 54px;
+}
+#contrl-panel #score .title{
+	font-size: 27px;
+}
+#contrl-panel #score .txt{
+	font-size: 20px;
+	margin-top: 5px;
+	text-align: center;
+}
+
+#contrl-panel #time .title{
+	font-size: 27px;
+	margin-top: 25px;
+}
+#contrl-panel #time .txt{
+	font-size: 20px;
+	margin-top: 5px;
+	text-align: center;
+}
+#pen img{
+	width: 65px;
+	margin-top: 25px;
+}
+#eraser img{
+	width: 65px;
+	margin-top: 25px;
+}

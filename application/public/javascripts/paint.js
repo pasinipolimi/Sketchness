@@ -547,8 +547,10 @@
 
 
 /*************************TOOLS PANEL MANAGEMENT**********************/
+
 (function(){
-  var canvas = document.getElementById("controls");
+	
+  /*var canvas = document.getElementById("controls");
   var ctx = canvas.getContext("2d");
   var dirty = true;
   
@@ -563,7 +565,7 @@
   penDisabled.src='assets/images/Pen-2-iconWhite.jpg';
   eraserDisabled.src='assets/images/Eraser-iconWhite.jpg';
   errorCross.src='assets/images/ErrorCross-icon.png';
-
+*/
   function setColor (c) 
   {
     color = c;
@@ -574,7 +576,7 @@
     size = s;
     send({type: 'change', size: size});
   }
-
+/*
   function setup() {
     canvas.addEventListener("click", function (e) {
       var o = $(canvas).offset();
@@ -593,12 +595,13 @@
       }
       dirty = true;
     });
-  }
+  }*/
 
   
   /************TOOLS PANEL RENDERING***********************/
-  function render() 
+  /*function render() 
   {
+	  
 	//Score rectangle
 	ctx.strokeStyle = "#abc";
 	ctx.fillStyle = "#abc";
@@ -654,12 +657,62 @@
                     ctx.drawImage(eraserEnabled,0,350,90,90);
             }
         }
+  }*/
+  function renderControlPanel(){
+	  imgPen = "assets/images/pen.jpg";
+	  imgPenDisable = "assets/images/pen2.jpg";
+	  imgEraser = "assets/images/eraser.jpg";
+	  imgEraserDisable = "assets/images/eraser2.jpg";
+	  imgX = "http://www.clker.com/cliparts/0/7/e/a/12074327311562940906milker_X_icon.svg.med.png";
+	  if(!matchStarted || role=="GUESSER" || role=="ENDED"){
+		  imgFinPen = imgX;
+		  imgFinEraser = imgX;
+		  classImgRmv = 'active';
+		  classImgAdd = 'disabled';
+		  ctrlChangeImg = $('#pen').hasClass('disabled') && $('#eraser').hasClass('disabled') ? false : true;
+	  }else{
+		  imgFinPen = imgPen;
+		  imgFinEraser = imgEraserDisable;
+		  classImgRmv = 'disabled';
+		  classImgAdd = 'active';
+		  ctrlChangeImg = $('#pen').hasClass('active') && $('#eraser').hasClass('active') ? false : true;
+	  }
+	  
+	  if(ctrlChangeImg){
+		  $('#pen').html('<img class="' + classImgAdd + '" src="' + imgFinPen + '">');
+		  $('#pen').addClass(classImgAdd);
+		  $('#pen').removeClass(classImgRmv);
+		  $('#eraser').html('<img class="' + classImgAdd + '" src="' + imgFinEraser + '">');
+		  $('#eraser').addClass(classImgAdd);
+		  $('#eraser').removeClass(classImgRmv);
+		  $("#pen.active").click(function() {
+			  setColor(PEN);
+			  setSize(SIZE);
+			  drawTool=true;
+			  $("#eraser.active img").attr('src', 'assets/images/eraser2.jpg');
+			  $("#pen.active img").attr('src', 'assets/images/pen.jpg');
+		  });
+		  $("#eraser.active").click(function() {
+			  setColor(ERASER);
+			  setSize(25);
+			  drawTool=false;
+			  $("#pen.active img").attr('src', 'assets/images/pen2.jpg');
+			  $("#eraser.active img").attr('src', 'assets/images/eraser.jpg');
+		  });
+	  }
+	  if(!$('#score').hasClass(score)){
+		  $('#score .txt').html(score);
+		  $('#score').addClass(score);
+	  }
+	  
+	  tempo = !matchStarted ? 'Waiting' : time;
+	  $('#time .txt').html(tempo);
   }
-
-  setup();
+  //setup();
   requestAnimFrame(function loop(){
     requestAnimFrame(loop);
-    render();
+    //render();
+    renderControlPanel();
   });
 
 })();
