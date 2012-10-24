@@ -235,3 +235,20 @@ footer {
 .message.system {
     background: #FFCC99;
 }
+
+
+.message.talkError p{
+	color: #FF0000;
+	font-weight: bold;
+}
+
+.message.talkWarning p{
+	color: #FE9A2E;
+	font-weight: bold;
+}
+
+.message.talkNear p{
+	color:#9FF781;
+	font-weight: bold;
+}
+
