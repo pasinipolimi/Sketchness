@@ -63,5 +63,12 @@ public class Application extends Controller {
         };
     
     }
-  
+	
+	/**
+     * Test page
+     */
+    public static Result test() {
+        flash("error", "Please choose a valid username.");
+        return redirect(routes.Application.index());
+    }
 }
