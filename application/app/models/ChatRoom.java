@@ -1,5 +1,6 @@
 package models;
 
+import models.levenshteinDistance.*;
 import play.libs.*;
 import play.libs.F.*;
 
@@ -147,12 +148,18 @@ public class ChatRoom extends UntypedActor {
             Talk talk = (Talk)message;
             if(gameStarted){
                 //Compare the message sent with the tag in order to establish if we have a right guess
-                if(talk.text.equalsIgnoreCase(currentGuess))
-                {
-                    paintLogic.guessedWord(talk.username);
-                }
-                else
-                    notifyAll("talk", talk.username, talk.text);
+            	levenshteinDistance distanza = new levenshteinDistance();
+        		int lenLength = distanza.computeLevenshteinDistance(talk.text, currentGuess);
+        		switch(distanza.computeLevenshteinDistance(talk.text, currentGuess)){
+	        		case 0:	paintLogic.guessedWord(talk.username);
+	        		break;
+	        		case 1: notifyAll("talkNear", talk.username, talk.text);
+	        		break;
+	        		case 2: notifyAll("talkWarning", talk.username, talk.text);
+        			break;
+        			default: notifyAll("talkError", talk.username, talk.text);
+    				break;
+        		}
             }
             else
                 //The players are just chatting, not playing
