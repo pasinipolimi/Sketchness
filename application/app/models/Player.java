@@ -32,7 +32,5 @@ public class Player {
         this.warningsReceived = warningsReceived;
     }
     
-    public int FBLogin(){
-    	return 2;
-    }
+    
 }

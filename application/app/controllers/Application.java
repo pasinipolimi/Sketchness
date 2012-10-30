@@ -1,5 +1,8 @@
 package controllers;
 
+
+import java.net.URLEncoder;
+
 import play.mvc.*;
 
 import org.codehaus.jackson.*;
@@ -64,10 +67,4 @@ public class Application extends Controller {
     
     }
 	
-	/**
-     * Test page
-     */
-    public static Result test() {
-    	return ok(login.render());
-    }
 }
