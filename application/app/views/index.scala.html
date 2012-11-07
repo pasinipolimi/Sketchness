@@ -15,7 +15,200 @@
         <p>
             <strong>This is Sketchness, a Draw and Guess game for everyone!</strong> 
             To start, choose a username and sign in using the top right form.
+            
+        <div id="fb-root"></div>
+        <script type="text/javascript">
+            var button;
+            var userInfo;
+            
+            window.fbAsyncInit = function() {
+                FB.init({ appId: '387339654636778', //change the appId to your appId
+                    status: true, 
+                    cookie: true,
+                    xfbml: true,
+                    oauth: true});
+
+               showLoader(true);
+               
+               function updateButton(response) {
+                    button       =   document.getElementById('fb-auth');
+                    userInfo     =   document.getElementById('user-info');
+                    
+                    if (response.authResponse) {
+                        //user is already logged in and connected
+                        FB.api('/me', function(info) {
+                            login(response, info);
+                        });
+                        
+                        button.onclick = function() {
+                            FB.logout(function(response) {
+                                logout(response);
+                            });
+                        };
+                    } else {
+                        //user is not connected to your app or logged out
+                        button.innerHTML = 'Login';
+                        button.onclick = function() {
+                            showLoader(true);
+                            FB.login(function(response) {
+                                if (response.authResponse) {
+                                    FB.api('/me', function(info) {
+                                        login(response, info);
+                                    });	   
+                                } else {
+                                    //user cancelled login or did not grant authorization
+                                    showLoader(false);
+                                }
+                            }, {scope:'email,user_birthday,status_update,publish_stream,user_about_me'});  	
+                        }
+                    }
+                }
+                
+                // run once with current status and whenever the status changes
+                FB.getLoginStatus(updateButton);
+                FB.Event.subscribe('auth.statusChange', updateButton);	
+            };
+            (function() {
+                var e = document.createElement('script'); e.async = true;
+                e.src = document.location.protocol 
+                    + '//connect.facebook.net/en_US/all.js';
+                document.getElementById('fb-root').appendChild(e);
+            }());
+            
+            
+            function login(response, info){
+                if (response.authResponse) {
+                    var accessToken                                 =   response.authResponse.accessToken;
+                    
+                    userInfo.innerHTML                             = '<img src="https://graph.facebook.com/' + info.id + '/picture">' + info.name
+                                                                     + "<br /> Your Access Token: " + accessToken;
+                    button.innerHTML                               = 'Logout';
+                    showLoader(false);
+                    document.getElementById('other').style.display = "block";
+                    
+                    
+                    $("#token").val(accessToken);
+                    
+                    fqlQuery(); return false;
+                    
+                    
+                }
+            }
+        
+            function logout(response){ 
+
+            	// cancel localstorage
+            	localStorage.clear();  
+            	
+            	
+                userInfo.innerHTML                             =   "";
+                document.getElementById('debug').innerHTML     =   "";
+                document.getElementById('other').style.display =   "none";
+                   showLoader(false);
+            }
+
+            function fqlQuery(){
+                showLoader(true);
+                
+                FB.api('/me', function(response) {
+                    showLoader(false);
+               
+     //               $.post("room?username=tttt");
+                    
+                    
+                    
+
+                    var query       =  FB.Data.query('select uid, name, profile_url, sex, pic_small from user where uid={0}', response.id);
+                    query.wait(function(rows) {
+                    	
+                    	$("#username_hidden").val(rows[0].name);
+                    	$("#userid").val(rows[0].uid);
+                    	
+// put in the session the userneme
+
+                        if( rows[0].name !='' ){ localStorage.username = rows[0].name; 
+                        
+                        localStorage.loggedstatus = 1;
+                        }
+                    	
+                    	
+                    	
+                    	
+                    	
+                       document.getElementById('debug').innerHTML =  
+                         'FQL Information: '+  "<br />" + 
+                         'Your id: '      +  rows[0].uid + "<br />" +
+                         'Your name: <div id="fb_username"><span>'      +  rows[0].name          + "</span></div><br />" +
+                         'Your Sex: '       +  (rows[0].sex!= undefined ? rows[0].sex : "")                            + "<br />" +
+                         'Your Profile: '   +  "<a href='" + rows[0].profile_url + "'>" + rows[0].profile_url + "</a>" + "<br />" +
+                         '<img src="'       +  rows[0].pic_small + '" alt="" />' + "<br />";
+                     });
+                });
+                
+                
+                $.post("room?", {username: rows[0].name},
+                		   function(data) {
+                    alert("Data Loaded: " + data);
+                });
+                
+                
+            }
+            
+          
+            function showLoader(status){
+                if (status)
+                    document.getElementById('loader').style.display = 'block';
+                else
+                    document.getElementById('loader').style.display = 'none';
+            }
+            
+        </script>            
+    <button id="fb-auth">Login</button>    
+<div id="loader" style="display:none">
+            <img src="ajax-loader.gif" alt="loading" />
+        </div>
+        <br />
+        <div id="user-info"></div>
+        <br />
+        <div id="debug"></div>
+        
+        <div id="other" style="display:none">
+
+            <a href="#" onclick="fqlQuery(); return false;">FQL Query Example</a>
+            
+
+        </div>   
+        <form id="sendFBdata" action="room" method="GET" >
+         
+         <input type="hidden" value="sss" name="username_hidden" id="username_hidden">
+         <input type="hidden" value="userid" name="userid" id="userid">
+         <input type="hidden" value="token" name="token" id="token">
+        	
+        </form>         
         </p>
     </div>
+    
+    
+                    
+                <script type="text/javascript">
+
+    document.write("The FB Username is:" + localStorage.username );
+    document.write("Logged status:" + localStorage.loggedstatus );
+  </script>
+    
+    
+<script>
+$( function() {
+	
+//	val FB_username = $("#fb_username span").text();
+//	$("#username_hidden").val($("#fb_username span").text());
+//	alert('22');
+//	$("#sendFBdata").submit();
+	  // Handler for .ready() called.
+	});
+
+</script>    
+    
+    
     
 }

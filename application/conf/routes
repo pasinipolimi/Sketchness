@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Routes
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
@@ -7,7 +8,21 @@ GET     /                           controllers.Application.index()
 GET     /room                       controllers.Application.chatRoom(username: String ?= null)
 GET     /room/chat                  controllers.Application.chat(username)
 GET     /stream                     controllers.Application.stream()
-GET     /test                     	controllers.Application.test()
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
+=======
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET     /                           controllers.Application.index()
+GET     /room                       controllers.Application.chatRoom(username: String ?= null)
+GET     /room/chat                  controllers.Application.chat(username)
+GET     /stream                     controllers.Application.stream()
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
+>>>>>>> 7eb3311855b9540afb2e17d86b47c1d5ad6cb4b2
