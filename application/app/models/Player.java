@@ -1,43 +1,3 @@
-<<<<<<< HEAD
-
-package models;
-
-
-
-public class Player {
-    private int points;
-    private int warningsReceived;
-
-    public Player() {
-        points=0;
-        warningsReceived=0;
-    }
-
-    public void setPoints(int points) {
-        this.points = points;
-    }
-
-    @Override
-    public String toString() {
-        return super.toString();
-    }
-
-    public int getWarningsReceived() {
-        return warningsReceived;
-    }
-
-    public int getPoints() {
-        return points;
-    }
-
-    public void setWarningsReceived(int warningsReceived) {
-        this.warningsReceived = warningsReceived;
-    }
-    
-
-}
-=======
-
 package models;
 
 import java.net.UnknownHostException;
@@ -73,7 +33,7 @@ public class Player {
         try {           
 			s = new Mongo();							// initialize a new Mongo
 			db = s.getDB( "sketchness" );				// get the sketchness db
-			coll = db.getCollection("user") ;		// get the annotation collection 
+			coll = db.getCollection("user") ;			// get the annotation collection 
         }
         catch (UnknownHostException e)
         {
@@ -104,9 +64,7 @@ public class Player {
         this.warningsReceived = warningsReceived;
     }
     
-<<<<<<< HEAD
-    
-=======
+
     /**
      * userSave: save data user in mongoDb
      * @param data - Format: Map<String, String[]>
@@ -115,20 +73,64 @@ public class Player {
 	public Map<String, String> userSave(Map<String, String[]> data){
 		boolean ctrl = true;
 		Map<String, String> result = new HashMap<String, String>();
-		for(String key :data.keySet()){
-			if(!key.equals("mail") && !key.equals("password")){
-				ctrl = false;
-				result.put(key, "error");
+		
+		// Verify that the keys of the submitted fields are correct
+		// Correct -> ctrl=true
+		// Incorrect -> ctrl=false
+		if(data.get("framework")[0] != null){
+			for(String key :data.keySet()){
+				if(!key.equals("mail") && !key.equals("password") && !key.equals("framework")){
+					ctrl = false;
+					result.put(key, "error");	// insert into result the incorrect values
+				}
 			}
+		}else{
+			ctrl = false;
+			result.put("framework", "error");	// insert into result the incorrect values (framework)
 		}
+		
 		if(ctrl){
-			coll.insert(new BasicDBObject(data));
-			result.put("queryResult", "ok");
+			boolean checkResult = checkUserRegistration(data);	// check if the user is already registered
+			if(checkResult == false){
+				coll.insert(new BasicDBObject(data));	// user insert into mongodb
+				result.put("queryResult", "ok");
+			}else{
+				result.put("User already registered", "error");
+				result.put("queryResult", "ko");
+			}
+			
 		}else{
 			result.put("queryResult", "ko");
 		}
 		return result;
     }
->>>>>>> 0917228ce62aa8cf88199a32573e28fb5e9ae821
+	
+	/**
+	 * Funzione che verifica se l'utente è già iscritto al sito tramite uno dei tre framework (facebook, twitter o sketchness)
+	 * @param data -> User data in Map<String, String[]> format
+	 * @return true if the user is already registered, false otherwise
+	 */
+	public boolean checkUserRegistration(Map<String, String[]> data){
+	    BasicDBObject query = new BasicDBObject();
+	    query.put("framework", data.get("framework")[0].toString());
+		
+	    if(data.get("framework")[0].equals("sketchness")){
+			query.put("mail", data.get("mail")[0].toString());
+			System.out.println("ok");
+		}else if(data.get("framework")[0].equals("facebook")){
+			query.put("token-1", data.get("token-1")[0].toString());
+		}else if(data.get("framework")[0].equals("twitter")){
+			query.put("token-1", data.get("token-1")[0].toString());
+			query.put("token-2", data.get("token-2")[0].toString());
+		}
+		
+		DBCursor cursor = coll.find(query);
+		
+		if(cursor.count() > 0){
+			return true; // User already registered
+		}else{
+			return false; // User not registered yet
+		}
+	}
+
 }
->>>>>>> 7eb3311855b9540afb2e17d86b47c1d5ad6cb4b2
