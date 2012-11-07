@@ -22,6 +22,11 @@ GET     /                           controllers.Application.index()
 GET     /room                       controllers.Application.chatRoom(username: String ?= null)
 GET     /room/chat                  controllers.Application.chat(username)
 GET     /stream                     controllers.Application.stream()
+<<<<<<< HEAD
+=======
+GET     /register                   controllers.Application.register()
+POST    /register                 	controllers.Application.postRegister()
+>>>>>>> 0917228ce62aa8cf88199a32573e28fb5e9ae821
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

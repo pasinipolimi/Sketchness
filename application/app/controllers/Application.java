@@ -73,6 +73,11 @@ package controllers;
 
 
 import java.net.URLEncoder;
+<<<<<<< HEAD
+=======
+import java.util.List;
+import java.util.Map;
+>>>>>>> 0917228ce62aa8cf88199a32573e28fb5e9ae821
 
 import play.mvc.*;
 
@@ -81,6 +86,7 @@ import org.codehaus.jackson.*;
 import views.html.*;
 
 import models.*;
+import play.mvc.Http.RequestBody;
 
 public class Application extends Controller {
   
@@ -137,6 +143,31 @@ public class Application extends Controller {
         };
     
     }
+	public static Result register() {
+		return ok(register.render());
+	}
 	
+<<<<<<< HEAD
+=======
+	public static Result postRegister() {
+		Map<String, String[]> dataUser = request().body().asFormUrlEncoded();	//POST Data converted in Map<String, String[]> format
+		Player newPlayer = new Player();
+		Map<String, String> result = newPlayer.userSave(dataUser);											//Save data user
+		if(result.get("queryResult").equals("ko")){
+			String ErrorMsg = "";
+			for(String key :result.keySet()){
+				String value = result.get(key);
+				if(value == "error"){
+					ErrorMsg = ErrorMsg + key;
+				}
+			}
+			flash("error", "Error field: " + ErrorMsg);
+			return redirect(routes.Application.index());
+		}
+		
+		return ok(register.render());
+		
+    }
+>>>>>>> 0917228ce62aa8cf88199a32573e28fb5e9ae821
 }
 >>>>>>> 7eb3311855b9540afb2e17d86b47c1d5ad6cb4b2
