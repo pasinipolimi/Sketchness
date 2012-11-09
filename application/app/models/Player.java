@@ -71,6 +71,7 @@ public class Player {
      * @return true: successful saving - false: failed saving
      */
 	public Map<String, String> userSave(Map<String, String[]> data){
+		
 		boolean ctrl = true;
 		Map<String, String> result = new HashMap<String, String>();
 		
@@ -79,7 +80,7 @@ public class Player {
 		// Incorrect -> ctrl=false
 		if(data.get("framework")[0] != null){
 			for(String key :data.keySet()){
-				if(!key.equals("mail") && !key.equals("password") && !key.equals("framework")){
+				if(!key.equals("mail") && !key.equals("password") && !key.equals("framework") && !key.equals("framework_id") && !key.equals("token_1")&& !key.equals("token_2") && !key.equals("user_id")){
 					ctrl = false;
 					result.put(key, "error");	// insert into result the incorrect values
 				}
@@ -116,12 +117,10 @@ public class Player {
 		
 	    if(data.get("framework")[0].equals("sketchness")){
 			query.put("mail", data.get("mail")[0].toString());
-			System.out.println("ok");
 		}else if(data.get("framework")[0].equals("facebook")){
-			query.put("token-1", data.get("token-1")[0].toString());
+			query.put("framework_id", data.get("framework_id")[0].toString());
 		}else if(data.get("framework")[0].equals("twitter")){
-			query.put("token-1", data.get("token-1")[0].toString());
-			query.put("token-2", data.get("token-2")[0].toString());
+			query.put("framework_id", data.get("framework_id")[0].toString());
 		}
 		
 		DBCursor cursor = coll.find(query);
@@ -130,6 +129,18 @@ public class Player {
 			return true; // User already registered
 		}else{
 			return false; // User not registered yet
+		}
+	}
+	
+	public boolean sketchenessLogin(Map<String, String[]> data){
+		BasicDBObject query = new BasicDBObject();
+		query.put("mail", data.get("mail")[0].toString());
+		query.put("password", data.get("password")[0].toString());
+		DBCursor cursor = coll.find(query);
+		if(cursor.count() == 1){
+			return true;
+		}else{
+			return false;
 		}
 	}
 

@@ -22,7 +22,9 @@ public class Application extends Controller {
      * Display the home page.
      */
     public static Result index() {
-        return ok(index.render());
+    	String user = session("connected");
+    	System.out.println(user);
+        return ok(index.render(user));
     }
     
     /**
@@ -34,6 +36,20 @@ public class Application extends Controller {
             return redirect(routes.Application.index());
         }
         return ok(chatRoom.render(username,env));
+    }
+    
+    /**
+     * Display the chat room.
+     */
+    public static Result chatRoomPost() {
+    	Player newPlayer = new Player();
+    	Map<String, String[]> dataUser = request().body().asFormUrlEncoded();	//POST Data converted in Map<String, String[]> format
+    	boolean logged = newPlayer.sketchenessLogin(dataUser);
+    	if(logged){
+    		session("connected", dataUser.get("mail")[0]);
+    	}
+        
+    	return redirect(routes.Application.index());
     }
     
     /**
@@ -70,6 +86,7 @@ public class Application extends Controller {
     
     }
 	public static Result register() {
+		session("prova", "gabriele casati");
 		return ok(register.render());
 	}
 	
@@ -92,4 +109,10 @@ public class Application extends Controller {
 		return ok(register.render());
 		
     }
+	
+	public static Result logout() {
+		session().clear();
+		return ok(logout.render());
+	}
+	
 }

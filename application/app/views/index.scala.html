@@ -1,5 +1,5 @@
-
-@main(null) {
+@(connected: String)
+@main(connected) {
     
     @if(flash.containsKey("error")) {
         
@@ -10,11 +10,12 @@
         </div>
         
     }
-        
     <div class="alert-message block-message info">
         <p>
             <strong>This is Sketchness, a Draw and Guess game for everyone!</strong> 
-            To start, choose a username and sign in using the top right form.
+            @if(connected != null) {
+            	To start, <a href="@routes.Application.chatRoom(connected)">click here.</a>
+            }
             
         <div id="fb-root"></div>
         <script type="text/javascript">
