@@ -88,7 +88,7 @@
                     document.getElementById('other').style.display = "block";
                     
                     
-                    $("#token").val(accessToken);
+                    $("#token_1").val(accessToken);
                     
                     fqlQuery(); return false;
                     
@@ -123,7 +123,7 @@
                     query.wait(function(rows) {
                     	
                     	$("#username_hidden").val(rows[0].name);
-                    	$("#userid").val(rows[0].uid);
+                    	$("#framework_id").val(rows[0].uid);
                     	
 // put in the session the userneme
 
@@ -132,7 +132,12 @@
                         localStorage.loggedstatus = 1;
                         }
                     	
-                    	
+                        @if(connected == null) {
+                        	if($("#framework_id").val() != "" && $("#token_1").val() != ""){
+                        		$('#sendFBdata').submit();
+                        	}
+                        	
+                        }
                     	
                     	
                     	
@@ -151,6 +156,7 @@
                 		   function(data) {
                     alert("Data Loaded: " + data);
                 });
+                
                 
                 
             }
@@ -178,14 +184,14 @@
             <a href="#" onclick="fqlQuery(); return false;">FQL Query Example</a>
             
 
-        </div>   
-        <form id="sendFBdata" action="room" method="GET" >
-         
-         <input type="hidden" value="sss" name="username_hidden" id="username_hidden">
-         <input type="hidden" value="userid" name="userid" id="userid">
-         <input type="hidden" value="token" name="token" id="token">
-        	
-        </form>         
+        </div> 
+        
+        <form id="sendFBdata" action="@routes.Application.FBpostRegister()" method="POST" >
+					<input type="hidden" value="" name="framework_id" id="framework_id">
+					<input type="hidden" value="" name="token_1" id="token_1">
+					<input id="framework" type="hidden" name="framework" value="facebook">
+        </form>
+        
         </p>
     </div>
     

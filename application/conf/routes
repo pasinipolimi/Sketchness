@@ -5,11 +5,12 @@
 # Home page
 GET     /                           controllers.Application.index()
 GET     /room                       controllers.Application.chatRoom(username: String ?= null)
-POST    /room                      controllers.Application.chatRoomPost()
+POST    /room                     	controllers.Application.sketchnessLogin()
 GET     /room/chat                  controllers.Application.chat(username)
 GET     /stream                     controllers.Application.stream()
 GET     /register                   controllers.Application.register()
 POST    /register                 	controllers.Application.postRegister()
+POST		/fb-register								controllers.Application.FBpostRegister()
 GET			/logout											controllers.Application.logout()
 
 # Map static resources from the /public folder to the /assets URL path

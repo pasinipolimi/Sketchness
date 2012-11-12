@@ -39,16 +39,15 @@ public class Application extends Controller {
     }
     
     /**
-     * Display the chat room.
+     * login function and redirect on index
      */
-    public static Result chatRoomPost() {
+    public static Result sketchnessLogin() {
     	Player newPlayer = new Player();
     	Map<String, String[]> dataUser = request().body().asFormUrlEncoded();	//POST Data converted in Map<String, String[]> format
     	boolean logged = newPlayer.sketchenessLogin(dataUser);
     	if(logged){
     		session("connected", dataUser.get("mail")[0]);
     	}
-        
     	return redirect(routes.Application.index());
     }
     
@@ -86,7 +85,6 @@ public class Application extends Controller {
     
     }
 	public static Result register() {
-		session("prova", "gabriele casati");
 		return ok(register.render());
 	}
 	
@@ -108,6 +106,26 @@ public class Application extends Controller {
 		
 		return ok(register.render());
 		
+    }
+	public static Result FBpostRegister() {
+		Map<String, String[]> dataUser = request().body().asFormUrlEncoded();	//POST Data converted in Map<String, String[]> format
+		Player newPlayer = new Player();
+		Map<String, String> result = newPlayer.userSave(dataUser);											//Save data user
+		if(result.get("queryResult").equals("ko")){
+			if(result.get("User already registered").equals("error")){
+				session("connected", dataUser.get("framework_id")[0]);
+			}else{
+				String ErrorMsg = "";
+				for(String key :result.keySet()){
+					String value = result.get(key);
+					if(value == "error"){
+						ErrorMsg = ErrorMsg + key;
+					}
+				}
+				flash("error", "Error field: " + ErrorMsg);
+			}
+		}
+		return redirect(routes.Application.index());
     }
 	
 	public static Result logout() {
