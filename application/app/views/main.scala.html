@@ -24,12 +24,15 @@
                             <a href="@routes.Application.logout()">Disconnect</a>
                         </p>
                     } else {
-                        <form action="@routes.Application.sketchnessLogin()"  method="post" class="pull-right">
+                    <div id="user-form">
+                        <form id="user-login-form" action="@routes.Application.sketchnessLogin()"  method="post">
                             <input id="mail" name="mail" class="input-small" type="text" placeholder="E-Mail">
                             <input id="password" name="password" class="input-small" type="password" placeholder="Password">
                             <button class="btn" type="submit">Log In</button>
                         </form>
-                        <div><a href="register">Register</a></div>
+                        <button id="fb-auth"></button>
+                        <div id="user-register"><a href="register">Register</a></div>
+                     </div>    
                     }
                     
                 </div>

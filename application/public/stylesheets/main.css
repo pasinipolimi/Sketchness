@@ -18,7 +18,7 @@ body {
 /* The white background content wrapper */
 .content {
     background-color: #fff;
-    padding: 20px;
+    padding: 45px 20px 20px 20px;
     margin: 0 -90px; /* negative indent the amount of the padding to maintain the grid system */
     -webkit-border-radius: 0 0 6px 6px;
        -moz-border-radius: 0 0 6px 6px;
@@ -288,3 +288,26 @@ footer {
 	width: 65px;
 	margin-top: 25px;
 }
+
+/**
+ * USER LOGIN BLOCK
+ */
+ 
+#fb-auth{
+	background-color: transparent;
+	float: left;
+}
+#fb-auth img{
+	width:180px;
+	margin-top:5px;
+}
+
+#user-form{
+	float:right;
+}
+
+#user-form #user-register{
+	margin-top: 8px;
+	float: right;
+}
+ 

@@ -14,7 +14,7 @@
         <p>
             <strong>This is Sketchness, a Draw and Guess game for everyone!</strong> 
             @if(connected != null) {
-            	To start, <a href="@routes.Application.chatRoom(connected)">click here.</a>
+            	<br />To start the game, <a href="@routes.Application.chatRoom(connected)">click here.</a>
             }
             
         <div id="fb-root"></div>
@@ -48,7 +48,7 @@
                         };
                     } else {
                         //user is not connected to your app or logged out
-                        button.innerHTML = 'Login';
+                        button.innerHTML = '<img src="assets/images/fb-connect.png">';
                         button.onclick = function() {
                             showLoader(true);
                             FB.login(function(response) {
@@ -170,7 +170,7 @@
             }
             
         </script>            
-    <button id="fb-auth">Login</button>    
+    
 <div id="loader" style="display:none">
             <img src="ajax-loader.gif" alt="loading" />
         </div>
@@ -202,20 +202,5 @@
     document.write("The FB Username is:" + localStorage.username );
     document.write("Logged status:" + localStorage.loggedstatus );
   </script>
-    
-    
-<script>
-$( function() {
-	
-//	val FB_username = $("#fb_username span").text();
-//	$("#username_hidden").val($("#fb_username span").text());
-//	alert('22');
-//	$("#sendFBdata").submit();
-	  // Handler for .ready() called.
-	});
-
-</script>    
-    
-    
     
 }
