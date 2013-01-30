@@ -1,5 +1,0 @@
-EXPORT COLLECTION: ANNOTATION
-mongoexport --db sketchness --collection annotation --out annotation.json
-
-IMPORT COLLECTION: ANNOTATION
-mongoimport --db sketchness --collection annotation --file annotation.json
