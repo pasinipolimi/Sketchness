@@ -1,6 +1,5 @@
 package models;
 
-import models.levenshteinDistance.*;
 import play.libs.*;
 import play.libs.F.*;
 
@@ -18,6 +17,8 @@ import models.Messages.*;
 import play.mvc.*;
 
 import org.codehaus.jackson.*;
+
+import models.levenshteinDistance.*;
 
 
 
@@ -43,6 +44,8 @@ public class ChatRoom extends UntypedActor {
         
         private int roundNumber=1;
         private static int maxRound=6;
+		
+		private static Boolean shownImages=false;
         
 	
     
@@ -111,13 +114,13 @@ public class ChatRoom extends UntypedActor {
             
             // Check if this username is free.
             if(playersMap.containsKey(join.username)) {
-                getSender().tell("This username is already used");
+                getSender().tell("Questo username e' gia' in uso");
             } 
             else if(!gameStarted) 
             {
                 playersMap.put(join.username, join.channel);
                 playersVect.add(new Painter(join.username,false));
-                notifyAll("join", join.username, "has entered the room");
+                notifyAll("join", join.username, "e' entrato nella stanza");
                 if(playersMap.size()>=requiredPlayers)
                 {
                         disconnectedPlayers=0;
@@ -130,36 +133,37 @@ public class ChatRoom extends UntypedActor {
                 else
                 {
                     if(requiredPlayers-playersMap.size()>1)
-                        notifyAll("system", "Sketchness", "Waiting for "+(requiredPlayers-playersMap.size())+" players to start.");
+                        notifyAll("system", "Sketchness", "In attesa di "+(requiredPlayers-playersMap.size())+" giocatori per iniziare.");
                     else
-                        notifyAll("system", "Sketchness", "Waiting for "+(requiredPlayers-playersMap.size())+" player to start.");
+                        notifyAll("system", "Sketchness", "In attesa di "+(requiredPlayers-playersMap.size())+" giocatore per iniziare.");
                 }
                 getSender().tell("OK");
             }
             //[TODO]Disabling game started control for debug messages
             else
             {
-            	getSender().tell("The game has already started");
+            	getSender().tell("Il match e' gia' iniziato");
             }
             
         } else if(message instanceof Talk)  {
             
             // Received a Talk message
             Talk talk = (Talk)message;
-            if(gameStarted){
-                //Compare the message sent with the tag in order to establish if we have a right guess
-            	levenshteinDistance distanza = new levenshteinDistance();
-        		int lenLength = distanza.computeLevenshteinDistance(talk.text, currentGuess);
-        		switch(distanza.computeLevenshteinDistance(talk.text, currentGuess)){
-	        		case 0:	paintLogic.guessedWord(talk.username);
-	        		break;
-	        		case 1: notifyAll("talkNear", talk.username, talk.text);
-	        		break;
-	        		case 2: notifyAll("talkWarning", talk.username, talk.text);
-        			break;
-        			default: notifyAll("talkError", talk.username, talk.text);
-    				break;
-        		}
+            if(gameStarted)
+			{
+                 //Compare the message sent with the tag in order to establish if we have a right guess
+				 levenshteinDistance distanza = new levenshteinDistance();
+				 int lenLength = distanza.computeLevenshteinDistance(talk.text, currentGuess);
+				 switch(distanza.computeLevenshteinDistance(talk.text, currentGuess)){
+					case 0:	paintLogic.guessedWord(talk.username);
+					        break;
+					case 1: notifyAll("talkNear", talk.username, talk.text);
+					        break;
+					case 2: notifyAll("talkWarning", talk.username, talk.text);
+					        break;
+					default: notifyAll("talkError", talk.username, talk.text);
+			                 break;
+				}
             }
             else
                 //The players are just chatting, not playing
@@ -185,7 +189,7 @@ public class ChatRoom extends UntypedActor {
                 }
             }
             
-            notifyAll("quit", quit.username, "has left the room");
+            notifyAll("quit", quit.username, "ha lasciato la partita.");
             disconnectedPlayers++;
             //End the game if there's just one player or less
             if(((requiredPlayers-disconnectedPlayers)<=1)&&gameStarted)
@@ -246,19 +250,24 @@ public class ChatRoom extends UntypedActor {
          else
          {
              //Manage round end
-             notifyAll("system", "Sketchness", "The game has ended!");
+             notifyAll("system", "Sketchness", "Il match e' terminato!");
              paintLogic.gameEnded();
              newGameSetup();
          } 
      }
+	 
+	 public void showImages()
+	 {
+		paintLogic.showImages();
+	 }
      
      public String nextSketcher()
      {
          currentSketcher=null;
          int currentPlayers=requiredPlayers-disconnectedPlayers;
          int count=0;
-         notifyAll("system", "Sketchness", "The next round has started!");
-         notifyAll("system", "Sketchness", "Randomly selecting roles...");
+         notifyAll("system", "Sketchness", "Ha inizio un nuovo round!");
+         notifyAll("system", "Sketchness", "Sto scegliendo i ruoli...");
          while(currentSketcher==null)
          {
             if(count>currentPlayers)
@@ -280,7 +289,7 @@ public class ChatRoom extends UntypedActor {
                 count++;
             }
          }
-         notifyAll("system", "Sketchness", "The SKETCHER is "+currentSketcher);
+         notifyAll("system", "Sketchness", "Lo SKETCHER e' "+currentSketcher);
          return currentSketcher;
      }
      
@@ -295,15 +304,28 @@ public class ChatRoom extends UntypedActor {
          }
          else
          {
-            for (Iterator<Painter> it = playersVect.iterator(); it.hasNext();) {
-                Painter painter = it.next();
-                if(painter.name.equals(name))
-                    missingPlayers--;
-            }
+			if(missingPlayers>0)
+			{
+				for (Iterator<Painter> it = playersVect.iterator(); it.hasNext();) {
+					Painter painter = it.next();
+					if(painter.name.equals(name))
+						missingPlayers--;
+				}
+			}
             if((missingPlayers-disconnectedPlayers)==0)
             {
-                nextRound();
-                missingPlayers=requiredPlayers;
+				if(shownImages==false)
+				{
+					showImages();
+					shownImages=true;
+					missingPlayers=requiredPlayers;
+				}
+				else
+				{
+					nextRound();
+					shownImages=false;
+					missingPlayers=requiredPlayers;
+				}
             }
          }
      }

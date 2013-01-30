@@ -1,10 +1,5 @@
 package controllers;
 
-
-import java.net.URLEncoder;
-import java.util.List;
-import java.util.Map;
-
 import play.mvc.*;
 
 import org.codehaus.jackson.*;
@@ -12,7 +7,6 @@ import org.codehaus.jackson.*;
 import views.html.*;
 
 import models.*;
-import play.mvc.Http.RequestBody;
 
 public class Application extends Controller {
   
@@ -22,9 +16,7 @@ public class Application extends Controller {
      * Display the home page.
      */
     public static Result index() {
-    	String user = session("connected");
-    	System.out.println(user);
-        return ok(index.render(user));
+        return ok(index.render());
     }
     
     /**
@@ -36,19 +28,6 @@ public class Application extends Controller {
             return redirect(routes.Application.index());
         }
         return ok(chatRoom.render(username,env));
-    }
-    
-    /**
-     * login function and redirect on index
-     */
-    public static Result sketchnessLogin() {
-    	Player newPlayer = new Player();
-    	Map<String, String[]> dataUser = request().body().asFormUrlEncoded();	//POST Data converted in Map<String, String[]> format
-    	boolean logged = newPlayer.sketchenessLogin(dataUser);
-    	if(logged){
-    		session("connected", dataUser.get("mail")[0]);
-    	}
-    	return redirect(routes.Application.index());
     }
     
     /**
@@ -84,53 +63,5 @@ public class Application extends Controller {
         };
     
     }
-	public static Result register() {
-		return ok(register.render());
-	}
-	
-	public static Result postRegister() {
-		Map<String, String[]> dataUser = request().body().asFormUrlEncoded();	//POST Data converted in Map<String, String[]> format
-		Player newPlayer = new Player();
-		Map<String, String> result = newPlayer.userSave(dataUser);											//Save data user
-		if(result.get("queryResult").equals("ko")){
-			String ErrorMsg = "";
-			for(String key :result.keySet()){
-				String value = result.get(key);
-				if(value == "error"){
-					ErrorMsg = ErrorMsg + key;
-				}
-			}
-			flash("error", "Error field: " + ErrorMsg);
-			return redirect(routes.Application.index());
-		}
-		
-		return ok(register.render());
-		
-    }
-	public static Result FBpostRegister() {
-		Map<String, String[]> dataUser = request().body().asFormUrlEncoded();	//POST Data converted in Map<String, String[]> format
-		Player newPlayer = new Player();
-		Map<String, String> result = newPlayer.userSave(dataUser);											//Save data user
-		if(result.get("queryResult").equals("ko")){
-			if(result.get("User already registered").equals("error")){
-				session("connected", dataUser.get("framework_id")[0]);
-			}else{
-				String ErrorMsg = "";
-				for(String key :result.keySet()){
-					String value = result.get(key);
-					if(value == "error"){
-						ErrorMsg = ErrorMsg + key;
-					}
-				}
-				flash("error", "Error field: " + ErrorMsg);
-			}
-		}
-		return redirect(routes.Application.index());
-    }
-	
-	public static Result logout() {
-		session().clear();
-		return ok(logout.render());
-	}
-	
+  
 }

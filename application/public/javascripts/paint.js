@@ -139,7 +139,7 @@
 
   // Init pname
   function queryPname() {
-	n=$('#nickname').text();
+	n=$('#currentNickname').text();
    if (n) {
       localStorage.setItem("pname", n);
     }
@@ -225,12 +225,14 @@
         matchStarted=true;
         if(role=="SKETCHER")
         {
-            $('#roleSpan').text("the Sketcher");
+            $('#roleSpan').text("lo Sketcher");
+			$('#mainPage').attr('background-image',"../images/UI/sketcher.jpg");
             $('#talk').attr('disabled', 'disabled');
         }
         else
         {
-            $('#roleSpan').text("a Guesser");
+            $('#roleSpan').text("un Guesser");
+			$('#mainPage').attr('background-image',"../images/UI/guesser.jpg");
             $('#talk').removeAttr('disabled');
         }
         CreateTimer(defaultRoundTime);
@@ -261,9 +263,29 @@
         //Wait for the image to be loaded before drawing it to canvas to avoid
         //errors
         taskImage.onload = function() {
-          taskContext.drawImage(taskImage,0,0,500,450);
+		  taskContext.save();
+		  taskContext.beginPath();
+		  x=0;
+		  y=0;
+		  width=460;
+		  height=370;
+		  radius=50;
+		  taskContext.moveTo(x + radius, y);
+		  taskContext.lineTo(x + width - radius, y);
+		  taskContext.quadraticCurveTo(x + width, y, x + width, y + radius);
+		  taskContext.lineTo(x + width, y + height - radius);
+		  taskContext.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+		  taskContext.lineTo(x + radius, y + height);
+		  taskContext.quadraticCurveTo(x, y + height, x, y + height - radius);
+		  taskContext.lineTo(x, y + radius);
+		  taskContext.quadraticCurveTo(x, y, x + radius, y);
+		  taskContext.closePath();
+		  taskContext.clip();
+	      taskContext.drawImage(taskImage,0,0,width,height);
+		  taskContext.restore(); 
         };
     }
+	
     
     if(m.type=="guesser")
     {
@@ -286,6 +308,12 @@
         if(RemainingSeconds>m.amount)
             RemainingSeconds=m.amount;
     }
+	
+	if(m.type=="showImages")
+	{
+		role="ROUNDCHANGE";
+		CreateTimer(m.seconds);
+	}
     
     if(m.type=="leaderboard")
     {
@@ -380,18 +408,6 @@
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
 
-  function positionWithE (e) {
-    var o = $(canvas).offset();
-    var x = e.clientX, y = e.clientY;
-    if (e.touches) {
-      var touch = e.touches[0];
-      if (touch) {
-        x = touch.pageX;
-        y = touch.pageY;
-      }
-    }
-    return {x: x-(o.left-$(window).scrollLeft()), y: y-(o.top-$(window).scrollTop())};
-  }
 
   function lineTo(x, y) {
       ctx.strokeStyle = color;
@@ -404,7 +420,7 @@
 
   function onMouseMove (e) {
     e.preventDefault();
-    var o = positionWithE(e);
+    var o = positionWithE(e,canvas);
     if (pressed && role=="SKETCHER") {
       lineTo(o.x, o.y);
       addPoint(o.x, o.y);
@@ -425,7 +441,7 @@
   function onMouseDown (e) {
     if(role=="SKETCHER")
         {
-            var o = positionWithE(e);
+            var o = positionWithE(e,canvas);
             position = o;
             addPoint(o.x, o.y);
             pressed = true;
@@ -449,6 +465,28 @@
   viewport.addEventListener(isMobile ? "touchmove" : "mousemove", onMouseMove);
 
 })();
+
+function positionWithE (e,obj) {
+	var leftm=topm=0;
+	var result= getPosition(obj);
+        return {
+          x: e.clientX-result.x,
+          y: e.clientY-result.y
+        };
+  };
+  
+  
+  function getPosition(element) {
+    var xPosition = 0;
+    var yPosition = 0;
+  
+    while(element) {
+        xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
+        yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
+        element = element.offsetParent;
+    }
+    return { x: xPosition, y: yPosition };
+};
 
 (function(){
   var canvas = document.getElementById("positions");
@@ -486,86 +524,24 @@
 })();
 
 
-/************************CONTROL MESSAGES PANEL MANAGEMENT************/
-(function(){
-  var canvas = document.getElementById("gameMessages");
-  var ctx = canvas.getContext("2d");
-
-  ctx.font = "9px monospace";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "bottom";
-  function render () 
-  {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if(!matchStarted)
-    {
-        ctx.fillStyle = "#000000";
-        ctx.font = "bold 30px sans-serif";
-        ctx.fillText('Waiting for the match to start',220,50);
-    }
-    else
-    {
-        if(role=="SKETCHER")
-        {
-            ctx.fillStyle = "#000000";
-            ctx.font = "bold 30px sans-serif";
-            ctx.fillText('Target:',50,50);
-            ctx.fillStyle = "#FF0000";
-            ctx.font = "bold 30px sans-serif";
-            ctx.fillText(guessWord,60+20*guessWord.length,50);
-        }
-        else if (role=="GUESSER")
-        {
-            ctx.fillStyle = "#000000";
-            ctx.font = "bold 30px sans-serif";
-            if(!guessed)
-                ctx.fillText('Guess the word!',150,50);
-            else
-                {
-                    ctx.fillText('Guessed!:',80,50);
-                    ctx.fillStyle = "#FF0000";
-                    ctx.font = "bold 30px sans-serif";
-                    ctx.fillText(guessWord,120+20*guessWord.length,50);
-                }
-        }
-        else if (role=="ENDED")
-        {
-            ctx.fillStyle = "#000000";
-            ctx.font = "bold 30px sans-serif";
-            ctx.fillText('Positions and Scores!',170,50);
-        }
-    }
-  }
-
-  requestAnimFrame(function loop () {
-    requestAnimFrame(loop);
-    render();
-  }, canvas);
-})();
-
-
 
 
 /*************************TOOLS PANEL MANAGEMENT**********************/
-
 (function(){
-	
-  /*var canvas = document.getElementById("controls");
-  var ctx = canvas.getContext("2d");
+  var hud = document.getElementById("hud");
+  var ctx = hud.getContext("2d");
   var dirty = true;
   
   //ICONS
-  var penEnabled = new Image();
-  var penDisabled = new Image();
+  var penEnabled= new Image();
   var eraserEnabled = new Image();
+  var penDisabled= new Image();
   var eraserDisabled = new Image();
-  var errorCross = new Image();
-  penEnabled.src = 'assets/images/Pen-2-icon.jpg';
-  eraserEnabled.src = 'assets/images/Eraser-icon.jpg';
-  penDisabled.src='assets/images/Pen-2-iconWhite.jpg';
-  eraserDisabled.src='assets/images/Eraser-iconWhite.jpg';
-  errorCross.src='assets/images/ErrorCross-icon.png';
-*/
+  penEnabled.src = 'assets/images/UI/Controls/pencil.png';
+  eraserEnabled.src = 'assets/images/UI/Controls/eraser.png';
+  penDisabled.src = 'assets/images/UI/Controls/pencilD.png';
+  eraserDisabled.src = 'assets/images/UI/Controls/eraserD.png';
+  
   function setColor (c) 
   {
     color = c;
@@ -576,18 +552,17 @@
     size = s;
     send({type: 'change', size: size});
   }
-/*
+
   function setup() {
-    canvas.addEventListener("click", function (e) {
-      var o = $(canvas).offset();
-      var p = {x: e.clientX-o.left, y: e.clientY-o.top};
-      if ((p.y>=245)&&(p.y<345)) 
+    hud.addEventListener("click", function (e) {
+      var o = positionWithE(e,hud);
+      if ((o.y>=130)&&(o.y<200)) 
       {
         setColor(PEN);
 	setSize(SIZE);
 	drawTool=true;
       }
-      else if ((p.y>=345)&&(p.y<=450))
+      else if ((o.y>=200)&&(o.y<=270))
       {
 	setColor(ERASER);
 	setSize(25);
@@ -595,124 +570,103 @@
       }
       dirty = true;
     });
-  }*/
+  }
 
   
   /************TOOLS PANEL RENDERING***********************/
-  /*function render() 
+  function render() 
   {
-	  
-	//Score rectangle
-	ctx.strokeStyle = "#abc";
-	ctx.fillStyle = "#abc";
-	ctx.roundRect(5, 5, 80, 90, 5, true);
-	ctx.font = "bold 18px sans-serif";
-	ctx.fillStyle = "#000000";
-	ctx.fillRect(10,15,70,25);
-	ctx.fillStyle = "#FFFFFF";
-	ctx.fillText("Score", 20, 33);
+	ctx.clearRect(0, 0, hud.width, hud.height);
+    if(!matchStarted)
+    {
+		ctx.lineWidth=1;
+        
+		ctx.fillStyle = "#000000";
+		ctx.lineStyle="#ffff00";
+		ctx.font      = "normal 25px Verdana";
+		ctx.fillText("In attesa di giocatori...", 150, 85);
+    }
+    else
+    {
+        if(role=="SKETCHER")
+        {
+            ctx.fillStyle = "#000000";
+			ctx.lineStyle="#ffff00";
+			ctx.font      = "normal 25px Verdana";
+			ctx.fillText("Scontorna:", 150, 85);
+            ctx.fillStyle = "#FF0000";
+            ctx.font      = "normal 25px Verdana";
+            ctx.fillText(guessWord,150+25*guessWord.length,85);
+        }
+        else if (role=="GUESSER")
+        {
+            ctx.fillStyle = "#000000";
+			ctx.lineStyle="#ffff00";
+			ctx.font      = "normal 20px Verdana";
+            if(!guessed)
+                ctx.fillText("Indovina l'oggetto disegnato!",150,85);
+            else
+                {
+                    ctx.fillText('Indovinata!:',150,85);
+                    ctx.fillStyle = "#FF0000";
+                    ctx.font      = "normal 20px Verdana";
+                    ctx.fillText(guessWord,150+20*guessWord.length,85);
+                }
+        }
+		else if (role=="ROUNDCHANGE")
+		{
+			ctx.fillStyle = "#000000";
+			ctx.fillText('Soluzione:',80,50);
+            ctx.fillStyle = "#FF0000";
+            ctx.font = "bold 30px sans-serif";
+            ctx.fillText(guessWord,120+20*guessWord.length,50);
+		}
+        else if (role=="ENDED")
+        {
+            ctx.fillStyle = "#000000";
+            ctx.font = "bold 30px sans-serif";
+            ctx.fillText('Classifica e Punteggi!',170,50);
+        }
+    }
+  
+	//Score positioning
 	ctx.fillStyle = "#000000";
 	ctx.font = "bold 30 px sans-serif";
-	ctx.fillText(score,40,70);
+	ctx.fillText(score,675,80);
 	
-	//Time rectangle
-	ctx.strokeStyle = "#abc";
-	ctx.fillStyle = "#abc";
-	ctx.roundRect(5, 110, 80, 90, 5, true);
-	ctx.font = "bold 18px sans-serif";
-	ctx.fillStyle = "#000000";
-	ctx.fillRect(10,120,70,25);
-	ctx.fillStyle = "#FFFFFF";
-	ctx.fillText("Time", 20, 138);
-	ctx.fillStyle = "#000000";
-	ctx.font = "bold 30 px sans-serif";
-	if(!matchStarted)
+	//Time positioning
+	if(matchStarted)
 	{
-		ctx.fillText('Waiting',12,175);
-	}
-	else
-	{
-		ctx.fillText(time,35,175);
+		//ctx.fillText(time,35,50);
 	}
 	
         
-        if(!matchStarted || role=="GUESSER" || role=="ENDED")
-	{
-            ctx.drawImage(penDisabled,0,250,90,90);
-            ctx.drawImage(eraserDisabled,0,350,90,90);
-            ctx.drawImage(errorCross,0,250,90,90);
-            ctx.drawImage(errorCross,0,350,90,90);
+        if(!matchStarted || role=="GUESSER" || role=="ENDED" || role=="ROUNDCHANGE")
+		{
+			//Draw nothing till now
+            ctx.drawImage(penDisabled,0,130,70,70);
+            ctx.drawImage(eraserDisabled,0,200,70,70);
         }
         else
         {
             //Drawing tools
             if(drawTool)
             {
-                    ctx.drawImage(penEnabled,0,250,90,90);
-                    ctx.drawImage(eraserDisabled,0,350,90,90);
+                    ctx.drawImage(penEnabled,0,130,70,70);
+                    ctx.drawImage(eraserDisabled,0,200,70,70);
             }
             else
             {
-                    ctx.drawImage(penDisabled,0,250,90,90);
-                    ctx.drawImage(eraserEnabled,0,350,90,90);
+                    ctx.drawImage(penDisabled,0,130,70,70);
+                    ctx.drawImage(eraserEnabled,0,200,70,70);
             }
         }
-  }*/
-  function renderControlPanel(){
-	  imgPen = "assets/images/pen.jpg";
-	  imgPenDisable = "assets/images/pen2.jpg";
-	  imgEraser = "assets/images/eraser.jpg";
-	  imgEraserDisable = "assets/images/eraser2.jpg";
-	  imgX = "http://www.clker.com/cliparts/0/7/e/a/12074327311562940906milker_X_icon.svg.med.png";
-	  if(!matchStarted || role=="GUESSER" || role=="ENDED"){
-		  imgFinPen = imgX;
-		  imgFinEraser = imgX;
-		  classImgRmv = 'active';
-		  classImgAdd = 'disabled';
-		  ctrlChangeImg = $('#pen').hasClass('disabled') && $('#eraser').hasClass('disabled') ? false : true;
-	  }else{
-		  imgFinPen = imgPen;
-		  imgFinEraser = imgEraserDisable;
-		  classImgRmv = 'disabled';
-		  classImgAdd = 'active';
-		  ctrlChangeImg = $('#pen').hasClass('active') && $('#eraser').hasClass('active') ? false : true;
-	  }
-	  
-	  if(ctrlChangeImg){
-		  $('#pen').html('<img class="' + classImgAdd + '" src="' + imgFinPen + '">');
-		  $('#pen').addClass(classImgAdd);
-		  $('#pen').removeClass(classImgRmv);
-		  $('#eraser').html('<img class="' + classImgAdd + '" src="' + imgFinEraser + '">');
-		  $('#eraser').addClass(classImgAdd);
-		  $('#eraser').removeClass(classImgRmv);
-		  $("#pen.active").click(function() {
-			  setColor(PEN);
-			  setSize(SIZE);
-			  drawTool=true;
-			  $("#eraser.active img").attr('src', 'assets/images/eraser2.jpg');
-			  $("#pen.active img").attr('src', 'assets/images/pen.jpg');
-		  });
-		  $("#eraser.active").click(function() {
-			  setColor(ERASER);
-			  setSize(25);
-			  drawTool=false;
-			  $("#pen.active img").attr('src', 'assets/images/pen2.jpg');
-			  $("#eraser.active img").attr('src', 'assets/images/eraser.jpg');
-		  });
-	  }
-	  if(!$('#score').hasClass(score)){
-		  $('#score .txt').html(score);
-		  $('#score').addClass(score);
-	  }
-	  
-	  tempo = !matchStarted ? 'Waiting' : time;
-	  $('#time .txt').html(tempo);
   }
-  //setup();
+
+  setup();
   requestAnimFrame(function loop(){
     requestAnimFrame(loop);
-    //render();
-    renderControlPanel();
+    render();
   });
 
 })();

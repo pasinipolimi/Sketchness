@@ -1,43 +1,35 @@
 @(username: String)(env: PaintRoom)
 
-@main(username) {
-    
-    <div class="page-header" id="pageheader">
-        <h1>You are <span id="roleSpan">waiting...</span>  <small>You are playing as <span id="nickname">@username</span></small></h1>
-    </div>
-    
+@main(username) {    
     <div id="onError" class="alert-message error">
         <p>
             <strong>Oops! </strong><span></span>
         </p>
     </div>
     
-    <div id="mainPage" class="row">
+    <div id="mainPage">
 		<div id="gameArea" class="span10">  
-		<div id="contrl-panel"><div id="score"><div class="title">Score</div><div class="txt"></div></p></div><div id="time"><div class="title">Time</div><div class="txt"></div></div><div id="pen">pen</div><div id="eraser">eraser</div></div>
-                          <span id="gameMessagesSpan">
-                                  <canvas id="gameMessages" height="50" width="500"></canvas>
-                          </span>
 			  <span id="viewport">
-				  <canvas id="me" width="500" height="450"></canvas>
-				  <canvas id="positions" width="500" height="450"></canvas>
-				  <canvas id="draws" width="500" height="450"></canvas>
-                                  <canvas id="task" width="500" height="450"></canvas>
+				  <canvas id="me" width="460px" height="370px"></canvas>
+				  <canvas id="positions" width="460px" height="370px"></canvas>
+				  <canvas id="draws" width="460px" height="370px"></canvas>
+                  <canvas id="task" width="460px" height="370px"></canvas>
 			  </span>
 		</div>
-		<script type="text/javascript" src="/assets/javascripts/paint.js"></script>
-		
         <div id="chatPanel" class="span4">
             <div id="messages">
             </div>
-            <textarea id="talk"></textarea>
 		</div>
-		<div class="span2">
-				<h2>Players</h2>
-				<ul id="members">
-				</ul>
+		<div id="hudArea">
+			<canvas id="hud" width="800px" height="300px"></canvas>
 		</div>
-	</div>
+		<textarea id="talk"></textarea>
+		<div id="currentNickname">@username</div>
+		<div id="opponent1"></div>
+		<div id="opponent2"></div>
+		<div id="opponent3"></div>
+		<div id="opponent4"></div>
+	
 	<script type="text/javascript">
 			(function() {
                             
@@ -71,11 +63,12 @@
 							{text: $("#talk").val()}
 						))
 						$("#talk").val('')
+						$("#messages").animate({scrollTop:$("#messages")[0].scrollHeight}, 1000);
 					}
 					
 					var receiveEvent = function(event) {
 						var data = JSON.parse(event.data)
-						
+					
 						// Handle errors
 						if(data.error) {
 							chatSocket.close()
@@ -97,9 +90,13 @@
 						$('#messages').append(el)
 						
 						// Update the members list
-						$("#members").html('') 
+						var userCounter=0;
 						$(data.members).each(function() {
-							$("#members").append('<li>' + this + '</li>')
+							 if(this != '@username')
+							 {
+								userCounter++;
+								$("#opponent"+userCounter).text(this);
+							}
 						})
 					}
 					
@@ -116,4 +113,6 @@
 					
 		})()
 	</script>
+	<script type="text/javascript" src="/assets/javascripts/paint.js"></script>
+	</div>
 }

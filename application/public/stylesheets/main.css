@@ -5,9 +5,7 @@ html {
 html, body {
     background-color: #eee;
 }
-body {
-    padding-top: 40px; /* 40px to make the container go all the way to the bottom of the topbar */
-}
+
 .container > footer p {
     text-align: center; /* center align it with the container */
 }
@@ -15,18 +13,32 @@ body {
     width: 820px; /* downsize our container to make the content feel a bit tighter and more cohesive. NOTE: this removes two full columns from the grid, meaning you only go to 14 columns and not 16. */
 }
 
+.brand{
+	top:300;
+	left:400;
+}
+
+
 /* The white background content wrapper */
 .content {
     background-color: #fff;
-    padding: 45px 20px 20px 20px;
+    padding: 20px;
+	position: relative;
     margin: 0 -90px; /* negative indent the amount of the padding to maintain the grid system */
-    -webkit-border-radius: 0 0 6px 6px;
-       -moz-border-radius: 0 0 6px 6px;
-            border-radius: 0 0 6px 6px;
-    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
-       -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
-            box-shadow: 0 1px 2px rgba(0,0,0,.15);
+    margin-left: auto ;
+    margin-right: auto ;
     min-height: 10px;
+}
+
+.backgroundimage {
+	background-image:url('../images/UI/home.png');
+	background-repeat:no-repeat;
+	background-position:center;
+	margin-left: auto ;
+    margin-right: auto ;
+	position: relative;
+	height: 600px;
+	width: 800px;
 }
 
 /* Page header tweaks */
@@ -46,7 +58,6 @@ body {
 .content .span4 {
     padding-left: 9px;
     margin-left: 10px;
-    border-left: 1px solid #eee;
 }
 
 .topbar .btn {
@@ -57,14 +68,96 @@ body {
     color: #888;
 }
 
+#mainPage{
+background-image: url("../images/UI/guesser.jpg");
+background-repeat:no-repeat;
+background-position:center;
+width:800px;
+height:600px;
+margin-left:auto;
+margin-right:auto;
+position: relative;
+}
+
 #username {
-    width: 200px;
+	background-color: transparent;
+	border-color: transparent;
+	left:535px;
+	position:absolute;
+	top:545px;
+    width: 115px;
+	font-weight:bold;
+	color: #B01AA6;
+}
+
+#facebook {
+	background-color: transparent;
+	background-image: url("../images/UI/facebook.png");
+	background-repeat:no-repeat;
+	background-position:center;
+	height:40px;
+	left:430px;
+	position:absolute;
+	top:535px;
+    width: 40px;
+}
+
+#twitter {
+	background-color: transparent;
+	background-image: url("../images/UI/twitterInactive.png");
+	background-repeat:no-repeat;
+	background-position:center;
+	height:40px;
+	left:480px;
+	position:absolute;
+	top:534px;
+    width: 40px;
+}
+
+
+#login {
+	background-color: transparent;
+	background-image: url("../images/UI/loginUnpressed.png");
+	height:66px;
+	left:8px;
+	position:absolute;
+	top:520px;
+    width: 181px;
+}
+
+#login:hover {
+	background-color: transparent;
+	background-image: url("../images/UI/loginHover.png");
+	height:66px;
+	left:8px;
+	position:absolute;
+	top:520px;
+    width: 181px;
+}
+
+#login:active {
+	background-color: transparent;
+	background-image: url("../images/UI/loginPressed.png");
+	height:46px;
+	left:8px;
+	position:absolute;
+	top:530px;
+    width: 181px;
+}
+
+#username:focus {
+	box-shadow:-2px -2px 6px #B01AA6, -2px 2px 6px #B01AA6, 4px 2px 6px #B01AA6, 4px -2px 6px #B01AA6;
 }
 
 #chatPanel {
-    position: relative;
     overflow: hidden;
-    left: 65px;
+	position: absolute;
+	height:290px;
+	left:600px;
+	min-height:160px;
+	top:300px;
+	width:180px;
+	z-index:10;
 }
 
 #onError, #onChat {
@@ -113,38 +206,62 @@ body {
 
 #positions {
   position: absolute;
-  top: 456px;
-  left: -500px;
-  z-index: 4;
+  top: 580px;
+  width: 460px;
+  height: 370px;
+  left:-10px;
+  z-index: 5;
 }
 #me {
   position: absolute;
-  top: 456px;
-  left: -500px;
-  z-index: 3;
+  top: 580px;
+  width: 460px;
+  height: 370px;
+  left:-10px;
+  z-index: 4;
 }
 
 #draws {
   position: absolute;
-  top: 456px;
-  left: -500px;
-  border: 1px solid #CCCCCC;
-  z-index: 2;
+  top: 580px;
+  width: 460px;
+  height: 370px;
+  left:-10px;
+  z-index: 3;
 }
 
 #task {
   position: absolute;
-  top: 456px;
-  left: -500px;
-  border: 1px solid #CCCCCC;
-  z-index: 1;
+  top: 580px;
+  width: 460px;
+  height: 370px;
+  z-index: 2;
+  left:-10px;
 }
 
-#controls {
-		position: relative;
-        left: 0;
-		border: 1px solid #CCCCCC;
+#currentNickname{
+width: 110px;
+height: 30px;
+left:680px;
+position:absolute;
+top:88px;
+text-align:center;
 }
+
+#hudArea{
+		position: absolute;
+        left: 0;
+		top: 0;
+		width: 800px;
+		height:300px;
+}
+
+#hud{
+	width: 800px;
+	height:300px;
+	z-index: 1;
+}
+
 
 #gameArea {
     width: 580px;
@@ -187,23 +304,26 @@ footer {
 
 #messages {
     position: absolute;
-    bottom: 60px;
+	height: 265px;
+	top:10px;
+	overflow-y: scroll;
 }
 
 
 #talk {
     position: absolute;
-    bottom: 5px;
-    left: 10px;
-    right: 0;
-    width: 208px;
-    height: 40px;
+    left: 580px;
+    width: 200px;
+    height: 20px;
+	top:540px;
+	background-color:transparent;
+	border-color:transparent;
+	z-index:11;
 }
 
 
 .message {
     padding: 4px 0;
-    border-bottom: 1px solid #eee;
     position: relative;
 }
 
@@ -222,19 +342,8 @@ footer {
 .message p {
     display: inline-block;
     margin: 0;
-    width: 500px;
-}
-
-.message.me {
-    background: #FFC;
-}
-
-.message.join, .message.quit {
-    background: #D9E7FB;
-}
-
-.message.system {
-    background: #FFCC99;
+    width: 150px;
+	word-wrap: break-word;
 }
 
 
@@ -253,61 +362,11 @@ footer {
 	font-weight: bold;
 }
 
-
-/**
-*	CSS PANNELLO DI CONTROLLO
-*/
-
-#contrl-panel{
-	float: left;
-	margin-top: 54px;
+div#preloaded-images {
+   position: absolute;
+   overflow: hidden;
+   left: -9999px; 
+   top: -9999px;
+   height: 1px;
+   width: 1px;
 }
-#contrl-panel #score .title{
-	font-size: 27px;
-}
-#contrl-panel #score .txt{
-	font-size: 20px;
-	margin-top: 5px;
-	text-align: center;
-}
-
-#contrl-panel #time .title{
-	font-size: 27px;
-	margin-top: 25px;
-}
-#contrl-panel #time .txt{
-	font-size: 20px;
-	margin-top: 5px;
-	text-align: center;
-}
-#pen img{
-	width: 65px;
-	margin-top: 25px;
-}
-#eraser img{
-	width: 65px;
-	margin-top: 25px;
-}
-
-/**
- * USER LOGIN BLOCK
- */
- 
-#fb-auth{
-	background-color: transparent;
-	float: left;
-}
-#fb-auth img{
-	width:180px;
-	margin-top:5px;
-}
-
-#user-form{
-	float:right;
-}
-
-#user-form #user-register{
-	margin-top: 8px;
-	float: right;
-}
- 

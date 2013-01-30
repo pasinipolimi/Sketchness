@@ -1,9 +1,5 @@
 package models;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
 import play.libs.Json;
@@ -91,5 +87,6 @@ public class Painter extends Player implements Comparable<Painter>{
             return 1;
         return 0;
     }
+    
     
 }

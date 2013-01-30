@@ -26,7 +26,7 @@ public class levenshteinDistance {
 		int stringa2Length = stringa2.length();
 		
 		/**
-		 * Definisco una matrice di zeri NxM dove N � la lunghezza della prima parola e M � la lunghezza della seconda parola
+		 * Definisco una matrice di zeri NxM dove N ? la lunghezza della prima parola e M ? la lunghezza della seconda parola
 		 */
         int[][] distance = new int[stringa1Length + 1][stringa2Length + 1];
         
