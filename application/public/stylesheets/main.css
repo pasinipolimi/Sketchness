@@ -68,6 +68,8 @@ html, body {
     color: #888;
 }
 
+
+
 #mainPage{
 background-image: url("../images/UI/guesser.jpg");
 background-repeat:no-repeat;
@@ -369,4 +371,13 @@ div#preloaded-images {
    top: -9999px;
    height: 1px;
    width: 1px;
+}
+
+
+#mainPage.sketcher {
+background-image: url("../images/UI/sketcher.jpg");
+}
+
+#mainPage.guesser {
+background-image: url("../images/UI/guesser.jpg");
 }
