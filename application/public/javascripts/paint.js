@@ -226,14 +226,18 @@
         if(role=="SKETCHER")
         {
             $('#roleSpan').text("lo Sketcher");
-			$('#mainPage').attr('background-image',"../images/UI/sketcher.jpg");
+			$('#mainPage').removeClass('guesser');
+			$('#mainPage').addClass('sketcher');
             $('#talk').attr('disabled', 'disabled');
+			
         }
         else
         {
             $('#roleSpan').text("un Guesser");
-			$('#mainPage').attr('background-image',"../images/UI/guesser.jpg");
+			$('#mainPage').removeClass('sketcher');
+			$('#mainPage').addClass('guesser');
             $('#talk').removeAttr('disabled');
+			
         }
         CreateTimer(defaultRoundTime);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -641,25 +645,31 @@ function positionWithE (e,obj) {
 	}
 	
         
-        if(!matchStarted || role=="GUESSER" || role=="ENDED" || role=="ROUNDCHANGE")
+        if(!matchStarted)
 		{
-			//Draw nothing till now
-            ctx.drawImage(penDisabled,0,130,70,70);
-            ctx.drawImage(eraserDisabled,0,200,70,70);
         }
         else
         {
-            //Drawing tools
-            if(drawTool)
-            {
-                    ctx.drawImage(penEnabled,0,130,70,70);
-                    ctx.drawImage(eraserDisabled,0,200,70,70);
-            }
-            else
-            {
-                    ctx.drawImage(penDisabled,0,130,70,70);
-                    ctx.drawImage(eraserEnabled,0,200,70,70);
-            }
+			if(!matchStarted || role=="GUESSER" || role=="ENDED" || role=="ROUNDCHANGE")
+			{
+				//Draw nothing till now
+				ctx.drawImage(penDisabled,0,130,70,70);
+				ctx.drawImage(eraserDisabled,0,200,70,70);
+			}
+			else
+			{
+				//Drawing tools
+				if(drawTool)
+				{
+						ctx.drawImage(penEnabled,0,130,70,70);
+						ctx.drawImage(eraserDisabled,0,200,70,70);
+				}
+				else
+				{
+						ctx.drawImage(penDisabled,0,130,70,70);
+						ctx.drawImage(eraserEnabled,0,200,70,70);
+				}
+			}
         }
   }
 
