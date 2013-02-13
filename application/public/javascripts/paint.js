@@ -184,9 +184,9 @@
         connected = true;
         send({type: 'change', size: size, color: color, name: pname});
       }
-	  
-      socket.onclose = function(evt) { 
-        connected = false;
+
+      socket.onclose = function (evt) {
+            connected = false;
         tryConnectAgain();
       };
 	  
@@ -339,7 +339,8 @@
     }
     
     if (m.type != "disconnect") {
-      if (m.type == "trace") {
+      if (m.type == "trace")
+      {
         ctx.strokeStyle = player.color;
         if(player.color=="rgba(255,255,255,1.0)")
             ctx.globalCompositeOperation = "destination-out";
@@ -643,21 +644,15 @@ function positionWithE (e,obj) {
 	{
 		//ctx.fillText(time,35,50);
 	}
-	
-        
-        if(!matchStarted)
-		{
+
+
+        if(!matchStarted || role=="GUESSER" || role=="ENDED" || role=="ROUNDCHANGE")
+        {
+              //Draw nothing till now
         }
         else
         {
-			if(!matchStarted || role=="GUESSER" || role=="ENDED" || role=="ROUNDCHANGE")
-			{
-				//Draw nothing till now
-				ctx.drawImage(penDisabled,0,130,70,70);
-				ctx.drawImage(eraserDisabled,0,200,70,70);
-			}
-			else
-			{
+
 				//Drawing tools
 				if(drawTool)
 				{
@@ -670,7 +665,6 @@ function positionWithE (e,obj) {
 						ctx.drawImage(eraserEnabled,0,200,70,70);
 				}
 			}
-        }
   }
 
   setup();

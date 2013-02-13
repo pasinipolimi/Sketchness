@@ -27,7 +27,7 @@ public class PaintRoom {
     private String currentGuess;
     private Boolean guessedWord;
     
-    private ChatRoom chatRoom;
+    private ChatRoom chatRoom=null;
     
     private int remainingTimeOnGuess=20;
     private int guesserPointsRemaining=10;
@@ -307,7 +307,10 @@ public class PaintRoom {
         sketcherPointsRemaining=0;
         numberGuessed=0;
         guessedWord=false;
+        Logger.debug("Starting match!\n");
+        Logger.debug("Numero giocatori: "+painters.size());
         for(Map.Entry<Integer, Painter> entry : painters.entrySet()) {
+            Logger.debug(entry.toString());
             if(entry.getValue().name.equals(sketcher))
             {
                 ObjectNode roleMessage = Json.newObject();
@@ -497,5 +500,15 @@ public class PaintRoom {
     public void setChatRoom(ChatRoom chatRoom)
     {
         this.chatRoom=chatRoom;
+    }
+    
+    public ChatRoom getChatRoom()
+    {
+        return this.chatRoom;
+    }
+    
+    public int paintersSize()
+    {
+        return painters.size();
     }
 }

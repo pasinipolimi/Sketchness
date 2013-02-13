@@ -23,6 +23,8 @@ import models.levenshteinDistance.*;
 
 
 import static java.util.concurrent.TimeUnit.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A chat room is an Actor.
@@ -41,6 +43,7 @@ public class ChatRoom extends UntypedActor {
 	private boolean gameStarted=false;
 	private String currentSketcher;
         private String currentGuess;
+        private ChatRoom current=this;
         
         private int roundNumber=1;
         private static int maxRound=6;
@@ -99,35 +102,25 @@ public class ChatRoom extends UntypedActor {
         
     }
     
-    // Members of this room.
-    Map<String, WebSocket.Out<JsonNode>> playersMap = new HashMap<String, WebSocket.Out<JsonNode>>();
-    ArrayList<Painter> playersVect = new ArrayList<Painter>();
     
-    @Override
-    public void onReceive(Object message) throws Exception {
-        
-        if(message instanceof Join) 
-        {
-            
-            // Received a Join message
-            Join join = (Join)message;
-            
-            // Check if this username is free.
-            if(playersMap.containsKey(join.username)) {
-                getSender().tell("Questo username e' gia' in uso");
-            } 
-            else if(!gameStarted) 
-            {
-                playersMap.put(join.username, join.channel);
-                playersVect.add(new Painter(join.username,false));
-                notifyAll("join", join.username, "e' entrato nella stanza");
+    public void tryStartMatch()
+    {
                 if(playersMap.size()>=requiredPlayers)
                 {
+                        paintLogic.setChatRoom(this);
+                        //BAD BAD PRACTICE BUT WE HAVE TO REWORK EVERYTHING TO FIX THIS
+                        while(paintLogic.paintersSize()!=playersMap.size())
+                        {
+                            try {
+                                    Thread.sleep(100);
+                                } catch (InterruptedException ex) {
+                                    Logger.getLogger(ChatRoom.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                        }
                         disconnectedPlayers=0;
                 	gameStarted=true;
                 	nextSketcher();
                         paintLogic.matchStarted(currentSketcher);
-                        paintLogic.setChatRoom(this);
                         currentGuess=paintLogic.getCurrentGuess();
                 }
                 else
@@ -137,6 +130,28 @@ public class ChatRoom extends UntypedActor {
                     else
                         notifyAll("system", "Sketchness", "In attesa di "+(requiredPlayers-playersMap.size())+" giocatore per iniziare.");
                 }
+    }
+    
+    // Members of this room.
+    Map<String, WebSocket.Out<JsonNode>> playersMap = new HashMap<String, WebSocket.Out<JsonNode>>();
+    ArrayList<Painter> playersVect = new ArrayList<Painter>();
+    
+    @Override
+    public void onReceive(Object message) throws Exception {           
+        if(message instanceof Join) 
+        {
+            // Received a Join message
+            Join join = (Join)message;
+            // Check if this username is free.
+            if(playersMap.containsKey(join.username)) {
+                getSender().tell("Questo username e' gia' in uso");
+            } 
+            else if(!gameStarted) 
+            {
+                playersMap.put(join.username, join.channel);
+                playersVect.add(new Painter(join.username,false));
+                tryStartMatch();
+                notifyAll("join", join.username, "e' entrato nella stanza");
                 getSender().tell("OK");
             }
             //[TODO]Disabling game started control for debug messages
@@ -280,7 +295,7 @@ public class ChatRoom extends UntypedActor {
             }
             else
             {
-                int index = (int)(Math.random() * ((currentPlayers - 1) + 1));
+                int index = (int)(Math.random() * currentPlayers);
                 if(!playersVect.get(index).hasBeenSketcher)
                 {
                         currentSketcher=playersVect.get(index).name;
