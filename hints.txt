@@ -1,1 +1,4 @@
 MongoDB on Play! Framework: https://groups.google.com/forum/?fromgroups=#!topic/play-framework/fMUKcA34luM  
+
+
+To make it work on dotcloud, remember to clean compile and stage the application!
