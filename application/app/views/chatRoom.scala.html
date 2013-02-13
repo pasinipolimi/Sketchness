@@ -17,13 +17,13 @@
 			  </span>
 		</div>
         <div id="chatPanel" class="span4">
-            <div id="messages">
+            <div id="messages" class="jscroll scroll-pane-arrows jspScrollable">
             </div>
 		</div>
 		<div id="hudArea">
 			<canvas id="hud" width="800px" height="300px"></canvas>
 		</div>
-		<textarea id="talk"></textarea>
+		<textarea id="talk">Write a message here...</textarea>
 		<div id="currentNickname">@username</div>
 		<div id="opponent1"></div>
 		<div id="opponent2"></div>
@@ -80,14 +80,19 @@
 						} else {
 							$("#onChat").show()
 						}
-						
+						var pane = $('.jscroll');
 						// Create the message element
+						var api = pane.data('jsp');
 						var el = $('<div class="message"><span></span><p></p></div>')
 						$("span", el).text(data.user)
 						$("p", el).text(data.message)
 						$(el).addClass(data.kind)
 						if(data.user == '@username') $(el).addClass('me')
-						$('#messages').append(el)
+						{
+							//$('#messages').append(el)
+							api.getContentPane().append(el)
+							api.reinitialise();
+						}
 						
 						// Update the members list
 						var userCounter=0;
@@ -114,5 +119,22 @@
 		})()
 	</script>
 	<script type="text/javascript" src="/assets/javascripts/paint.js"></script>
+	<!--HANDLE DEFAULT VALUES FOR TEXT AREA-->
+	<script type="text/javascript">
+			$("#talk").focus(function() {
+
+			if( $(this).val() == "Write a message here..." ) {
+				$(this).val("");
+			}
+
+			});
+			$("#talk").blur(function() {
+
+				if( $(this).val() == "" ) {
+					$(this).val("Write a message here...");
+				}
+
+			});
+	</script>
 	</div>
 }

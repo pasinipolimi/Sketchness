@@ -1,4 +1,4 @@
-#!/bin/sh
+﻿#!/bin/sh
 export JAVA_OPTIONS="-Xmx128M -XX:PermSize=64M -XX:MaxPermSize=128M"
 echo "JAVA_OPTIONS=$JAVA_OPTIONS"
 echo '(To change JAVA_OPTIONS, edit the "run" script!)'
