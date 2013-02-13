@@ -1,4 +1,4 @@
-#!/bin/bash
+﻿#!/bin/bash
 set -e
 BUILDROOT="$(dirname "$0")"
 VERSION=2.0.3
