@@ -110,36 +110,10 @@
     }
   
   /*****************************UTILITY FUNCTIONS********************************************/
-  CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius, fill, stroke) {
-    if (typeof stroke == "undefined") {
-        stroke = true;
-    }
-    if (typeof radius === "undefined") {
-        radius = 5;
-    }
-    this.beginPath();
-    this.moveTo(x + radius, y);
-    this.lineTo(x + width - radius, y);
-    this.quadraticCurveTo(x + width, y, x + width, y + radius);
-    this.lineTo(x + width, y + height - radius);
-    this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    this.lineTo(x + radius, y + height);
-    this.quadraticCurveTo(x, y + height, x, y + height - radius);
-    this.lineTo(x, y + radius);
-    this.quadraticCurveTo(x, y, x + radius, y);
-    this.closePath();
-    if (stroke) {
-        this.stroke(stroke);
-    }
-    if (fill) {
-        this.fill(fill);
-    }
-  };
-
 
   // Init pname
   function queryPname() {
-	n=$('#currentNickname').text();
+   n=$('#currentNickname').text();
    if (n) {
       localStorage.setItem("pname", n);
     }
@@ -535,7 +509,6 @@ function positionWithE (e,obj) {
 (function(){
   var hud = document.getElementById("hud");
   var ctx = hud.getContext("2d");
-  var dirty = true;
   
   //ICONS
   var penEnabled= new Image();
@@ -573,7 +546,6 @@ function positionWithE (e,obj) {
 	setSize(25);
 	drawTool=false;
       }
-      dirty = true;
     });
   }
 
@@ -584,24 +556,15 @@ function positionWithE (e,obj) {
 	ctx.clearRect(0, 0, hud.width, hud.height);
     if(!matchStarted)
     {
-		ctx.lineWidth=1;
-        
-		ctx.fillStyle = "#000000";
-		ctx.lineStyle="#ffff00";
-		ctx.font      = "normal 25px Verdana";
-		ctx.fillText("In attesa di giocatori...", 150, 85);
+		var htmlMessage="<font size='5'>"+"<b>"+"In attesa di nuovi giocatori..."+"<b>"+"</font>";
+		document.getElementById('topMessage').innerHTML=htmlMessage;
     }
     else
     {
         if(role=="SKETCHER")
         {
-            ctx.fillStyle = "#000000";
-			ctx.lineStyle="#ffff00";
-			ctx.font      = "normal 25px Verdana";
-			ctx.fillText("Scontorna:", 150, 85);
-            ctx.fillStyle = "#FF0000";
-            ctx.font      = "normal 25px Verdana";
-            ctx.fillText(guessWord,150+25*guessWord.length,85);
+			var htmlMessage="<font size='5'>"+"<b>"+"Disegna: "+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
+			document.getElementById('topMessage').innerHTML=htmlMessage;
         }
         else if (role=="GUESSER")
         {
@@ -609,35 +572,30 @@ function positionWithE (e,obj) {
 			ctx.lineStyle="#ffff00";
 			ctx.font      = "normal 20px Verdana";
             if(!guessed)
-                ctx.fillText("Indovina l'oggetto disegnato!",150,85);
+			{
+                var htmlMessage="<font size='5'>"+"<b>"+"Indovina l'oggetto disegnato!"+"<b>"+"</font>";
+				document.getElementById('topMessage').innerHTML=htmlMessage;
+			}
             else
                 {
-                    ctx.fillText('Indovinata!:',150,85);
-                    ctx.fillStyle = "#FF0000";
-                    ctx.font      = "normal 20px Verdana";
-                    ctx.fillText(guessWord,150+20*guessWord.length,85);
+					var htmlMessage="<font size='5'>"+"<b>"+"Indovinato! "+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
+					document.getElementById('topMessage').innerHTML=htmlMessage;
                 }
         }
 		else if (role=="ROUNDCHANGE")
 		{
-			ctx.fillStyle = "#000000";
-			ctx.fillText('Soluzione:',80,50);
-            ctx.fillStyle = "#FF0000";
-            ctx.font = "bold 30px sans-serif";
-            ctx.fillText(guessWord,120+20*guessWord.length,50);
+			var htmlMessage="<font size='5'>"+"<b>"+"Soluzione: "+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
+			document.getElementById('topMessage').innerHTML=htmlMessage;
 		}
         else if (role=="ENDED")
         {
-            ctx.fillStyle = "#000000";
-            ctx.font = "bold 30px sans-serif";
-            ctx.fillText('Classifica e Punteggi!',170,50);
+			var htmlMessage="<font size='5'>"+"<b>"+"Classifica:"+"<b>"+"</font>";
+			document.getElementById('topMessage').innerHTML=htmlMessage;
         }
     }
-  
-	//Score positioning
-	ctx.fillStyle = "#000000";
-	ctx.font = "bold 30 px sans-serif";
-	ctx.fillText(score,675,80);
+	
+	var htmlMessage="<font size='5'>"+"<b>"+score+"<b>"+"</font>";
+	document.getElementById('score').innerHTML=htmlMessage;
 	
 	//Time positioning
 	if(matchStarted)
