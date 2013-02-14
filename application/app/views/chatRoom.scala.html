@@ -23,7 +23,9 @@
 		<div id="hudArea">
 			<canvas id="hud" width="800px" height="300px"></canvas>
 		</div>
-		<textarea id="talk">Write a message here...</textarea>
+		<div id="topMessage"></div>
+		<div id="score">100</div>
+		<textarea id="talk">Scrivi un messaggio qui...</textarea>
 		<div id="currentNickname">@username</div>
 		<div id="opponent1"></div>
 		<div id="opponent2"></div>
@@ -123,7 +125,7 @@
 	<script type="text/javascript">
 			$("#talk").focus(function() {
 
-			if( $(this).val() == "Write a message here..." ) {
+			if( $(this).val() == "Scrivi un messaggio qui..." ) {
 				$(this).val("");
 			}
 
@@ -131,7 +133,7 @@
 			$("#talk").blur(function() {
 
 				if( $(this).val() == "" ) {
-					$(this).val("Write a message here...");
+					$(this).val("Scrivi un messaggio qui...");
 				}
 
 			});
