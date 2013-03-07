@@ -5,7 +5,7 @@
 ###########################
 
 # Compile application or not on dotcloud.
-MAX_HEAP_SIZE=128M
+MAX_HEAP_SIZE=384M
 PERM_SIZE=64M
 MAX_PERM_SIZE=128M
 

@@ -143,9 +143,31 @@ public class ChatRoom extends UntypedActor {
             // Received a Join message
             Join join = (Join)message;
             // Check if this username is free.
-            if(playersMap.containsKey(join.username)) {
-                getSender().tell("Questo username e' gia' in uso");
+            //Has the player disconnected before?
+            Boolean disconnected=false;
+             for (Painter painter : playersVect) {
+                if(painter.name.equalsIgnoreCase(join.username)){
+                    disconnected=playersVect.get(playersVect.indexOf(painter)).getDisconnected();
+                    break;
+                }
+            }
+            if(playersMap.containsKey(join.username)&&disconnected) {
+                playersMap.remove(join.username);
+                playersMap.put(join.username, join.channel);
+                for (Painter painter : playersVect) {
+                if(painter.name.equalsIgnoreCase(join.username)){
+                    playersVect.get(playersVect.indexOf(painter)).setDisconnected(false);
+                    disconnectedPlayers--;
+                    break;
+                 }
+                }
+                notifyAll("join", join.username, "e' entrato nella stanza");
+                getSender().tell("OK");
             } 
+            else if(playersMap.containsKey(join.username))
+            {
+               getSender().tell("Questo username e' gia' in uso");         
+            }   
             else if(!gameStarted) 
             {
                 playersMap.put(join.username, join.channel);
@@ -189,18 +211,11 @@ public class ChatRoom extends UntypedActor {
             // Received a Quit message
             Quit quit = (Quit)message;
             
-            playersMap.remove(quit.username);
+            playersMap.get(quit.username).close();
             for (Painter painter : playersVect) {
                 if(painter.name.equalsIgnoreCase(quit.username)){
-                    playersVect.remove(painter);
+                    playersVect.get(playersVect.indexOf(painter)).setDisconnected(true);
                     break;
-                }
-            }
-            for (int key : paintLogic.painters.keySet())
-            {
-                if(paintLogic.painters.get(key).name.equalsIgnoreCase(quit.username)){
-                   paintLogic.painters.remove(key);
-                   break;
                 }
             }
             
