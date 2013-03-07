@@ -4,6 +4,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
 import play.libs.Json;
 import play.mvc.WebSocket;
+import play.mvc.WebSocket.Out;
 
 
 
@@ -17,7 +18,7 @@ public class Painter extends Player implements Comparable<Painter>{
         public boolean guessed;
         public boolean hasBeenSketcher;
 
-    public final WebSocket.Out<JsonNode> channel;
+    private WebSocket.Out<JsonNode> channel;
 
     public Painter(WebSocket.Out<JsonNode> channel) {
         this.channel = channel;
@@ -87,6 +88,19 @@ public class Painter extends Player implements Comparable<Painter>{
             return 1;
         return 0;
     }
+
+    public Out<JsonNode> getChannel() {
+        return channel;
+    }
+
+    public void setChannel(Out<JsonNode> channel) {
+        this.channel = channel;
+    }
+
+    public String getName() {
+        return name;
+    }
+    
     
     
 }

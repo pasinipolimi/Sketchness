@@ -242,30 +242,65 @@ public class PaintRoom {
                 String type = json.get("type").getTextValue();
                 // The painter wants to change some of his property
                 if(type.equalsIgnoreCase("change")) {
+                        Boolean found=false;
                         Painter painter = painters.get(pid);
                         if(painter == null) {
-                            painter = new Painter(out);
-                            painters.put(pid, painter);
+                            for(Map.Entry<Integer, Painter> entry : painters.entrySet())
+                            {
+                                String name=json.get("name").getTextValue();
+                                String compareName=entry.getValue().getName();
+                                if(compareName.equalsIgnoreCase(name))
+                                {
+                                    painters.get(entry.getKey()).setDisconnected(false);
+                                    painters.get(entry.getKey()).getChannel().close();
+                                    painters.get(entry.getKey()).setChannel(out);
+                                    ObjectNode jsonTime = Json.newObject();
+                                    jsonTime.put("type", "syncTime");
+                                    jsonTime.put("pid", entry.getKey());
+        
+                                    // Inform the list of other painters
+                                    for(Map.Entry<Integer, Painter> entryTime : painters.entrySet()) {
+                                        if(!(entryTime.getValue().name.equalsIgnoreCase(name)))
+                                            entryTime.getValue().getChannel().write(jsonTime);
+                                    }
 
-                            // Inform the painter who he is (which pid, he can then identify himself)
-                            ObjectNode self = Json.newObject();
-                            self.put("type", "youAre");
-                            self.put("pid", pid);
-                            self.put("role", painter.role);
-                            painter.channel.write(self);
-
-                            // Inform the list of other painters
-                            for(Map.Entry<Integer, Painter> entry : painters.entrySet()) {
-                                ObjectNode other = (ObjectNode)entry.getValue().toJson();
-                                other.put("pid", entry.getKey());
-                                painter.channel.write(other);
+                                    found=true;
+                                    break;
+                                }
                             }
+                            if(!found)
+                            {
+                                painter = new Painter(out);
+                                painters.put(pid, painter);
+                                 // Inform the painter who he is (which pid, he can then identify himself)
+                                ObjectNode self = Json.newObject();
+                                self.put("type", "youAre");
+                                self.put("pid", pid);
+                                self.put("role", painter.role);
+                                painter.getChannel().write(self);
+
+                                // Inform the list of other painters
+                                for(Map.Entry<Integer, Painter> entry : painters.entrySet()) {
+                                    ObjectNode other = (ObjectNode)entry.getValue().toJson();
+                                    other.put("pid", entry.getKey());
+                                    painter.getChannel().write(other);
+                                }
+                                }
                         }
                         painter.updateFromJson(json);
                 }
                 else if (type.equalsIgnoreCase("roundEnded")) {
                         chatRoom.playerTimeExpired(json.get("player").getTextValue());
                 }
+                else if(type.equalsIgnoreCase("syncTime"))
+                {
+                     Integer remaining = json.get("remaining").getIntValue();
+                     Integer id=json.get("pid").getIntValue();
+                     ObjectNode self = Json.newObject();
+                                self.put("type", "createTimer");
+                                self.put("amount", remaining);
+                     painters.get(id).getChannel().write(self);
+                }    
                 ObjectNode node = ((ObjectNode)json);
                 node.put("pid", pid);
                 PaintRoom.this.notifyAll(node);
@@ -276,7 +311,7 @@ public class PaintRoom {
         in.onClose(new F.Callback0() {
             @Override
             public void invoke() throws Throwable {
-                painters.remove(pid);
+                painters.get(pid).setDisconnected(true);
                 connections.decrementAndGet();
 
                 ObjectNode json = Json.newObject();
@@ -296,7 +331,7 @@ public class PaintRoom {
 
     public void notifyAll(JsonNode json) {
         for(Painter painter : painters.values()) {
-            painter.channel.write(json);
+            painter.getChannel().write(json);
         }
     }
     
@@ -316,13 +351,13 @@ public class PaintRoom {
                 ObjectNode roleMessage = Json.newObject();
                 roleMessage.put("type", "role");
                 roleMessage.put("role","SKETCHER");
-                entry.getValue().channel.write(roleMessage);
+                entry.getValue().getChannel().write(roleMessage);
                 sketcherPainter=entry.getValue();
                 
                 
                 //RETRIEVE THE IMAGE AND THE TAG TO SEND TO THE SKETCHER
                 ObjectNode guessWord = retrieveTaskImage();
-                entry.getValue().channel.write(guessWord);
+                entry.getValue().getChannel().write(guessWord);
                 currentGuess=guessWord.get("word").asText();
             }
             else
@@ -330,7 +365,7 @@ public class PaintRoom {
                 ObjectNode self = Json.newObject();
                 self.put("type", "role");
                 self.put("role","GUESSER");
-                entry.getValue().channel.write(self);
+                entry.getValue().getChannel().write(self);
             }
         }
     }
@@ -344,11 +379,11 @@ public class PaintRoom {
 	{
 		for(Map.Entry<Integer, Painter> entry : painters.entrySet()) {
 				ObjectNode guessWord = retrieveCurrentTaskImage();
-				entry.getValue().channel.write(guessWord);
+				entry.getValue().getChannel().write(guessWord);
                 ObjectNode show =  Json.newObject();
                 show.put("type", "showImages");
                 show.put("seconds",5);
-				entry.getValue().channel.write(show); 
+				entry.getValue().getChannel().write(show); 
 		}
 	}
     
@@ -365,13 +400,13 @@ public class PaintRoom {
                 guesserJson.put("guessWord",chatRoom.getCurrentGuess());
                 guesserJson.put("points",guesserPointsRemaining);
                 currentPlayer.setPoints(currentPlayer.getPoints()+guesserPointsRemaining);
-                currentPlayer.channel.write(guesserJson);
+                currentPlayer.getChannel().write(guesserJson);
                 currentPlayer.setCorrectGuess();
                 
                 
                 //Send the underlying image also to the guesser
                 ObjectNode guessWord = retrieveCurrentTaskImage();
-                entry.getValue().channel.write(guessWord);
+                entry.getValue().getChannel().write(guessWord);
                 
                 //Only if less than 5 players have already guessed assign the points to the sketcher
                 if(guesserPointsRemaining>5)
@@ -381,7 +416,7 @@ public class PaintRoom {
                     sketcherJson.put("name",sketcherPainter.name);
                     sketcherPointsRemaining= (guesserPointsRemaining==10) ? 10 : 1;
                     sketcherJson.put("points",sketcherPointsRemaining);
-                    sketcherPainter.channel.write(sketcherJson);
+                    sketcherPainter.getChannel().write(sketcherJson);
                     sketcherPainter.setPoints(sketcherPainter.getPoints()+sketcherPointsRemaining);
                 }
                 if(guesserPointsRemaining>=5)
@@ -389,13 +424,13 @@ public class PaintRoom {
             }
             if(!guessedWord)
             {
-                entry.getValue().channel.write(timerChange(remainingTimeOnGuess));    
+                entry.getValue().getChannel().write(timerChange(remainingTimeOnGuess));    
             }
         }
         //Every player has guessed, reduce the remaining time
         if(numberGuessed==(chatRoom.playersMap.size()-1))
         for(Map.Entry<Integer, Painter> entry : painters.entrySet())
-                entry.getValue().channel.write(timerChange(3));
+                entry.getValue().getChannel().write(timerChange(3));
         guessedWord=true;
     }
     
@@ -417,12 +452,12 @@ public class PaintRoom {
                     ObjectNode roleMessage = Json.newObject();
                     roleMessage.put("type", "role");
                     roleMessage.put("role","SKETCHER");
-                    entry.getValue().channel.write(roleMessage);
+                    entry.getValue().getChannel().write(roleMessage);
                     sketcherPainter=entry.getValue();
 
                     //RETRIEVE THE IMAGE AND THE TAG TO SEND TO THE SKETCHER
                     ObjectNode guessWord =  retrieveTaskImage();
-                    entry.getValue().channel.write(guessWord);
+                    entry.getValue().getChannel().write(guessWord);
                     currentGuess=guessWord.get("word").asText();
                 }
                 else
@@ -430,7 +465,7 @@ public class PaintRoom {
                     ObjectNode self = Json.newObject();
                     self.put("type", "role");
                     self.put("role","GUESSER");
-                    entry.getValue().channel.write(self);
+                    entry.getValue().getChannel().write(self);
                 }
             }
         }
@@ -456,8 +491,8 @@ public class PaintRoom {
             //Send the leaderboard information to all the players
             for(Map.Entry<Integer, Painter> entry : painters.entrySet()) {
                 //Set the remaining time to 0
-                entry.getValue().channel.write(timerChange(0));
-                entry.getValue().channel.write(leaderboard);
+                entry.getValue().getChannel().write(timerChange(0));
+                entry.getValue().getChannel().write(leaderboard);
             }
     }
 	

@@ -280,6 +280,11 @@
         if(m.name==pname)
             score=score+m.points;
     }
+	
+	if(m.type=="createTimer")
+	{
+		CreateTimer(m.amount);
+	}
     
     if(m.type=="timeChange")
     {
@@ -291,6 +296,11 @@
 	{
 		role="ROUNDCHANGE";
 		CreateTimer(m.seconds);
+	}
+	
+	if(m.type=="syncTime")
+	{
+		send({type: "syncTime", remaining: RemainingSeconds, pid: m.pid});
 	}
     
     if(m.type=="leaderboard")
