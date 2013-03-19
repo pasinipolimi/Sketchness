@@ -1,8 +1,13 @@
-
-@main(null) {
+@main(null,null) {
+    
+    <!-- CLEANED CODE-->
+    <!--Flash scope is place where we can store variables
+        between requests. Everything in flash scope is there until the following request,
+        and is then deleted.
+        We are just printing the error message here
+        TODO: BETTER INTERFACE FOR THE ERRORS-->
     
     @if(flash.containsKey("error")) {
-        
         <div class="alert-message error">
             <p>
                 <strong>Oops!</strong> @flash.get("error")
@@ -10,25 +15,30 @@
         </div>
         
     }
-	
+
         
-    <div class="backgroundimage" onLoad="javascript:preloader()">
-        <a class="brand" href="@routes.Application.index()"></a>
-			<form id="loginForm" action="@routes.Application.chatRoom()">
+    <div class="backgroundimage">
+        <a class="brand" href="@routes.Sketchness.index()"></a>
+        
+        <!--LOGIN FORM TO GET USERNAME AND PASSWORD, NEEDS TO BE FIXED-->
+        <!--NOTE: THE PAGES ARE SERVED BY THE CONTROLLER, WHICH IS CALLED APPLICATION-->
+        <form id="loginForm" action="@routes.Sketchness.chatRoom()">
                             <input id="username" name="username" class="input-small" type="text" placeholder="Username">
                             <button id="login" type="submit"></button>
-            </form>
-			<form id="socialNetworks" action="@routes.Application.chatRoom()">
+        </form>
+        
+        <!--THE SOCIAL NETWORKS LOGIN HAS TO BE PROPERLY IMPLEMENTED-->
+        <form id="socialNetworks" action="@routes.Sketchness.chatRoom()">
                             <button id="facebook" class="social-network" type="submit"></button>
-							<button id="twitter"  class="social-network" type="submit"></button>
-            </form>
+                            <button id="twitter" class="social-network" type="submit"></button>
+        </form>
     </div>
-	
-	
-	<div id="preloaded-images">
-	   <img src="../images/UI/loginUnpressed.png" width="1" height="1" alt="loginUnpressed" />
-	   <img src="../images/UI/loginPressed.png" width="1" height="1" alt="loginPressed" />
-	   <img src="../images/UI/loginHover.png" width="1" height="1" alt="loginHover" />
-	   <img src="../images/UI/facebook.png" width="1" height="1" alt="facebookUnpressed" />
-	</div>
+
+    <!--THIS HIDDEN DIV IS USED JUST TO PRELOAD IMAGES SO THAT THEY WON'T "FLICKER"-->
+    <div id="preloaded-images">
+        <img src="../assets/images/UI/loginUnpressed.png" width="1" height="1" alt="loginUnpressed" />
+        <img src="../assets/images/UI/loginPressed.png" width="1" height="1" alt="loginPressed" />
+        <img src="../assets/images/UI/loginHover.png" width="1" height="1" alt="loginHover" />
+        <img src="../assets/images/UI/facebook.png" width="1" height="1" alt="facebookUnpressed" />
+    </div>
 }

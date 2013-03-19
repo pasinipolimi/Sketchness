@@ -8,6 +8,8 @@ import akka.actor.*;
 import akka.dispatch.*;
 import static akka.pattern.Patterns.ask;
 
+import akka.actor.ActorSystem;
+
 import org.codehaus.jackson.node.*;
 
 import java.util.*;
@@ -23,8 +25,7 @@ import models.levenshteinDistance.*;
 
 
 import static java.util.concurrent.TimeUnit.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import play.Logger;
 
 /**
  * A chat room is an Actor.
@@ -53,16 +54,29 @@ public class ChatRoom extends UntypedActor {
 	
     
     // Default room.
-    static ActorRef defaultRoom = Akka.system().actorOf(new Props(ChatRoom.class));
+    static Map<String,ActorRef> rooms = new HashMap<String, ActorRef>();
+    
 
     
     /**
      * Join the default room.
      */
-    public static void join(final String username, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out, PaintRoom paintRoom) throws Exception{
+    public static void join(final String username, final String room, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out, PaintRoom paintRoom) throws Exception{
+        
+        ActorRef newRoom;        
+        if(rooms.containsKey(room))
+            newRoom=rooms.get(room);
+        else
+        {
+            newRoom= Akka.system().actorOf(new Props(ChatRoom.class));
+            rooms.put(room, newRoom);
+        }
+
+	final ActorRef finalRoom=newRoom;
+        
         
         // Send the Join message to the room
-        String result = (String)Await.result(ask(defaultRoom,new Join(username, out), 1000), Duration.create(1, SECONDS));
+        String result = (String)Await.result(ask(finalRoom,new Join(username, out), 1000), Duration.create(1, SECONDS));
         
         if("OK".equals(result)) 
         {
@@ -74,7 +88,7 @@ public class ChatRoom extends UntypedActor {
                public void invoke(JsonNode event) {
                    
                    // Send a Talk message to the room.
-                   defaultRoom.tell(new Talk(username, event.get("text").asText()));
+                   finalRoom.tell(new Talk(username, event.get("text").asText()));
                } 
             });
             
@@ -84,7 +98,7 @@ public class ChatRoom extends UntypedActor {
                public void invoke() {
                    
                    // Send a Quit message to the room.
-                   defaultRoom.tell(new Quit(username));
+                   finalRoom.tell(new Quit(username));
                    
                }
             });
@@ -114,7 +128,7 @@ public class ChatRoom extends UntypedActor {
                             try {
                                     Thread.sleep(100);
                                 } catch (InterruptedException ex) {
-                                    Logger.getLogger(ChatRoom.class.getName()).log(Level.SEVERE, null, ex);
+                                    Logger.error("TruStartMatch", ex);
                                 }
                         }
                         disconnectedPlayers=0;
@@ -143,31 +157,9 @@ public class ChatRoom extends UntypedActor {
             // Received a Join message
             Join join = (Join)message;
             // Check if this username is free.
-            //Has the player disconnected before?
-            Boolean disconnected=false;
-             for (Painter painter : playersVect) {
-                if(painter.name.equalsIgnoreCase(join.username)){
-                    disconnected=playersVect.get(playersVect.indexOf(painter)).getDisconnected();
-                    break;
-                }
-            }
-            if(playersMap.containsKey(join.username)&&disconnected) {
-                playersMap.remove(join.username);
-                playersMap.put(join.username, join.channel);
-                for (Painter painter : playersVect) {
-                if(painter.name.equalsIgnoreCase(join.username)){
-                    playersVect.get(playersVect.indexOf(painter)).setDisconnected(false);
-                    disconnectedPlayers--;
-                    break;
-                 }
-                }
-                notifyAll("join", join.username, "e' entrato nella stanza");
-                getSender().tell("OK");
+            if(playersMap.containsKey(join.username)) {
+                getSender().tell("Questo username e' gia' in uso");
             } 
-            else if(playersMap.containsKey(join.username))
-            {
-               getSender().tell("Questo username e' gia' in uso");         
-            }   
             else if(!gameStarted) 
             {
                 playersMap.put(join.username, join.channel);
@@ -211,11 +203,18 @@ public class ChatRoom extends UntypedActor {
             // Received a Quit message
             Quit quit = (Quit)message;
             
-            playersMap.get(quit.username).close();
+            playersMap.remove(quit.username);
             for (Painter painter : playersVect) {
                 if(painter.name.equalsIgnoreCase(quit.username)){
-                    playersVect.get(playersVect.indexOf(painter)).setDisconnected(true);
+                    playersVect.remove(painter);
                     break;
+                }
+            }
+            for (int key : paintLogic.painters.keySet())
+            {
+                if(paintLogic.painters.get(key).name.equalsIgnoreCase(quit.username)){
+                   paintLogic.painters.remove(key);
+                   break;
                 }
             }
             

@@ -1,6 +1,9 @@
-@(username: String)(env: PaintRoom)
+@(username: String, room: String)
 
-@main(username) {    
+
+ <!-- CLEANED CODE-->
+@main(username, room) {
+    <!--TODO: BETTER INTERFACE FOR THE ERRORS, POSSIBLY AN OVERLAY-->
     <div id="onError" class="alert-message error">
         <p>
             <strong>Oops! </strong><span></span>
@@ -8,135 +11,70 @@
     </div>
     
     <div id="mainPage">
-		<div id="gameArea" class="span10">  
-			  <span id="viewport">
-				  <canvas id="me" width="460px" height="370px"></canvas>
-				  <canvas id="positions" width="460px" height="370px"></canvas>
-				  <canvas id="draws" width="460px" height="370px"></canvas>
-                  <canvas id="task" width="460px" height="370px"></canvas>
-			  </span>
-		</div>
+        
+        <!--THIS IS THE AREA IN WHICH THE DRAWINGS ARE MADE-->
+        <div id="gameArea" class="span10">
+            <span id="viewport">
+                <!-- CANVAS USED TO STORE THE LAST DRAWING SEGMENT-->
+                <canvas id="me" width="460" height="370"></canvas>
+                <!-- CANVAS TO TRACK THE POSITION OF THE DRAWING PLAYER-->
+                <canvas id="positions" width="460" height="370"></canvas>
+                <!-- CANVAS TO STORE THE ENTIRE DRAWINGS DONE SO FAR-->
+                <canvas id="draws" width="460" height="370"></canvas>
+                <!-- CANVAS USED TO SHOW THE IMAGE-->
+                <canvas id="task" width="460" height="370"></canvas>
+            </span>
+        </div>
+        
+        
         <div id="chatPanel" class="span4">
             <div id="messages" class="jscroll scroll-pane-arrows jspScrollable">
             </div>
-		</div>
-		<div id="hudArea">
-			<canvas id="hud" width="800px" height="300px"></canvas>
-		</div>
-		<div id="topMessage"></div>
-		<div id="score">100</div>
-		<textarea id="talk">Scrivi un messaggio qui...</textarea>
-		<div id="currentNickname">@username</div>
-		<div id="opponent1"></div>
-		<div id="opponent2"></div>
-		<div id="opponent3"></div>
-		<div id="opponent4"></div>
-	
-	<script type="text/javascript">
-			(function() {
-                            
-                                        function setError (message) {
-                                            $("#onError span").text(message)
-                                            $("#onError").show()
-                                            $("#pageheader").hide()
-                                            $("#mainPage").hide()
-                                        }
-                                        
-                                        if (!window.WebSocket) {
-                                            if (!window.MozWebSocket)
-                                            {
-                                                setError("WebSockets are not supported by your browser.");
-                                                return;
-                                            }
-                                        }
+        </div>
+        <textarea id="talk">Scrivi un messaggio qui...</textarea>
+        
+        
+        <!-- A SIMPLE CANVAS USED AS AN HUD TO DRAW TOOLS-->
+        <div id="hudArea">
+            <canvas id="hud" width="800" height="300"></canvas>
+        </div>
+        
+        <!--MESSAGES AND SCORES FOR THE PLAYERS-->
+        <div id="topMessage"></div>
+        <div id="score">100</div>
 
-                                        if (!(function(e){return e.getContext && e.getContext('2d')}(document.getElementById("me")))) {
-                                            setError("Canvas is not supported by your browser.");
-                                            return;
-                                        }
-                                        
-                                        
-                                        
-					var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket
-					var chatSocket = new WS("@routes.Application.chat(username).webSocketURL(request)")
-					
-					var sendMessage = function() {
-						chatSocket.send(JSON.stringify(
-							{text: $("#talk").val()}
-						))
-						$("#talk").val('')
-						$("#messages").animate({scrollTop:$("#messages")[0].scrollHeight}, 1000);
-					}
-					
-					var receiveEvent = function(event) {
-						var data = JSON.parse(event.data)
-					
-						// Handle errors
-						if(data.error) {
-							chatSocket.close()
-							$("#onError span").text(data.error)
-							$("#onError").show()
-							$("#pageheader").hide()
-                                                        $("#mainPage").hide()
-							return
-						} else {
-							$("#onChat").show()
-						}
-						var pane = $('.jscroll');
-						// Create the message element
-						var api = pane.data('jsp');
-						var el = $('<div class="message"><span></span><p></p></div>')
-						$("span", el).text(data.user)
-						$("p", el).text(data.message)
-						$(el).addClass(data.kind)
-						if(data.user == '@username') $(el).addClass('me')
-						{
-							//$('#messages').append(el)
-							api.getContentPane().append(el)
-							api.reinitialise();
-						}
-						
-						// Update the members list
-						var userCounter=0;
-						$(data.members).each(function() {
-							 if(this != '@username')
-							 {
-								userCounter++;
-								$("#opponent"+userCounter).text(this);
-							}
-						})
-					}
-					
-					var handleReturnKey = function(e) {
-						if(e.charCode == 13 || e.keyCode == 13) {
-							e.preventDefault()
-							sendMessage()
-						} 
-					}
-					
-					$("#talk").keypress(handleReturnKey) 
-					
-					chatSocket.onmessage = receiveEvent
-					
-		})()
-	</script>
-	<script type="text/javascript" src="/assets/javascripts/paint.js"></script>
-	<!--HANDLE DEFAULT VALUES FOR TEXT AREA-->
-	<script type="text/javascript">
-			$("#talk").focus(function() {
+        <!--HANDLING ALL THE USERS CURRENTLY CONNECTED-->
+        <div id="currentNickname">@username</div>
+        <div id="opponent1"></div>
+        <div id="opponent2"></div>
+        <div id="opponent3"></div>
+        <div id="opponent4"></div>
 
-			if( $(this).val() == "Scrivi un messaggio qui..." ) {
-				$(this).val("");
-			}
+        <!--WE CAN'T USE ROUTES IN STATIC JAVASCRIPT, SO WE MUST REFERENCE THEM OUTSIDE-->
+        <div id="websocket" data-ws="@routes.Sketchness.chat(username,room).webSocketURL(request)">
+            
+        <script type="text/javascript" src="/assets/javascripts/chat.js"></script>
+        
+         
+        <script type="text/javascript" src="/assets/javascripts/paint.js"></script>
 
-			});
-			$("#talk").blur(function() {
+        <!--HANDLE DEFAULT VALUES FOR TEXT AREA-->
+        <script type="text/javascript">
+            $("#talk").focus(function() {
 
-				if( $(this).val() == "" ) {
-					$(this).val("Scrivi un messaggio qui...");
-				}
+                if( $(this).val() == "Scrivi un messaggio qui..." ) {
+                $(this).val("");
+                }
 
-			});
-	</script>
-	</div>
+            });
+            
+            $("#talk").blur(function() {
+
+                if( $(this).val() == "" ) {
+                $(this).val("Scrivi un messaggio qui...");
+                }
+
+            });
+        </script>
+</div>
 }

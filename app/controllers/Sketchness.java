@@ -1,9 +1,8 @@
 package controllers;
 
 import akka.actor.ActorRef;
-import akka.actor.Props;
 import play.mvc.*;
-import play.libs.Akka;
+
 import org.codehaus.jackson.*;
 
 import views.html.*;
@@ -11,7 +10,8 @@ import views.html.*;
 import models.*;
 
 
-public class Application extends Controller {
+
+public class Sketchness extends Controller {
   
     static PaintRoom env = new PaintRoom("Public");
   
@@ -25,18 +25,19 @@ public class Application extends Controller {
     /**
      * Display the chat room.
      */
-    public static Result chatRoom(String username) {
+    public static Result chatRoom(final String username, final String roomName) {
+        /*Fix the errors with all the possible cases*/
         if(username == null || username.trim().equals("")) {
             flash("error", "Please choose a valid username.");
-            return redirect(routes.Application.index());
+            return redirect(routes.Sketchness.index());
         }
-        return ok(chatRoom.render(username,env));
+        return ok(chatRoom.render(username,roomName));
     }
     
     /**
      * Handle the chat websocket.
      */
-    public static WebSocket<JsonNode> chat(final String username) {
+    public static WebSocket<JsonNode> chat(final String username, final String roomName) {
         return new WebSocket<JsonNode>() {
             
             // Called when the Websocket Handshake is done.
@@ -44,7 +45,7 @@ public class Application extends Controller {
                 
                 // Join the chat room.
                 try { 
-                    ChatRoom.join(username, in, out, env);
+                    ChatRoom.join(username, roomName, in, out, env);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -52,6 +53,11 @@ public class Application extends Controller {
         };
     }
 	
+    
+        /**
+         * 
+         * Handle the paintroom websocket 
+         */
 	public static WebSocket<JsonNode> stream() {
         
         return new WebSocket<JsonNode>() {
