@@ -1,5 +1,5 @@
 (function(){
-	
+
   
 
 
@@ -9,18 +9,18 @@
 
   // Polyfills
   window.requestAnimFrame = (function(){
-  return  window.requestAnimationFrame       || 
-          window.webkitRequestAnimationFrame || 
-          window.mozRequestAnimationFrame    || 
-          window.oRequestAnimationFrame      || 
-          window.msRequestAnimationFrame     || 
+  return window.requestAnimationFrame ||
+          window.webkitRequestAnimationFrame ||
+          window.mozRequestAnimationFrame ||
+          window.oRequestAnimationFrame ||
+          window.msRequestAnimationFrame ||
           function( callback ){
             window.setTimeout(callback, 1000 / 60);
           };
           })();
-		  
 
-		  
+
+
   
 
   if (!window.WebSocket) {
@@ -81,7 +81,7 @@
     
     /**********UTILITY FUNCTION FOR TIMER CREATION********************/
 
-    function TimerTick() 
+    function TimerTick()
     {
         if (RemainingSeconds == 0) {
            //Round End
@@ -95,7 +95,7 @@
         }
     }
 
-    function CreateTimer(Countdown) 
+    function CreateTimer(Countdown)
     {
         RemainingSeconds = Countdown;
         UpdateTimer();
@@ -104,7 +104,7 @@
 
 
     //Timing Functions
-    function UpdateTimer() 
+    function UpdateTimer()
     {
         time=RemainingSeconds;
     }
@@ -149,7 +149,7 @@
     try {
       socket = new WebSocket("ws://"+location.host+"/stream");
       socket.onmessage = onSocketMessage;
-	  
+
       socket.onopen = function(evt) {
         if (reconnection) {
           window.location = window.location; // Reloading the page to reset states
@@ -163,7 +163,7 @@
             connected = false;
         tryConnectAgain();
       };
-	  
+
       socket.onerror = function(evt) {console.error("error", evt);};
     }
     catch (e) {
@@ -200,18 +200,18 @@
         if(role=="SKETCHER")
         {
             $('#roleSpan').text("lo Sketcher");
-			$('#mainPage').removeClass('guesser');
-			$('#mainPage').addClass('sketcher');
+$('#mainPage').removeClass('guesser');
+$('#mainPage').addClass('sketcher');
             $('#talk').attr('disabled', 'disabled');
-			
+
         }
         else
         {
             $('#roleSpan').text("un Guesser");
-			$('#mainPage').removeClass('sketcher');
-			$('#mainPage').addClass('guesser');
+$('#mainPage').removeClass('sketcher');
+$('#mainPage').addClass('guesser');
             $('#talk').removeAttr('disabled');
-			
+
         }
         CreateTimer(defaultRoundTime);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -221,11 +221,11 @@
     else
     {
         var player = players[m.pid];
-        if (player === undefined) 
+        if (player === undefined)
         {
             player = players[m.pid] = m;
         }
-        if (m.type=="youAre") 
+        if (m.type=="youAre")
         {
             pid = m.pid;
             role = m.role;
@@ -241,29 +241,29 @@
         //Wait for the image to be loaded before drawing it to canvas to avoid
         //errors
         taskImage.onload = function() {
-		  taskContext.save();
-		  taskContext.beginPath();
-		  x=0;
-		  y=0;
-		  width=460;
-		  height=370;
-		  radius=50;
-		  taskContext.moveTo(x + radius, y);
-		  taskContext.lineTo(x + width - radius, y);
-		  taskContext.quadraticCurveTo(x + width, y, x + width, y + radius);
-		  taskContext.lineTo(x + width, y + height - radius);
-		  taskContext.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-		  taskContext.lineTo(x + radius, y + height);
-		  taskContext.quadraticCurveTo(x, y + height, x, y + height - radius);
-		  taskContext.lineTo(x, y + radius);
-		  taskContext.quadraticCurveTo(x, y, x + radius, y);
-		  taskContext.closePath();
-		  taskContext.clip();
-	      taskContext.drawImage(taskImage,0,0,width,height);
-		  taskContext.restore(); 
+taskContext.save();
+taskContext.beginPath();
+x=0;
+y=0;
+width=460;
+height=370;
+radius=50;
+taskContext.moveTo(x + radius, y);
+taskContext.lineTo(x + width - radius, y);
+taskContext.quadraticCurveTo(x + width, y, x + width, y + radius);
+taskContext.lineTo(x + width, y + height - radius);
+taskContext.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+taskContext.lineTo(x + radius, y + height);
+taskContext.quadraticCurveTo(x, y + height, x, y + height - radius);
+taskContext.lineTo(x, y + radius);
+taskContext.quadraticCurveTo(x, y, x + radius, y);
+taskContext.closePath();
+taskContext.clip();
+taskContext.drawImage(taskImage,0,0,width,height);
+taskContext.restore();
         };
     }
-	
+
     
     if(m.type=="guesser")
     {
@@ -280,28 +280,18 @@
         if(m.name==pname)
             score=score+m.points;
     }
-	
-	if(m.type=="createTimer")
-	{
-		CreateTimer(m.amount);
-	}
     
     if(m.type=="timeChange")
     {
         if(RemainingSeconds>m.amount)
             RemainingSeconds=m.amount;
     }
-	
-	if(m.type=="showImages")
-	{
-		role="ROUNDCHANGE";
-		CreateTimer(m.seconds);
-	}
-	
-	if(m.type=="syncTime")
-	{
-		send({type: "syncTime", remaining: RemainingSeconds, pid: m.pid});
-	}
+
+if(m.type=="showImages")
+{
+role="ROUNDCHANGE";
+CreateTimer(m.seconds);
+}
     
     if(m.type=="leaderboard")
     {
@@ -310,7 +300,7 @@
         time=0;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         taskContext.clearRect(0, 0, canvas.width, canvas.height);
-        positionContext.clearRect(0, 0, canvas.width, canvas.height);    
+        positionContext.clearRect(0, 0, canvas.width, canvas.height);
    
         //Disable the chat
         $('#talk').attr('disabled', 'disabled');
@@ -450,14 +440,14 @@
 
 
   document.addEventListener(isMobile ? "touchstart": "mousedown", onMouseDown);
-  document.addEventListener(isMobile ? "touchend"  : "mouseup",   onMouseUp);
+  document.addEventListener(isMobile ? "touchend" : "mouseup", onMouseUp);
   viewport.addEventListener(isMobile ? "touchmove" : "mousemove", onMouseMove);
 
 })();
 
 function positionWithE (e,obj) {
-	var leftm=topm=0;
-	var result= getPosition(obj);
+var leftm=topm=0;
+var result= getPosition(obj);
         return {
           x: e.clientX-result.x,
           y: e.clientY-result.y
@@ -484,15 +474,15 @@ function positionWithE (e,obj) {
   ctx.font = "9px monospace";
   ctx.textAlign = "center";
   ctx.textBaseline = "bottom";
-  function render () 
+  function render ()
   {
     if(!dirtyPositions) return;
     dirtyPositions = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if(matchStarted)
-        for (var pid in players) 
-        {   
-            var player = players[pid]; 
+        for (var pid in players)
+        {
+            var player = players[pid];
             if (!player || player.x===undefined) continue;
             ctx.beginPath();
             ctx.strokeStyle = TRACKER;
@@ -530,7 +520,7 @@ function positionWithE (e,obj) {
   penDisabled.src = 'assets/images/UI/Controls/pencilD.png';
   eraserDisabled.src = 'assets/images/UI/Controls/eraserD.png';
   
-  function setColor (c) 
+  function setColor (c)
   {
     color = c;
     send({type: 'change', color: color});
@@ -544,74 +534,74 @@ function positionWithE (e,obj) {
   function setup() {
     hud.addEventListener("click", function (e) {
       var o = positionWithE(e,hud);
-      if ((o.y>=130)&&(o.y<200)) 
+      if ((o.y>=130)&&(o.y<200))
       {
         setColor(PEN);
-	setSize(SIZE);
-	drawTool=true;
+setSize(SIZE);
+drawTool=true;
       }
       else if ((o.y>=200)&&(o.y<=270))
       {
-	setColor(ERASER);
-	setSize(25);
-	drawTool=false;
+setColor(ERASER);
+setSize(25);
+drawTool=false;
       }
     });
   }
 
   
   /************TOOLS PANEL RENDERING***********************/
-  function render() 
+  function render()
   {
-	ctx.clearRect(0, 0, hud.width, hud.height);
+ctx.clearRect(0, 0, hud.width, hud.height);
     if(!matchStarted)
     {
-		var htmlMessage="<font size='5'>"+"<b>"+"In attesa di nuovi giocatori..."+"<b>"+"</font>";
-		document.getElementById('topMessage').innerHTML=htmlMessage;
+var htmlMessage="<font size='5'>"+"<b>"+"In attesa di nuovi giocatori..."+"<b>"+"</font>";
+document.getElementById('topMessage').innerHTML=htmlMessage;
     }
     else
     {
         if(role=="SKETCHER")
         {
-			var htmlMessage="<font size='5'>"+"<b>"+"Disegna: "+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
-			document.getElementById('topMessage').innerHTML=htmlMessage;
+var htmlMessage="<font size='5'>"+"<b>"+"Disegna: "+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
+document.getElementById('topMessage').innerHTML=htmlMessage;
         }
         else if (role=="GUESSER")
         {
             ctx.fillStyle = "#000000";
-			ctx.lineStyle="#ffff00";
-			ctx.font      = "normal 20px Verdana";
+ctx.lineStyle="#ffff00";
+ctx.font = "normal 20px Verdana";
             if(!guessed)
-			{
+{
                 var htmlMessage="<font size='5'>"+"<b>"+"Indovina l'oggetto disegnato!"+"<b>"+"</font>";
-				document.getElementById('topMessage').innerHTML=htmlMessage;
-			}
+document.getElementById('topMessage').innerHTML=htmlMessage;
+}
             else
                 {
-					var htmlMessage="<font size='5'>"+"<b>"+"Indovinato! "+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
-					document.getElementById('topMessage').innerHTML=htmlMessage;
+var htmlMessage="<font size='5'>"+"<b>"+"Indovinato! "+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
+document.getElementById('topMessage').innerHTML=htmlMessage;
                 }
         }
-		else if (role=="ROUNDCHANGE")
-		{
-			var htmlMessage="<font size='5'>"+"<b>"+"Soluzione: "+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
-			document.getElementById('topMessage').innerHTML=htmlMessage;
-		}
+else if (role=="ROUNDCHANGE")
+{
+var htmlMessage="<font size='5'>"+"<b>"+"Soluzione: "+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
+document.getElementById('topMessage').innerHTML=htmlMessage;
+}
         else if (role=="ENDED")
         {
-			var htmlMessage="<font size='5'>"+"<b>"+"Classifica:"+"<b>"+"</font>";
-			document.getElementById('topMessage').innerHTML=htmlMessage;
+var htmlMessage="<font size='5'>"+"<b>"+"Classifica:"+"<b>"+"</font>";
+document.getElementById('topMessage').innerHTML=htmlMessage;
         }
     }
-	
-	var htmlMessage="<font size='5'>"+"<b>"+score+"<b>"+"</font>";
-	document.getElementById('score').innerHTML=htmlMessage;
-	
-	//Time positioning
-	if(matchStarted)
-	{
-		//ctx.fillText(time,35,50);
-	}
+
+var htmlMessage="<font size='5'>"+"<b>"+score+"<b>"+"</font>";
+document.getElementById('score').innerHTML=htmlMessage;
+
+//Time positioning
+if(matchStarted)
+{
+//ctx.fillText(time,35,50);
+}
 
 
         if(!matchStarted || role=="GUESSER" || role=="ENDED" || role=="ROUNDCHANGE")
@@ -621,18 +611,18 @@ function positionWithE (e,obj) {
         else
         {
 
-				//Drawing tools
-				if(drawTool)
-				{
-						ctx.drawImage(penEnabled,0,130,70,70);
-						ctx.drawImage(eraserDisabled,0,200,70,70);
-				}
-				else
-				{
-						ctx.drawImage(penDisabled,0,130,70,70);
-						ctx.drawImage(eraserEnabled,0,200,70,70);
-				}
-			}
+//Drawing tools
+if(drawTool)
+{
+ctx.drawImage(penEnabled,0,130,70,70);
+ctx.drawImage(eraserDisabled,0,200,70,70);
+}
+else
+{
+ctx.drawImage(penDisabled,0,130,70,70);
+ctx.drawImage(eraserEnabled,0,200,70,70);
+}
+}
   }
 
   setup();

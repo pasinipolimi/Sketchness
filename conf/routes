@@ -3,10 +3,10 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index()
-GET     /room                       controllers.Application.chatRoom(username: String ?= null)
-GET     /room/chat                  controllers.Application.chat(username)
-GET     /stream                     controllers.Application.stream()
+GET     /                           controllers.Sketchness.index()
+GET     /room                       controllers.Sketchness.chatRoom(username: String ?= null, room: String ?= null)
+GET     /room/chat                  controllers.Sketchness.chat(username: String ?= null,room: String ?= null)
+GET     /stream                     controllers.Sketchness.stream()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
