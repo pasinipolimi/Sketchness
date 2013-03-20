@@ -88,11 +88,15 @@ public class PaintRoom {
        guessWord.put("word","giacca");
        guessWord.put("image","/assets/taskImages/coat.jpg");
        taskHashSet.add(guessWord); 
-       guessWord = Json.newObject();
+	   
+       /*
+	   guessWord = Json.newObject();
        guessWord.put("type", "task");
        guessWord.put("word","maschera");
        guessWord.put("image","/assets/taskImages/gasMask.jpg");
-       taskHashSet.add(guessWord); 
+       taskHashSet.add(guessWord);*/
+	   
+	   
        guessWord = Json.newObject();
        guessWord.put("type", "task");
        guessWord.put("word","scarpe");
@@ -128,11 +132,14 @@ public class PaintRoom {
        guessWord.put("word","t-shirt");
        guessWord.put("image","/assets/taskImages/shirt.jpg");
        taskHashSet.add(guessWord);
+	   
+	   /*
        guessWord = Json.newObject();
        guessWord.put("type", "task");
        guessWord.put("word","tankini");
        guessWord.put("image","/assets/taskImages/tankini.jpg");
-       taskHashSet.add(guessWord);
+       taskHashSet.add(guessWord);*/
+	   
        guessWord = Json.newObject();
        guessWord.put("type", "task");
        guessWord.put("word","pantaloncini");
@@ -227,6 +234,336 @@ public class PaintRoom {
        guessWord.put("type", "task");
        guessWord.put("word","pantaloncini");
        guessWord.put("image","/assets/taskImages/shorts.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cappuccio");
+       guessWord.put("image","/assets/taskImages/1.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","borsa");
+       guessWord.put("image","/assets/taskImages/2.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","sciarpa");
+       guessWord.put("image","/assets/taskImages/3.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","scarpe");
+       guessWord.put("image","/assets/taskImages/4.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","minigonna");
+       guessWord.put("image","/assets/taskImages/5.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cravatta");
+       guessWord.put("image","/assets/taskImages/6.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cappuccio");
+       guessWord.put("image","/assets/taskImages/7.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","corona");
+       guessWord.put("image","/assets/taskImages/8.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","stivaletti");
+       guessWord.put("image","/assets/taskImages/9.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cappello");
+       guessWord.put("image","/assets/taskImages/11.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","reggiseno");
+       guessWord.put("image","/assets/taskImages/12.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","reggiseno");
+       guessWord.put("image","/assets/taskImages/13.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","fiocco");
+       guessWord.put("image","/assets/taskImages/14.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cappello");
+       guessWord.put("image","/assets/taskImages/15.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","guanti");
+       guessWord.put("image","/assets/taskImages/16.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","calze");
+       guessWord.put("image","/assets/taskImages/17.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","slip");
+       guessWord.put("image","/assets/taskImages/18.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","slip");
+       guessWord.put("image","/assets/taskImages/19.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","fiocco");
+       guessWord.put("image","/assets/taskImages/20.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","maschera");
+       guessWord.put("image","/assets/taskImages/21.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cuffia");
+       guessWord.put("image","/assets/taskImages/22.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","corno");
+       guessWord.put("image","/assets/taskImages/23.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","maschera");
+       guessWord.put("image","/assets/taskImages/25.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","poncho");
+       guessWord.put("image","/assets/taskImages/26.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","ombrello");
+       guessWord.put("image","/assets/taskImages/27.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","gonna");
+       guessWord.put("image","/assets/taskImages/28.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","fiocco");
+       guessWord.put("image","/assets/taskImages/29.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cappello");
+       guessWord.put("image","/assets/taskImages/30.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","minigonna");
+       guessWord.put("image","/assets/taskImages/31.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cappotto");
+       guessWord.put("image","/assets/taskImages/32.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cintura");
+       guessWord.put("image","/assets/taskImages/33.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cappotto");
+       guessWord.put("image","/assets/taskImages/34.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cerchietto");
+       guessWord.put("image","/assets/taskImages/35.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","t-shirt");
+       guessWord.put("image","/assets/taskImages/36.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cappuccio");
+       guessWord.put("image","/assets/taskImages/37.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cappello");
+       guessWord.put("image","/assets/taskImages/38.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","occhiali");
+       guessWord.put("image","/assets/taskImages/40.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cappello");
+       guessWord.put("image","/assets/taskImages/41.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","fiocco");
+       guessWord.put("image","/assets/taskImages/42.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","orologio");
+       guessWord.put("image","/assets/taskImages/43.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cappello");
+       guessWord.put("image","/assets/taskImages/44.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cravatta");
+       guessWord.put("image","/assets/taskImages/45.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","sciarpa");
+       guessWord.put("image","/assets/taskImages/46.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","anello");
+       guessWord.put("image","/assets/taskImages/47.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","anello");
+       guessWord.put("image","/assets/taskImages/48.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","orecchini");
+       guessWord.put("image","/assets/taskImages/49.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","orecchini");
+       guessWord.put("image","/assets/taskImages/50.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cravatta");
+       guessWord.put("image","/assets/taskImages/51.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","cravatta");
+       guessWord.put("image","/assets/taskImages/52.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","orologio");
+       guessWord.put("image","/assets/taskImages/53.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","orologio");
+       guessWord.put("image","/assets/taskImages/54.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","orologio");
+       guessWord.put("image","/assets/taskImages/55.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","corona");
+       guessWord.put("image","/assets/taskImages/56.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","corona");
+       guessWord.put("image","/assets/taskImages/57.jpg");
+       taskHashSet.add(guessWord);
+	   
+	   guessWord = Json.newObject();
+       guessWord.put("type", "task");
+       guessWord.put("word","borsa");
+       guessWord.put("image","/assets/taskImages/58.jpg");
        taskHashSet.add(guessWord);
     }
 
