@@ -245,8 +245,11 @@ taskContext.save();
 taskContext.beginPath();
 x=0;
 y=0;
-width=460;
-height=370;
+var style = window.getComputedStyle(taskCanvas);
+var width=style.getPropertyValue('width');
+width= parseInt(width, 10);
+var height=style.getPropertyValue('height');
+height=parseInt(height, 10);
 radius=50;
 taskContext.moveTo(x + radius, y);
 taskContext.lineTo(x + width - radius, y);
@@ -601,6 +604,8 @@ document.getElementById('score').innerHTML=htmlMessage;
 if(matchStarted)
 {
 //ctx.fillText(time,35,50);
+var htmlMessage="<font size='5'>"+"<b>"+"Tempo: "+time+"<b>"+"</font>";
+document.getElementById('timeCounter').innerHTML=htmlMessage;
 }
 
 
