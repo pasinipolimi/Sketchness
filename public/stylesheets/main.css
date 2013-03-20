@@ -84,12 +84,14 @@ position: relative;
 #username {
 background-color: transparent;
 border-color: transparent;
-left:535px;
+left:312px;
 position:absolute;
-top:545px;
-    width: 115px;
+top:457px;
+    width: 200px;
+	height:35px;
 font-weight:bold;
 color: #B01AA6;
+text-align:center;
 }
 
 #facebook {
@@ -121,7 +123,7 @@ top:534px;
 background-color: transparent;
 background-image: url("../images/UI/loginUnpressed.png");
 height:66px;
-left:8px;
+left:330px;
 position:absolute;
 top:520px;
     width: 181px;
@@ -131,7 +133,7 @@ top:520px;
 background-color: transparent;
 background-image: url("../images/UI/loginHover.png");
 height:66px;
-left:8px;
+left:330px;
 position:absolute;
 top:520px;
     width: 181px;
@@ -141,7 +143,7 @@ top:520px;
 background-color: transparent;
 background-image: url("../images/UI/loginPressed.png");
 height:46px;
-left:8px;
+left:330px;
 position:absolute;
 top:530px;
     width: 181px;
@@ -200,7 +202,7 @@ left: 89.5px;
 #gameMessagesSpan {
     width: 500px;
     height: 50px;
-left: 89.5px;
+    left: 89.5px;
     background: white;
     position: relative;
 }
@@ -208,37 +210,36 @@ left: 89.5px;
 
 #positions {
   position: absolute;
-  top: 582px;
-  width: 460px;
-  height: 370px;
-  left:-20px;
+  width: inherit;
+  height: inherit;
   z-index: 5;
 }
 #me {
   position: absolute;
-  top: 582px;
-  width: 460px;
-  height: 370px;
-  left:-20px;
+  width: inherit;
+  height: inherit;
   z-index: 4;
 }
 
 #draws {
   position: absolute;
-  top: 582px;
-  width: 460px;
-  height: 370px;
-  left:-20px;
+  width: inherit;
+  height: inherit;
   z-index: 3;
 }
 
 #task {
   position: absolute;
-  top: 582px;
-  width: 460px;
-  height: 370px;
+  width: inherit;
+  height: inherit;
   z-index: 2;
-  left:-20px;
+}
+
+#canvaswindows{
+  position: absolute;
+  top: 580px;
+  width: 420px;
+  height: 350px;
 }
 
 #currentNickname{
@@ -258,6 +259,15 @@ height: 30px;
 left:108px;
 position:absolute;
 top:60px;
+text-align:center;
+}
+
+#timeCounter{
+width: 200px;
+height: 30px;
+left:-10px;
+position:absolute;
+top:557px;
 text-align:center;
 }
 

@@ -57,8 +57,9 @@ $(el).addClass(data.kind)
 if(data.user == '@username') $(el).addClass('me')
 {
 //$('#messages').append(el)
-api.getContentPane().append(el)
+api.getContentPane().append(el);
 api.reinitialise();
+api.scrollToBottom();
 }
 
 // Update the members list
