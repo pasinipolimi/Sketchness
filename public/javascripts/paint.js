@@ -311,7 +311,7 @@ CreateTimer(m.seconds);
         {
             taskContext.fillStyle = "#000000";
             taskContext.font = "bold 30px sans-serif";
-            taskContext.fillText(i+"): "+m.playerList[i-1].name+" = "+m.playerList[i-1].points+" points",30,50+50*(i-1));
+            taskContext.fillText(i+"): "+m.playerList[i-1].name+" = "+m.playerList[i-1].points+" punti",30,50+50*(i-1));
         }
     }
     

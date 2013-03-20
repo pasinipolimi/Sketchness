@@ -38,7 +38,7 @@ public class ChatRoom extends UntypedActor {
     
 	//Control Variables
 	
-	private static final int requiredPlayers=3;
+	private static final int requiredPlayers=4;
         private static int missingPlayers=requiredPlayers;
         private int disconnectedPlayers=0;
 	private boolean gameStarted=false;
