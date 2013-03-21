@@ -60,6 +60,13 @@
         
          
         <script type="text/javascript" src="/assets/javascripts/paint.js"></script>
+		
+		<!-- DISABLE THE REFRESH BUTTON-->
+		<script type="text/javascript">
+			function disableF5(e) { if (e.which == 116) e.preventDefault(); };
+			// To disable f5
+			$(document).bind("keydown", disableF5);
+		</script>
 
         <!--HANDLE DEFAULT VALUES FOR TEXT AREA-->
         <script type="text/javascript">
