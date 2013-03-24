@@ -16,6 +16,20 @@
 
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
         <script src="@routes.Assets.at("javascripts/jquery-1.7.1.min.js")" type="text/javascript"></script>
+		<script src="@routes.Assets.at("javascripts/jquery.i18n.properties-min-1.0.9.js")" type="text/javascript"></script>
+		
+		<!-- Adding support for Internazionalization -->
+		 <script type="text/javascript">
+			$(document).ready(function(){
+			$.i18n.properties({
+					name: 'messages',
+					path: '/i18n?',
+					mode: 'map',
+					cache: true,
+					language: 'it'
+			});
+		});
+		</script>
 
 
         <!-- the mousewheel plugin - optional to provide mousewheel support -->
