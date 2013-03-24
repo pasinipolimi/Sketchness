@@ -7,6 +7,9 @@ import akka.util.*;
 import akka.actor.*;
 import akka.dispatch.*;
 import static akka.pattern.Patterns.ask;
+import scala.concurrent.Await;
+
+import scala.concurrent.duration.Duration;
 
 import akka.actor.ActorSystem;
 
@@ -15,6 +18,8 @@ import org.codehaus.jackson.node.*;
 import java.util.*;
 
 import models.Messages.*;
+
+import play.i18n.Messages;
 
 import play.mvc.*;
 
@@ -38,11 +43,11 @@ public class ChatRoom extends UntypedActor {
     
 	//Control Variables
 	
-	private static final int requiredPlayers=4;
+		private static final int requiredPlayers=3;
         private static int missingPlayers=requiredPlayers;
         private int disconnectedPlayers=0;
-	private boolean gameStarted=false;
-	private String currentSketcher;
+		private boolean gameStarted=false;
+		private String currentSketcher;
         private String currentGuess;
         private ChatRoom current=this;
         
@@ -72,7 +77,7 @@ public class ChatRoom extends UntypedActor {
             rooms.put(room, newRoom);
         }
 
-	final ActorRef finalRoom=newRoom;
+		final ActorRef finalRoom=newRoom;
         
         
         // Send the Join message to the room
@@ -140,9 +145,9 @@ public class ChatRoom extends UntypedActor {
                 else
                 {
                     if(requiredPlayers-playersMap.size()>1)
-                        notifyAll("system", "Sketchness", "In attesa di "+(requiredPlayers-playersMap.size())+" giocatori per iniziare.");
+                        notifyAll("system", "Sketchness", Messages.get("waitingfor")+(requiredPlayers-playersMap.size())+Messages.get("playerstostart"));
                     else
-                        notifyAll("system", "Sketchness", "In attesa di "+(requiredPlayers-playersMap.size())+" giocatore per iniziare.");
+                        notifyAll("system", "Sketchness", Messages.get("waitingfor")+(requiredPlayers-playersMap.size())+Messages.get("playertostart"));
                 }
     }
     
@@ -158,20 +163,20 @@ public class ChatRoom extends UntypedActor {
             Join join = (Join)message;
             // Check if this username is free.
             if(playersMap.containsKey(join.username)) {
-                getSender().tell("Questo username e' gia' in uso");
+                getSender().tell(Messages.get("usernameused"));
             } 
             else if(!gameStarted) 
             {
                 playersMap.put(join.username, join.channel);
                 playersVect.add(new Painter(join.username,false));
                 tryStartMatch();
-                notifyAll("join", join.username, "e' entrato nella stanza");
+                notifyAll("join", join.username, Messages.get("join"));
                 getSender().tell("OK");
             }
             //[TODO]Disabling game started control for debug messages
             else
             {
-            	getSender().tell("Il match e' gia' iniziato");
+            	getSender().tell(Messages.get("matchstarted"));
             }
             
         } else if(message instanceof Talk)  {
@@ -218,7 +223,7 @@ public class ChatRoom extends UntypedActor {
                 }
             }
             
-            notifyAll("quit", quit.username, "ha lasciato la partita.");
+            notifyAll("quit", quit.username, Messages.get("quit"));
             disconnectedPlayers++;
             //End the game if there's just one player or less
             if(((requiredPlayers-disconnectedPlayers)<=1)&&gameStarted)
@@ -279,7 +284,7 @@ public class ChatRoom extends UntypedActor {
          else
          {
              //Manage round end
-             notifyAll("system", "Sketchness", "Il match e' terminato!");
+             notifyAll("system", "Sketchness", Messages.get("end"));
              paintLogic.gameEnded();
              newGameSetup();
          } 
@@ -295,8 +300,8 @@ public class ChatRoom extends UntypedActor {
          currentSketcher=null;
          int currentPlayers=requiredPlayers-disconnectedPlayers;
          int count=0;
-         notifyAll("system", "Sketchness", "Ha inizio un nuovo round!");
-         notifyAll("system", "Sketchness", "Sto scegliendo i ruoli...");
+         notifyAll("system", "Sketchness", Messages.get("newround"));
+         notifyAll("system", "Sketchness", Messages.get("choosingroles"));
          while(currentSketcher==null)
          {
             if(count>currentPlayers)
@@ -318,7 +323,7 @@ public class ChatRoom extends UntypedActor {
                 count++;
             }
          }
-         notifyAll("system", "Sketchness", "Lo SKETCHER e' "+currentSketcher);
+         notifyAll("system", "Sketchness", Messages.get("thesketcheris")+currentSketcher);
          return currentSketcher;
      }
      

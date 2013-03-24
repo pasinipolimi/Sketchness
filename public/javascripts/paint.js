@@ -199,7 +199,7 @@
         matchStarted=true;
         if(role=="SKETCHER")
         {
-            $('#roleSpan').text("lo Sketcher");
+            $('#roleSpan').text($.i18n.prop('sketcher'));
 $('#mainPage').removeClass('guesser');
 $('#mainPage').addClass('sketcher');
             $('#talk').attr('disabled', 'disabled');
@@ -207,7 +207,7 @@ $('#mainPage').addClass('sketcher');
         }
         else
         {
-            $('#roleSpan').text("un Guesser");
+            $('#roleSpan').text($.i18n.prop('guesser'));
 $('#mainPage').removeClass('sketcher');
 $('#mainPage').addClass('guesser');
             $('#talk').removeAttr('disabled');
@@ -311,7 +311,7 @@ CreateTimer(m.seconds);
         {
             taskContext.fillStyle = "#000000";
             taskContext.font = "bold 30px sans-serif";
-            taskContext.fillText(i+"): "+m.playerList[i-1].name+" = "+m.playerList[i-1].points+" punti",30,50+50*(i-1));
+            taskContext.fillText(i+"): "+m.playerList[i-1].name+" = "+m.playerList[i-1].points+$.i18n.prop('points'),30,50+50*(i-1));
         }
     }
     
@@ -559,14 +559,14 @@ drawTool=false;
 ctx.clearRect(0, 0, hud.width, hud.height);
     if(!matchStarted)
     {
-var htmlMessage="<font size='5'>"+"<b>"+"In attesa di nuovi giocatori..."+"<b>"+"</font>";
+var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('waiting')+"<b>"+"</font>";
 document.getElementById('topMessage').innerHTML=htmlMessage;
     }
     else
     {
         if(role=="SKETCHER")
         {
-var htmlMessage="<font size='5'>"+"<b>"+"Disegna: "+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
+var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('draw')+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
 document.getElementById('topMessage').innerHTML=htmlMessage;
         }
         else if (role=="GUESSER")
@@ -576,23 +576,23 @@ ctx.lineStyle="#ffff00";
 ctx.font = "normal 20px Verdana";
             if(!guessed)
 {
-                var htmlMessage="<font size='5'>"+"<b>"+"Indovina l'oggetto disegnato!"+"<b>"+"</font>";
+                var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('guess')+"<b>"+"</font>";
 document.getElementById('topMessage').innerHTML=htmlMessage;
 }
             else
                 {
-var htmlMessage="<font size='5'>"+"<b>"+"Indovinato! "+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
+var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('guessed')+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
 document.getElementById('topMessage').innerHTML=htmlMessage;
                 }
         }
 else if (role=="ROUNDCHANGE")
 {
-var htmlMessage="<font size='5'>"+"<b>"+"Soluzione: "+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
+var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('solution')+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
 document.getElementById('topMessage').innerHTML=htmlMessage;
 }
         else if (role=="ENDED")
         {
-var htmlMessage="<font size='5'>"+"<b>"+"Classifica:"+"<b>"+"</font>";
+var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('leaderboard')+"<b>"+"</font>";
 document.getElementById('topMessage').innerHTML=htmlMessage;
         }
     }
@@ -604,7 +604,7 @@ document.getElementById('score').innerHTML=htmlMessage;
 if(matchStarted)
 {
 //ctx.fillText(time,35,50);
-var htmlMessage="<font size='5'>"+"<b>"+"Tempo: "+time+"<b>"+"</font>";
+var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('time')+time+"<b>"+"</font>";
 document.getElementById('timeCounter').innerHTML=htmlMessage;
 }
 
