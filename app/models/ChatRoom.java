@@ -5,13 +5,17 @@ import play.libs.F.*;
 
 import akka.util.*;
 import akka.actor.*;
-import akka.dispatch.*;
+import akka.dispatch.Futures;
 import static akka.pattern.Patterns.ask;
+
+import static akka.dispatch.Futures.future;
 import scala.concurrent.Await;
 
 import scala.concurrent.duration.Duration;
 
 import akka.actor.ActorSystem;
+import akka.dispatch.Future;
+import akka.pattern.Patterns;
 
 import org.codehaus.jackson.node.*;
 
@@ -27,6 +31,8 @@ import org.codehaus.jackson.*;
 
 import models.levenshteinDistance.*;
 
+import models.Chat;
+
 
 
 import static java.util.concurrent.TimeUnit.*;
@@ -35,7 +41,7 @@ import play.Logger;
 /**
  * A chat room is an Actor.
  */
-public class ChatRoom extends UntypedActor {
+public class ChatRoom {
     
     
         //Reference to the drawing logic
@@ -62,6 +68,9 @@ public class ChatRoom extends UntypedActor {
     static Map<String,ActorRef> rooms = new HashMap<String, ActorRef>();
     
 
+    // Members of this room.
+    Map<String, WebSocket.Out<JsonNode>> playersMap = new HashMap<String, WebSocket.Out<JsonNode>>();
+    ArrayList<Painter> playersVect = new ArrayList<Painter>();
     
     /**
      * Join the default room.
@@ -73,15 +82,15 @@ public class ChatRoom extends UntypedActor {
             newRoom=rooms.get(room);
         else
         {
-            newRoom= Akka.system().actorOf(new Props(ChatRoom.class));
+            newRoom= Akka.system().actorOf(new Props(Chat.class));
             rooms.put(room, newRoom);
         }
 
 		final ActorRef finalRoom=newRoom;
         
-        
+            Future<ChatRoom> future = Patterns.ask(finalRoom,new Join(username, out), 1000);
         // Send the Join message to the room
-        String result = (String)Await.result(ask(finalRoom,new Join(username, out), 1000), Duration.create(1, SECONDS));
+        String result = (String)Await.result(future, Duration.create(10, SECONDS));
         
         if("OK".equals(result)) 
         {
@@ -94,6 +103,7 @@ public class ChatRoom extends UntypedActor {
                    
                    // Send a Talk message to the room.
                    finalRoom.tell(new Talk(username, event.get("text").asText()));
+                   finalRoom.tell(this);
                } 
             });
             
@@ -144,133 +154,15 @@ public class ChatRoom extends UntypedActor {
                 }
                 else
                 {
-                    if(requiredPlayers-playersMap.size()>1)
-                        notifyAll("system", "Sketchness", Messages.get("waitingfor")+(requiredPlayers-playersMap.size())+Messages.get("playerstostart"));
-                    else
-                        notifyAll("system", "Sketchness", Messages.get("waitingfor")+(requiredPlayers-playersMap.size())+Messages.get("playertostart"));
+                    //if(requiredPlayers-playersMap.size()>1)
+                       // notifyAll("system", "Sketchness", Messages.get("waitingfor")+(requiredPlayers-playersMap.size())+Messages.get("playerstostart"));
+                    //else
+                        //notifyAll("system", "Sketchness", Messages.get("waitingfor")+(requiredPlayers-playersMap.size())+Messages.get("playertostart"));
                 }
     }
     
-    // Members of this room.
-    Map<String, WebSocket.Out<JsonNode>> playersMap = new HashMap<String, WebSocket.Out<JsonNode>>();
-    ArrayList<Painter> playersVect = new ArrayList<Painter>();
     
-    @Override
-    public void onReceive(Object message) throws Exception {           
-        if(message instanceof Join) 
-        {
-            // Received a Join message
-            Join join = (Join)message;
-            // Check if this username is free.
-            if(playersMap.containsKey(join.username)) {
-                getSender().tell(Messages.get("usernameused"));
-            } 
-            else if(!gameStarted) 
-            {
-                playersMap.put(join.username, join.channel);
-                playersVect.add(new Painter(join.username,false));
-                tryStartMatch();
-                notifyAll("join", join.username, Messages.get("join"));
-                getSender().tell("OK");
-            }
-            //[TODO]Disabling game started control for debug messages
-            else
-            {
-            	getSender().tell(Messages.get("matchstarted"));
-            }
-            
-        } else if(message instanceof Talk)  {
-            
-            // Received a Talk message
-            Talk talk = (Talk)message;
-            if(gameStarted)
-			{
-                 //Compare the message sent with the tag in order to establish if we have a right guess
-				 levenshteinDistance distanza = new levenshteinDistance();
-				 int lenLength = distanza.computeLevenshteinDistance(talk.text, currentGuess);
-				 switch(distanza.computeLevenshteinDistance(talk.text, currentGuess)){
-					case 0:	paintLogic.guessedWord(talk.username);
-					        break;
-					case 1: notifyAll("talkNear", talk.username, talk.text);
-					        break;
-					case 2: notifyAll("talkWarning", talk.username, talk.text);
-					        break;
-					default: notifyAll("talkError", talk.username, talk.text);
-			                 break;
-				}
-            }
-            else
-                //The players are just chatting, not playing
-                notifyAll("talk", talk.username, talk.text);
-            
-        } else if(message instanceof Quit)  {
-            
-            // Received a Quit message
-            Quit quit = (Quit)message;
-            
-            playersMap.remove(quit.username);
-            for (Painter painter : playersVect) {
-                if(painter.name.equalsIgnoreCase(quit.username)){
-                    playersVect.remove(painter);
-                    break;
-                }
-            }
-            for (int key : paintLogic.painters.keySet())
-            {
-                if(paintLogic.painters.get(key).name.equalsIgnoreCase(quit.username)){
-                   paintLogic.painters.remove(key);
-                   break;
-                }
-            }
-            
-            notifyAll("quit", quit.username, Messages.get("quit"));
-            disconnectedPlayers++;
-            //End the game if there's just one player or less
-            if(((requiredPlayers-disconnectedPlayers)<=1)&&gameStarted)
-            {
-                //Restart the game
-                paintLogic.gameEnded();
-                newGameSetup();
-            }
-        } else {
-            unhandled(message);
-        } 
-    }
     
-    // Send a Json event to all members
-    public void notifyAll(String kind, String user, String text) {
-        for(WebSocket.Out<JsonNode> channel: playersMap.values()) {
-            
-            ObjectNode event = Json.newObject();
-            event.put("kind", kind);
-            event.put("user", user);
-            event.put("message", text);
-            
-            ArrayNode m = event.putArray("members");
-            for(String u: playersMap.keySet()) {
-                m.add(u);
-            }
-            
-            channel.write(event);
-        }
-    }   
-    
-    // Send a Json event to all members
-    public void notifyGuesser(String kind, String user, String text) {
-        for(WebSocket.Out<JsonNode> channel: playersMap.values()) {
-            
-            ObjectNode event = Json.newObject();
-            event.put("kind", kind);
-            event.put("user", user);
-            event.put("message", text);
-            
-            ArrayNode m = event.putArray("members");
-            for(String u: playersMap.keySet()) {
-                m.add(u);
-            }            
-            channel.write(event);
-        }
-    } 
     
      public void nextRound()
      {
@@ -284,7 +176,7 @@ public class ChatRoom extends UntypedActor {
          else
          {
              //Manage round end
-             notifyAll("system", "Sketchness", Messages.get("end"));
+             //notifyAll("system", "Sketchness", Messages.get("end"));
              paintLogic.gameEnded();
              newGameSetup();
          } 
@@ -300,8 +192,8 @@ public class ChatRoom extends UntypedActor {
          currentSketcher=null;
          int currentPlayers=requiredPlayers-disconnectedPlayers;
          int count=0;
-         notifyAll("system", "Sketchness", Messages.get("newround"));
-         notifyAll("system", "Sketchness", Messages.get("choosingroles"));
+         //notifyAll("system", "Sketchness", Messages.get("newround"));
+         //notifyAll("system", "Sketchness", Messages.get("choosingroles"));
          while(currentSketcher==null)
          {
             if(count>currentPlayers)
@@ -323,7 +215,7 @@ public class ChatRoom extends UntypedActor {
                 count++;
             }
          }
-         notifyAll("system", "Sketchness", Messages.get("thesketcheris")+currentSketcher);
+       //  notifyAll("system", "Sketchness", Messages.get("thesketcheris")+currentSketcher);
          return currentSketcher;
      }
      
@@ -365,7 +257,7 @@ public class ChatRoom extends UntypedActor {
      }
      
      
-     private void newGameSetup()
+     public void newGameSetup()
      {
          disconnectedPlayers=0;
          roundNumber=1;
