@@ -1,5 +1,6 @@
-package models;
+package models.paint;
 
+import models.chat.ChatRoomFactory;
 import java.util.*;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
@@ -10,6 +11,7 @@ import play.mvc.WebSocket;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import models.Painter;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 
@@ -17,17 +19,17 @@ public class PaintRoom {
 	
     public String name;
     // The list of all connected painters (identified by ids)
-    public Map<Integer, Painter> painters = new ConcurrentHashMap<Integer, Painter>();
+    public Map<Integer, Painter> painters = new ConcurrentHashMap<>();
     public AtomicInteger counter = new AtomicInteger(0);
     public AtomicInteger connections = new AtomicInteger(0);
     
-    private HashSet<ObjectNode> taskHashSet = new HashSet<ObjectNode>();
+    private HashSet<ObjectNode> taskHashSet = new HashSet<>();
 
     
     private String currentGuess;
     private Boolean guessedWord;
     
-    private ChatRoom chatRoom=null;
+    private ChatRoomFactory chatRoom=null;
     
     private int remainingTimeOnGuess=20;
     private int guesserPointsRemaining=10;
@@ -601,7 +603,7 @@ public class PaintRoom {
                         painter.updateFromJson(json);
                 }
                 else if (type.equalsIgnoreCase("roundEnded")) {
-                        chatRoom.playerTimeExpired(json.get("player").getTextValue());
+                        //chatRoom.playerTimeExpired(json.get("player").getTextValue());
                 }
                 ObjectNode node = ((ObjectNode)json);
                 node.put("pid", pid);
@@ -699,7 +701,7 @@ public class PaintRoom {
                 ObjectNode guesserJson =  Json.newObject();
                 guesserJson.put("type", "guesser");
                 guesserJson.put("name",guesser);
-                guesserJson.put("guessWord",chatRoom.getCurrentGuess());
+               // guesserJson.put("guessWord",chatRoom.getCurrentGuess());
                 guesserJson.put("points",guesserPointsRemaining);
                 currentPlayer.setPoints(currentPlayer.getPoints()+guesserPointsRemaining);
                 currentPlayer.channel.write(guesserJson);
@@ -730,7 +732,7 @@ public class PaintRoom {
             }
         }
         //Every player has guessed, reduce the remaining time
-        if(numberGuessed==(chatRoom.playersMap.size()-1))
+        //if(numberGuessed==(chatRoom.playersVect.size()-1))
         for(Map.Entry<Integer, Painter> entry : painters.entrySet())
                 entry.getValue().channel.write(timerChange(3));
         guessedWord=true;
@@ -834,12 +836,12 @@ public class PaintRoom {
     }
 
     
-    public void setChatRoom(ChatRoom chatRoom)
+    public void setChatRoom(ChatRoomFactory chatRoom)
     {
         this.chatRoom=chatRoom;
     }
     
-    public ChatRoom getChatRoom()
+    public ChatRoomFactory getChatRoom()
     {
         return this.chatRoom;
     }
