@@ -147,7 +147,7 @@
 
   function connect () {
     try {
-      socket = new WebSocket("ws://"+location.host+"/stream");
+      socket = new WebSocket("ws://"+location.host+"/paintStream");
       socket.onmessage = onSocketMessage;
 
       socket.onopen = function(evt) {

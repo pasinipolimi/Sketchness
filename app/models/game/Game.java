@@ -1,27 +1,19 @@
-package models;
+package models.game;
 
-import play.libs.*;
+
 import play.libs.F.*;
 
-import akka.util.*;
+
 import akka.actor.*;
-import akka.dispatch.Futures;
-import static akka.pattern.Patterns.ask;
 
-import static akka.dispatch.Futures.future;
-import scala.concurrent.Await;
-
-import scala.concurrent.duration.Duration;
-
-import akka.actor.ActorSystem;
-import akka.dispatch.Future;
-import akka.pattern.Patterns;
-
-import org.codehaus.jackson.node.*;
 
 import java.util.*;
+import models.chat.ChatRoomFactory;
 
 import models.Messages.*;
+import models.paint.PaintRoom;
+import models.Painter;
+import models.levenshteinDistance;
 
 import play.i18n.Messages;
 
@@ -31,17 +23,15 @@ import org.codehaus.jackson.*;
 
 import models.levenshteinDistance.*;
 
-import models.Chat;
 
 
 
-import static java.util.concurrent.TimeUnit.*;
 import play.Logger;
 
 /**
  * A chat room is an Actor.
  */
-public class ChatRoom {
+public class Game extends UntypedActor {
     
     
         //Reference to the drawing logic
@@ -55,7 +45,7 @@ public class ChatRoom {
 		private boolean gameStarted=false;
 		private String currentSketcher;
         private String currentGuess;
-        private ChatRoom current=this;
+       public ChatRoomFactory current=null;
         
         private int roundNumber=1;
         private static int maxRound=6;
@@ -67,85 +57,15 @@ public class ChatRoom {
     // Default room.
     static Map<String,ActorRef> rooms = new HashMap<String, ActorRef>();
     
-
+    
+    
     // Members of this room.
-    Map<String, WebSocket.Out<JsonNode>> playersMap = new HashMap<String, WebSocket.Out<JsonNode>>();
     ArrayList<Painter> playersVect = new ArrayList<Painter>();
     
-    /**
-     * Join the default room.
-     */
-    public static void join(final String username, final String room, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out, PaintRoom paintRoom) throws Exception{
-        
-        ActorRef newRoom;        
-        if(rooms.containsKey(room))
-            newRoom=rooms.get(room);
-        else
-        {
-            newRoom= Akka.system().actorOf(new Props(Chat.class));
-            rooms.put(room, newRoom);
-        }
-
-		final ActorRef finalRoom=newRoom;
-        
-            Future<ChatRoom> future = Patterns.ask(finalRoom,new Join(username, out), 1000);
-        // Send the Join message to the room
-        String result = (String)Await.result(future, Duration.create(10, SECONDS));
-        
-        if("OK".equals(result)) 
-        {
-            
-            paintLogic=paintRoom;
-            // For each event received on the socket,
-            in.onMessage(new Callback<JsonNode>() {
-                @Override
-               public void invoke(JsonNode event) {
-                   
-                   // Send a Talk message to the room.
-                   finalRoom.tell(new Talk(username, event.get("text").asText()));
-                   finalRoom.tell(this);
-               } 
-            });
-            
-            // When the socket is closed.
-            in.onClose(new Callback0() {
-                @Override
-               public void invoke() {
-                   
-                   // Send a Quit message to the room.
-                   finalRoom.tell(new Quit(username));
-                   
-               }
-            });
-            
-        } else {
-            
-            // Cannot connect, create a Json error.
-            ObjectNode error = Json.newObject();
-            error.put("error", result);
-            
-            // Send the error to the socket.
-            out.write(error);
-            
-        }
-        
-    }
-    
-    
-    public void tryStartMatch()
+    public void tryStartMatch(Join join)
     {
-                if(playersMap.size()>=requiredPlayers)
+                if(playersVect.size()>=requiredPlayers)
                 {
-                        paintLogic.setChatRoom(this);
-                        //BAD BAD PRACTICE BUT WE HAVE TO REWORK EVERYTHING TO FIX THIS
-                        while(paintLogic.paintersSize()!=playersMap.size())
-                        {
-                            try {
-                                    Thread.sleep(100);
-                                } catch (InterruptedException ex) {
-                                    Logger.error("TruStartMatch", ex);
-                                }
-                        }
                         disconnectedPlayers=0;
                 	gameStarted=true;
                 	nextSketcher();
@@ -155,7 +75,7 @@ public class ChatRoom {
                 else
                 {
                     //if(requiredPlayers-playersMap.size()>1)
-                       // notifyAll("system", "Sketchness", Messages.get("waitingfor")+(requiredPlayers-playersMap.size())+Messages.get("playerstostart"));
+                        //notifyAll("system", "Sketchness", Messages.get("waitingfor")+(requiredPlayers-playersMap.size())+Messages.get("playerstostart"));
                     //else
                         //notifyAll("system", "Sketchness", Messages.get("waitingfor")+(requiredPlayers-playersMap.size())+Messages.get("playertostart"));
                 }
@@ -261,14 +181,77 @@ public class ChatRoom {
      {
          disconnectedPlayers=0;
          roundNumber=1;
-         playersMap = new HashMap<String, WebSocket.Out<JsonNode>>();
          gameStarted=false;
-         playersVect = new ArrayList<Painter>();
+         playersVect = new ArrayList<>();
      }
 
     public String getCurrentGuess() {
         return currentGuess;
     }
-     
-     
+    
+    @Override
+    public void onReceive(Object message) throws Exception {  
+        if(message instanceof Join) 
+        {
+            // Received a Join message
+            Join join = (Join)message;
+            tryStartMatch(join);
+        } else if(message instanceof Talk)  {
+            
+            // Received a Talk message
+            Talk talk = (Talk)message;
+            if(gameStarted)
+			{
+                 //Compare the message sent with the tag in order to establish if we have a right guess
+				 levenshteinDistance distanza = new levenshteinDistance();
+				 int lenLength = distanza.computeLevenshteinDistance(talk.text, currentGuess);
+				 switch(distanza.computeLevenshteinDistance(talk.text, currentGuess)){
+					case 0:	paintLogic.guessedWord(talk.username);
+					        break;
+					//case 1: notifyAll("talkNear", talk.username, talk.text);
+					        //break;
+					//case 2: notifyAll("talkWarning", talk.username, talk.text);
+					        ///break;
+					//default: notifyAll("talkError", talk.username, talk.text);
+			                 //break;
+				}
+            }
+            else{}
+                //The players are just chatting, not playing
+                //notifyAll("talk", talk.username, talk.text);
+            
+        } else if(message instanceof Quit)  {
+            
+            // Received a Quit message
+            Quit quit = (Quit)message;
+            
+            //playersMap.remove(quit.username);
+            for (Painter painter : playersVect) {
+                if(painter.name.equalsIgnoreCase(quit.username)){
+                    playersVect.remove(painter);
+                    break;
+                }
+            }
+            for (int key : paintLogic.painters.keySet())
+            {
+                if(paintLogic.painters.get(key).name.equalsIgnoreCase(quit.username)){
+                   paintLogic.painters.remove(key);
+                   break;
+                }
+            }
+            
+            //notifyAll("quit", quit.username, Messages.get("quit"));
+            disconnectedPlayers++;
+            //End the game if there's just one player or less
+            if(((requiredPlayers-disconnectedPlayers)<=1)&&gameStarted)
+            {
+                //Restart the game
+                paintLogic.gameEnded();
+               // current.newGameSetup();
+            }
+        } else {
+            unhandled(message);
+        } 
+    }
+
 }

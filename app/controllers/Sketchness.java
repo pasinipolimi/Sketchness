@@ -1,5 +1,7 @@
 package controllers;
 
+import models.paint.PaintRoom;
+import models.chat.ChatRoomFactory;
 import akka.actor.ActorRef;
 import play.mvc.*;
 
@@ -37,7 +39,7 @@ public class Sketchness extends Controller {
     /**
      * Handle the chat websocket.
      */
-    public static WebSocket<JsonNode> chat(final String username, final String roomName) {
+    public static WebSocket<JsonNode> chatStream(final String username, final String roomName) {
         return new WebSocket<JsonNode>() {
             
             // Called when the Websocket Handshake is done.
@@ -45,7 +47,7 @@ public class Sketchness extends Controller {
                 
                 // Join the chat room.
                 try { 
-                    ChatRoom.join(username, roomName, in, out, env);
+                    ChatRoomFactory.create(username, roomName, in, out);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -58,7 +60,7 @@ public class Sketchness extends Controller {
          * 
          * Handle the paintroom websocket 
          */
-	public static WebSocket<JsonNode> stream() {
+	public static WebSocket<JsonNode> paintStream() {
         
         return new WebSocket<JsonNode>() {
             @Override

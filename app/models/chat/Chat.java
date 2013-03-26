@@ -1,24 +1,21 @@
-package models;
+package models.chat;
+
 
 import play.libs.*;
 import play.libs.F.*;
 
-import akka.util.*;
+
 import akka.actor.*;
-import akka.dispatch.*;
-import static akka.pattern.Patterns.ask;
-import scala.concurrent.Await;
 
-import scala.concurrent.duration.Duration;
 
-import akka.actor.ActorSystem;
-import static akka.pattern.Patterns.ask;
+
 
 import org.codehaus.jackson.node.*;
 
 import java.util.*;
 
 import models.Messages.*;
+import models.levenshteinDistance;
 
 import play.i18n.Messages;
 
@@ -28,53 +25,34 @@ import org.codehaus.jackson.*;
 
 import models.levenshteinDistance.*;
 
-
-
-import static java.util.concurrent.TimeUnit.*;
-import static models.ChatRoom.rooms;
+import models.gamebus.GameBus;
+import models.gamebus.GameMessages;
+import models.gamebus.GameMessages.GameStart;
+import models.gamebus.GameMessages.Guessed;
+import models.gamebus.GameMessages.PlayerQuit;
 import play.Logger;
 
 /**
  * A chat room is an Actor.
  */
 public class Chat extends UntypedActor {
-    
-    
-        //Reference to the drawing logic
-        static PaintRoom paintLogic;
-    
-	//Control Variables
-	
-		private static final int requiredPlayers=3;
-        private static int missingPlayers=requiredPlayers;
-        private int disconnectedPlayers=0;
-		private boolean gameStarted=false;
-		private String currentSketcher;
-        private String currentGuess;
-       public ChatRoom current=null;
-        
-        private int roundNumber=1;
-        private static int maxRound=6;
-		
-		private static Boolean shownImages=false;
-        
-	
-    
-    // Default room.
-    static Map<String,ActorRef> rooms = new HashMap<String, ActorRef>();
+
+    String  roomChannel;
+    String  currentGuess;
+    Boolean gameStarted=false;
+
     
     
     
     // Members of this room.
-    Map<String, WebSocket.Out<JsonNode>> playersMap = new HashMap<String, WebSocket.Out<JsonNode>>();
-    ArrayList<Painter> playersVect = new ArrayList<Painter>();
+    Map<String, WebSocket.Out<JsonNode>> playersMap = new HashMap<>();
     
     @Override
     public void onReceive(Object message) throws Exception {  
-        if (message instanceof ChatRoom)
+        if(message instanceof Room)
         {
-            current=(ChatRoom)message;
-            current.tryStartMatch();
+            this.roomChannel=((Room)message).getRoom();
+            Logger.info("CHATROOM "+roomChannel+" created.");
         }
         if(message instanceof Join) 
         {
@@ -87,8 +65,8 @@ public class Chat extends UntypedActor {
             else if(!gameStarted) 
             {
                 playersMap.put(join.username, join.channel);
-                playersVect.add(new Painter(join.username,false));
                 notifyAll("join", join.username, Messages.get("join"));
+                GameBus.getInstance().publish(new GameMessages.PlayerJoin(join.username, roomChannel));
                 getSender().tell("OK");
             }
             //[TODO]Disabling game started control for debug messages
@@ -97,7 +75,12 @@ public class Chat extends UntypedActor {
             	getSender().tell(Messages.get("matchstarted"));
             }
             
-        } else if(message instanceof Talk)  {
+        }
+        else if(message instanceof GameStart)
+        {
+            gameStarted=true;
+        }
+        else if(message instanceof Talk)  {
             
             // Received a Talk message
             Talk talk = (Talk)message;
@@ -105,9 +88,8 @@ public class Chat extends UntypedActor {
 			{
                  //Compare the message sent with the tag in order to establish if we have a right guess
 				 levenshteinDistance distanza = new levenshteinDistance();
-				 int lenLength = distanza.computeLevenshteinDistance(talk.text, currentGuess);
 				 switch(distanza.computeLevenshteinDistance(talk.text, currentGuess)){
-					case 0:	paintLogic.guessedWord(talk.username);
+					case 0:	GameBus.getInstance().publish(new Guessed(talk.username,roomChannel));
 					        break;
 					case 1: notifyAll("talkNear", talk.username, talk.text);
 					        break;
@@ -125,31 +107,9 @@ public class Chat extends UntypedActor {
             
             // Received a Quit message
             Quit quit = (Quit)message;
-            
             playersMap.remove(quit.username);
-            for (Painter painter : playersVect) {
-                if(painter.name.equalsIgnoreCase(quit.username)){
-                    playersVect.remove(painter);
-                    break;
-                }
-            }
-            for (int key : paintLogic.painters.keySet())
-            {
-                if(paintLogic.painters.get(key).name.equalsIgnoreCase(quit.username)){
-                   paintLogic.painters.remove(key);
-                   break;
-                }
-            }
-            
             notifyAll("quit", quit.username, Messages.get("quit"));
-            disconnectedPlayers++;
-            //End the game if there's just one player or less
-            if(((requiredPlayers-disconnectedPlayers)<=1)&&gameStarted)
-            {
-                //Restart the game
-                paintLogic.gameEnded();
-                current.newGameSetup();
-            }
+            GameBus.getInstance().publish(new PlayerQuit(quit.username,roomChannel));
         } else {
             unhandled(message);
         } 
@@ -172,23 +132,6 @@ public class Chat extends UntypedActor {
             channel.write(event);
         }
     }   
-    
-    // Send a Json event to all members
-    public void notifyGuesser(String kind, String user, String text) {
-        for(WebSocket.Out<JsonNode> channel: playersMap.values()) {
-            
-            ObjectNode event = Json.newObject();
-            event.put("kind", kind);
-            event.put("user", user);
-            event.put("message", text);
-            
-            ArrayNode m = event.putArray("members");
-            for(String u: playersMap.keySet()) {
-                m.add(u);
-            }            
-            channel.write(event);
-        }
-    } 
 
      
 }

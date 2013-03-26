@@ -8,8 +8,8 @@ public class Messages {
     
     public static class Join {
         
-        final String username;
-        final WebSocket.Out<JsonNode> channel;
+        final public String username;
+        final public WebSocket.Out<JsonNode> channel;
         
         public Join(String username, WebSocket.Out<JsonNode> channel) {
             this.username = username;
@@ -19,8 +19,8 @@ public class Messages {
     
     public static class Talk {
         
-        final String username;
-        final String text;
+        final public String username;
+        final public String text;
         
         public Talk(String username, String text) {
             this.username = username;
@@ -31,7 +31,7 @@ public class Messages {
     
     public static class Quit {
         
-        final String username;
+        final public String username;
         
         public Quit(String username) {
             this.username = username;
@@ -39,4 +39,15 @@ public class Messages {
         
     }
     
+    public static class Room{
+        final public String room;
+
+        public Room(String room) {
+            this.room = room;
+        }
+
+        public String getRoom() {
+            return room;
+        }
+    }
 }
