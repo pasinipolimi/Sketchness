@@ -10,6 +10,7 @@ import org.codehaus.jackson.*;
 import views.html.*;
 
 import models.*;
+import models.game.GameRoomFactory;
 
 
 
@@ -27,7 +28,7 @@ public class Sketchness extends Controller {
     /**
      * Display the chat room.
      */
-    public static Result chatRoom(final String username, final String roomName) {
+    public static Result chatRoom(final String username, final String roomName) throws Exception {
         /*Fix the errors with all the possible cases*/
         if(username == null || username.trim().equals("")) {
             flash("error", "Please choose a valid username.");
@@ -47,7 +48,9 @@ public class Sketchness extends Controller {
                 
                 // Join the chat room.
                 try { 
-                    ChatRoomFactory.create(username, roomName, in, out);
+                    
+                    ChatRoomFactory.createChat(username, roomName, in, out);
+                    GameRoomFactory.createGame(roomName);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

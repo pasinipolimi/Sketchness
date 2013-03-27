@@ -13,6 +13,10 @@ import models.chat.ChatRoomFactory;
 import models.Messages.*;
 import models.paint.PaintRoom;
 import models.Painter;
+import models.gamebus.GameBus;
+import models.gamebus.GameMessages;
+import models.gamebus.GameMessages.PlayerJoin;
+import models.gamebus.GameMessages.PlayerQuit;
 import models.levenshteinDistance;
 
 import play.i18n.Messages;
@@ -33,6 +37,7 @@ import play.Logger;
  */
 public class Game extends UntypedActor {
     
+    String  roomChannel;
     
         //Reference to the drawing logic
         static PaintRoom paintLogic;
@@ -54,29 +59,28 @@ public class Game extends UntypedActor {
         
 	
     
-    // Default room.
-    static Map<String,ActorRef> rooms = new HashMap<String, ActorRef>();
-    
     
     
     // Members of this room.
-    ArrayList<Painter> playersVect = new ArrayList<Painter>();
+    ArrayList<Painter> playersVect = new ArrayList<>();
     
-    public void tryStartMatch(Join join)
+    public void checkStart()
     {
                 if(playersVect.size()>=requiredPlayers)
                 {
                         disconnectedPlayers=0;
                 	gameStarted=true;
-                	nextSketcher();
-                        paintLogic.matchStarted(currentSketcher);
-                        currentGuess=paintLogic.getCurrentGuess();
+                	//nextSketcher();
+                        //paintLogic.matchStarted(currentSketcher);
+                        //currentGuess=paintLogic.getCurrentGuess();
                 }
                 else
                 {
-                    //if(requiredPlayers-playersMap.size()>1)
-                        //notifyAll("system", "Sketchness", Messages.get("waitingfor")+(requiredPlayers-playersMap.size())+Messages.get("playerstostart"));
-                    //else
+                    if(requiredPlayers-playersVect.size()>1)
+                        GameBus.getInstance().publish(new GameMessages.SystemMessage(Messages.get("waitingfor")+" "+(requiredPlayers-playersVect.size())+" "+Messages.get("playerstostart"), roomChannel));
+                    else
+                        GameBus.getInstance().publish(new GameMessages.SystemMessage(Messages.get("waitingfor")+" "+(requiredPlayers-playersVect.size())+" "+Messages.get("playertostart"), roomChannel));
+
                         //notifyAll("system", "Sketchness", Messages.get("waitingfor")+(requiredPlayers-playersMap.size())+Messages.get("playertostart"));
                 }
     }
@@ -189,7 +193,47 @@ public class Game extends UntypedActor {
         return currentGuess;
     }
     
+    
+    
     @Override
+    public void onReceive(Object message) throws Exception {
+        
+        if(message instanceof Room)
+        {
+            this.roomChannel=((Room)message).getRoom();
+            Logger.info("GAMEROOM "+roomChannel+" created.");
+        }
+        if(message instanceof PlayerJoin) 
+        {
+            String username=((PlayerJoin)message).getUser();
+            Logger.info("GAMEROOM: added player"+ username);
+            GameBus.getInstance().publish(new GameMessages.SystemMessage("RICEVUTO GIOCATORE", roomChannel));
+            //Add the new entered player, it has never been a sketcher in this game (false)
+            playersVect.add(new Painter(username, false));
+            //Check if we can start the game and, in such a case, start it
+            checkStart();
+        }
+        if(message instanceof PlayerQuit) 
+        {
+            for (Painter painter : playersVect) {
+                if(painter.name.equalsIgnoreCase(((PlayerQuit)message).getUser())){
+                    playersVect.remove(painter);
+                    break;
+                }
+            }
+             //notifyAll("quit", quit.username, Messages.get("quit"));
+            disconnectedPlayers++;
+            //End the game if there's just one player or less
+            if(((requiredPlayers-disconnectedPlayers)<=1)&&gameStarted)
+            {
+                //Restart the game
+                paintLogic.gameEnded();
+               // current.newGameSetup();
+            }
+        }
+    }
+    
+    /*@Override
     public void onReceive(Object message) throws Exception {  
         if(message instanceof Join) 
         {
@@ -252,6 +296,6 @@ public class Game extends UntypedActor {
         } else {
             unhandled(message);
         } 
-    }
+    }*/
 
 }

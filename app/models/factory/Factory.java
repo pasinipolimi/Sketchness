@@ -40,8 +40,6 @@ import scala.concurrent.Future;
 
 public abstract class Factory {
     
-    //Module that we want to create
-    static Class module;
 
     // All the possible chatrooms
     static Map<String,ActorRef> rooms = new HashMap<>();
@@ -50,25 +48,22 @@ public abstract class Factory {
     // Members of this room.
     ArrayList<Painter> playersVect = new ArrayList<>();
 
-    public Factory() 
-    {
-        setModule();
-    }
-    
-    abstract void setModule();
-
     /**
      * Join the default room.
      */
-    public static void create(final String username, final String room, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception{
-        
-        ActorRef newRoom;        
-        if(rooms.containsKey(room))
-            newRoom=rooms.get(room);
+    protected static void create(final String username, final String room, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out, Class module) throws Exception{
+        ActorRef newRoom;     
+        String roomID=room+"_"+module.getSimpleName();
+        if(rooms.containsKey(roomID))
+        {
+            newRoom=rooms.get(roomID);
+             Logger.debug("CHATFACTORY:EXISTING "+roomID);
+        }
         else
         {
-            newRoom= Akka.system().actorOf(new Props(module));
-            rooms.put(room, newRoom);
+            Logger.debug("CHATFACTORY:CREATING "+roomID);
+            newRoom= Akka.system().actorOf(new Props(module),roomID);
+            rooms.put(roomID, newRoom);
             newRoom.tell(new Room(room));
             GameBus.getInstance().subscribe(newRoom, room);
         }
@@ -101,6 +96,7 @@ public abstract class Factory {
                    
                    // Send a Quit message to the room.
                    finalRoom.tell(new Quit(username));
+                   Logger.debug("L'UTENTE HA QUITTATO");
                    
                }
             });
@@ -116,6 +112,25 @@ public abstract class Factory {
             out.write(error);
         }
         
+    }
+    
+    
+     protected static void create(final String room, Class module) throws Exception{
+        ActorRef newRoom;     
+        String roomID=room+"_"+module.getSimpleName();
+        if(rooms.containsKey(roomID))
+        {
+            //newRoom=rooms.get(roomID);
+            Logger.debug("GAMEFACTORY:EXISTING "+roomID);
+        }
+        else
+        {
+            Logger.debug("GAMEFACTORY:CREATING "+roomID);
+            newRoom= (ActorRef)Akka.system().actorOf(new Props(module));
+            rooms.put(roomID, newRoom);
+            newRoom.tell(new Room(room));
+            GameBus.getInstance().subscribe(newRoom, room);
+        }
     }
 
 }
