@@ -13,6 +13,7 @@ public class GameMessages {
     public static class GameEvent
     {
         String channel;
+        protected String message;
 
           public GameEvent(String channel) 
           {
@@ -22,10 +23,15 @@ public class GameMessages {
           public GameEvent(String message, String channel) 
           {
               this.channel=channel;
+              this.message=message;
           }
 
         public String getChannel() {
             return channel;
+        }
+        
+        public String getMessage() {
+            return message;
         }
     }
     
@@ -35,9 +41,14 @@ public class GameMessages {
         public PlayerJoin(String message, String channel) {
             super(message, channel);
         }
+        
+        public String getUser()
+        {
+            return message;
+        }
     }
     
-    public static class PlayerQuit extends GameEvent
+    public static class PlayerQuit extends PlayerJoin
     {
 
         public PlayerQuit(String message, String channel) {
@@ -59,6 +70,14 @@ public class GameMessages {
         {
             super(channel);
             username=guesser;
+        }
+    }
+    
+    public static class SystemMessage extends GameEvent
+    {
+        public SystemMessage(String message,String channel)
+        {
+            super(message,channel);
         }
     }
 }

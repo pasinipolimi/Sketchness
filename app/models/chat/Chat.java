@@ -49,10 +49,17 @@ public class Chat extends UntypedActor {
     
     @Override
     public void onReceive(Object message) throws Exception {  
+        
+      
         if(message instanceof Room)
         {
             this.roomChannel=((Room)message).getRoom();
             Logger.info("CHATROOM "+roomChannel+" created.");
+        }
+        if(message instanceof GameMessages.SystemMessage)
+        {
+            Logger.info("RICEVUTO SYSTEM MESSAGE");
+            notifyAll("system", "Sketchness", ((GameMessages.SystemMessage)message).getMessage());
         }
         if(message instanceof Join) 
         {

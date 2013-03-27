@@ -16,10 +16,11 @@ public class MessageBus extends LookupEventBus {
  
       /**
        * Used to define a partial ordering of subscribers. The ordering is based on Event.channel
-       */
+      */
       @Override
-      public int compareSubscribers(Object subscriberA, Object subscriberB) {
-         return ((GameEvent)subscriberA).getChannel().compareTo(((GameEvent)subscriberB).getChannel());
+      public int compareSubscribers(Object subscriberA, Object subscriberB) 
+      {
+         return ((ActorRef)subscriberA).path().compareTo(((ActorRef)subscriberB).path());
       }
  
       /**
