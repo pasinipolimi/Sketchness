@@ -23,7 +23,7 @@
                                         
                                         
 var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket
-var chatSocket = new WS($('#websocket').data('ws'));
+var chatSocket = new WS($('#chatWebSocket').data('ws'));
 
 var sendMessage = function() {
 chatSocket.send(JSON.stringify(

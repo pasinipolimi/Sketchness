@@ -1,6 +1,6 @@
 package controllers;
 
-import models.paint.PaintRoom;
+import models.paint.Paint;
 import models.chat.ChatRoomFactory;
 import akka.actor.ActorRef;
 import play.mvc.*;
@@ -11,12 +11,12 @@ import views.html.*;
 
 import models.*;
 import models.game.GameRoomFactory;
+import models.paint.PaintRoomFactory;
+import play.Logger;
 
 
 
 public class Sketchness extends Controller {
-  
-    static PaintRoom env = new PaintRoom("Public");
   
     /**
      * Display the home page.
@@ -34,7 +34,9 @@ public class Sketchness extends Controller {
             flash("error", "Please choose a valid username.");
             return redirect(routes.Sketchness.index());
         }
+        GameRoomFactory.createGame(roomName);
         return ok(chatRoom.render(username,roomName));
+        
     }
     
     /**
@@ -48,9 +50,7 @@ public class Sketchness extends Controller {
                 
                 // Join the chat room.
                 try { 
-                    
                     ChatRoomFactory.createChat(username, roomName, in, out);
-                    GameRoomFactory.createGame(roomName);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -63,13 +63,14 @@ public class Sketchness extends Controller {
          * 
          * Handle the paintroom websocket 
          */
-	public static WebSocket<JsonNode> paintStream() {
+	public static WebSocket<JsonNode> paintStream(final String username, final String roomName) {
         
         return new WebSocket<JsonNode>() {
             @Override
             public void onReady(In<JsonNode> in, Out<JsonNode> out) {
                 try{
-                    env.createPainter(in, out);
+                    PaintRoomFactory.createPaint(username, roomName, in, out);
+                    Logger.debug("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

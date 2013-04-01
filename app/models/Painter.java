@@ -16,6 +16,7 @@ public class Painter extends Player implements Comparable<Painter>{
         public String role;
         public boolean guessed;
         public boolean hasBeenSketcher;
+        private int nModulesReceived;
 
     public final WebSocket.Out<JsonNode> channel;
 
@@ -23,6 +24,7 @@ public class Painter extends Player implements Comparable<Painter>{
         this.channel = channel;
         this.role = "UNDEFINED";
         hasBeenSketcher=false;
+        nModulesReceived=0;
     }
 
     public Painter(String name, String color, String role, Long size, WebSocket.Out<JsonNode> channel) {
@@ -31,12 +33,14 @@ public class Painter extends Player implements Comparable<Painter>{
 		this.size = size;
                 this.role = role;
                 this.channel = channel;
+                nModulesReceived=0;
 	}
     
     public Painter(String name, Boolean hasBeenSketcher) {
 		this.name = name;
 		this.hasBeenSketcher = hasBeenSketcher;
                 channel=null;
+                nModulesReceived=0;
 	}
 
     public void updateFromJson(JsonNode json) {
@@ -87,6 +91,16 @@ public class Painter extends Player implements Comparable<Painter>{
             return 1;
         return 0;
     }
+
+    public void setnModulesReceived(int nModulesReceived) {
+        this.nModulesReceived = nModulesReceived;
+    }
+
+    public int getnModulesReceived() {
+        return nModulesReceived;
+    }
+    
+    
     
     
 }
