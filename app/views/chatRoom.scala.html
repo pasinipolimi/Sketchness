@@ -60,7 +60,8 @@
         <div id="opponent4"></div>
 
         <!--WE CAN'T USE ROUTES IN STATIC JAVASCRIPT, SO WE MUST REFERENCE THEM OUTSIDE-->
-        <div id="websocket" data-ws="@routes.Sketchness.chatStream(username,room).webSocketURL(request)">
+        <div id="chatWebSocket" data-ws="@routes.Sketchness.chatStream(username,room).webSocketURL(request)">
+        <div id="paintWebSocket" data-ws="@routes.Sketchness.paintStream(username,room).webSocketURL(request)">
             
         <script type="text/javascript" src="/assets/javascripts/chat.js"></script>
         

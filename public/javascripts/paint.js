@@ -3,7 +3,7 @@
   
 
 
-   
+   var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket
 
 
 
@@ -18,16 +18,6 @@
             window.setTimeout(callback, 1000 / 60);
           };
           })();
-
-
-
-  
-
-  if (!window.WebSocket) {
-    if (window.MozWebSocket)
-      window.WebSocket = window.MozWebSocket
-  }
-
 
   var insideIframe = (window.parent != window);
   var isMobile = /ipad|iphone|android/i.test(navigator.userAgent)
@@ -130,38 +120,23 @@
 
 
   // WebSocket
-  var socket;
   var connected = false;
 
-  var reconnectInterval = 1000;
-  var reconnection = false;
-
-  function tryConnectAgain () {
-    reconnection = true;
-    setError("WebSocket connection is down. reconnecting...");
-    setTimeout(function() {
-      reconnectInterval *= (1.5+0.2*Math.random());
-      connect();
-    }, reconnectInterval);
-  }
 
   function connect () {
     try {
-      socket = new WebSocket("ws://"+location.host+"/paintStream");
+	  var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket
+	  socket = new WS($('#paintWebSocket').data('ws'));
       socket.onmessage = onSocketMessage;
 
       socket.onopen = function(evt) {
-        if (reconnection) {
-          window.location = window.location; // Reloading the page to reset states
-          return;
-        }
         connected = true;
         send({type: 'change', size: size, color: color, name: pname});
       }
 
       socket.onclose = function (evt) {
             connected = false;
-        tryConnectAgain();
+			setError("Connection lost");
       };
 
       socket.onerror = function(evt) {console.error("error", evt);};
@@ -200,16 +175,16 @@
         if(role=="SKETCHER")
         {
             $('#roleSpan').text($.i18n.prop('sketcher'));
-$('#mainPage').removeClass('guesser');
-$('#mainPage').addClass('sketcher');
+			$('#mainPage').removeClass('guesser');
+			$('#mainPage').addClass('sketcher');
             $('#talk').attr('disabled', 'disabled');
 
         }
         else
         {
             $('#roleSpan').text($.i18n.prop('guesser'));
-$('#mainPage').removeClass('sketcher');
-$('#mainPage').addClass('guesser');
+			$('#mainPage').removeClass('sketcher');
+			$('#mainPage').addClass('guesser');
             $('#talk').removeAttr('disabled');
 
         }
@@ -241,40 +216,37 @@ $('#mainPage').addClass('guesser');
         //Wait for the image to be loaded before drawing it to canvas to avoid
         //errors
         taskImage.onload = function() {
-taskContext.save();
-taskContext.beginPath();
-x=0;
-y=0;
-var style = window.getComputedStyle(taskCanvas);
-var width=style.getPropertyValue('width');
-width= parseInt(width, 10);
-var height=style.getPropertyValue('height');
-height=parseInt(height, 10);
-radius=50;
-taskContext.moveTo(x + radius, y);
-taskContext.lineTo(x + width - radius, y);
-taskContext.quadraticCurveTo(x + width, y, x + width, y + radius);
-taskContext.lineTo(x + width, y + height - radius);
-taskContext.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-taskContext.lineTo(x + radius, y + height);
-taskContext.quadraticCurveTo(x, y + height, x, y + height - radius);
-taskContext.lineTo(x, y + radius);
-taskContext.quadraticCurveTo(x, y, x + radius, y);
-taskContext.closePath();
-taskContext.clip();
-taskContext.drawImage(taskImage,0,0,width,height);
-taskContext.restore();
+				taskContext.save();
+				taskContext.beginPath();
+				x=0;
+				y=0;
+				var style = window.getComputedStyle(taskCanvas);
+				var width=style.getPropertyValue('width');
+				width= parseInt(width, 10);
+				var height=style.getPropertyValue('height');
+				height=parseInt(height, 10);
+				radius=50;
+				taskContext.moveTo(x + radius, y);
+				taskContext.lineTo(x + width - radius, y);
+				taskContext.quadraticCurveTo(x + width, y, x + width, y + radius);
+				taskContext.lineTo(x + width, y + height - radius);
+				taskContext.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+				taskContext.lineTo(x + radius, y + height);
+				taskContext.quadraticCurveTo(x, y + height, x, y + height - radius);
+				taskContext.lineTo(x, y + radius);
+				taskContext.quadraticCurveTo(x, y, x + radius, y);
+				taskContext.closePath();
+				taskContext.clip();
+				taskContext.drawImage(taskImage,0,0,width,height);
+				taskContext.restore();
         };
     }
-
-    
     if(m.type=="guesser")
     {
         if(m.name==pname)
         {
             score=score+m.points;
             guessed=true;
-            guessWord=m.guessWord;
         }
     }
     

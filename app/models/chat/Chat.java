@@ -15,6 +15,7 @@ import org.codehaus.jackson.node.*;
 import java.util.*;
 
 import models.Messages.*;
+import models.Painter;
 import models.levenshteinDistance;
 
 import play.i18n.Messages;
@@ -27,6 +28,7 @@ import models.levenshteinDistance.*;
 
 import models.gamebus.GameBus;
 import models.gamebus.GameMessages;
+import models.gamebus.GameMessages.GameEvent;
 import models.gamebus.GameMessages.GameStart;
 import models.gamebus.GameMessages.Guessed;
 import models.gamebus.GameMessages.PlayerQuit;
@@ -58,7 +60,6 @@ public class Chat extends UntypedActor {
         }
         if(message instanceof GameMessages.SystemMessage)
         {
-            Logger.info("RICEVUTO SYSTEM MESSAGE");
             notifyAll("system", "Sketchness", ((GameMessages.SystemMessage)message).getMessage());
         }
         if(message instanceof Join) 
@@ -83,10 +84,6 @@ public class Chat extends UntypedActor {
             }
             
         }
-        else if(message instanceof GameStart)
-        {
-            gameStarted=true;
-        }
         else if(message instanceof Talk)  {
             
             // Received a Talk message
@@ -96,7 +93,7 @@ public class Chat extends UntypedActor {
                  //Compare the message sent with the tag in order to establish if we have a right guess
 				 levenshteinDistance distanza = new levenshteinDistance();
 				 switch(distanza.computeLevenshteinDistance(talk.text, currentGuess)){
-					case 0:	GameBus.getInstance().publish(new Guessed(talk.username,roomChannel));
+					case 0:	GameBus.getInstance().publish(new GameEvent(talk.username,roomChannel,"guessed"));
 					        break;
 					case 1: notifyAll("talkNear", talk.username, talk.text);
 					        break;
@@ -110,7 +107,19 @@ public class Chat extends UntypedActor {
                 //The players are just chatting, not playing
                 notifyAll("talk", talk.username, talk.text);
             
-        } else if(message instanceof Quit)  {
+        } 
+        else
+        if(message instanceof GameMessages.GameEvent)
+        {
+            GameEvent event= (GameEvent)message;
+            switch(event.getType())
+            {
+                case "gameStart":gameStarted=true;break;
+                case "nextRound":nextRound(event.getMessage());break;
+                case "task":retrieveTask(event.getObject());break;
+            }
+        }
+        else if(message instanceof Quit)  {
             
             // Received a Quit message
             Quit quit = (Quit)message;
@@ -120,6 +129,17 @@ public class Chat extends UntypedActor {
         } else {
             unhandled(message);
         } 
+    }
+    
+    
+    private void nextRound(String sketcher)
+    {
+         
+   }
+    
+    private void retrieveTask(ObjectNode task)
+    {
+        currentGuess=task.get("word").asText();
     }
     
     // Send a Json event to all members
