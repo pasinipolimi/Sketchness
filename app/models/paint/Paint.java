@@ -13,7 +13,6 @@ import play.libs.Json;
 import java.util.concurrent.atomic.AtomicInteger;
 import models.Messages;
 import models.Messages.Quit;
-import models.Messages.Talk;
 import models.Painter;
 import models.gamebus.GameBus;
 import models.gamebus.GameMessages;
@@ -48,10 +47,10 @@ public class Paint extends UntypedActor{
         if(message instanceof Messages.Room)
         {
             this.roomChannel=((Messages.Room)message).getRoom();
+            Logger.info("PAINTROOM "+roomChannel+" created.");
         }
         if(message instanceof Messages.Join) 
         {
-            boolean found=false;
             Messages.Join join = (Messages.Join)message;
             String username=join.username;
             if(painters.containsKey(username))
@@ -61,16 +60,11 @@ public class Paint extends UntypedActor{
                 Painter painter = new Painter(join.channel);
                     painter.name=username;
                     painters.put(username, painter);
-                      // Inform the painter who he is (which pid, he can then identify himself)
-                    ObjectNode self = Json.newObject();
-                    self.put("type", "youAre");
-                    self.put("pid", 0);
-                    self.put("role", painter.role);
 
-                                        // Inform the list of other painters
+                   // Inform the current painter of the whole list of users
                    for(Map.Entry<String, Painter> entry : painters.entrySet()) {
                         ObjectNode other = (ObjectNode)entry.getValue().toJson();
-                        other.put("pid", entry.getKey());
+                        other.put("type", "change");
                         painter.channel.write(other);
                     }
                 GameBus.getInstance().publish(new GameMessages.PlayerJoin(username, roomChannel));
@@ -92,6 +86,7 @@ public class Paint extends UntypedActor{
                             Painter painter = painters.get(json.get("name").getTextValue());
                             if(painter != null) {
                                 painter.updateFromJson(json);
+                                Logger.debug(painter.toString());
                             }
                             
                     }
@@ -99,9 +94,11 @@ public class Paint extends UntypedActor{
                     {
                         GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel,"timeExpired"));
                     }
-                    ObjectNode node = ((ObjectNode)json);
-                    node.put("pid", pid.intValue());
-                    notifyAll(node);
+                    else if (type.equalsIgnoreCase("trace"))
+                            {
+                                Logger.debug(json.toString());
+                            }
+                    notifyAll(json);
         }
         else
         if(message instanceof GameEvent)
@@ -152,9 +149,9 @@ public class Paint extends UntypedActor{
     {
          //Send to the users the information about their role
          for(Map.Entry<String, Painter> entry : painters.entrySet()) {
-            Logger.debug(entry.toString());
             if(entry.getValue().name.equals(sketcher))
             {
+                entry.getValue().role="SKETCHER";
                 ObjectNode roleMessage = Json.newObject();
                 roleMessage.put("type", "role");
                 roleMessage.put("role","SKETCHER");
@@ -162,6 +159,7 @@ public class Paint extends UntypedActor{
             }
             else
             {
+                entry.getValue().role="GUESSER";
                 ObjectNode self = Json.newObject();
                 self.put("type", "role");
                 self.put("role","GUESSER");
