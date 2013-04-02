@@ -154,6 +154,7 @@ public class Paint extends UntypedActor{
                 entry.getValue().role="SKETCHER";
                 ObjectNode roleMessage = Json.newObject();
                 roleMessage.put("type", "role");
+                roleMessage.put("name",entry.getValue().name);
                 roleMessage.put("role","SKETCHER");
                 entry.getValue().channel.write(roleMessage);
             }
@@ -162,6 +163,7 @@ public class Paint extends UntypedActor{
                 entry.getValue().role="GUESSER";
                 ObjectNode self = Json.newObject();
                 self.put("type", "role");
+                self.put("name",entry.getValue().name);
                 self.put("role","GUESSER");
                 entry.getValue().channel.write(self);
             }

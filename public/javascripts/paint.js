@@ -201,6 +201,9 @@
         guessed=false;
         role=m.role;
         matchStarted=true;
+		var player=getPlayer(pname);
+		player.role=m.role;
+		send({type: 'change', size: size, color: color, name: pname, role: role});
         if(role=="SKETCHER")
         {
             $('#roleSpan').text($.i18n.prop('sketcher'));
@@ -222,7 +225,7 @@
         taskContext.clearRect(0, 0, canvas.width, canvas.height);
         positionContext.clearRect(0, 0, canvas.width, canvas.height);
     }
-	else if(m.type=="move")
+	if(m.type=="move")
 	{
 		trackX=m.x;
 		trackY=m.y;
@@ -324,7 +327,10 @@ CreateTimer(m.seconds);
             ctx.lineTo(p.x, p.y);
             });
         ctx.stroke();
-
+		
+		trackX = points[points.length-1].x;
+        trackY = points[points.length-1].y;
+		
         // clear local canvas if synchronized
         if (m.name==pname && numTrace == m.num) {
           meCtx.clearRect(0,0,meCtx.canvas.width,meCtx.canvas.height);
@@ -383,7 +389,7 @@ CreateTimer(m.seconds);
   }
   function sendMove (x, y) {
     lastSent = +new Date();
-    send({type: "move", x: x, y: y});
+    send({type: "move", x: x, y: y, name: pname});
   }
 
   function canSendNow () {
@@ -489,7 +495,7 @@ var result= getPosition(obj);
         for (i=0;i<players.length;i++)
         {
             var player = players[i];
-            if (!player.role=="SKETCHER" || trackX===undefined) continue;
+            if (player.role!="SKETCHER") continue;
             ctx.beginPath();
             ctx.strokeStyle = TRACKER;
             ctx.arc(trackX, trackY, player.size/2, 0, 2*Math.PI);
@@ -527,12 +533,12 @@ var result= getPosition(obj);
   function setColor (c)
   {
     color = c;
-    send({type: 'change', size: size, color: color, name: pname});
+    send({type: 'change', size: size, color: color, name: pname, role: role});
   }
   
   function setSize (s) {
     size = s;
-    send({type: 'change', size: size, color: color, name: pname});
+    send({type: 'change', size: size, color: color, name: pname, role: role});
   }
 
   function setup() {
