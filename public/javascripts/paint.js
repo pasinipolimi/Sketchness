@@ -54,7 +54,7 @@
   var dirtyPositions = false;
 
   // every player positions
-  var players = {};
+  var players = new Array();
 
   var viewport = document.getElementById('viewport');
   
@@ -106,6 +106,7 @@
    n=$('#currentNickname').text();
    if (n) {
       localStorage.setItem("pname", n);
+	  pname=n;
     }
     return n || pname;
   }
@@ -128,6 +129,7 @@
 	  var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket
 	  socket = new WS($('#paintWebSocket').data('ws'));
       socket.onmessage = onSocketMessage;
+	  queryPname();
 
       socket.onopen = function(evt) {
         connected = true;
@@ -150,6 +152,30 @@
     if (!connected) return;
     socket.send(JSON.stringify(o));
   }
+  
+  function getPlayer(username)
+  {
+	for (i=0;i<players.length;i++)
+	{
+		if(players[i].name.toLowerCase()==username.toLowerCase())
+		{
+			return players[i];
+		}
+	}
+  }
+  
+  function playerExtend(message)
+  {
+	var username=message.name;
+    for (i=0;i<players.length;i++)
+	{
+		if(players[i].name.toLowerCase()==username.toLowerCase())
+		{
+	          players[i]=$.extend(players[i], message);
+		}
+	}
+  }
+  
 
 
 
@@ -193,22 +219,8 @@
         taskContext.clearRect(0, 0, canvas.width, canvas.height);
         positionContext.clearRect(0, 0, canvas.width, canvas.height);
     }
-    else
-    {
-        var player = players[m.pid];
-        if (player === undefined)
-        {
-            player = players[m.pid] = m;
-        }
-        if (m.type=="youAre")
-        {
-            pid = m.pid;
-            role = m.role;
-        }
-    }
-    
     //Managing the task to provide to the users
-    if(m.type=="task")
+    else if(m.type=="task")
     {
         guessWord=m.word;
         taskImage=new Image();
@@ -241,7 +253,7 @@
 				taskContext.restore();
         };
     }
-    if(m.type=="guesser")
+    else if(m.type=="guesser")
     {
         if(m.name==pname)
         {
@@ -250,25 +262,25 @@
         }
     }
     
-    if(m.type=="sketcher")
+    else if(m.type=="sketcher")
     {
         if(m.name==pname)
             score=score+m.points;
     }
     
-    if(m.type=="timeChange")
+    else if(m.type=="timeChange")
     {
         if(RemainingSeconds>m.amount)
             RemainingSeconds=m.amount;
     }
 
-if(m.type=="showImages")
+else if(m.type=="showImages")
 {
 role="ROUNDCHANGE";
 CreateTimer(m.seconds);
 }
     
-    if(m.type=="leaderboard")
+    else if(m.type=="leaderboard")
     {
         role="ENDED";
         //Clear all the canvas and draw the leaderboard
@@ -287,9 +299,10 @@ CreateTimer(m.seconds);
         }
     }
     
-    if (m.type != "disconnect") {
+    else if (m.type != "disconnect") {
       if (m.type == "trace")
       {
+	    player = getPlayer(m.name);
         ctx.strokeStyle = player.color;
         if(player.color=="rgba(255,255,255,1.0)")
             ctx.globalCompositeOperation = "destination-out";
@@ -303,23 +316,39 @@ CreateTimer(m.seconds);
             ctx.lineTo(p.x, p.y);
             });
         ctx.stroke();
-        m.x = points[points.length-1].x;
-        m.y = points[points.length-1].y;
+        player.x = m.x = points[points.length-1].x;
+        player.y = m.y = points[points.length-1].y;
 
         // clear local canvas if synchronized
-        if (m.pid==pid && numTrace == m.num) {
+        if (m.name==pname && numTrace == m.num) {
           meCtx.clearRect(0,0,meCtx.canvas.width,meCtx.canvas.height);
         }
       }
-
-     players[m.pid] = $.extend(players[m.pid], m);
+	else if(m.type=="change")
+    {
+        var player = getPlayer(m.name);
+        if (player === undefined)
+        {
+            player = players[players.length] = m;
+			console.log(player);
+        }
+        playerExtend(m);
     }
-    else {
-      delete players[m.pid];
+	else if (m.type=="youAre")
+        {
+            role = m.role;
+        }
+	else {
+	  //TODO CHANGE TO NOT WORK WITH PID
+      //delete players[m.pid];
     }
+	}
+	}
+	  
+    
+    
 
     dirtyPositions = true;
-  }
 
   var w = canvas.width, h = canvas.height;
   ctx.lineCap = 'round';
@@ -347,7 +376,7 @@ CreateTimer(m.seconds);
   }
   function sendPoints () {
     lastSent = +new Date();
-    send({type: "trace", points: points, num: numTrace});
+    send({type: "trace", points: points, num: numTrace, name: pname});
     points = [];
   }
   function sendMove (x, y) {
@@ -455,9 +484,9 @@ var result= getPosition(obj);
     dirtyPositions = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if(matchStarted)
-        for (var pid in players)
+        for (i=0;i<players.length;i++)
         {
-            var player = players[pid];
+            var player = players[i];
             if (!player || player.x===undefined) continue;
             ctx.beginPath();
             ctx.strokeStyle = TRACKER;
@@ -466,8 +495,8 @@ var result= getPosition(obj);
             ctx.font = "10px sans-serif";
             ctx.fillStyle = TRACKER;
             ctx.fillText((player.name+"").substring(0,20), player.x, player.y-Math.round(player.size/2)-4);
-            players[pid].x=-200;
-            players[pid].y=-200;
+            players[i].x=-200;
+            players[i].y=-200;
         }
   }
 
@@ -498,12 +527,12 @@ var result= getPosition(obj);
   function setColor (c)
   {
     color = c;
-    send({type: 'change', color: color});
+    send({type: 'change', size: size, color: color, name: pname});
   }
   
   function setSize (s) {
     size = s;
-    send({type: 'change', size: size});
+    send({type: 'change', size: size, color: color, name: pname});
   }
 
   function setup() {

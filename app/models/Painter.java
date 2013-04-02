@@ -10,8 +10,8 @@ import play.mvc.WebSocket;
 public class Painter extends Player implements Comparable<Painter>{
     
 	public String name;
-	public String color;
-	public Long size;
+	public String color="red";
+	public int size=5;
         //ROLE TYPES: UNDEFINED, SKETCHER, GUESSER
         public String role;
         public boolean guessed;
@@ -27,7 +27,7 @@ public class Painter extends Player implements Comparable<Painter>{
         nModulesReceived=0;
     }
 
-    public Painter(String name, String color, String role, Long size, WebSocket.Out<JsonNode> channel) {
+    public Painter(String name, String color, String role, int size, WebSocket.Out<JsonNode> channel) {
 		this.name = name;
 		this.color = color;
 		this.size = size;
@@ -49,7 +49,7 @@ public class Painter extends Player implements Comparable<Painter>{
         if(json.has("color"))
             this.color = json.get("color").getTextValue();
         if(json.has("size"))
-            this.size = json.get("size").getLongValue();
+            this.size = json.get("size").getIntValue();
         if(json.has("role"))
             this.role = json.get("role").getTextValue();
         if(json.has("guessed"))

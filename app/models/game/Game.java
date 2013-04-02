@@ -5,7 +5,6 @@ import play.libs.F.*;
 
 
 import akka.actor.*;
-import java.math.BigDecimal;
 
 
 import java.util.*;
@@ -16,7 +15,6 @@ import models.Painter;
 import models.gamebus.GameBus;
 import models.gamebus.GameMessages;
 import models.gamebus.GameMessages.GameEvent;
-import models.gamebus.GameMessages.Guessed;
 import models.gamebus.GameMessages.PlayerJoin;
 import models.gamebus.GameMessages.PlayerQuit;
 import models.gamebus.GameMessages.SystemMessage;
@@ -39,7 +37,6 @@ public class Game extends UntypedActor {
     
     String  roomChannel;
     
-     private String currentGuess;
     private Boolean guessedWord;
     
     
@@ -167,6 +164,10 @@ public class Game extends UntypedActor {
            sketcherPointsRemaining=0;
            numberGuessed=0;
            guessedWord=false;
+           //Reset the guesses on the players
+           for (Painter current : playersVect) {
+                 current.guessed=false;
+           }
            nextSketcher();
            //We start a new round
            GameBus.getInstance().publish(new GameEvent(sketcherPainter.name,roomChannel,"nextRound"));
@@ -179,8 +180,6 @@ public class Game extends UntypedActor {
          {
              SystemMessage endRound = new SystemMessage(Messages.get("end"),roomChannel);
              //Manage round end:send the message to the chat
-             GameBus.getInstance().publish(endRound);
-             //TODO gestisci il messaggio in maniera appropriata
              GameBus.getInstance().publish(endRound);
              newGameSetup();
          } 
