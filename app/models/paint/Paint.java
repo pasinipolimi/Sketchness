@@ -94,7 +94,7 @@ public class Paint extends UntypedActor{
                     {
                         GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel,"timeExpired"));
                     }
-                    else if (type.equalsIgnoreCase("trace"))
+                    else if (type.equalsIgnoreCase("move"))
                             {
                                 Logger.debug(json.toString());
                             }
