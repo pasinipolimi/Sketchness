@@ -48,6 +48,9 @@
   var guessed=false;
   var drawTool = true;
   var taskImage;
+  
+  var trackX;
+  var trackY;
 
   var numTrace = 1;
   var onSocketMessage;
@@ -219,6 +222,11 @@
         taskContext.clearRect(0, 0, canvas.width, canvas.height);
         positionContext.clearRect(0, 0, canvas.width, canvas.height);
     }
+	else if(m.type=="move")
+	{
+		trackX=m.x;
+		trackY=m.y;
+	}
     //Managing the task to provide to the users
     else if(m.type=="task")
     {
@@ -316,8 +324,6 @@ CreateTimer(m.seconds);
             ctx.lineTo(p.x, p.y);
             });
         ctx.stroke();
-        player.x = m.x = points[points.length-1].x;
-        player.y = m.y = points[points.length-1].y;
 
         // clear local canvas if synchronized
         if (m.name==pname && numTrace == m.num) {
@@ -343,12 +349,8 @@ CreateTimer(m.seconds);
       //delete players[m.pid];
     }
 	}
+	dirtyPositions = true;
 	}
-	  
-    
-    
-
-    dirtyPositions = true;
 
   var w = canvas.width, h = canvas.height;
   ctx.lineCap = 'round';
@@ -487,16 +489,14 @@ var result= getPosition(obj);
         for (i=0;i<players.length;i++)
         {
             var player = players[i];
-            if (!player || player.x===undefined) continue;
+            if (!player.role=="SKETCHER" || trackX===undefined) continue;
             ctx.beginPath();
             ctx.strokeStyle = TRACKER;
-            ctx.arc(player.x, player.y, player.size/2, 0, 2*Math.PI);
+            ctx.arc(trackX, trackY, player.size/2, 0, 2*Math.PI);
             ctx.stroke();
             ctx.font = "10px sans-serif";
             ctx.fillStyle = TRACKER;
-            ctx.fillText((player.name+"").substring(0,20), player.x, player.y-Math.round(player.size/2)-4);
-            players[i].x=-200;
-            players[i].y=-200;
+            ctx.fillText((player.name+"").substring(0,20), trackX, trackY-Math.round(player.size/2)-4);
         }
   }
 
