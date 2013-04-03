@@ -21,7 +21,7 @@
 
   // CONSTANTS
   var PEN = 'red';
-  var ERASER = "rgba(255,255,255,0.2)";
+  var ERASER = "rgba(255,255,255,1.0)";
   var TRACKER = 'red';
   var SIZE = 5;
   var MIN_SEND_RATE = 50; // the min interval in ms between 2 send
@@ -281,6 +281,14 @@
 			break;
 			
 		case "showImages":
+					
+					//We want to save the image that has been created by the sketcher
+					if(role=="SKETCHER")
+					{
+						//Save the drawings done by the player
+						var dataURL = canvas.toDataURL('image/png');
+						send({type: 'segment', src: taskImage.src, image: dataURL, name: pname});
+					}
 					role="ROUNDCHANGE";
 					CreateTimer(m.seconds);
 			break;
@@ -306,7 +314,7 @@
 		case "trace":
 					player = getPlayer(m.name);
 					ctx.strokeStyle = player.color;
-					if(player.color=="rgba(255,255,255,0.2)")
+					if(player.color==ERASER)
 						ctx.globalCompositeOperation = "destination-out";
 					else
 					   ctx.globalCompositeOperation = "source-over";
@@ -360,8 +368,8 @@
 
 
 
-
-// "me" canvas is where you draw before the painter sends your own events (before synchronization)
+/*************************DRAWING PANEL**********************/
+// The "me" canvas is where the sketcher draws before sending the update status to all the other players
 (function(){
   var canvas = document.getElementById("me");
   var ctx = meCtx = canvas.getContext("2d");
@@ -371,19 +379,25 @@
   var points = [];
   var lastSent = 0;
 
+  //Add the current point to the list of points to be sent
   function addPoint (x, y) {
     points.push({x: x, y: y});
   }
+  
+  //Send the points to the server as a trace message. It sends the points, the number of the trace sent, the name of the player that has sent the trace
   function sendPoints () {
-    lastSent = +new Date();
+    lastSent = +new Date(); //Refresh the countdown timer
     send({type: "trace", points: points, num: numTrace, name: pname});
     points = [];
   }
+  
+  //Send the tracking position of the player that is drawing, sending his current position and name
   function sendMove (x, y) {
     lastSent = +new Date();
     send({type: "move", x: x, y: y, name: pname});
   }
 
+  //Can we send? If the current time - the last update is bigger than the treshold, we can send the packets
   function canSendNow () {
     return +new Date() - lastSent > MIN_SEND_RATE;
   }
@@ -391,7 +405,7 @@
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
 
-
+   //Create a line from the starting point to the end point
   function lineTo(x, y) {
       ctx.strokeStyle = color;
       ctx.lineWidth = size;
@@ -401,19 +415,29 @@
       ctx.stroke();
   }
 
+  //Handle the mouse movement when drawing
   function onMouseMove (e) {
     e.preventDefault();
+	//Get the current position with respect to the canvas element we want to draw to
     var o = positionWithE(e,canvas);
+	//If the mouse is pressed and the player is a sketcher
     if (pressed && role=="SKETCHER") {
+	  //Draw the local line
       lineTo(o.x, o.y);
+	  //Add the points to the points to be sent
       addPoint(o.x, o.y);
+	  //We have created a trace
       ++ numTrace;
+	  //Can we send the batch of points?
       if (canSendNow()) {
         sendPoints();
+		sendMove(o.x, o.y);
         addPoint(o.x, o.y);
       }
     }
-    else {
+    else 
+	{
+	  //The mouse is not pressed, can we just send the position of the player?
       if (canSendNow() && role=="SKETCHER") {
         sendMove(o.x, o.y);
       }
@@ -422,6 +446,7 @@
   }
 
   function onMouseDown (e) {
+	//If the player is a sketcher, update the mouse pressed status to send his traces
     if(role=="SKETCHER")
         {
             var o = positionWithE(e,canvas);
@@ -432,6 +457,7 @@
   }
 
   function onMouseUp (e) {
+    //If the player is the sketcher, send the last trace and disable the drawing function
     if(role=="SKETCHER")
         {
             lineTo(position.x, position.y);
@@ -442,13 +468,15 @@
   }
 
 
-
+  //Add the event listeners to handle movements, mouse up and mouse down, eventually supporting also mobile devices
   document.addEventListener(isMobile ? "touchstart": "mousedown", onMouseDown);
   document.addEventListener(isMobile ? "touchend" : "mouseup", onMouseUp);
   viewport.addEventListener(isMobile ? "touchmove" : "mousemove", onMouseMove);
 
 })();
 
+
+//Return the current position of the cursor within the specified element
 function positionWithE (e,obj) {
 var leftm=topm=0;
 var result= getPosition(obj);
@@ -458,7 +486,7 @@ var result= getPosition(obj);
         };
   };
   
-  
+  //Return the position of the element in the page
   function getPosition(element) {
     var xPosition = 0;
     var yPosition = 0;
@@ -470,6 +498,9 @@ var result= getPosition(obj);
     }
     return { x: xPosition, y: yPosition };
 };
+
+
+/*************************DRAW PLAYERS POSITION**********************/
 
 (function(){
   var canvas = document.getElementById("positions");
@@ -573,9 +604,6 @@ var result= getPosition(obj);
 				break;
 				
 			case "GUESSER":
-						ctx.fillStyle = "#000000";
-						ctx.lineStyle="#ffff00";
-						ctx.font = "normal 20px Verdana";
 						if(!guessed)
 						{
 							var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('guess')+"<b>"+"</font>";
@@ -596,6 +624,8 @@ var result= getPosition(obj);
 			case "ENDED":
 						var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('leaderboard')+"<b>"+"</font>";
 						document.getElementById('topMessage').innerHTML=htmlMessage;
+						$('#mainPage').removeClass('guesser');
+						$('#mainPage').removeClass('sketcher');
 				break;
 				
 		}
