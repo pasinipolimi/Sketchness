@@ -72,11 +72,18 @@ public class Game extends UntypedActor {
     // Members of this room.
     ArrayList<Painter> playersVect = new ArrayList<>();
     
+    
+    /*
+     * Retrieves one of the images that has been stored to be segmented at random
+     * being careful not to retrieve the same image two times for the same match.
+     * <p>
+     * @return The object related to the task: image + tag
+     */
     public ObjectNode retrieveTaskImage()
     {
          guessObject=null;
          int size = taskHashSet.size();
-         int item = new Random().nextInt(size); // In real life, the Random object should be rather more shared than this
+         int item = new Random().nextInt(size);
          int i = 0;
          for(ObjectNode obj : taskHashSet)
          {
@@ -91,16 +98,26 @@ public class Game extends UntypedActor {
          return guessObject;
     }
     
+    
+     /*
+     * Retrieves the name of the sketcher for the next round. It assigns the sketcher
+     * role to the players that have never played as such first
+     * <p>
+     * @return The object related to the task: image + tag
+     */
      public String nextSketcher()
      {
          sketcherPainter=null;
          int currentPlayers=requiredPlayers-disconnectedPlayers;
          int count=0;
+         //Publish system messages to inform that a new round is starting and the roles are being chosen
          GameBus.getInstance().publish(new SystemMessage(Messages.get("newround"), roomChannel));
          GameBus.getInstance().publish(new SystemMessage(Messages.get("choosingroles"), roomChannel));
 
+         //Keep searching for a new sketcher
          while(sketcherPainter==null)
          {
+            //If all the players have been sketcher at least one time, reset their status
             if(count>currentPlayers)
             {
                 for(int i=0;i<currentPlayers;i++)
@@ -109,6 +126,7 @@ public class Game extends UntypedActor {
                 }
                 count=0;
             }
+            //Find a sketcher at random among the ones that have never played such a role
             else
             {
                 int index = (int)(Math.random() * currentPlayers);
@@ -120,10 +138,20 @@ public class Game extends UntypedActor {
                 count++;
             }
          }
-         GameBus.getInstance().publish(new SystemMessage(Messages.get("thesketcheris")+sketcherPainter.name, roomChannel));
+         //Publish a system message to inform the other players on who is the sketcher
+         GameBus.getInstance().publish(new SystemMessage(Messages.get("thesketcheris")+" "+sketcherPainter.name, roomChannel));
          return sketcherPainter.name;
      }
-    
+     
+     
+     /*
+     * Check if there are enough players connected and that all the modules have
+     * received the login information regarding all these players.
+     * If not enough players are connected, inform the players with a message and
+     * wait for new connections or for all the modules to receive the login of the
+     * respective players
+     * <p>
+     */
     public void checkStart()
     {
                 boolean canStart=true;
@@ -154,28 +182,34 @@ public class Game extends UntypedActor {
     
     
     
-    
+     /*
+     * Start a new round of the game
+     */
      public void nextRound()
      {
          roundNumber++;
          if(roundNumber<=maxRound)
          {
+           //Reset the points and status counters
            guesserPointsRemaining=10;
            sketcherPointsRemaining=0;
            numberGuessed=0;
            guessedWord=false;
-           //Reset the guesses on the players
-           for (Painter current : playersVect) {
-                 current.guessed=false;
+           //Nobody has guessed for this round
+           for (Painter reset : playersVect) {
+                 reset.guessed=false;
            }
+           //Find the new sketcher
            nextSketcher();
-           //We start a new round
+           //Inform the other modules that we are starting a new round
            GameBus.getInstance().publish(new GameEvent(sketcherPainter.name,roomChannel,"nextRound"));
            //We send the right task to the right sketcher
            GameEvent task = new GameEvent(sketcherPainter.name,roomChannel,"task");
            task.setObject(retrieveTaskImage());
            GameBus.getInstance().publish(task);
          }
+         //We have played all the rounds for the game, inform the users and the modules
+         //that the match has ended
          else
          {
              SystemMessage endRound = new SystemMessage(Messages.get("end"),roomChannel);
@@ -186,46 +220,59 @@ public class Game extends UntypedActor {
      }
 	 
      
-     //NOT CHECKED
+
      
-     
+     /*
+     * Check if the timer for all the players has expired, show the solution for the current
+     * round and start a new one
+     */
      public void playerTimeExpired(String name)
      {
+         //If all the players have disconnected during a game, start a new one
          if(((requiredPlayers-disconnectedPlayers)<=1)&&gameStarted)
          {
              //Restart the game
              gameEnded();
              newGameSetup();
          }
+         //There are still players in game
          else
          {
-			if(missingPlayers>0)
-			{
-				for (Iterator<Painter> it = playersVect.iterator(); it.hasNext();) {
-					Painter painter = it.next();
-					if(painter.name.equals(name))
-						missingPlayers--;
-				}
-			}
+            //We are still missing the end response from some players
+            //[TODO] POSSIBLE EXPLOIT
+            if(missingPlayers>0)
+	    {
+	      for (Iterator<Painter> it = playersVect.iterator(); it.hasNext();) {
+		Painter painter = it.next();
+		if(painter.name.equals(name))
+			missingPlayers--;
+	      }
+	    }
+            //If we have received a response from all the active players in the game, end the round
             if((missingPlayers-disconnectedPlayers)==0)
             {
-				if(shownImages==false)
-				{
-					showImages();
-					shownImages=true;
-					missingPlayers=requiredPlayers;
-				}
-				else
-				{
-					nextRound();
-					shownImages=false;
-					missingPlayers=requiredPlayers;
-				}
+                //Before calling the new round, show the solution to all the players
+		if(shownImages==false)
+		{
+		    showImages();
+		    shownImages=true;
+		    missingPlayers=requiredPlayers;
+		}
+                //If the solution has been given, start a new round
+		else
+		{
+		  nextRound();
+		  shownImages=false;
+		  missingPlayers=requiredPlayers;
+		}
             }
          }
      }
      
-     
+     /*
+     * Initialization of the variables to start a new game
+     * [TODO] Shouldn't we kill the current actor and all the associated ones?
+     */
      public void newGameSetup()
      {
          disconnectedPlayers=0;
@@ -236,7 +283,9 @@ public class Game extends UntypedActor {
      }
     
     
-    
+    /*
+     * Handles all the messages sent to this actor
+     */
     @Override
     public void onReceive(Object message) throws Exception {
         
@@ -424,9 +473,31 @@ public class Game extends UntypedActor {
     
     
     
-    //Stub function to save the task objects in the system
-    //WE ARE WAITING FOR THE CMS TO BE CREATED, THAT'S WHY FOR NOW THERE IS NO 
-    //NEED FOR COMPLEX FUNCTIONS
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+    /**Stub function to save the task objects in the system
+      WE ARE WAITING FOR THE CMS TO BE CREATED, THAT'S WHY FOR NOW THERE IS NO 
+     NEED FOR COMPLEX FUNCTIONS
+    **/
     public final void taskSetInitialization()
     {
        //First item in the task set
@@ -943,31 +1014,5 @@ public class Game extends UntypedActor {
        guessWord.put("image","/assets/taskImages/58.jpg");
        taskHashSet.add(guessWord);
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
 }
