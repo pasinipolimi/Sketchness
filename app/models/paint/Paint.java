@@ -97,6 +97,7 @@ public class Paint extends UntypedActor{
                 case "guesserPoints":notifySingle(event.getMessage(),event.getObject());break;
                 case "guessedObject":notifySingle(event.getMessage(),event.getObject());break;
                 case "timerChange":notifyAll(event.getObject());break;
+                case "leaderboard":notifyAll(event.getObject());break;
             }
         }
             if(message instanceof Quit)

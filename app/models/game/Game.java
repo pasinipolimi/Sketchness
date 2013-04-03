@@ -22,6 +22,8 @@ import models.gamebus.GameMessages.SystemMessage;
 
 import play.i18n.Messages;
 import models.levenshteinDistance.*;
+import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
 
@@ -35,37 +37,39 @@ import play.libs.Json;
  */
 public class Game extends UntypedActor {
     
-    String  roomChannel;
-    
-    private Boolean guessedWord;
     
     
-    private Integer remainingTimeOnGuess=20;
-    private Integer remainingTimeOnAllGuess=3;
     
-    private int guesserPointsRemaining=10;
-    private int sketcherPointsRemaining=0;
-    private int roundNumber=1;
-    private static int maxRound=6;
-    private int numberGuessed=0;
-   
-    private Painter sketcherPainter;
     
-    private int modules =2;
+    //[TODO] Should be declared as config variables
+    //Variables to manage the point system in the game
+    private Boolean guessedWord=false; //Has the word been guessed for the current round?
+    private Integer remainingTimeOnGuess=20;  //Once a player has guessed, change the time for everyone to 20 seconds
+    private Integer remainingTimeOnAllGuess=3; //If all have guessed, reduce the timer to 3 seconds
+    private int guesserPointsRemaining=10;  //The number of points available to the guessers:the first get 10, the second 9 and so on
+    private int sketcherPointsRemaining=0;  //The number of points available to the sketcher: for the first reply he gets 5, for the second 4 and so on
     
-	//Control Variables
-	private ObjectNode guessObject;
-		private static final int requiredPlayers=3;
-        private static int missingPlayers=requiredPlayers;
-        private int disconnectedPlayers=0;
-		private boolean gameStarted=false;
-
-       public ChatRoomFactory current=null;
+    
+    //Variables used to manage the rounds
+    private boolean gameStarted=false;
+    private int roundNumber=1;  //Starts with round number 1
+    private static int maxRound=6;  //Maximum number of rounds
+    private int numberGuessed=0;   //Number of players that have guessed for a specific round
+    private Painter sketcherPainter;  //The current sketcher
+    
+    //System variables
+    private int modules = 2; //Number of modules available in the game (chat/paint)
+    String  roomChannel;  //Name of the room
+    
+    //Control Variables
+    private ObjectNode guessObject;
+    private static final int requiredPlayers=3;
+    private static int missingPlayers=requiredPlayers;
+    private int disconnectedPlayers=0;
+    
+    private static Boolean shownImages=false;
         
-		
-		private static Boolean shownImages=false;
-        
-	private HashSet<ObjectNode> taskHashSet = new HashSet<>();
+    private HashSet<ObjectNode> taskHashSet = new HashSet<>();
     
     
     
@@ -152,7 +156,7 @@ public class Game extends UntypedActor {
      * respective players
      * <p>
      */
-    public void checkStart()
+    public void checkStart() throws Exception
     {
                 boolean canStart=true;
                 for (Painter painter : playersVect) {
@@ -167,7 +171,10 @@ public class Game extends UntypedActor {
                 	gameStarted=true;
                         //We start the game
                         nextRound();
-                        GameBus.getInstance().publish(new GameEvent(sketcherPainter.name, roomChannel,"gameStart"));
+                        if(sketcherPainter!=null)
+                            GameBus.getInstance().publish(new GameEvent(sketcherPainter.name, roomChannel,"gameStart"));
+                        else
+                            throw new Exception("[Error][Game]: Cannot find a suitable Sketcher!");
                 }
                 //Send a message to inform about the missing players
                 else
@@ -215,6 +222,7 @@ public class Game extends UntypedActor {
              SystemMessage endRound = new SystemMessage(Messages.get("end"),roomChannel);
              //Manage round end:send the message to the chat
              GameBus.getInstance().publish(endRound);
+             gameEnded();
              newGameSetup();
          } 
      }
@@ -318,6 +326,7 @@ public class Game extends UntypedActor {
                 Logger.info("GAMEROOM: added player "+playersVect.get(playersVect.size()-1).name);
                 //Check if we can start the game and, in such a case, start it
            }
+           //Wait to see if all the modules have received the login information from the players
            else if (modules>1 ? count>(modules-1) : count>1)
            {
                checkStart();
@@ -328,9 +337,11 @@ public class Game extends UntypedActor {
             GameEvent event= (GameEvent)message;
             switch(event.getType())
             {
+                //[TODO] Get rid of the other messages and use just game event
+                case "playerJoin":break;
+                case "playerQuit":break;
                 case "guessed":guessed(event.getMessage());break;
                 case "timeExpired": playerTimeExpired(event.getMessage());
-                
             }
         }
         if(message instanceof PlayerQuit) 
@@ -379,7 +390,6 @@ public class Game extends UntypedActor {
                  
                 if(guesserPointsRemaining>5)
                 {
-                    
                     sketcherPointsRemaining= (guesserPointsRemaining==10) ? 10 : 1;
                     sketcherPainter.setPoints(sketcherPainter.getPoints()+sketcherPointsRemaining);
                     
@@ -415,27 +425,25 @@ public class Game extends UntypedActor {
     
     public void gameEnded()
     {
-            /*JsonNodeFactory factory = JsonNodeFactory.instance;
+            //Prepares the leaderboard of the players based on their points
+            //and send it to all the interested modules
+            JsonNodeFactory factory = JsonNodeFactory.instance;
             ObjectNode leaderboard = new ObjectNode(factory);
             leaderboard.put("type", "leaderboard");
-            leaderboard.put("playersNumber", painters.size());
+            leaderboard.put("playersNumber", playersVect.size());
             //[TODO] order the list
-            List<Painter> list = new ArrayList<Painter>(painters.values());
-            Collections.sort(list);
+            Collections.sort(playersVect);
             ArrayNode playersOrder=new ArrayNode(factory);
-            for (Painter painter : list) {
+            for (Painter painter : playersVect) {
                 ObjectNode row = new ObjectNode(factory);
                 row.put("name", painter.name);
                 row.put("points", painter.getPoints());
                 playersOrder.add(row);
             }
             leaderboard.put("playerList",playersOrder);
-            //Send the leaderboard information to all the players
-            for(Map.Entry<Integer, Painter> entry : painters.entrySet()) {
-                //Set the remaining time to 0
-                entry.getValue().channel.write(timerChange(0));
-                entry.getValue().channel.write(leaderboard);
-            }*/
+            GameEvent endEvent = new GameEvent("", roomChannel, "leaderboard");
+            endEvent.setObject(leaderboard);
+            GameBus.getInstance().publish(endEvent);
     }
 	
     
