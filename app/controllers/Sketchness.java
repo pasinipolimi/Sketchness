@@ -70,7 +70,6 @@ public class Sketchness extends Controller {
             public void onReady(In<JsonNode> in, Out<JsonNode> out) {
                 try{
                     PaintRoomFactory.createPaint(username, roomName, in, out);
-                    Logger.debug("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

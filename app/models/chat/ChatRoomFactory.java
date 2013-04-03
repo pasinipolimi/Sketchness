@@ -60,7 +60,6 @@ public class ChatRoomFactory extends Factory{
             // Cannot connect, create a Json error.
             ObjectNode error = Json.newObject();
             error.put("error", result);
-            
             // Send the error to the socket.
             out.write(error);
         }

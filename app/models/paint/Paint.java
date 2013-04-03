@@ -10,7 +10,6 @@ import play.Logger;
 import play.libs.Json;
 
 
-import java.util.concurrent.atomic.AtomicInteger;
 import models.Messages;
 import models.Messages.Quit;
 import models.Painter;
@@ -21,19 +20,8 @@ import models.gamebus.GameMessages.GameEvent;
 
 public class Paint extends UntypedActor{
 	
-    public String name;
-    
-
-    public AtomicInteger counter = new AtomicInteger(0);
-    public AtomicInteger connections = new AtomicInteger(0);
     Boolean gameStarted=false;
-    
-
-    
-   
     String  roomChannel;
-    
-    final AtomicInteger pid = new AtomicInteger(0);
     
     
    // The list of all connected painters (identified by ids)
@@ -86,7 +74,6 @@ public class Paint extends UntypedActor{
                             Painter painter = painters.get(json.get("name").getTextValue());
                             if(painter != null) {
                                 painter.updateFromJson(json);
-                                Logger.debug(painter.toString());
                             }
                             
                     }
@@ -94,10 +81,6 @@ public class Paint extends UntypedActor{
                     {
                         GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel,"timeExpired"));
                     }
-                    else if (type.equalsIgnoreCase("move"))
-                            {
-                                Logger.debug(json.toString());
-                            }
                     notifyAll(json);
         }
         else
