@@ -1,8 +1,13 @@
 package models.paint;
 
 import akka.actor.UntypedActor;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 
 import java.util.*;
+import javax.imageio.ImageIO;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
 import play.Logger;
@@ -16,6 +21,8 @@ import models.Painter;
 import models.gamebus.GameBus;
 import models.gamebus.GameMessages;
 import models.gamebus.GameMessages.GameEvent;
+import net.coobird.thumbnailator.Thumbnails;
+import sun.misc.BASE64Decoder;
 
 
 public class Paint extends UntypedActor{
@@ -23,6 +30,8 @@ public class Paint extends UntypedActor{
     Boolean gameStarted=false;
     String  roomChannel;
     
+    BufferedImage taskImage;
+    String taskUrl;
     
    // The list of all connected painters (identified by ids)
    private Map<String, Painter> painters = new HashMap<>();
@@ -69,6 +78,13 @@ public class Paint extends UntypedActor{
              JsonNode json = (JsonNode) message;
              String type = json.get("type").getTextValue();
              
+             //We have received a segment to save and encode
+             if(type.equalsIgnoreCase("segment"))
+             {
+                writeSegment(json);
+             }
+             else
+             {
                     // The painter wants to change some of his property
                     if(type.equalsIgnoreCase("change")) {
                             Painter painter = painters.get(json.get("name").getTextValue());
@@ -82,6 +98,7 @@ public class Paint extends UntypedActor{
                         GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel,"timeExpired"));
                     }
                     notifyAll(json);
+             }
         }
         else
         if(message instanceof GameEvent)
@@ -154,15 +171,21 @@ public class Paint extends UntypedActor{
         }
    }
     
-    private void sendTask(String sketcher,ObjectNode task)
+    private void sendTask(String sketcher,ObjectNode task) throws Exception
     {
         //Send to the users the information about their role
          for(Map.Entry<String, Painter> entry : painters.entrySet()) {
-              if(entry.getValue().name.equals(sketcher))
+            if(entry.getValue().name.equals(sketcher))
             {
                 entry.getValue().channel.write(task);
             }
          }   
+        
+        taskUrl=task.get("image").getTextValue();
+        taskUrl=taskUrl.replace("/assets", "public");
+        taskImage = ImageIO.read(new File(taskUrl));
+        taskUrl=taskUrl.replace("public/taskImages/", "");
+        taskUrl=taskUrl.split("\\.")[0];
     }
     
 
@@ -178,5 +201,37 @@ public class Paint extends UntypedActor{
             if(painter.name.equalsIgnoreCase(username))
                  painter.channel.write(json);
         }
+    }
+    
+    
+    /*
+     * Function used to store on the server the results of the segmentation of 
+     * the players
+     */
+    private void writeSegment(JsonNode json) throws Exception
+    {
+                String image=json.get("image").getTextValue();
+                image=image.replace("data:image/png;base64,", "");
+                BASE64Decoder decoder = new BASE64Decoder();
+                byte[] decodedBytes = decoder.decodeBuffer(image);
+                Logger.debug("Decoded upload data : " + decodedBytes.length);
+
+                String data = new Date().toString();
+                String urlSegment = "./results/"+taskUrl+"_segment.png";
+                String urlTask = "./results/"+taskUrl+".png";
+
+                BufferedImage imageB = ImageIO.read(new ByteArrayInputStream(decodedBytes));
+                
+                imageB=Thumbnails.of(imageB).forceSize(taskImage.getWidth(), taskImage.getHeight()).asBufferedImage();
+                
+                if (imageB == null) {
+                      Logger.error("Buffered Image is null");
+                  }
+                File fTask = new File(urlTask);
+                File fSegment = new File(urlSegment);
+
+                // write the image and the segment
+                ImageIO.write(taskImage, "png", fTask);
+                ImageIO.write(imageB, "png", fSegment);
     }
 }

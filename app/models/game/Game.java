@@ -36,11 +36,7 @@ import play.libs.Json;
  * A chat room is an Actor.
  */
 public class Game extends UntypedActor {
-    
-    
-    
-    
-    
+
     //[TODO] Should be declared as config variables
     //Variables to manage the point system in the game
     private Boolean guessedWord=false; //Has the word been guessed for the current round?
@@ -219,9 +215,6 @@ public class Game extends UntypedActor {
          //that the match has ended
          else
          {
-             SystemMessage endRound = new SystemMessage(Messages.get("end"),roomChannel);
-             //Manage round end:send the message to the chat
-             GameBus.getInstance().publish(endRound);
              gameEnded();
              newGameSetup();
          } 
@@ -357,7 +350,7 @@ public class Game extends UntypedActor {
             if(((requiredPlayers-disconnectedPlayers)<=1)&&gameStarted)
             {
                 //Restart the game
-                //paintLogic.gameEnded();
+                gameEnded();
                 newGameSetup();
             }
         }
@@ -425,6 +418,9 @@ public class Game extends UntypedActor {
     
     public void gameEnded()
     {
+            SystemMessage endRound = new SystemMessage(Messages.get("end"),roomChannel);
+             //Manage round end:send the message to the chat
+            GameBus.getInstance().publish(endRound);
             //Prepares the leaderboard of the players based on their points
             //and send it to all the interested modules
             JsonNodeFactory factory = JsonNodeFactory.instance;
@@ -480,27 +476,6 @@ public class Game extends UntypedActor {
 	}
     
     
-    
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
      
     /**Stub function to save the task objects in the system
       WE ARE WAITING FOR THE CMS TO BE CREATED, THAT'S WHY FOR NOW THERE IS NO 
