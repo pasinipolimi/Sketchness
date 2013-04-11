@@ -1,8 +1,8 @@
-package models.gamebus;
+package utils.gamebus;
 
 import akka.actor.ActorRef;
 import akka.event.japi.LookupEventBus;
-import models.gamebus.GameMessages.GameEvent;
+import utils.gamebus.GameMessages.GameEvent;
 
 public class MessageBus extends LookupEventBus {
       /**

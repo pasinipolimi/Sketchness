@@ -100,6 +100,8 @@ public class Painter extends Player implements Comparable<Painter>{
         return nModulesReceived;
     }
     
+  
+    
     
     
     

@@ -164,6 +164,18 @@
 	}
   }
   
+  function deletePlayer(username)
+  {
+	for (i=0;i<players.length;i++)
+	{
+		if(players[i].name.toLowerCase()==username.toLowerCase())
+		{
+			delete players[i];
+			return;
+		}
+	}
+  }
+  
   function playerExtend(message)
   {
 	var username=message.name;
@@ -313,7 +325,6 @@
 		
 		case "trace":
 					player = getPlayer(m.name);
-					ctx.strokeStyle = player.color;
 					if(player.color==ERASER)
 						ctx.globalCompositeOperation = "destination-out";
 					else
@@ -323,6 +334,7 @@
 						var points = m.points;
 						points[0] && ctx.moveTo(points[0].x, points[0].y);
 						points.forEach(function (p) {
+						ctx.strokeStyle=p.color;
 						ctx.lineTo(p.x, p.y);
 						});
 					ctx.stroke();
@@ -351,6 +363,7 @@
 			break;
 		
 		case "disconnect": //[TODO]
+			deletePlayer(m.username);
 			break;
 		
 	}
@@ -380,8 +393,8 @@
   var lastSent = 0;
 
   //Add the current point to the list of points to be sent
-  function addPoint (x, y) {
-    points.push({x: x, y: y});
+  function addPoint (x, y, size, color) {
+    points.push({x: x, y: y, size: size, color: color});
   }
   
   //Send the points to the server as a trace message. It sends the points, the number of the trace sent, the name of the player that has sent the trace
@@ -425,14 +438,14 @@
 	  //Draw the local line
       lineTo(o.x, o.y);
 	  //Add the points to the points to be sent
-      addPoint(o.x, o.y);
+      addPoint(o.x, o.y, size, color);
 	  //We have created a trace
       ++ numTrace;
 	  //Can we send the batch of points?
       if (canSendNow()) {
         sendPoints();
 		sendMove(o.x, o.y);
-        addPoint(o.x, o.y);
+        addPoint(o.x, o.y, size, color);
       }
     }
     else 
@@ -451,7 +464,7 @@
         {
             var o = positionWithE(e,canvas);
             position = o;
-            addPoint(o.x, o.y);
+            addPoint(o.x, o.y, size, color);
             pressed = true;
         }
   }
@@ -461,7 +474,7 @@
     if(role=="SKETCHER")
         {
             lineTo(position.x, position.y);
-            addPoint(position.x, position.y);
+            addPoint(position.x, position.y, size, color);
             sendPoints();
             pressed = false;
         }

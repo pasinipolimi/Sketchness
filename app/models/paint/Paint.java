@@ -4,9 +4,11 @@ import akka.actor.UntypedActor;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.math.BigDecimal;
+import java.net.URL;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.imageio.ImageIO;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
@@ -15,13 +17,15 @@ import play.Logger;
 import play.libs.Json;
 
 
-import models.Messages;
-import models.Messages.Quit;
+import utils.Messages;
 import models.Painter;
-import models.gamebus.GameBus;
-import models.gamebus.GameMessages;
-import models.gamebus.GameMessages.GameEvent;
+import utils.gamebus.GameBus;
+import utils.gamebus.GameMessages;
+import utils.gamebus.GameMessages.GameEvent;
 import net.coobird.thumbnailator.Thumbnails;
+import org.codehaus.jackson.node.JsonNodeFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
 import sun.misc.BASE64Decoder;
 
 
@@ -32,9 +36,15 @@ public class Paint extends UntypedActor{
     
     BufferedImage taskImage;
     String taskUrl;
+    String sketcher;
+    String guessWord;
     
    // The list of all connected painters (identified by ids)
-   private Map<String, Painter> painters = new HashMap<>();
+   private Map<String, Painter> painters = new ConcurrentHashMap<>();
+   
+   //Traces 
+   JsonNodeFactory factory = JsonNodeFactory.instance;
+   private ObjectNode traces = new ObjectNode(factory);
     
                     
     //Manage the messages
@@ -76,29 +86,19 @@ public class Paint extends UntypedActor{
         if(message instanceof JsonNode )
         {
              JsonNode json = (JsonNode) message;
-             String type = json.get("type").getTextValue();
-             
-             //We have received a segment to save and encode
-             if(type.equalsIgnoreCase("segment"))
+             String type = json.get("type").getTextValue().toLowerCase();
+             switch(type)
              {
-                writeSegment(json);
+                 case "segment": writeSegment(json);break;
+                 case "change": Painter painter = painters.get(json.get("name").getTextValue());
+                                if(painter != null) {
+                                    painter.updateFromJson(json);
+                                };break;
+                 case "roundended": GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel,"timeExpired"));break;
+                 case "trace":addTrace(json);break;
+                     
              }
-             else
-             {
-                    // The painter wants to change some of his property
-                    if(type.equalsIgnoreCase("change")) {
-                            Painter painter = painters.get(json.get("name").getTextValue());
-                            if(painter != null) {
-                                painter.updateFromJson(json);
-                            }
-                            
-                    }
-                    else if (type.equalsIgnoreCase("roundEnded")) 
-                    {
-                        GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel,"timeExpired"));
-                    }
-                    notifyAll(json);
-             }
+             notifyAll(json);
         }
         else
         if(message instanceof GameEvent)
@@ -106,48 +106,64 @@ public class Paint extends UntypedActor{
             GameEvent event= (GameEvent)message;
             switch(event.getType())
             {
+                case "newGame":gameStarted=false;break;
                 case "gameStart":gameStarted=true;break;
                 case "showImages":notifyAll(event.getObject());break;
-                case "nextRound":nextRound(event.getMessage());break;
+                case "nextRound":saveTraces();nextRound(event.getMessage());break;
                 case "task":sendTask(event.getMessage(),event.getObject());break;
                 case "sketcherPoints":notifySingle(event.getMessage(),event.getObject());break;
                 case "guesserPoints":notifySingle(event.getMessage(),event.getObject());break;
                 case "guessedObject":notifySingle(event.getMessage(),event.getObject());break;
                 case "timerChange":notifyAll(event.getObject());break;
                 case "leaderboard":notifyAll(event.getObject());break;
+                case "quit":handleQuitter(event.getMessage());
             }
         }
-            if(message instanceof Quit)
-            {
-                /*//QUIT MESSAGE
-                   / Quit received= (Quit)message;
-                    Integer toRemove=null;
-                    for (Map.Entry<Integer, Painter> entry : painters.entrySet()) {
-                        Painter painter = entry.getValue();
-                        if(painter.name.equalsIgnoreCase(received.username)){
-                            toRemove=entry.getKey();
+    }
+    
+    
+    private void saveTraces()
+    {
+        GameEvent tracesMessage = new GameEvent("",roomChannel,"finalTraces");
+        traces.put("id", taskUrl);
+        traces.put("label", guessWord);
+        tracesMessage.setObject((ObjectNode)traces);
+        GameBus.getInstance().publish(tracesMessage);
+    }
+    
+    
+    private void addTrace(JsonNode json) throws JSONException
+    {
+        Integer iKey = json.get("num").getIntValue();
+        traces.put(iKey.toString(),json.get("points"));
+    }
+    
+    private void handleQuitter(String quitter) throws InterruptedException
+    {
+        synchronized(painters)
+        {
+                    for (Map.Entry<String, Painter> entry : painters.entrySet()) {
+                        if (entry.getKey().equalsIgnoreCase(quitter))
+                        {
+                            ObjectNode json = Json.newObject();
+                            json.put("type", "disconnect");
+                            json.put("username", quitter);
+                            notifyAll(json);
+                            
+                            entry.getValue().channel.close();
+                            painters.remove(quitter);
+                            Logger.debug("[PAINT] "+quitter+" has disconnected.");
+                            GameBus.getInstance().publish(new GameEvent(quitter,roomChannel,"quit"));
                         }
                     }
-                    if(null!=toRemove)
-                    {
-                        painters.remove(toRemove);
-                        connections.decrementAndGet();
-
-                        ObjectNode json = Json.newObject();
-                        json.put("type", "disconnect");
-                        json.put("pid", toRemove);
-
-                        notifyAll(json);
-
-                        Logger.debug("(pid:"+toRemove+") disconnected.");
-                        Logger.info(connections+" painter(s) currently connected.");
-                        //GameBus.getInstance().publish(new GameMessages.PlayerQuit(quit.username,roomChannel));
-                    }*/
-            }
+        }
     }
    
     private void nextRound(String sketcher)
     {
+         //Reset the traces storage
+         traces=new ObjectNode(factory);
+         
          //Send to the users the information about their role
          for(Map.Entry<String, Painter> entry : painters.entrySet()) {
             if(entry.getValue().name.equals(sketcher))
@@ -182,10 +198,11 @@ public class Paint extends UntypedActor{
          }   
         
         taskUrl=task.get("image").getTextValue();
-        taskUrl=taskUrl.replace("/assets", "public");
-        taskImage = ImageIO.read(new File(taskUrl));
-        taskUrl=taskUrl.replace("public/taskImages/", "");
-        taskUrl=taskUrl.split("\\.")[0];
+        URL url = new URL(taskUrl);
+        taskImage = ImageIO.read(url);
+        taskUrl=task.get("id").getTextValue();
+        this.sketcher=sketcher;
+        guessWord=task.get("word").getTextValue();
     }
     
 
@@ -206,7 +223,7 @@ public class Paint extends UntypedActor{
     
     /*
      * Function used to store on the server the results of the segmentation of 
-     * the players
+     * the players. It will be modified to use the CMS in the future
      */
     private void writeSegment(JsonNode json) throws Exception
     {
