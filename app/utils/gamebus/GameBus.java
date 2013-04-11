@@ -1,5 +1,5 @@
 //Singletone to access the gamebus from everywhere
-package models.gamebus;
+package utils.gamebus;
 
 /**
  *

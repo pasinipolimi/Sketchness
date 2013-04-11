@@ -1,4 +1,4 @@
-package models;
+package utils;
 
 import org.codehaus.jackson.JsonNode;
 import play.mvc.WebSocket;

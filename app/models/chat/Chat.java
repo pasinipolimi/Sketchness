@@ -13,10 +13,11 @@ import akka.actor.*;
 import org.codehaus.jackson.node.*;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 
-import models.Messages.*;
-import models.Painter;
-import models.levenshteinDistance;
+import utils.Messages.*;
+import utils.levenshteinDistance;
 
 import play.i18n.Messages;
 
@@ -24,14 +25,12 @@ import play.mvc.*;
 
 import org.codehaus.jackson.*;
 
-import models.levenshteinDistance.*;
+import utils.levenshteinDistance.*;
 
-import models.gamebus.GameBus;
-import models.gamebus.GameMessages;
-import models.gamebus.GameMessages.GameEvent;
-import models.gamebus.GameMessages.GameStart;
-import models.gamebus.GameMessages.Guessed;
-import models.gamebus.GameMessages.PlayerQuit;
+import utils.gamebus.GameBus;
+import utils.gamebus.GameMessages;
+import utils.gamebus.GameMessages.GameEvent;
+import utils.gamebus.GameMessages.PlayerQuit;
 import play.Logger;
 
 /**
@@ -46,8 +45,9 @@ public class Chat extends UntypedActor {
     
     
     
+    
     // Members of this room.
-    Map<String, WebSocket.Out<JsonNode>> playersMap = new HashMap<>();
+    Map<String, WebSocket.Out<JsonNode>> playersMap = new ConcurrentHashMap<>();
     
     @Override
     public void onReceive(Object message) throws Exception {  
@@ -82,7 +82,6 @@ public class Chat extends UntypedActor {
             {
             	getSender().tell(Messages.get("matchstarted"));
             }
-            
         }
         else if(message instanceof Talk)  {
             
@@ -115,8 +114,9 @@ public class Chat extends UntypedActor {
             switch(event.getType())
             {
                 case "gameStart":gameStarted=true;break;
-                case "nextRound":nextRound(event.getMessage());break;
+                case "newGame":gameStarted=false;break;
                 case "task":retrieveTask(event.getObject());break;
+                case "quit":handleQuitter(event.getMessage());
             }
         }
         else if(message instanceof Quit)  {
@@ -131,11 +131,24 @@ public class Chat extends UntypedActor {
         } 
     }
     
-    
-    private void nextRound(String sketcher)
+    private  void handleQuitter(String quitter) throws InterruptedException
     {
-         
-   }
+        synchronized(playersMap)
+        {
+                    for (Map.Entry<String, WebSocket.Out<JsonNode>> entry : playersMap.entrySet()) {
+                        if (entry.getKey().equalsIgnoreCase(quitter))
+                        {
+                            //Close the websocket
+                            entry.getValue().close();
+                            playersMap.remove(quitter);
+                            notifyAll("quit", quitter, Messages.get("quit"));
+                            Logger.debug("[CHAT] "+quitter+" has disconnected.");
+                            GameBus.getInstance().publish(new GameEvent(quitter,roomChannel,"quit"));
+                        } 
+                    }
+        }
+    }
+
     
     private void retrieveTask(ObjectNode task)
     {

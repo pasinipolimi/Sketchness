@@ -3,7 +3,7 @@ package models.chat;
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import models.Messages;
+import utils.Messages;
 import models.factory.Factory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
@@ -13,16 +13,17 @@ import play.mvc.WebSocket;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import utils.gamebus.GameMessages.GameEvent;
 
 
 
 
 
 
-public class ChatRoomFactory extends Factory{
+  public class ChatRoomFactory extends Factory{
 
 
-  public static void createChat(final String username, final String room, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception
+  public static synchronized void createChat(final String username, final String room, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception
   {
       final ActorRef finalRoom=create(room, Chat.class);
       Future<Object> future = (Future<Object>) Patterns.ask(finalRoom,new Messages.Join(username, out), 1000);
@@ -49,8 +50,7 @@ public class ChatRoomFactory extends Factory{
                public void invoke() {
                    
                    // Send a Quit message to the room.
-                   finalRoom.tell(new Messages.Quit(username));
-               
+                   finalRoom.tell( new GameEvent(username,room,"quit"));
                }
             });
             

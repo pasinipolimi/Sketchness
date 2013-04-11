@@ -6,21 +6,16 @@ package models.paint;
 
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
-import java.util.Map;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import models.Messages;
-import models.Painter;
-import models.chat.Chat;
+import utils.Messages;
 import models.factory.Factory;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ObjectNode;
-import play.Logger;
 import play.libs.F;
-import play.libs.Json;
 import play.mvc.WebSocket;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import utils.gamebus.GameMessages;
 
 /**
  *
@@ -28,7 +23,7 @@ import scala.concurrent.duration.Duration;
  */
 public class PaintRoomFactory extends Factory{
     
-    public static void createPaint(final String username, final String room, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception
+    public static synchronized void createPaint(final String username, final String room, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception
     {
 
         final ActorRef finalRoom=create(room, Paint.class);
@@ -51,7 +46,7 @@ public class PaintRoomFactory extends Factory{
                 @Override
                 public void invoke() throws Throwable {
                     
-                    finalRoom.tell(new Messages.Quit(username));
+                    finalRoom.tell(new GameMessages.GameEvent(username,room,"quit"));
                 }
             });
         }

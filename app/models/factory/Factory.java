@@ -1,11 +1,11 @@
 package models.factory;
 
-import models.gamebus.GameBus;
+import utils.gamebus.GameBus;
 import play.libs.*;
 import play.libs.F.*;
 import akka.actor.*;
-import models.Messages.*;
-import models.levenshteinDistance.*;
+import utils.Messages.*;
+import utils.levenshteinDistance.*;
 
 public abstract class Factory {
     /**

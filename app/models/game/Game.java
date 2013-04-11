@@ -5,37 +5,45 @@ import play.libs.F.*;
 
 
 import akka.actor.*;
-
+import java.io.IOException;
+import java.net.MalformedURLException;
 
 import java.util.*;
-import models.chat.ChatRoomFactory;
+import java.util.concurrent.TimeUnit;
 
-import models.Messages.*;
+import utils.Messages.*;
 import models.Painter;
-import models.gamebus.GameBus;
-import models.gamebus.GameMessages;
-import models.gamebus.GameMessages.GameEvent;
-import models.gamebus.GameMessages.PlayerJoin;
-import models.gamebus.GameMessages.PlayerQuit;
-import models.gamebus.GameMessages.SystemMessage;
+import org.codehaus.jackson.JsonNode;
+import utils.gamebus.GameBus;
+import utils.gamebus.GameMessages;
+import utils.gamebus.GameMessages.GameEvent;
+import utils.gamebus.GameMessages.PlayerJoin;
+import utils.gamebus.GameMessages.SystemMessage;
 
 
 import play.i18n.Messages;
-import models.levenshteinDistance.*;
+import utils.levenshteinDistance.*;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
+import org.json.JSONException;
 
 
 
 
 import play.Logger;
+import play.libs.Akka;
 import play.libs.Json;
+import play.libs.WS;
+import scala.concurrent.duration.Duration;
+import utils.JsonReader;
 
 /**
  * A chat room is an Actor.
  */
 public class Game extends UntypedActor {
+    
+    private final String rootUrl="http://webservices.comoconnection.com/";
 
     //[TODO] Should be declared as config variables
     //Variables to manage the point system in the game
@@ -70,7 +78,8 @@ public class Game extends UntypedActor {
     
     
     // Members of this room.
-    ArrayList<Painter> playersVect = new ArrayList<>();
+    List<Painter> playersVect = Collections.synchronizedList(new ArrayList());
+
     
     
     /*
@@ -279,8 +288,23 @@ public class Game extends UntypedActor {
          disconnectedPlayers=0;
          roundNumber=1;
          gameStarted=false;
-         playersVect = new ArrayList<>();
+         playersVect = Collections.synchronizedList(new ArrayList());
          sketcherPainter=null;
+         GameBus.getInstance().publish(new GameEvent("",roomChannel,"newGame"));
+         Akka.system().scheduler().scheduleOnce(
+            Duration.create(1, TimeUnit.MILLISECONDS),
+            new Runnable() {
+              public void run() {
+                  try {
+                      taskSetInitialization();
+                  } catch (Exception ex) {
+                      //TODO HANDLE EXCEPTIONS
+                  }
+              }
+            },
+            Akka.system().dispatcher()
+          ); 
+         Logger.debug("[GAME] New game started");
      }
     
     
@@ -293,10 +317,10 @@ public class Game extends UntypedActor {
         if(message instanceof Room)
         {
             this.roomChannel=((Room)message).getRoom();
+            newGameSetup();
             Logger.info("GAMEROOM "+roomChannel+" created.");
-            taskSetInitialization();
         }
-        if(message instanceof PlayerJoin) 
+        if(message instanceof PlayerJoin)
         {
             int count=0;
             String username=((PlayerJoin)message).getUser();
@@ -332,28 +356,52 @@ public class Game extends UntypedActor {
             {
                 //[TODO] Get rid of the other messages and use just game event
                 case "playerJoin":break;
-                case "playerQuit":break;
+                case "quit":handleQuitter(event.getMessage());break;
                 case "guessed":guessed(event.getMessage());break;
-                case "timeExpired": playerTimeExpired(event.getMessage());
+                case "timeExpired": playerTimeExpired(event.getMessage());break;
+                case "finalTraces": sendFinalTraces(event.getObject());
             }
         }
-        if(message instanceof PlayerQuit) 
+    }
+    
+    
+    private void sendFinalTraces(ObjectNode traces) throws MalformedURLException, IOException
+    {
+        String id =traces.get("id").getTextValue();
+        String label=traces.get("label").getTextValue();
+        traces.remove("id");
+        traces.remove("label");
+        
+        String urlParameters = "{\"label\":\""+label+"\", \"coordinates\":["+traces.toString()+"]}";
+        String request = "http://webservices.comoconnection.com/wsmc/image/"+id+"/segment";
+        
+        WS.url(request).setContentType("application/json").post(urlParameters);
+    }
+    
+    private void handleQuitter(String quitter)
+    {
+        synchronized(playersVect)
         {
-            for (Painter painter : playersVect) {
-                if(painter.name.equalsIgnoreCase(((PlayerQuit)message).getUser())){
-                    playersVect.remove(painter);
-                    break;
+            Iterator it = playersVect.iterator();  
+            for (int i=0;i<playersVect.size();i++) {
+                Painter painter = playersVect.get(i);
+                if(painter.name.equalsIgnoreCase(quitter)){
+                    //Wait for all the modules to announce that the player has disconnected
+                    painter.setnModulesReceived(painter.getnModulesReceived()-1);
+                    if(painter.getnModulesReceived()==0)
+                    {
+                        playersVect.remove(painter);
+                        disconnectedPlayers++;
+                        //End the game if there's just one player or less
+                        if(((requiredPlayers-disconnectedPlayers)==1)&&gameStarted)
+                            //Restart the game
+                            gameEnded();
+                        else if (((requiredPlayers-disconnectedPlayers)<=0)&&gameStarted)
+                            newGameSetup();
+                    }
                 }
             }
-            disconnectedPlayers++;
-            //End the game if there's just one player or less
-            if(((requiredPlayers-disconnectedPlayers)<=1)&&gameStarted)
-            {
-                //Restart the game
-                gameEnded();
-                newGameSetup();
-            }
-        }
+        }   
     }
     
     private void guessed(String guesser)
@@ -477,525 +525,45 @@ public class Game extends UntypedActor {
     
     
      
-    /**Stub function to save the task objects in the system
-      WE ARE WAITING FOR THE CMS TO BE CREATED, THAT'S WHY FOR NOW THERE IS NO 
-     NEED FOR COMPLEX FUNCTIONS
+    /**
+     * Retrieving data from the CMS
     **/
-    public final void taskSetInitialization()
+    public void taskSetInitialization() throws MalformedURLException, IOException, JSONException
     {
-       //First item in the task set
-       ObjectNode guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","gonna");
-       guessWord.put("image","/assets/taskImages/skirt.png");
-       taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","pantaloni");
-       guessWord.put("image","/assets/taskImages/trousers.jpg");
-       taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","pantaloni");
-       guessWord.put("image","/assets/taskImages/trousers2.jpg");
-       taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","poncho");
-       guessWord.put("image","/assets/taskImages/poncho.jpg");
-       taskHashSet.add(guessWord); 
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cintura");
-       guessWord.put("image","/assets/taskImages/belt.jpg");
-       taskHashSet.add(guessWord); 
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cintura");
-       guessWord.put("image","/assets/taskImages/belt2.jpg");
-       taskHashSet.add(guessWord); 
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","giacca");
-       guessWord.put("image","/assets/taskImages/coat.jpg");
-       taskHashSet.add(guessWord); 
-	   
-       /*
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","maschera");
-       guessWord.put("image","/assets/taskImages/gasMask.jpg");
-       taskHashSet.add(guessWord);*/
-	   
-	   
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","scarpe");
-       guessWord.put("image","/assets/taskImages/shoes.jpg");
-       taskHashSet.add(guessWord);  
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","scarpe");
-       guessWord.put("image","/assets/taskImages/shoes2.jpg");
-       taskHashSet.add(guessWord);  
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cappello");
-       guessWord.put("image","/assets/taskImages/hat.jpg");
-       taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","reggiseno");
-       guessWord.put("image","/assets/taskImages/bra.jpg");
-       taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","sciarpa");
-       guessWord.put("image","/assets/taskImages/scarf.jpg");
-       taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","stivali");
-       guessWord.put("image","/assets/taskImages/boots.jpg");
-       taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","t-shirt");
-       guessWord.put("image","/assets/taskImages/shirt.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   /*
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","tankini");
-       guessWord.put("image","/assets/taskImages/tankini.jpg");
-       taskHashSet.add(guessWord);*/
-	   
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","pantaloncini");
-       guessWord.put("image","/assets/taskImages/trunks.jpg");
-       taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","calze");
-       guessWord.put("image","/assets/taskImages/socks.jpg");
-       taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","fazzoletto");
-       guessWord.put("image","/assets/taskImages/handkerchief.jpg");
-       taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","unghie");
-       guessWord.put("image","/assets/taskImages/nails.jpg");
-       taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","ombrello");
-       guessWord.put("image","/assets/taskImages/umbrella.jpg");
-       taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cravatta");
-       guessWord.put("image","/assets/taskImages/tie.jpg");
-       taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","occhiali");
-       guessWord.put("image","/assets/taskImages/sunglasses.jpg");
-       taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","guanti");
-       guessWord.put("image","/assets/taskImages/gloves.jpg");
-	   taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","guanti");
-       guessWord.put("image","/assets/taskImages/gloves2.jpg");
-       taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","guanti");
-       guessWord.put("image","/assets/taskImages/gloves3.jpg");
-       taskHashSet.add(guessWord);
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","zaino");
-       guessWord.put("image","/assets/taskImages/backpack.jpg");
-	   taskHashSet.add(guessWord);
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","sciarpa");
-       guessWord.put("image","/assets/taskImages/scarf2.jpg");
-	   taskHashSet.add(guessWord);
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","gonna");
-       guessWord.put("image","/assets/taskImages/skirt.jpg");
-	   taskHashSet.add(guessWord);
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","grembiule");
-       guessWord.put("image","/assets/taskImages/grembiule.jpg");
-	   taskHashSet.add(guessWord);
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","maschera");
-       guessWord.put("image","/assets/taskImages/mask.jpg");
-	   taskHashSet.add(guessWord);
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","maschera");
-       guessWord.put("image","/assets/taskImages/mask2.jpg");
-	   taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","borsa");
-       guessWord.put("image","/assets/taskImages/handbag.jpg");
-       taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","orologio");
-       guessWord.put("image","/assets/taskImages/clock.jpg");
-       taskHashSet.add(guessWord);
-       guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","pantaloncini");
-       guessWord.put("image","/assets/taskImages/shorts.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cappuccio");
-       guessWord.put("image","/assets/taskImages/1.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","borsa");
-       guessWord.put("image","/assets/taskImages/2.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","sciarpa");
-       guessWord.put("image","/assets/taskImages/3.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","scarpe");
-       guessWord.put("image","/assets/taskImages/4.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","minigonna");
-       guessWord.put("image","/assets/taskImages/5.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cravatta");
-       guessWord.put("image","/assets/taskImages/6.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cappuccio");
-       guessWord.put("image","/assets/taskImages/7.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","corona");
-       guessWord.put("image","/assets/taskImages/8.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","stivaletti");
-       guessWord.put("image","/assets/taskImages/9.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cappello");
-       guessWord.put("image","/assets/taskImages/11.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","reggiseno");
-       guessWord.put("image","/assets/taskImages/12.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","reggiseno");
-       guessWord.put("image","/assets/taskImages/13.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","fiocco");
-       guessWord.put("image","/assets/taskImages/14.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cappello");
-       guessWord.put("image","/assets/taskImages/15.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","guanti");
-       guessWord.put("image","/assets/taskImages/16.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","calze");
-       guessWord.put("image","/assets/taskImages/17.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","slip");
-       guessWord.put("image","/assets/taskImages/18.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","slip");
-       guessWord.put("image","/assets/taskImages/19.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","fiocco");
-       guessWord.put("image","/assets/taskImages/20.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","maschera");
-       guessWord.put("image","/assets/taskImages/21.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cuffia");
-       guessWord.put("image","/assets/taskImages/22.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","corno");
-       guessWord.put("image","/assets/taskImages/23.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","maschera");
-       guessWord.put("image","/assets/taskImages/25.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","poncho");
-       guessWord.put("image","/assets/taskImages/26.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","ombrello");
-       guessWord.put("image","/assets/taskImages/27.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","gonna");
-       guessWord.put("image","/assets/taskImages/28.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","fiocco");
-       guessWord.put("image","/assets/taskImages/29.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cappello");
-       guessWord.put("image","/assets/taskImages/30.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","minigonna");
-       guessWord.put("image","/assets/taskImages/31.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cappotto");
-       guessWord.put("image","/assets/taskImages/32.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cintura");
-       guessWord.put("image","/assets/taskImages/33.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cappotto");
-       guessWord.put("image","/assets/taskImages/34.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cerchietto");
-       guessWord.put("image","/assets/taskImages/35.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","t-shirt");
-       guessWord.put("image","/assets/taskImages/36.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cappuccio");
-       guessWord.put("image","/assets/taskImages/37.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cappello");
-       guessWord.put("image","/assets/taskImages/38.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","occhiali");
-       guessWord.put("image","/assets/taskImages/40.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cappello");
-       guessWord.put("image","/assets/taskImages/41.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","fiocco");
-       guessWord.put("image","/assets/taskImages/42.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","orologio");
-       guessWord.put("image","/assets/taskImages/43.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cappello");
-       guessWord.put("image","/assets/taskImages/44.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cravatta");
-       guessWord.put("image","/assets/taskImages/45.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","sciarpa");
-       guessWord.put("image","/assets/taskImages/46.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","anello");
-       guessWord.put("image","/assets/taskImages/47.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","anello");
-       guessWord.put("image","/assets/taskImages/48.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","orecchini");
-       guessWord.put("image","/assets/taskImages/49.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","orecchini");
-       guessWord.put("image","/assets/taskImages/50.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cravatta");
-       guessWord.put("image","/assets/taskImages/51.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","cravatta");
-       guessWord.put("image","/assets/taskImages/52.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","orologio");
-       guessWord.put("image","/assets/taskImages/53.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","orologio");
-       guessWord.put("image","/assets/taskImages/54.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","orologio");
-       guessWord.put("image","/assets/taskImages/55.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","corona");
-       guessWord.put("image","/assets/taskImages/56.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","corona");
-       guessWord.put("image","/assets/taskImages/57.jpg");
-       taskHashSet.add(guessWord);
-	   
-	   guessWord = Json.newObject();
-       guessWord.put("type", "task");
-       guessWord.put("word","borsa");
-       guessWord.put("image","/assets/taskImages/58.jpg");
-       taskHashSet.add(guessWord);
+       JsonReader jsonReader= new JsonReader();
+       JsonNode retrieved= jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image.json");
+
+        for (int i=0; i<retrieved.size(); i++) {
+            JsonNode item = retrieved.get(i);
+            if(item.getElements().hasNext())
+            {
+                item=(JsonNode)item.get("image");
+                String id=item.get("imgage_id").asText();
+                String url=rootUrl+item.get("image_uri").asText();
+                JsonNode image= jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image/"+id+"/segment.json");
+                try
+                {
+                     image=(JsonNode)image.get(0);
+                }
+                catch(Exception e)
+                {
+                    Logger.error("[GAME] No valid metadata for task "+id);
+                }
+                if(image.getElements().hasNext())
+                {
+                    image=(JsonNode)image.get("image");
+                    JsonNode segment = (JsonNode) image.get("polyline");
+                    item=segment.get(0);
+                    String label=item.get("label").asText();
+                    ObjectNode guessWord = Json.newObject();
+                    guessWord.put("type", "task");
+                    guessWord.put("id", id);
+                    guessWord.put("word",label);
+                    guessWord.put("image",url);
+                    taskHashSet.add(guessWord);
+                }
+            }
+        }
     }
 
 }

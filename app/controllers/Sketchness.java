@@ -1,18 +1,14 @@
 package controllers;
 
-import models.paint.Paint;
 import models.chat.ChatRoomFactory;
-import akka.actor.ActorRef;
 import play.mvc.*;
 
 import org.codehaus.jackson.*;
 
 import views.html.*;
 
-import models.*;
 import models.game.GameRoomFactory;
 import models.paint.PaintRoomFactory;
-import play.Logger;
 
 
 
@@ -46,6 +42,7 @@ public class Sketchness extends Controller {
         return new WebSocket<JsonNode>() {
             
             // Called when the Websocket Handshake is done.
+            @Override
             public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out){
                 
                 // Join the chat room.

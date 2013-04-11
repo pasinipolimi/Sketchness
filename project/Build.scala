@@ -4,15 +4,20 @@ import play.Project._
 
 object ApplicationBuild extends Build {
 
-    val appName         = "Sketchness"
-    val appVersion      = "0.1"
+  val appName         = "Sketchness"
+  val appVersion      = "1.0-SNAPSHOT"
 
-    val appDependencies = Seq(
-	  javaCore
-    )
+  val appDependencies = Seq(
+    // Add your project dependencies here,
+    javaCore,
+    javaJdbc,
+    javaEbean,
+	"org.json" % "json" % "20090211"
+  )
 
-    val main = play.Project(appName, appVersion, appDependencies).settings(
-      // Add your own project settings here      
-    )
+  val main = play.Project(appName, appVersion, appDependencies).settings(
+    // Add your own project settings here      
+  )
+
 
 }
