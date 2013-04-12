@@ -373,7 +373,7 @@ public class Game extends UntypedActor {
         traces.remove("label");
         
         String urlParameters = "{\"label\":\""+label+"\", \"coordinates\":["+traces.toString()+"]}";
-        String request = "http://webservices.comoconnection.com/wsmc/image/"+id+"/segment";
+        String request = rootUrl+"/wsmc/image/"+id+"/segment";
         
         WS.url(request).setContentType("application/json").post(urlParameters);
     }
