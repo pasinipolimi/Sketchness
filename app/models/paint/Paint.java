@@ -19,13 +19,15 @@ import play.libs.Json;
 
 import utils.Messages;
 import models.Painter;
+import models.Point;
+import models.Segment;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.GameEvent;
 import net.coobird.thumbnailator.Thumbnails;
+import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.json.JSONException;
-import org.json.JSONObject;
 import sun.misc.BASE64Decoder;
 
 
@@ -38,6 +40,8 @@ public class Paint extends UntypedActor{
     String taskUrl;
     String sketcher;
     String guessWord;
+    
+    private Segment currentSegment=null;
     
    // The list of all connected painters (identified by ids)
    private Map<String, Painter> painters = new ConcurrentHashMap<>();
@@ -109,7 +113,7 @@ public class Paint extends UntypedActor{
                 case "newGame":gameStarted=false;break;
                 case "gameStart":gameStarted=true;break;
                 case "showImages":notifyAll(event.getObject());break;
-                case "nextRound":saveTraces();nextRound(event.getMessage());break;
+                case "nextRound":nextRound(event.getMessage());break;
                 case "task":sendTask(event.getMessage(),event.getObject());break;
                 case "sketcherPoints":notifySingle(event.getMessage(),event.getObject());break;
                 case "guesserPoints":notifySingle(event.getMessage(),event.getObject());break;
@@ -129,13 +133,29 @@ public class Paint extends UntypedActor{
         traces.put("label", guessWord);
         tracesMessage.setObject((ObjectNode)traces);
         GameBus.getInstance().publish(tracesMessage);
+        currentSegment.filter();
     }
     
     
     private void addTrace(JsonNode json) throws JSONException
     {
         Integer iKey = json.get("num").getIntValue();
-        traces.put(iKey.toString(),json.get("points"));
+        ObjectNode trace = new ObjectNode(factory);
+        ArrayNode points = (ArrayNode)json.get("points");
+        trace.put("points", points);
+        trace.put("time", json.get("time"));     
+        traces.put(iKey.toString(),trace);
+        int row = currentSegment.getRowSize();
+        int column = 0;
+        for (JsonNode object : points) {
+            Point toBeAdded= new Point();
+            toBeAdded.setX(object.get("x").asInt());
+            toBeAdded.setY(object.get("y").asInt());
+            toBeAdded.setColor(object.get("color").asText());
+            toBeAdded.setSize(object.get("size").asInt());
+            currentSegment.setPoint(row, column, toBeAdded);
+            column++;
+        }
     }
     
     private void handleQuitter(String quitter) throws InterruptedException
@@ -161,8 +181,15 @@ public class Paint extends UntypedActor{
    
     private void nextRound(String sketcher)
     {
+         //It's the first match of the game, we have noting to store
+         if(currentSegment!=null)
+         {
+
+             saveTraces();
+         }
          //Reset the traces storage
          traces=new ObjectNode(factory);
+         currentSegment = new Segment("rgba(255,255,255,1.0)");
          
          //Send to the users the information about their role
          for(Map.Entry<String, Painter> entry : painters.entrySet()) {

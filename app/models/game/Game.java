@@ -372,10 +372,10 @@ public class Game extends UntypedActor {
         traces.remove("id");
         traces.remove("label");
         
-        String urlParameters = "{\"label\":\""+label+"\", \"coordinates\":["+traces.toString()+"]}";
+        String urlParameters = "label="+label+"&coordinates="+traces.toString();
         String request = rootUrl+"/wsmc/image/"+id+"/segment";
         
-        WS.url(request).setContentType("application/json").post(urlParameters);
+        WS.url(request).setContentType("application/x-www-form-urlencoded").post(urlParameters);
     }
     
     private void handleQuitter(String quitter)
@@ -488,7 +488,7 @@ public class Game extends UntypedActor {
             GameEvent endEvent = new GameEvent("", roomChannel, "leaderboard");
             endEvent.setObject(leaderboard);
             GameBus.getInstance().publish(endEvent);
-    }
+   }
 	
     
     
