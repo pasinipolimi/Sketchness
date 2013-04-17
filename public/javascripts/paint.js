@@ -2,6 +2,7 @@
 
   //Defining the websocket type based on the browser
   var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket
+  var timerObj=new TimerObj();
 
 
   // Polyfills
@@ -13,7 +14,7 @@
           window.msRequestAnimationFrame ||
           function( callback ){
             window.setTimeout(callback, 1000 / 60);
-          };
+          }; 
           })();
 
   var insideIframe = (window.parent != window);
@@ -39,7 +40,6 @@
   //GAME STATUS
   var score = 0;
   var defaultRoundTime=90;
-  var time = defaultRoundTime;
   var matchStarted = false;
   var guessWord="";
   var guessed=false;
@@ -58,7 +58,6 @@
 
   var viewport = document.getElementById('viewport');
   
-  var RemainingSeconds;
   
   
   function setError (message) {
@@ -68,36 +67,6 @@
       $("#mainPage").hide()
   }
     
-    
-    /**********UTILITY FUNCTION FOR TIMER CREATION********************/
-
-    function TimerTick()
-    {
-        if (RemainingSeconds == 0) {
-           //Round End
-              send({type: 'roundEnded', player: pname});
-              RemainingSeconds='waiting';
-        }
-        else {
-            RemainingSeconds -= 1;
-            UpdateTimer();
-            window.setTimeout(TimerTick, 1000);
-        }
-    }
-
-    function CreateTimer(Countdown)
-    {
-        RemainingSeconds = Countdown;
-        UpdateTimer();
-        window.setTimeout(TimerTick, 1000);
-    }
-
-
-    //Timing Functions
-    function UpdateTimer()
-    {
-        time=RemainingSeconds;
-    }
   
   /*****************************UTILITY FUNCTIONS********************************************/
 
@@ -193,7 +162,7 @@
 
 
 //***************************TAKING CARE OF THE LINE STROKES*****************************/
-(function(){
+var gameloop = (function(){
   var canvas = document.getElementById("draws");
   var ctx = canvas.getContext("2d");
   var taskCanvas = document.getElementById("task");
@@ -230,7 +199,8 @@
 						$('#talk').removeAttr('disabled');
 
 					}
-					CreateTimer(defaultRoundTime);
+					timerObj.createCountdown("round",defaultRoundTime,"roundEndMessage");
+					timerObj.createTimer("round");
 					ctx.clearRect(0, 0, canvas.width, canvas.height);
 					taskContext.clearRect(0, 0, canvas.width, canvas.height);
 					positionContext.clearRect(0, 0, canvas.width, canvas.height);
@@ -288,8 +258,8 @@
 			break;
 			
 		case "timeChange":
-					if(RemainingSeconds>m.amount)
-						RemainingSeconds=m.amount;
+					if(timerObj.retrieveCountdown('round')>m.amount)
+						timerObj.changeCountdown('round',m.amount);
 			break;
 			
 		case "showImages":
@@ -302,7 +272,7 @@
 						send({type: 'segment', src: taskImage.src, image: dataURL, name: pname});
 					}
 					role="ROUNDCHANGE";
-					CreateTimer(m.seconds);
+					timerObj.createCountdown("round",m.seconds,"roundEndMessage");
 			break;
 		
 		case "leaderboard":
@@ -370,11 +340,18 @@
 	dirtyPositions = true;
   }
 
-  
+  var triggerFunction=roundEndMessage;
   var w = canvas.width, h = canvas.height;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-
+  
+  function roundEndMessage()
+  {
+	send({type: 'roundEnded', player: pname});
+	console.log("Round message sent");
+  }
+  
+  window.roundEndMessage=roundEndMessage;
 })();
 
 
@@ -400,7 +377,8 @@
   //Send the points to the server as a trace message. It sends the points, the number of the trace sent, the name of the player that has sent the trace
   function sendPoints () {
     lastSent = +new Date(); //Refresh the countdown timer
-    send({type: "trace", points: points, num: numTrace, name: pname});
+	var gameTimer = timerObj.retrieveTimer("round");
+    send({type: "trace", points: points, num: numTrace, name: pname, time: gameTimer});
     points = [];
   }
   
@@ -650,7 +628,7 @@ var result= getPosition(obj);
 	//Time positioning
 	if(matchStarted)
 	{
-		var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('time')+time+"<b>"+"</font>";
+		var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('time')+timerObj.retrieveCountdown('round')+"<b>"+"</font>";
 		document.getElementById('timeCounter').innerHTML=htmlMessage;
 	}
     if(!matchStarted || role=="GUESSER" || role=="ENDED" || role=="ROUNDCHANGE")
