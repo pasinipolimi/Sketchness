@@ -1,7 +1,7 @@
+# Default play .gitignore
 logs
 project/project
 project/target
-results
 target
 tmp
 .history
@@ -14,4 +14,33 @@ dist
 /.project
 /RUNNING_PID
 /.settings
-/nbproject/private/
+
+# Ignore all dotfiles except for .gitignore
+.*
+!.gitignore
+
+# Resources handled outside the vcs
+/lib
+/assets
+/public/taskImages
+/public/images
+
+# Results of the execution
+/results
+
+# Netbean files
+/build.xml
+/nbproject
+
+# Probable path to ide side effect build
+/bin
+/build
+/.target
+
+# Known binary file extensions
+*.class
+*.jar
+*.zip
+*.psd
+*.jpg
+*.png
