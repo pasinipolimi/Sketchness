@@ -57,8 +57,12 @@ class Resource private (name: String, path :String, url :String = null, zipped :
 		log.info("Deleting " + name + ".")
 		if(_path.exists()) {
 			try {
+			if(_path.exists()) {
 				delete(_path)
 				log.success("-> Resource deleted.")
+			} else {
+				log.info("-> Resource already non existent.")
+			}
 			} catch {
 				case e :IOException => {
 					log.error("-> Unable to delete resource!")
