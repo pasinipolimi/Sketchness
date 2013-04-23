@@ -1,7 +1,0 @@
-play:
-  type: custom
-  buildscript: playframework/builder
-  ports:
-    www: http
-  process: ~/run
-  approot: application
