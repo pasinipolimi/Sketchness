@@ -31,6 +31,7 @@ import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.GameEvent;
 import utils.gamebus.GameMessages.PlayerQuit;
 import play.Logger;
+import utils.LanguagePicker;
 
 /**
  * A chat room is an Actor.
@@ -68,12 +69,12 @@ public class Chat extends UntypedActor {
             Join join = (Join)message;
             // Check if this username is free.
             if(playersMap.containsKey(join.username)) {
-                getSender().tell(Messages.get("usernameused"),this.getSelf());
+                getSender().tell(Messages.get(LanguagePicker.retrieveLocale(),"usernameused"),this.getSelf());
             } 
             else if(!gameStarted) 
             {
                 playersMap.put(join.username, join.channel);
-                notifyAll("join", join.username, Messages.get("join"));
+                notifyAll("join", join.username, Messages.get(LanguagePicker.retrieveLocale(),"join"));
                 GameBus.getInstance().publish(new GameMessages.PlayerJoin(join.username, roomChannel));
                 getSender().tell("OK",this.getSelf());
                 Logger.debug("[GAME] added player "+join.username);
@@ -81,7 +82,7 @@ public class Chat extends UntypedActor {
             //[TODO]Disabling game started control for debug messages
             else
             {
-            	getSender().tell(Messages.get("matchstarted"),this.getSelf());
+            	getSender().tell(Messages.get(LanguagePicker.retrieveLocale(),"matchstarted"),this.getSelf());
             }
         }
         else if(message instanceof Talk)  {
@@ -123,7 +124,7 @@ public class Chat extends UntypedActor {
                 case "gameStart":gameStarted=true;break;
                 case "newGame":case "gameEnded":gameStarted=false;break;
                 case "task":retrieveTask(event.getObject());break;
-                case "askTag":notifyAll("system", "Sketchness", Messages.get("asktag"));askTag=true;break;
+                case "askTag":notifyAll("system", "Sketchness", Messages.get(LanguagePicker.retrieveLocale(),"asktag"));askTag=true;break;
                 case "quit":handleQuitter(event.getMessage());
             }
         }
@@ -132,7 +133,7 @@ public class Chat extends UntypedActor {
             // Received a Quit message
             Quit quit = (Quit)message;
             playersMap.remove(quit.username);
-            notifyAll("quit", quit.username, Messages.get("quit"));
+            notifyAll("quit", quit.username, Messages.get(LanguagePicker.retrieveLocale(),"quit"));
             GameBus.getInstance().publish(new PlayerQuit(quit.username,roomChannel));
         } else {
             unhandled(message);
@@ -147,7 +148,7 @@ public class Chat extends UntypedActor {
                             //Close the websocket
                             entry.getValue().close();
                             playersMap.remove(quitter);
-                            notifyAll("quit", quitter, Messages.get("quit"));
+                            notifyAll("quit", quitter, Messages.get(LanguagePicker.retrieveLocale(),"quit"));
                             Logger.debug("[CHAT] "+quitter+" has disconnected.");
                             GameBus.getInstance().publish(new GameEvent(quitter,roomChannel,"quit"));
                         } 

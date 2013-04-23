@@ -3,21 +3,29 @@ package controllers;
 import models.chat.ChatRoomFactory;
 import play.mvc.*;
 
-import org.codehaus.jackson.*;
+import org.codehaus.jackson.JsonNode;
 
-import views.html.*;
+import views.html.index;
+import views.html.chatRoom;
 
 import models.game.GameRoomFactory;
 import models.paint.PaintRoomFactory;
+import play.i18n.Lang;
+import static play.mvc.Controller.request;
+import utils.LanguagePicker;
 
 
 
 public class Sketchness extends Controller {
-  
+
     /**
      * Display the home page.
      */
     public static Result index() {
+        if(LanguagePicker.retrieveIsoCode().equals(""))
+        {
+            LanguagePicker.setLanguage(Lang.preferred(request().acceptLanguages()));
+        }
         return ok(index.render());
     }
     
@@ -25,6 +33,10 @@ public class Sketchness extends Controller {
      * Display the chat room.
      */
     public static Result chatRoom(final String username, final String roomName) throws Exception {
+        if(LanguagePicker.retrieveIsoCode().equals(""))
+        {
+            LanguagePicker.setLanguage(Lang.preferred(request().acceptLanguages()));
+        }
         /*Fix the errors with all the possible cases*/
         if(username == null || username.trim().equals("")) {
             flash("error", "Please choose a valid username.");

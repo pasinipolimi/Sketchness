@@ -23,13 +23,10 @@ import utils.gamebus.GameMessages.SystemMessage;
 
 
 import play.i18n.Messages;
-import utils.levenshteinDistance.*;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 import org.json.JSONException;
-
-
 
 
 import play.Logger;
@@ -38,6 +35,7 @@ import play.libs.Json;
 import play.libs.WS;
 import scala.concurrent.duration.Duration;
 import utils.JsonReader;
+import utils.LanguagePicker;
 
 /**
  * A chat room is an Actor.
@@ -60,7 +58,7 @@ public class Game extends UntypedActor {
     //Variables used to manage the rounds
     private boolean gameStarted=false;
     private int roundNumber=0;  //Starts with round number 1
-    private static int maxRound=1;  //Maximum number of rounds
+    private static int maxRound=6;  //Maximum number of rounds
     private int numberGuessed=0;   //Number of players that have guessed for a specific round
     private Painter sketcherPainter;  //The current sketcher
     
@@ -125,8 +123,8 @@ public class Game extends UntypedActor {
          int currentPlayers=requiredPlayers-disconnectedPlayers;
          int count=0;
          //Publish system messages to inform that a new round is starting and the roles are being chosen
-         GameBus.getInstance().publish(new SystemMessage(Messages.get("newround"), roomChannel));
-         GameBus.getInstance().publish(new SystemMessage(Messages.get("choosingroles"), roomChannel));
+         GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(),"newround"), roomChannel));
+         GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(),"choosingroles"), roomChannel));
 
          //Keep searching for a new sketcher
          while(sketcherPainter==null)
@@ -153,7 +151,7 @@ public class Game extends UntypedActor {
             }
          }
          //Publish a system message to inform the other players on who is the sketcher
-         GameBus.getInstance().publish(new SystemMessage(Messages.get("thesketcheris")+" "+sketcherPainter.name, roomChannel));
+         GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(),"thesketcheris")+" "+sketcherPainter.name, roomChannel));
          return sketcherPainter.name;
      }
      
@@ -173,9 +171,9 @@ public class Game extends UntypedActor {
                 {
                     int nPlayers=playersVect.size();
                     if(requiredPlayers-nPlayers>1)
-                        GameBus.getInstance().publish(new SystemMessage(Messages.get("waitingfor")+" "+(requiredPlayers-nPlayers)+" "+Messages.get("playerstostart"), roomChannel));
+                        GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(),"waitingfor")+" "+(requiredPlayers-nPlayers)+" "+Messages.get(LanguagePicker.retrieveLocale(),"playerstostart"), roomChannel));
                     else if (requiredPlayers-nPlayers==1)
-                        GameBus.getInstance().publish(new SystemMessage(Messages.get("waitingfor")+" "+(requiredPlayers-nPlayers)+" "+Messages.get("playertostart"), roomChannel));
+                        GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(),"waitingfor")+" "+(requiredPlayers-nPlayers)+" "+Messages.get(LanguagePicker.retrieveLocale(),"playertostart"), roomChannel));
                 }
     }
     
@@ -203,7 +201,7 @@ public class Game extends UntypedActor {
                     }
                     else
                     {
-                         GameBus.getInstance().publish(new SystemMessage(Messages.get("acquiring"), roomChannel));
+                         GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(),"acquiring"), roomChannel));
                     }
                     return true;
                 }
@@ -333,7 +331,7 @@ public class Game extends UntypedActor {
                   try {
                       taskSetInitialization();
                   } catch (Exception ex) {
-                      //TODO HANDLE EXCEPTIONS
+                      ex.printStackTrace();
                   }
               }
             },
@@ -410,7 +408,7 @@ public class Game extends UntypedActor {
         String history = finalTraces.get("history").toString();
         
         //[TODO] ADD THE LANGUAGE FOR THE TAG
-        String urlParameters = "label="+label+"&coordinates="+traces+"&history="+history+"&user_id="+sketcherPainter.name+"&language=ita";
+        String urlParameters = "label="+label+"&coordinates="+traces+"&history="+history+"&user_id="+sketcherPainter.name+"&language="+LanguagePicker.retrieveIsoCode();
         String request = rootUrl+"/wsmc/image/"+id+"/segment";
         
         WS.url(request).setContentType("application/x-www-form-urlencoded").post(urlParameters);
@@ -563,6 +561,8 @@ public class Game extends UntypedActor {
     **/
     public void taskSetInitialization() throws MalformedURLException, IOException, JSONException
     {
+      
+       
        taskAcquired=false;
        JsonReader jsonReader= new JsonReader();
        JsonNode retrieved= jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image.json");
@@ -577,32 +577,34 @@ public class Game extends UntypedActor {
                 Integer width = item.get("imgage_width").asInt();
                 Integer height = item.get("imgage_height").asInt();
                 
-                JsonNode image= jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image/"+id+"/segment.json");
-                
-                if(image.size()>0 && image.getElements().hasNext())
+                JsonNode imageSegments= jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image/"+id+"/segment.json");
+
+                String label="";
+                ObjectNode guessWord = Json.newObject();
+                guessWord.put("type", "task");
+                guessWord.put("id", id);
+                if(imageSegments.size()>0 && imageSegments.getElements().hasNext())
                 {
-                    String label="";
-                    ObjectNode guessWord = Json.newObject();
-                    guessWord.put("type", "task");
-                    guessWord.put("id", id);
-                    
                     JsonNode tags= jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image/"+id+"/tag.json");
                     if(tags.size()>=minimumTags && tags.getElements().hasNext())
                     {
                         JsonNode retrievedTags=tags.get(new Random().nextInt(tags.size()));
                         retrievedTags=retrievedTags.get("image").get("tag");
-                        label=retrievedTags.get(new Random().nextInt(retrievedTags.size())).get("tag").get("tag_name").asText();
+                        JsonNode retrievedTag = retrievedTags.get(new Random().nextInt(retrievedTags.size())).get("tag");
+                        if(retrievedTag.get("language").get("language_iso_code").asText().equals(LanguagePicker.retrieveIsoCode()))
+                            label=retrievedTag.get("tag").get("tag_name").asText();
                     }
-                    guessWord.put("word",label);
-                    guessWord.put("image",url);
-                    guessWord.put("width",width);
-                    guessWord.put("height",height);
-                    taskHashSet.add(guessWord);
-                    if(!taskAcquired)
-                    {
-                        taskAcquired = true;
-                        GameBus.getInstance().publish(new GameEvent("", roomChannel, "canStart"));
-                    }
+                }
+                guessWord.put("word",label);
+                guessWord.put("lang",LanguagePicker.retrieveIsoCode());
+                guessWord.put("image",url);
+                guessWord.put("width",width);
+                guessWord.put("height",height);
+                taskHashSet.add(guessWord);
+                if(!taskAcquired)
+                {
+                    taskAcquired = true;
+                    GameBus.getInstance().publish(new GameEvent("", roomChannel, "canStart"));
                 }
             }
         }  
