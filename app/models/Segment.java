@@ -2,6 +2,8 @@ package models;
 
 import java.util.ArrayList;
 import java.util.ListIterator;
+import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
 
 
 
@@ -57,10 +59,10 @@ public class Segment{
     
     
     //Reconstruct the final segment, removing the traces that have been erased
-    public ArrayList<Point> filter()
+    public ArrayNode filter()
     {
         
-        ArrayList<Point> toReturn = new ArrayList<>();
+        ArrayNode toReturn = new ArrayNode(JsonNodeFactory.instance);
         ArrayList<PositionedPoint> finalSegment = new ArrayList<>();
         ArrayList<PositionedPoint> copy = new ArrayList<>();
         
@@ -103,7 +105,7 @@ public class Segment{
         {
             Point current=((PositionedPoint)copyIt.next()).getPoint();
             if(!current.getColor().equals(eraser))
-                toReturn.add(current);
+                toReturn.add(current.toJson());
         }
         
         return toReturn;

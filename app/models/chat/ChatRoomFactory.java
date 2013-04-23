@@ -26,7 +26,7 @@ import utils.gamebus.GameMessages.GameEvent;
   public static synchronized void createChat(final String username, final String room, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception
   {
       final ActorRef finalRoom=create(room, Chat.class);
-      Future<Object> future = (Future<Object>) Patterns.ask(finalRoom,new Messages.Join(username, out), 1000);
+      Future<Object> future = Patterns.ask(finalRoom,new Messages.Join(username, out), 1000);
         // Send the Join message to the room
       String result = (String)Await.result(future, Duration.create(10, SECONDS));
         
@@ -39,8 +39,8 @@ import utils.gamebus.GameMessages.GameEvent;
                public void invoke(JsonNode event) {
                    
                    // Send a Talk message to the room.
-                   finalRoom.tell(new Messages.Talk(username, event.get("text").asText()));
-                   finalRoom.tell(this);
+                   finalRoom.tell(new Messages.Talk(username, event.get("text").asText()),finalRoom);
+                   finalRoom.tell(this,finalRoom);
                } 
             });
             
@@ -50,7 +50,7 @@ import utils.gamebus.GameMessages.GameEvent;
                public void invoke() {
                    
                    // Send a Quit message to the room.
-                   finalRoom.tell( new GameEvent(username,room,"quit"));
+                   finalRoom.tell( new GameEvent(username,room,"quit"),finalRoom);
                }
             });
             

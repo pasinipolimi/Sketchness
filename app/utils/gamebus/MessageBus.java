@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.event.japi.LookupEventBus;
 import utils.gamebus.GameMessages.GameEvent;
 
+@SuppressWarnings("unchecked")
 public class MessageBus extends LookupEventBus {
       /**
        * Initial size of the index data structure used internally
@@ -40,6 +41,6 @@ public class MessageBus extends LookupEventBus {
        */
       @Override
       public void publish(Object event, Object subscriber) {
-         ((ActorRef) subscriber).tell(event);
+         ((ActorRef) subscriber).tell(event,(ActorRef) subscriber);
       }
    }

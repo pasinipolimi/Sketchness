@@ -1,7 +1,5 @@
 (function(){
 
-  //Defining the websocket type based on the browser
-  var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket
   var timerObj=new TimerObj();
 
 
@@ -17,8 +15,8 @@
           }; 
           })();
 
-  var insideIframe = (window.parent != window);
-  var isMobile = /ipad|iphone|android/i.test(navigator.userAgent)
+  var insideIframe = (window.parent !== window);
+  var isMobile = /ipad|iphone|android/i.test(navigator.userAgent);
 
   // CONSTANTS
   var PEN = 'red';
@@ -32,6 +30,7 @@
   var pname;
   var meCtx;
   var role;
+  var tagging=false;
   
   // TOOLS STATUS
   var color = PEN;
@@ -61,12 +60,12 @@
   
   
   function setError (message) {
-      $("#onError span").text(message)
-      $("#onError").show()
-      $("#pageheader").hide()
-      $("#mainPage").hide()
+      $("#onError span").text(message);
+      $("#onError").show();
+      $("#pageheader").hide();
+      $("#mainPage").hide();
   }
-    
+  
   
   /*****************************UTILITY FUNCTIONS********************************************/
 
@@ -85,7 +84,7 @@
      pname = queryPname();
   }
   if (!pname) {
-    pname = "iam"+Math.floor(100*Math.random())
+    pname = "iam"+Math.floor(100*Math.random());
 }
 
 
@@ -95,7 +94,7 @@
 
   function connect () {
     try {
-	  var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket
+	  var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
 	  socket = new WS($('#paintWebSocket').data('ws'));
       socket.onmessage = onSocketMessage;
 	  queryPname();
@@ -103,7 +102,7 @@
       socket.onopen = function(evt) {
         connected = true;
         send({type: 'change', size: size, color: color, name: pname});
-      }
+      };
 
       socket.onclose = function (evt) {
             connected = false;
@@ -126,7 +125,7 @@
   {
 	for (i=0;i<players.length;i++)
 	{
-		if(players[i].name.toLowerCase()==username.toLowerCase())
+		if(players[i].name.toLowerCase()===username.toLowerCase())
 		{
 			return players[i];
 		}
@@ -137,7 +136,7 @@
   {
 	for (i=0;i<players.length;i++)
 	{
-		if(players[i].name.toLowerCase()==username.toLowerCase())
+		if(players[i].name.toLowerCase()===username.toLowerCase())
 		{
 			delete players[i];
 			return;
@@ -150,7 +149,7 @@
 	var username=message.name;
     for (i=0;i<players.length;i++)
 	{
-		if(players[i].name.toLowerCase()==username.toLowerCase())
+		if(players[i].name.toLowerCase()===username.toLowerCase())
 		{
 	          players[i]=$.extend(players[i], message);
 		}
@@ -175,170 +174,224 @@ var gameloop = (function(){
 	switch(m.type)
 	{
 		case "role":
-					//Fix the drawing style for the player
-					ctx.globalCompositeOperation = "destination-out";
-					guessed=false;
-					role=m.role;
-					matchStarted=true;
-					var player=getPlayer(pname);
-					player.role=m.role;
-					send({type: 'change', size: size, color: color, name: pname, role: role});
-					if(role=="SKETCHER")
-					{
-						$('#roleSpan').text($.i18n.prop('sketcher'));
-						$('#mainPage').removeClass('guesser');
-						$('#mainPage').addClass('sketcher');
-						$('#talk').attr('disabled', 'disabled');
+                            tagging=false;
+                            //Fix the drawing style for the player
+                            ctx.globalCompositeOperation = "destination-out";
+                            guessed=false;
+                            role=m.role;
+                            matchStarted=true;
+                            var player=getPlayer(pname);
+                            player.role=m.role;
+                            send({type: 'change', size: size, color: color, name: pname, role: role});
+                            if(role==="SKETCHER")
+                            {
+                                    $('#roleSpan').text($.i18n.prop('sketcher'));
+                                    $('#mainPage').removeClass('guesser');
+                                    $('#mainPage').addClass('sketcher');
+                                    $('#talk').attr('disabled', 'disabled');
 
-					}
-					else
-					{
-						$('#roleSpan').text($.i18n.prop('guesser'));
-						$('#mainPage').removeClass('sketcher');
-						$('#mainPage').addClass('guesser');
-						$('#talk').removeAttr('disabled');
+                            }
+                            else
+                            {
+                                    $('#roleSpan').text($.i18n.prop('guesser'));
+                                    $('#mainPage').removeClass('sketcher');
+                                    $('#mainPage').addClass('guesser');
+                                    $('#talk').removeAttr('disabled');
 
-					}
-					timerObj.createCountdown("round",defaultRoundTime,"roundEndMessage");
-					timerObj.createTimer("round");
-					ctx.clearRect(0, 0, canvas.width, canvas.height);
-					taskContext.clearRect(0, 0, canvas.width, canvas.height);
-					positionContext.clearRect(0, 0, canvas.width, canvas.height);
+                            }
+                            timerObj.createCountdown("round",defaultRoundTime,"roundEndMessage");
+                            timerObj.createTimer("round");
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            taskContext.clearRect(0, 0, canvas.width, canvas.height);
+                            positionContext.clearRect(0, 0, canvas.width, canvas.height);
 			break;
 			
 		case "move"://We need to update the current position of the player
-					trackX=m.x;
-					trackY=m.y;
+                            trackX=m.x;
+                            trackY=m.y;
 			break;
 			
 		case "task"://Send the current task (image + tag) to the player
-					guessWord=m.word;
-					taskImage=new Image();
-					taskImage.src=m.image;
-					//Wait for the image to be loaded before drawing it to canvas to avoid
-					//errors
-					taskImage.onload = function() {
-							taskContext.save();
-							taskContext.beginPath();
-							x=0;
-							y=0;
-							var style = window.getComputedStyle(taskCanvas);
-							var width=style.getPropertyValue('width');
-							width= parseInt(width, 10);
-							var height=style.getPropertyValue('height');
-							height=parseInt(height, 10);
-							radius=50;
-							taskContext.moveTo(x + radius, y);
-							taskContext.lineTo(x + width - radius, y);
-							taskContext.quadraticCurveTo(x + width, y, x + width, y + radius);
-							taskContext.lineTo(x + width, y + height - radius);
-							taskContext.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-							taskContext.lineTo(x + radius, y + height);
-							taskContext.quadraticCurveTo(x, y + height, x, y + height - radius);
-							taskContext.lineTo(x, y + radius);
-							taskContext.quadraticCurveTo(x, y, x + radius, y);
-							taskContext.closePath();
-							taskContext.clip();
-							taskContext.drawImage(taskImage,0,0,width,height);
-							taskContext.restore();
-					};
+                            tagging=false;
+                            guessWord=m.word;
+                            taskImage=null;
+                            taskImage=new Image();
+                            taskImage.src=m.image;
+                            //Wait for the image to be loaded before drawing it to canvas to avoid
+                            //errors
+                            taskImage.onload = function() {
+                                            taskContext.save();
+                                            taskContext.beginPath();
+                                            x=0;
+                                            y=0;
+                                            var style = window.getComputedStyle(taskCanvas);
+                                            var width=style.getPropertyValue('width');
+                                            width= parseInt(width, 10);
+                                            var height=style.getPropertyValue('height');
+                                            height=parseInt(height, 10);
+                                            radius=50;
+                                            taskContext.moveTo(x + radius, y);
+                                            taskContext.lineTo(x + width - radius, y);
+                                            taskContext.quadraticCurveTo(x + width, y, x + width, y + radius);
+                                            taskContext.lineTo(x + width, y + height - radius);
+                                            taskContext.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                                            taskContext.lineTo(x + radius, y + height);
+                                            taskContext.quadraticCurveTo(x, y + height, x, y + height - radius);
+                                            taskContext.lineTo(x, y + radius);
+                                            taskContext.quadraticCurveTo(x, y, x + radius, y);
+                                            taskContext.closePath();
+                                            taskContext.clip();
+                                            taskContext.drawImage(taskImage,0,0,width,height);
+                                            taskContext.restore();
+                            };
+			break;
+	
+		case "tag"://Send the current task (image) to the player
+                            tagging=true;
+                            document.getElementById('timeCounter').innerHTML="";
+                            if(m.role==="SKETCHER")
+                            {
+                                    $('#talk').removeAttr('disabled');
+                                    var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('asktagsketcher')+"</font>";
+                                    document.getElementById('topMessage').innerHTML=htmlMessage;
+                                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                    taskContext.clearRect(0, 0, canvas.width, canvas.height);
+                                    taskImage=null;
+                                    taskImage=new Image();
+                                    taskImage.src=m.image;
+                                    //Wait for the image to be loaded before drawing it to canvas to avoid
+                                    //errors
+                                    taskImage.onload = function() {
+                                                    taskContext.save();
+                                                    taskContext.beginPath();
+                                                    x=0;
+                                                    y=0;
+                                                    var style = window.getComputedStyle(taskCanvas);
+                                                    var width=style.getPropertyValue('width');
+                                                    width= parseInt(width, 10);
+                                                    var height=style.getPropertyValue('height');
+                                                    height=parseInt(height, 10);
+                                                    radius=50;
+                                                    taskContext.moveTo(x + radius, y);
+                                                    taskContext.lineTo(x + width - radius, y);
+                                                    taskContext.quadraticCurveTo(x + width, y, x + width, y + radius);
+                                                    taskContext.lineTo(x + width, y + height - radius);
+                                                    taskContext.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                                                    taskContext.lineTo(x + radius, y + height);
+                                                    taskContext.quadraticCurveTo(x, y + height, x, y + height - radius);
+                                                    taskContext.lineTo(x, y + radius);
+                                                    taskContext.quadraticCurveTo(x, y, x + radius, y);
+                                                    taskContext.closePath();
+                                                    taskContext.clip();
+                                                    taskContext.drawImage(taskImage,0,0,width,height);
+                                                    taskContext.restore();
+                                    };
+                            }
+                            else
+                            {
+                                    var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('asktag')+"</font>"+"<b>"+"</font>";
+                                    //[TODO] Possible exploit, they can still send messages if they enable the textfield
+                                    $('#talk').attr('disabled', 'disabled');
+                                    document.getElementById('topMessage').innerHTML=htmlMessage;
+                                    taskContext.clearRect(0, 0, canvas.width, canvas.height);
+                                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            }
 			break;
 			
 		case "guesser":
-					if(m.name==pname)
-					{
-						score=score+m.points;
-						guessed=true;
-					}
+                            if(m.name===pname)
+                            {
+                                    score=score+m.points;
+                                    guessed=true;
+                            }
 			break;
 			
 		case "sketcher":
-					if(m.name==pname)
-						score=score+m.points;
+                            if(m.name===pname)
+                                    score=score+m.points;
 			break;
 			
 		case "timeChange":
-					if(timerObj.retrieveCountdown('round')>m.amount)
-						timerObj.changeCountdown('round',m.amount);
+                            if(timerObj.retrieveCountdown('round')>m.amount)
+                                    timerObj.changeCountdown('round',m.amount);
 			break;
 			
-		case "showImages":
-					
-					//We want to save the image that has been created by the sketcher
-					if(role=="SKETCHER")
-					{
-						//Save the drawings done by the player
-						var dataURL = canvas.toDataURL('image/png');
-						send({type: 'segment', src: taskImage.src, image: dataURL, name: pname});
-					}
-					role="ROUNDCHANGE";
-					timerObj.createCountdown("round",m.seconds,"roundEndMessage");
+		case "showImages":	
+                            //We want to save the image that has been created by the sketcher
+                            if(role==="SKETCHER")
+                            {
+                                    //Save the drawings done by the player
+                                    var dataURL = canvas.toDataURL('image/png');
+                                    send({type: 'segment', src: taskImage.src, image: dataURL, name: pname});
+                            }
+                            role="ROUNDCHANGE";
+                            timerObj.createCountdown("round",m.seconds,"roundEndMessage");
 			break;
 		
 		case "leaderboard":
-					role="ENDED";
-					//Clear all the canvas and draw the leaderboard
-					time=0;
-					ctx.clearRect(0, 0, canvas.width, canvas.height);
-					taskContext.clearRect(0, 0, canvas.width, canvas.height);
-					positionContext.clearRect(0, 0, canvas.width, canvas.height);
-			   
-					//Disable the chat
-					$('#talk').attr('disabled', 'disabled');
-					for(var i=1;i<=m.playersNumber;i++)
-					{
-						taskContext.fillStyle = "#000000";
-						taskContext.font = "bold 30px sans-serif";
-						taskContext.fillText(i+"): "+m.playerList[i-1].name+" = "+m.playerList[i-1].points+$.i18n.prop('points'),30,50+50*(i-1));
-					}
+                            role="ENDED";
+                            //Clear all the canvas and draw the leaderboard
+                            time=0;
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            taskContext.clearRect(0, 0, canvas.width, canvas.height);
+                            positionContext.clearRect(0, 0, canvas.width, canvas.height);
+
+                            //Disable the chat
+                            $('#talk').attr('disabled', 'disabled');
+                            for(var i=1;i<=m.playersNumber;i++)
+                            {
+                                    taskContext.fillStyle = "#000000";
+                                    taskContext.font = "bold 30px sans-serif";
+                                    taskContext.fillText(i+"): "+m.playerList[i-1].name+" = "+m.playerList[i-1].points+$.i18n.prop('points'),30,50+50*(i-1));
+                            }
 			break;
 		
 		case "trace":
-					player = getPlayer(m.name);
-					if(player.color==ERASER)
-						ctx.globalCompositeOperation = "destination-out";
-					else
-					   ctx.globalCompositeOperation = "source-over";
-					ctx.lineWidth = player.size;
-					ctx.beginPath();
-						var points = m.points;
-						points[0] && ctx.moveTo(points[0].x, points[0].y);
-						points.forEach(function (p) {
-						ctx.strokeStyle=p.color;
-						ctx.lineTo(p.x, p.y);
-						});
-					ctx.stroke();
-					
-					trackX = points[points.length-1].x;
-					trackY = points[points.length-1].y;
-					
-					// clear local canvas if synchronized
-					if (m.name==pname && numTrace == m.num) {
-					  meCtx.clearRect(0,0,meCtx.canvas.width,meCtx.canvas.height);
-					}
+                            player = getPlayer(m.name);
+                            if(player.color===ERASER)
+                                    ctx.globalCompositeOperation = "destination-out";
+                            else
+                               ctx.globalCompositeOperation = "source-over";
+                            ctx.lineWidth = player.size;
+                            ctx.beginPath();
+                                    var points = m.points;
+                                    points[0] && ctx.moveTo(points[0].x, points[0].y);
+                                    points.forEach(function (p) {
+                                    ctx.strokeStyle=p.color;
+                                    ctx.lineTo(p.x, p.y);
+                                    });
+                            ctx.stroke();
+
+                            trackX = points[points.length-1].x;
+                            trackY = points[points.length-1].y;
+
+                            // clear local canvas if synchronized
+                            if (m.name===pname && numTrace === m.num) {
+                              meCtx.clearRect(0,0,meCtx.canvas.width,meCtx.canvas.height);
+                            }
 			break;
 			
 		case "change":
-				var player = getPlayer(m.name);
-				if (player === undefined)
-				{
-					player = players[players.length] = m;
-					console.log(player);
-				}
-				playerExtend(m);
+                            var player = getPlayer(m.name);
+                            if (player === undefined)
+                            {
+                                    player = players[players.length] = m;
+                                    console.log(player);
+                            }
+                            playerExtend(m);
 			break;
 			
 		case "youAre":
-				role = m.role;
+                            role = m.role;
 			break;
 		
 		case "disconnect": //[TODO]
-			deletePlayer(m.username);
+                            //deletePlayer(m.username);
 			break;
 		
 	}
 	dirtyPositions = true;
-  }
+  };
 
   var triggerFunction=roundEndMessage;
   var w = canvas.width, h = canvas.height;
@@ -412,7 +465,7 @@ var gameloop = (function(){
 	//Get the current position with respect to the canvas element we want to draw to
     var o = positionWithE(e,canvas);
 	//If the mouse is pressed and the player is a sketcher
-    if (pressed && role=="SKETCHER") {
+    if (pressed && role==="SKETCHER") {
 	  //Draw the local line
       lineTo(o.x, o.y);
 	  //Add the points to the points to be sent
@@ -429,7 +482,7 @@ var gameloop = (function(){
     else 
 	{
 	  //The mouse is not pressed, can we just send the position of the player?
-      if (canSendNow() && role=="SKETCHER") {
+      if (canSendNow() && role==="SKETCHER") {
         sendMove(o.x, o.y);
       }
     }
@@ -438,7 +491,7 @@ var gameloop = (function(){
 
   function onMouseDown (e) {
 	//If the player is a sketcher, update the mouse pressed status to send his traces
-    if(role=="SKETCHER")
+    if(role==="SKETCHER")
         {
             var o = positionWithE(e,canvas);
             position = o;
@@ -449,7 +502,7 @@ var gameloop = (function(){
 
   function onMouseUp (e) {
     //If the player is the sketcher, send the last trace and disable the drawing function
-    if(role=="SKETCHER")
+    if(role==="SKETCHER")
         {
             lineTo(position.x, position.y);
             addPoint(position.x, position.y, size, color);
@@ -502,6 +555,10 @@ var result= getPosition(obj);
   ctx.textBaseline = "bottom";
   function render ()
   {
+	if(tagging){
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		return;
+	}
     if(!dirtyPositions) return;
     dirtyPositions = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -509,7 +566,7 @@ var result= getPosition(obj);
         for (i=0;i<players.length;i++)
         {
             var player = players[i];
-            if (player.role!="SKETCHER") continue;
+            if (player.role!=="SKETCHER") continue;
             ctx.beginPath();
             ctx.strokeStyle = TRACKER;
             ctx.arc(trackX, trackY, player.size/2, 0, 2*Math.PI);
@@ -579,8 +636,8 @@ var result= getPosition(obj);
   /************TOOLS PANEL RENDERING***********************/
   function render()
   {
-	ctx.clearRect(0, 0, hud.width, hud.height);
-    if(!matchStarted)
+    ctx.clearRect(0, 0, hud.width, hud.height);
+    if(!matchStarted&&!tagging)
     {
 		var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('waiting')+"<b>"+"</font>";
 		document.getElementById('topMessage').innerHTML=htmlMessage;
@@ -590,34 +647,40 @@ var result= getPosition(obj);
 		switch(role)
 		{
 			case "SKETCHER":
-						var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('draw')+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
-						document.getElementById('topMessage').innerHTML=htmlMessage;
-				break;
+                               if(!tagging){
+                                    var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('draw')+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
+                                    document.getElementById('topMessage').innerHTML=htmlMessage;
+                               }
+                            break;
 				
 			case "GUESSER":
-						if(!guessed)
-						{
-							var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('guess')+"<b>"+"</font>";
-							document.getElementById('topMessage').innerHTML=htmlMessage;
-						}
-						else
-						{
-							var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('guessed')+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
-							document.getElementById('topMessage').innerHTML=htmlMessage;
-						}
-				break;
+                                if(!tagging){
+                                    if(!guessed)
+                                    {
+                                            var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('guess')+"<b>"+"</font>";
+                                            document.getElementById('topMessage').innerHTML=htmlMessage;
+                                    }
+                                    else
+                                    {
+                                            var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('guessed')+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
+                                            document.getElementById('topMessage').innerHTML=htmlMessage;
+                                    }
+                                }
+                            break;
 				
 			case "ROUNDCHANGE":
-						var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('solution')+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
-						document.getElementById('topMessage').innerHTML=htmlMessage;
-				break;
+                                if(!tagging){
+                                    var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('solution')+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
+                                    document.getElementById('topMessage').innerHTML=htmlMessage;
+                                }
+                            break;
 				
 			case "ENDED":
-						var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('leaderboard')+"<b>"+"</font>";
-						document.getElementById('topMessage').innerHTML=htmlMessage;
-						$('#mainPage').removeClass('guesser');
-						$('#mainPage').removeClass('sketcher');
-				break;
+                                var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('leaderboard')+"<b>"+"</font>";
+                                document.getElementById('topMessage').innerHTML=htmlMessage;
+                                $('#mainPage').removeClass('guesser');
+                                $('#mainPage').removeClass('sketcher');
+                            break;
 				
 		}
     }
@@ -626,12 +689,12 @@ var result= getPosition(obj);
 	document.getElementById('score').innerHTML=htmlMessage;
 
 	//Time positioning
-	if(matchStarted)
+	if(matchStarted&&!tagging)
 	{
 		var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('time')+timerObj.retrieveCountdown('round')+"<b>"+"</font>";
 		document.getElementById('timeCounter').innerHTML=htmlMessage;
 	}
-    if(!matchStarted || role=="GUESSER" || role=="ENDED" || role=="ROUNDCHANGE")
+    if(!matchStarted || role==="GUESSER" || role==="ENDED" || role==="ROUNDCHANGE")
     {
               //Draw nothing till now
     }

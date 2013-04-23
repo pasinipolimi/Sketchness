@@ -20,3 +20,6 @@ end=Il match è terminato!
 usernameused=Questo username è già in uso
 matchstarted=Il match è già iniziato
 thesketcheris=Lo SKETCHER è 
+acquiring=Sto creando la partita, attendere...
+asktag=Lo sketcher sta scegliendo...
+asktagsketcher=Scrivi l''oggetto da disegnare:
