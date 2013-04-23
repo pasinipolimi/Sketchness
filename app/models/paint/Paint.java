@@ -28,6 +28,7 @@ import net.coobird.thumbnailator.Thumbnails;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.json.JSONException;
+import utils.LanguagePicker;
 
 
 public class Paint extends UntypedActor{
@@ -64,7 +65,7 @@ public class Paint extends UntypedActor{
             Messages.Join join = (Messages.Join)message;
             String username=join.username;
             if(painters.containsKey(username))
-                getSender().tell(play.i18n.Messages.get("usernameused"),this.getSelf());
+                getSender().tell(play.i18n.Messages.get(LanguagePicker.retrieveLocale(),"usernameused"),this.getSelf());
             else if(!gameStarted) 
             {
                Painter painter = new Painter(join.channel);
@@ -83,7 +84,7 @@ public class Paint extends UntypedActor{
             }
             else
             {
-            	getSender().tell(play.i18n.Messages.get("matchstarted"),this.getSelf());
+            	getSender().tell(play.i18n.Messages.get(LanguagePicker.retrieveLocale(),"matchstarted"),this.getSelf());
             }
         }
         if(message instanceof JsonNode )
