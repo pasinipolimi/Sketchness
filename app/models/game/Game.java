@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 import utils.Messages.*;
@@ -44,6 +45,8 @@ import utils.JsonReader;
 public class Game extends UntypedActor {
     
     private final String rootUrl="http://webservices.comoconnection.com/";
+    //Minimum tags that an image should have to avoid asking to the users for new tags
+    private final int minimumTags=3;
 
     //[TODO] Should be declared as config variables
     //Variables to manage the point system in the game
@@ -56,14 +59,16 @@ public class Game extends UntypedActor {
     
     //Variables used to manage the rounds
     private boolean gameStarted=false;
-    private int roundNumber=1;  //Starts with round number 1
-    private static int maxRound=6;  //Maximum number of rounds
+    private int roundNumber=0;  //Starts with round number 1
+    private static int maxRound=1;  //Maximum number of rounds
     private int numberGuessed=0;   //Number of players that have guessed for a specific round
     private Painter sketcherPainter;  //The current sketcher
     
     //System variables
     private int modules = 2; //Number of modules available in the game (chat/paint)
     String  roomChannel;  //Name of the room
+    
+    boolean taskAcquired=false;
     
     //Control Variables
     private ObjectNode guessObject;
@@ -75,10 +80,10 @@ public class Game extends UntypedActor {
         
     private HashSet<ObjectNode> taskHashSet = new HashSet<>();
     
-    
+    private ObjectNode taskImage;
     
     // Members of this room.
-    List<Painter> playersVect = Collections.synchronizedList(new ArrayList());
+    CopyOnWriteArrayList<Painter> playersVect = new CopyOnWriteArrayList<>();
 
     
     
@@ -163,6 +168,19 @@ public class Game extends UntypedActor {
      */
     public void checkStart() throws Exception
     {
+                if(!triggerStart())
+                //Send a message to inform about the missing players
+                {
+                    int nPlayers=playersVect.size();
+                    if(requiredPlayers-nPlayers>1)
+                        GameBus.getInstance().publish(new SystemMessage(Messages.get("waitingfor")+" "+(requiredPlayers-nPlayers)+" "+Messages.get("playerstostart"), roomChannel));
+                    else if (requiredPlayers-nPlayers==1)
+                        GameBus.getInstance().publish(new SystemMessage(Messages.get("waitingfor")+" "+(requiredPlayers-nPlayers)+" "+Messages.get("playertostart"), roomChannel));
+                }
+    }
+    
+    public boolean triggerStart() throws Exception
+    {
                 boolean canStart=true;
                 for (Painter painter : playersVect) {
                    if(painter.getnModulesReceived()<modules)
@@ -171,8 +189,10 @@ public class Game extends UntypedActor {
                 //We need to wait for all the modules to receive the player list
                 if(canStart&&playersVect.size()>=requiredPlayers)
                 {
+                    if(taskAcquired)
+                    {
                         disconnectedPlayers=0;
-                        roundNumber=1;
+                        roundNumber=0;
                 	gameStarted=true;
                         //We start the game
                         nextRound();
@@ -180,16 +200,14 @@ public class Game extends UntypedActor {
                             GameBus.getInstance().publish(new GameEvent(sketcherPainter.name, roomChannel,"gameStart"));
                         else
                             throw new Exception("[Error][Game]: Cannot find a suitable Sketcher!");
+                    }
+                    else
+                    {
+                         GameBus.getInstance().publish(new SystemMessage(Messages.get("acquiring"), roomChannel));
+                    }
+                    return true;
                 }
-                //Send a message to inform about the missing players
-                else
-                {
-                    int nPlayers=playersVect.size();
-                    if(requiredPlayers-nPlayers>1)
-                        GameBus.getInstance().publish(new SystemMessage(Messages.get("waitingfor")+" "+(requiredPlayers-nPlayers)+" "+Messages.get("playerstostart"), roomChannel));
-                    else if (requiredPlayers-nPlayers==1)
-                        GameBus.getInstance().publish(new SystemMessage(Messages.get("waitingfor")+" "+(requiredPlayers-nPlayers)+" "+Messages.get("playertostart"), roomChannel));
-                }
+                return false;
     }
     
     
@@ -213,12 +231,21 @@ public class Game extends UntypedActor {
            }
            //Find the new sketcher
            nextSketcher();
-           //Inform the other modules that we are starting a new round
-           GameBus.getInstance().publish(new GameEvent(sketcherPainter.name,roomChannel,"nextRound"));
            //We send the right task to the right sketcher
-           GameEvent task = new GameEvent(sketcherPainter.name,roomChannel,"task");
-           task.setObject(retrieveTaskImage());
-           GameBus.getInstance().publish(task);
+           
+           //Check if a tag for the current image as already been provided;if not, ask for a new one
+           taskImage = retrieveTaskImage();
+           String label=taskImage.get("word").asText();
+           if(label.equals(""))
+           {
+               GameEvent task = new GameEvent(sketcherPainter.name,roomChannel,"askTag");
+               task.setObject(taskImage);
+               GameBus.getInstance().publish(task);
+           }
+           else
+           {
+                sendTask();
+           }
          }
          //We have played all the rounds for the game, inform the users and the modules
          //that the match has ended
@@ -227,6 +254,14 @@ public class Game extends UntypedActor {
              gameEnded();
              newGameSetup();
          } 
+     }
+     
+     public void sendTask()
+     {
+         GameBus.getInstance().publish(new GameEvent(sketcherPainter.name,roomChannel,"nextRound"));
+         GameEvent task = new GameEvent(sketcherPainter.name,roomChannel,"task");
+         task.setObject(taskImage);
+         GameBus.getInstance().publish(task);
      }
 	 
      
@@ -286,14 +321,14 @@ public class Game extends UntypedActor {
      public void newGameSetup()
      {
          disconnectedPlayers=0;
-         roundNumber=1;
+         roundNumber=0;
          gameStarted=false;
-         playersVect = Collections.synchronizedList(new ArrayList());
-         sketcherPainter=null;
+         playersVect =  new CopyOnWriteArrayList<>();
          GameBus.getInstance().publish(new GameEvent("",roomChannel,"newGame"));
          Akka.system().scheduler().scheduleOnce(
             Duration.create(1, TimeUnit.MILLISECONDS),
             new Runnable() {
+              @Override
               public void run() {
                   try {
                       taskSetInitialization();
@@ -359,20 +394,23 @@ public class Game extends UntypedActor {
                 case "quit":handleQuitter(event.getMessage());break;
                 case "guessed":guessed(event.getMessage());break;
                 case "timeExpired": playerTimeExpired(event.getMessage());break;
-                case "finalTraces": sendFinalTraces(event.getObject());
+                case "finalTraces": sendFinalTraces(event.getObject());break;
+                case "canStart": triggerStart();break;
+                case "tag": taskImage.remove("word");taskImage.put("word",event.getMessage());sendTask();break;
             }
         }
     }
     
     
-    private void sendFinalTraces(ObjectNode traces) throws MalformedURLException, IOException
+    private void sendFinalTraces(ObjectNode finalTraces) throws MalformedURLException, IOException
     {
-        String id =traces.get("id").getTextValue();
-        String label=traces.get("label").getTextValue();
-        traces.remove("id");
-        traces.remove("label");
+        String id = finalTraces.get("id").getTextValue();
+        String label = finalTraces.get("label").getTextValue();
+        String traces = finalTraces.get("traces").toString();
+        String history = finalTraces.get("history").toString();
         
-        String urlParameters = "label="+label+"&coordinates="+traces.toString();
+        //[TODO] ADD THE LANGUAGE FOR THE TAG
+        String urlParameters = "label="+label+"&coordinates="+traces+"&history="+history+"&user_id="+sketcherPainter.name+"&language=ita";
         String request = rootUrl+"/wsmc/image/"+id+"/segment";
         
         WS.url(request).setContentType("application/x-www-form-urlencoded").post(urlParameters);
@@ -380,11 +418,7 @@ public class Game extends UntypedActor {
     
     private void handleQuitter(String quitter)
     {
-        synchronized(playersVect)
-        {
-            Iterator it = playersVect.iterator();  
-            for (int i=0;i<playersVect.size();i++) {
-                Painter painter = playersVect.get(i);
+            for (Painter painter : playersVect) {
                 if(painter.name.equalsIgnoreCase(quitter)){
                     //Wait for all the modules to announce that the player has disconnected
                     painter.setnModulesReceived(painter.getnModulesReceived()-1);
@@ -400,8 +434,7 @@ public class Game extends UntypedActor {
                             newGameSetup();
                     }
                 }
-            }
-        }   
+            } 
     }
     
     private void guessed(String guesser)
@@ -466,9 +499,7 @@ public class Game extends UntypedActor {
     
     public void gameEnded()
     {
-            SystemMessage endRound = new SystemMessage(Messages.get("end"),roomChannel);
-             //Manage round end:send the message to the chat
-            GameBus.getInstance().publish(endRound);
+            GameBus.getInstance().publish(new GameEvent("", roomChannel, "gameEnded"));
             //Prepares the leaderboard of the players based on their points
             //and send it to all the interested modules
             JsonNodeFactory factory = JsonNodeFactory.instance;
@@ -476,9 +507,10 @@ public class Game extends UntypedActor {
             leaderboard.put("type", "leaderboard");
             leaderboard.put("playersNumber", playersVect.size());
             //[TODO] order the list
-            Collections.sort(playersVect);
+            Painter[] sorted = playersVect.toArray(new Painter[0]);
+            Arrays.sort(sorted);
             ArrayNode playersOrder=new ArrayNode(factory);
-            for (Painter painter : playersVect) {
+            for (Painter painter : sorted) {
                 ObjectNode row = new ObjectNode(factory);
                 row.put("name", painter.name);
                 row.put("points", painter.getPoints());
@@ -526,44 +558,54 @@ public class Game extends UntypedActor {
     
      
     /**
-     * Retrieving data from the CMS
+     * Retrieving data from the CMS [TODO] Right now we are not retrieving based on the requirements of our tasks
+     * such as completing tasks that have not been already faced and so on. We will add this feature in the future.
     **/
     public void taskSetInitialization() throws MalformedURLException, IOException, JSONException
     {
+       taskAcquired=false;
        JsonReader jsonReader= new JsonReader();
        JsonNode retrieved= jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image.json");
-
-        for (int i=0; i<retrieved.size(); i++) {
-            JsonNode item = retrieved.get(i);
+       
+       //[TODO] NOT THE RIGHT POSITION, JUST FOR TESTING PURPOSES
+        for (JsonNode item : retrieved) {
             if(item.getElements().hasNext())
             {
-                item=(JsonNode)item.get("image");
+                item=item.get("image");
                 String id=item.get("imgage_id").asText();
                 String url=rootUrl+item.get("image_uri").asText();
+                Integer width = item.get("imgage_width").asInt();
+                Integer height = item.get("imgage_height").asInt();
+                
                 JsonNode image= jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image/"+id+"/segment.json");
-                try
+                
+                if(image.size()>0 && image.getElements().hasNext())
                 {
-                     image=(JsonNode)image.get(0);
-                }
-                catch(Exception e)
-                {
-                    Logger.error("[GAME] No valid metadata for task "+id);
-                }
-                if(image.getElements().hasNext())
-                {
-                    image=(JsonNode)image.get("image");
-                    JsonNode segment = (JsonNode) image.get("polyline");
-                    item=segment.get(0);
-                    String label=item.get("label").asText();
+                    String label="";
                     ObjectNode guessWord = Json.newObject();
                     guessWord.put("type", "task");
                     guessWord.put("id", id);
+                    
+                    JsonNode tags= jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image/"+id+"/tag.json");
+                    if(tags.size()>=minimumTags && tags.getElements().hasNext())
+                    {
+                        JsonNode retrievedTags=tags.get(new Random().nextInt(tags.size()));
+                        retrievedTags=retrievedTags.get("image").get("tag");
+                        label=retrievedTags.get(new Random().nextInt(retrievedTags.size())).get("tag").get("tag_name").asText();
+                    }
                     guessWord.put("word",label);
                     guessWord.put("image",url);
+                    guessWord.put("width",width);
+                    guessWord.put("height",height);
                     taskHashSet.add(guessWord);
+                    if(!taskAcquired)
+                    {
+                        taskAcquired = true;
+                        GameBus.getInstance().publish(new GameEvent("", roomChannel, "canStart"));
+                    }
                 }
             }
-        }
+        }  
     }
 
 }

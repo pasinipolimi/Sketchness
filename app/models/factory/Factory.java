@@ -18,9 +18,11 @@ public abstract class Factory {
         newRoom=Akka.system().actorFor("akka://application/user/"+roomID);
         if(newRoom instanceof EmptyLocalActorRef)
         {
+            @SuppressWarnings("unchecked")
+            Props properties= new Props(module);
             //Otherwise create a new actor to the room and subscribe it to the message channel
-            newRoom= Akka.system().actorOf(new Props(module),roomID);
-            newRoom.tell(new Room(room));
+            newRoom =  Akka.system().actorOf(properties,roomID);
+            newRoom.tell(new Room(room),newRoom);
             GameBus.getInstance().subscribe(newRoom, room);
         }
 

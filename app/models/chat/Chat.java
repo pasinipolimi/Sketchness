@@ -14,7 +14,6 @@ import org.codehaus.jackson.node.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Semaphore;
 
 import utils.Messages.*;
 import utils.levenshteinDistance;
@@ -41,13 +40,14 @@ public class Chat extends UntypedActor {
     String  roomChannel;
     String  currentGuess;
     Boolean gameStarted=false;
+    Boolean askTag=false;
 
     
     
     
     
     // Members of this room.
-    Map<String, WebSocket.Out<JsonNode>> playersMap = new ConcurrentHashMap<>();
+    ConcurrentHashMap<String, WebSocket.Out<JsonNode>> playersMap = new ConcurrentHashMap<>();
     
     @Override
     public void onReceive(Object message) throws Exception {  
@@ -68,27 +68,34 @@ public class Chat extends UntypedActor {
             Join join = (Join)message;
             // Check if this username is free.
             if(playersMap.containsKey(join.username)) {
-                getSender().tell(Messages.get("usernameused"));
+                getSender().tell(Messages.get("usernameused"),this.getSelf());
             } 
             else if(!gameStarted) 
             {
                 playersMap.put(join.username, join.channel);
                 notifyAll("join", join.username, Messages.get("join"));
                 GameBus.getInstance().publish(new GameMessages.PlayerJoin(join.username, roomChannel));
-                getSender().tell("OK");
+                getSender().tell("OK",this.getSelf());
+                Logger.debug("[GAME] added player "+join.username);
             }
             //[TODO]Disabling game started control for debug messages
             else
             {
-            	getSender().tell(Messages.get("matchstarted"));
+            	getSender().tell(Messages.get("matchstarted"),this.getSelf());
             }
         }
         else if(message instanceof Talk)  {
             
             // Received a Talk message
             Talk talk = (Talk)message;
+            if(askTag)
+            {
+                askTag=false;
+                GameBus.getInstance().publish(new GameEvent(talk.text,roomChannel,"tag"));
+            }
+            else
             if(gameStarted)
-			{
+	    {
                  //Compare the message sent with the tag in order to establish if we have a right guess
 				 levenshteinDistance distanza = new levenshteinDistance();
 				 switch(distanza.computeLevenshteinDistance(talk.text, currentGuess)){
@@ -114,8 +121,9 @@ public class Chat extends UntypedActor {
             switch(event.getType())
             {
                 case "gameStart":gameStarted=true;break;
-                case "newGame":gameStarted=false;break;
+                case "newGame":case "gameEnded":gameStarted=false;break;
                 case "task":retrieveTask(event.getObject());break;
+                case "askTag":notifyAll("system", "Sketchness", Messages.get("asktag"));askTag=true;break;
                 case "quit":handleQuitter(event.getMessage());
             }
         }
@@ -133,8 +141,6 @@ public class Chat extends UntypedActor {
     
     private  void handleQuitter(String quitter) throws InterruptedException
     {
-        synchronized(playersMap)
-        {
                     for (Map.Entry<String, WebSocket.Out<JsonNode>> entry : playersMap.entrySet()) {
                         if (entry.getKey().equalsIgnoreCase(quitter))
                         {
@@ -146,7 +152,6 @@ public class Chat extends UntypedActor {
                             GameBus.getInstance().publish(new GameEvent(quitter,roomChannel,"quit"));
                         } 
                     }
-        }
     }
 
     

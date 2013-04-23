@@ -14,3 +14,6 @@ playerstostart= players to start.
 playertostart= player to start.
 join=has entered the room.
 quit=has left the match.
+acquiring=The match is being created, wait...
+asktag=The sketcher is choosing...
+asktagsketcher=Type the object to be drawn:

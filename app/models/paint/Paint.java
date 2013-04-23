@@ -4,12 +4,12 @@ import akka.actor.UntypedActor;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.math.BigDecimal;
 import java.net.URL;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.imageio.ImageIO;
+import javax.xml.bind.DatatypeConverter;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
 import play.Logger;
@@ -28,7 +28,6 @@ import net.coobird.thumbnailator.Thumbnails;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.json.JSONException;
-import sun.misc.BASE64Decoder;
 
 
 public class Paint extends UntypedActor{
@@ -44,7 +43,7 @@ public class Paint extends UntypedActor{
     private Segment currentSegment=null;
     
    // The list of all connected painters (identified by ids)
-   private Map<String, Painter> painters = new ConcurrentHashMap<>();
+   private ConcurrentHashMap<String, Painter> painters = new ConcurrentHashMap<>();
    
    //Traces 
    JsonNodeFactory factory = JsonNodeFactory.instance;
@@ -65,26 +64,26 @@ public class Paint extends UntypedActor{
             Messages.Join join = (Messages.Join)message;
             String username=join.username;
             if(painters.containsKey(username))
-                getSender().tell(play.i18n.Messages.get("usernameused"));
+                getSender().tell(play.i18n.Messages.get("usernameused"),this.getSelf());
             else if(!gameStarted) 
             {
-                Painter painter = new Painter(join.channel);
-                    painter.name=username;
-                    painters.put(username, painter);
+               Painter painter = new Painter(join.channel);
+               painter.name=username;
+               painters.put(username, painter);
 
-                   // Inform the current painter of the whole list of users
-                   for(Map.Entry<String, Painter> entry : painters.entrySet()) {
-                        ObjectNode other = (ObjectNode)entry.getValue().toJson();
-                        other.put("type", "change");
-                        painter.channel.write(other);
-                    }
-                GameBus.getInstance().publish(new GameMessages.PlayerJoin(username, roomChannel));
-                Logger.debug("PAINT ROOM ADDED "+username);
-                getSender().tell("OK");
+               // Inform the current painter of the whole list of users
+               for(Map.Entry<String, Painter> entry : painters.entrySet()) {
+                    ObjectNode other = (ObjectNode)entry.getValue().toJson();
+                    other.put("type", "change");
+                    painter.channel.write(other);
+                }
+               GameBus.getInstance().publish(new GameMessages.PlayerJoin(username, roomChannel));
+               Logger.debug("[PAINT] added player "+username);
+               getSender().tell("OK",this.getSelf());
             }
             else
             {
-            	getSender().tell(play.i18n.Messages.get("matchstarted"));
+            	getSender().tell(play.i18n.Messages.get("matchstarted"),this.getSelf());
             }
         }
         if(message instanceof JsonNode )
@@ -110,16 +109,17 @@ public class Paint extends UntypedActor{
             GameEvent event= (GameEvent)message;
             switch(event.getType())
             {
-                case "newGame":gameStarted=false;break;
+                case "newGame":case "gameEnded":gameStarted=false;break;
                 case "gameStart":gameStarted=true;break;
                 case "showImages":notifyAll(event.getObject());break;
                 case "nextRound":nextRound(event.getMessage());break;
                 case "task":sendTask(event.getMessage(),event.getObject());break;
+                case "askTag":sendTag(event.getMessage(),event.getObject());break;
                 case "sketcherPoints":notifySingle(event.getMessage(),event.getObject());break;
                 case "guesserPoints":notifySingle(event.getMessage(),event.getObject());break;
                 case "guessedObject":notifySingle(event.getMessage(),event.getObject());break;
                 case "timerChange":notifyAll(event.getObject());break;
-                case "leaderboard":notifyAll(event.getObject());break;
+                case "leaderboard":saveTraces();notifyAll(event.getObject());break;
                 case "quit":handleQuitter(event.getMessage());
             }
         }
@@ -129,11 +129,14 @@ public class Paint extends UntypedActor{
     private void saveTraces()
     {
         GameEvent tracesMessage = new GameEvent("",roomChannel,"finalTraces");
-        traces.put("id", taskUrl);
-        traces.put("label", guessWord);
-        tracesMessage.setObject((ObjectNode)traces);
+        ObjectNode finalTraces = new ObjectNode(factory);
+        finalTraces.put("id", taskUrl);
+        finalTraces.put("label", guessWord);
+        finalTraces.put("traces", traces);
+        ArrayNode filtered = currentSegment.filter();
+        finalTraces.put("history", filtered);
+        tracesMessage.setObject(finalTraces);
         GameBus.getInstance().publish(tracesMessage);
-        currentSegment.filter();
     }
     
     
@@ -160,8 +163,6 @@ public class Paint extends UntypedActor{
     
     private void handleQuitter(String quitter) throws InterruptedException
     {
-        synchronized(painters)
-        {
                     for (Map.Entry<String, Painter> entry : painters.entrySet()) {
                         if (entry.getKey().equalsIgnoreCase(quitter))
                         {
@@ -176,7 +177,6 @@ public class Paint extends UntypedActor{
                             GameBus.getInstance().publish(new GameEvent(quitter,roomChannel,"quit"));
                         }
                     }
-        }
     }
    
     private void nextRound(String sketcher)
@@ -216,6 +216,8 @@ public class Paint extends UntypedActor{
     
     private void sendTask(String sketcher,ObjectNode task) throws Exception
     {
+        task.remove("type");
+        task.put("type", "task");
         //Send to the users the information about their role
          for(Map.Entry<String, Painter> entry : painters.entrySet()) {
             if(entry.getValue().name.equals(sketcher))
@@ -230,6 +232,26 @@ public class Paint extends UntypedActor{
         taskUrl=task.get("id").getTextValue();
         this.sketcher=sketcher;
         guessWord=task.get("word").getTextValue();
+    }
+    
+    private void sendTag(String sketcher, ObjectNode task) throws Exception
+    {
+        task.remove("type");
+        task.put("type", "tag");
+        ObjectNode cleanedTask = new ObjectNode(factory);
+        cleanedTask.put("type","tag");
+        for(Map.Entry<String, Painter> entry : painters.entrySet()) {
+            if(entry.getValue().name.equals(sketcher))
+            {
+                task.put("role","SKETCHER");
+                entry.getValue().channel.write(task);
+            }
+            else
+            {
+                cleanedTask.put("role","GUESSER");
+                entry.getValue().channel.write(cleanedTask);
+            }
+         }
     }
     
 
@@ -256,11 +278,9 @@ public class Paint extends UntypedActor{
     {
                 String image=json.get("image").getTextValue();
                 image=image.replace("data:image/png;base64,", "");
-                BASE64Decoder decoder = new BASE64Decoder();
-                byte[] decodedBytes = decoder.decodeBuffer(image);
+                byte[] decodedBytes = DatatypeConverter.parseBase64Binary(image);
                 Logger.debug("Decoded upload data : " + decodedBytes.length);
 
-                String data = new Date().toString();
                 String urlSegment = "./results/"+taskUrl+"_segment.png";
                 String urlTask = "./results/"+taskUrl+".png";
 
