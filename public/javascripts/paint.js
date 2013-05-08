@@ -213,7 +213,7 @@ var gameloop = (function(){
 			
 		case "task"://Send the current task (image + tag) to the player
                             tagging=false;
-                            guessWord=m.word;
+                            guessWord=m.tag;
                             taskImage=null;
                             taskImage=new Image();
                             taskImage.src=m.image;
@@ -506,6 +506,7 @@ var gameloop = (function(){
         {
             lineTo(position.x, position.y);
             addPoint(position.x, position.y, size, color);
+			addPoint(position.x, position.y, size, "end");
             sendPoints();
             pressed = false;
         }

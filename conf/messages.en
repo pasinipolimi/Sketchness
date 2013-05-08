@@ -17,3 +17,10 @@ quit=has left the match.
 acquiring=The match is being created, wait...
 asktag=The sketcher is choosing...
 asktagsketcher=Type the object to be drawn:
+newround=A new round has started!
+choosingroles=Choosing the roles...
+end=The match has ended!
+usernameused=This username is already in use
+matchstarted=The match has already started
+thesketcheris=The SKETCHER is
+
