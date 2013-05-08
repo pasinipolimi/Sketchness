@@ -3,7 +3,6 @@ package models.chat;
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import utils.Messages;
 import models.factory.Factory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
@@ -13,7 +12,9 @@ import play.mvc.WebSocket;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import utils.gamebus.GameEventType;
 import utils.gamebus.GameMessages.GameEvent;
+import utils.gamebus.GameMessages.Join;
 
 
 
@@ -26,7 +27,7 @@ import utils.gamebus.GameMessages.GameEvent;
   public static synchronized void createChat(final String username, final String room, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception
   {
       final ActorRef finalRoom=create(room, Chat.class);
-      Future<Object> future = Patterns.ask(finalRoom,new Messages.Join(username, out), 1000);
+      Future<Object> future = Patterns.ask(finalRoom,new Join(username, out), 1000);
         // Send the Join message to the room
       String result = (String)Await.result(future, Duration.create(10, SECONDS));
         
@@ -39,18 +40,17 @@ import utils.gamebus.GameMessages.GameEvent;
                public void invoke(JsonNode event) {
                    
                    // Send a Talk message to the room.
-                   finalRoom.tell(new Messages.Talk(username, event.get("text").asText()),finalRoom);
-                   finalRoom.tell(this,finalRoom);
+                   finalRoom.tell(new GameEvent(event.get("text").asText(),username, GameEventType.talk),finalRoom);
+
                } 
             });
             
             // When the socket is closed.
             in.onClose(new F.Callback0() {
-                @Override
+               @Override
                public void invoke() {
-                   
                    // Send a Quit message to the room.
-                   finalRoom.tell( new GameEvent(username,room,"quit"),finalRoom);
+                   finalRoom.tell( new GameEvent(username,room,GameEventType.quit),finalRoom);
                }
             });
             

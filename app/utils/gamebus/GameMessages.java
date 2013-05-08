@@ -1,45 +1,58 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package utils.gamebus;
 
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
+import play.mvc.WebSocket;
 
-/**
- *
- * @author Leyart
- */
+
 public class GameMessages {
 
     public static class GameEvent
     {
-        String channel;
-        protected String type;
+        protected Room channel;
+        protected GameEventType type;
         protected String message;
         protected ObjectNode object;
+        protected String username;
 
-          public GameEvent(String channel) 
-          {
-              this.channel=channel;
-              this.message="none";
-              this.type="generic";
-          }
           
-          public GameEvent(String message, String channel) 
+          private GameEvent(String message, Room channel) 
           {
               this.channel=channel;
+              this.type=GameEventType.unknown;
               this.message=message;
-              this.type="generic";
           }
           
-          public GameEvent(String message, String channel, String type)
+          public GameEvent(Room channel, GameEventType type)
+          {
+              this.channel=channel;
+              this.type=type;
+          }
+          
+          
+          public GameEvent(String message, Room channel, GameEventType type) 
+          {
+              this.channel=channel;
+              this.type=type;
+              this.message=message;
+          }
+          
+          
+          public GameEvent(String message, String username, GameEventType type)
+          {
+              this.message=message;
+              this.username=username;
+              this.type=type;
+          }
+          
+          public GameEvent(String message, String username, Room channel, GameEventType type)
           {
               this(message,channel);
+              this.username=username;
               this.type=type;
           }
 
-        public String getType() {
+        public GameEventType getType() {
             return type;
         }
 
@@ -50,68 +63,58 @@ public class GameMessages {
         public ObjectNode getObject() {
             return object;
         }
-        
-        
-          
-          
 
-        public String getChannel() {
+        public Room getChannel() {
             return channel;
         }
         
         public String getMessage() {
             return message;
         }
-    }
-    
-    public static class PlayerJoin extends GameEvent
-    {
 
-        public PlayerJoin(String message, String channel) {
-            super(message, channel);
+        public String getUsername() {
+            return username;
         }
         
-        public String getUser()
-        {
-            return message;
-        }
-    }
-    
-    public static class PlayerQuit extends GameEvent
-    {
-
-        public PlayerQuit(String message, String channel) {
-            super(message, channel);
-        }
-        
-        public String getUser()
-        {
-            return message;
-        }
-    }
-    
-    public static class GameStart extends GameEvent
-    {
-        public GameStart(String sketcher, String channel) {
-            super(sketcher,channel);
-        }
-    }
-    
-    public static class Guessed extends GameEvent
-    {
-        String username;
-        public Guessed(String guesser,String channel)
-        {
-            super(channel);
-            username=guesser;
-        }
     }
     
     public static class SystemMessage extends GameEvent
     {
-        public SystemMessage(String message,String channel)
+        public SystemMessage(String message,Room channel)
         {
             super(message,channel);
+        }
+    }
+    
+    public static class Join {
+        
+        final String username;
+        final WebSocket.Out<JsonNode> channel;
+        
+        public Join(String username, WebSocket.Out<JsonNode> channel) {
+            this.username = username;
+            this.channel = channel;
+        }
+
+        public WebSocket.Out<JsonNode> getChannel() {
+            return channel;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+    }
+    
+    public static class Room {
+        final String room;
+
+        public Room(String room) {
+            this.room = room;
+        }
+
+        public String getRoom() {
+            return room;
         }
     }
 }

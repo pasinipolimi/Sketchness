@@ -4,8 +4,7 @@ import akka.actor.ActorRef;
 import akka.event.japi.LookupEventBus;
 import utils.gamebus.GameMessages.GameEvent;
 
-@SuppressWarnings("unchecked")
-public class MessageBus extends LookupEventBus {
+public class MessageBus extends LookupEventBus<Object,Object,Object> {
       /**
        * Initial size of the index data structure used internally
        * (i.e. the expected number of different classifiers)
@@ -31,7 +30,7 @@ public class MessageBus extends LookupEventBus {
        */
       @Override
       public Object classify(Object event) {
-         return ((GameEvent)event).getChannel();
+         return ((GameEvent)event).getChannel().getRoom();
       }
  
       /**

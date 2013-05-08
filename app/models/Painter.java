@@ -9,14 +9,12 @@ import play.mvc.WebSocket;
 
 public class Painter extends Player implements Comparable<Painter>{
     
-	public String name;
-	public String color="red";
-	public int size=5;
-        //ROLE TYPES: UNDEFINED, SKETCHER, GUESSER
-        public String role;
-        public boolean guessed;
-        public boolean hasBeenSketcher;
-        private int nModulesReceived;
+    public String   name;
+    //ROLE TYPES: UNDEFINED, SKETCHER, GUESSER
+    public String    role;
+    public Boolean  guessed;
+    public Boolean  hasBeenSketcher;
+    private Integer nModulesReceived;
 
     public final WebSocket.Out<JsonNode> channel;
 
@@ -29,8 +27,6 @@ public class Painter extends Player implements Comparable<Painter>{
 
     public Painter(String name, String color, String role, int size, WebSocket.Out<JsonNode> channel) {
 		this.name = name;
-		this.color = color;
-		this.size = size;
                 this.role = role;
                 this.channel = channel;
                 nModulesReceived=0;
@@ -46,10 +42,6 @@ public class Painter extends Player implements Comparable<Painter>{
     public void updateFromJson(JsonNode json) {
         if(json.has("name"))
             this.name = json.get("name").getTextValue();
-        if(json.has("color"))
-            this.color = json.get("color").getTextValue();
-        if(json.has("size"))
-            this.size = json.get("size").getIntValue();
         if(json.has("role"))
             this.role = json.get("role").getTextValue();
         if(json.has("guessed"))
@@ -59,8 +51,6 @@ public class Painter extends Player implements Comparable<Painter>{
     public JsonNode toJson() {
         ObjectNode json = Json.newObject();
         json.put("name", this.name);
-        json.put("color", this.color);
-        json.put("size", this.size);
         json.put("role", this.role);
         json.put("guessed", this.guessed);
         return  json;
@@ -70,8 +60,6 @@ public class Painter extends Player implements Comparable<Painter>{
     public String toString() {
         return "Painter{" +
                 "name='" + name + '\'' +
-                ", color='" + color + '\'' +
-                ", size=" + size  +
                 ", role='" + role + '\'' +
                 ", guessed='" + guessed + '\'' +
                 '}';
@@ -99,10 +87,8 @@ public class Painter extends Player implements Comparable<Painter>{
     public int getnModulesReceived() {
         return nModulesReceived;
     }
-    
-  
-    
-    
-    
-    
+}
+
+enum Roles {
+    UNDEFINED,SKETCHER,GUESSER
 }

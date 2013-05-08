@@ -12,6 +12,7 @@ import models.game.GameRoomFactory;
 import models.paint.PaintRoomFactory;
 import play.i18n.Lang;
 import static play.mvc.Controller.request;
+import static play.mvc.Results.ok;
 import utils.LanguagePicker;
 
 

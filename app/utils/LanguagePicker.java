@@ -13,15 +13,25 @@ public class LanguagePicker {
     
     public static void setLanguage(Lang retrieved)
     {
-         switch(retrieved.language())
+         switch(AllowedLang.valueOf(retrieved.language()))
          {
-             case "it" : platformLang = "ita";break;
-             case "en" : platformLang = "eng";break;
+             case it : platformLang = "ita";break;
+             case en : platformLang = "eng";break;
              default   : platformLang = "undefined";
          }
          
          playLang=retrieved;
-         
+    }
+    
+    public static void setLanguage(String lang)
+    {
+        switch(AllowedLang.valueOf(lang))
+        {
+             case it : platformLang = "ita";break;
+             case en : platformLang = "eng";break;
+             default   : platformLang = "undefined";
+        }
+        playLang = new Lang(play.api.i18n.Lang.apply(lang));
     }
     
     public static String retrieveIsoCode()
@@ -34,4 +44,9 @@ public class LanguagePicker {
         return playLang;
     }
     
+}
+
+enum AllowedLang
+{
+    it,en
 }

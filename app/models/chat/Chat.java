@@ -1,172 +1,147 @@
 package models.chat;
 
-
 import play.libs.*;
 import play.libs.F.*;
-
-
+import play.i18n.Messages;
+import play.mvc.*;
 import akka.actor.*;
-
-
-
+import play.Logger;
 
 import org.codehaus.jackson.node.*;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
-import utils.Messages.*;
-import utils.levenshteinDistance;
-
-import play.i18n.Messages;
-
-import play.mvc.*;
-
 import org.codehaus.jackson.*;
 
-import utils.levenshteinDistance.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
+import utils.*;
 import utils.gamebus.GameBus;
-import utils.gamebus.GameMessages;
-import utils.gamebus.GameMessages.GameEvent;
-import utils.gamebus.GameMessages.PlayerQuit;
-import play.Logger;
+import utils.gamebus.GameMessages.*;
 import utils.LanguagePicker;
+import utils.gamebus.GameEventType;
 
-/**
- * A chat room is an Actor.
- */
+
 public class Chat extends UntypedActor {
 
-    String  roomChannel;
+    Room  roomChannel;
     String  currentGuess;
     Boolean gameStarted=false;
     Boolean askTag=false;
-
-    
-    
-    
-    
     // Members of this room.
-    ConcurrentHashMap<String, WebSocket.Out<JsonNode>> playersMap = new ConcurrentHashMap<>();
+    ConcurrentHashMap<String, WebSocket.Out<JsonNode>> playersMap = new ConcurrentHashMap<String, WebSocket.Out<JsonNode>>();
     
     @Override
     public void onReceive(Object message) throws Exception {  
         
-      
         if(message instanceof Room)
         {
-            this.roomChannel=((Room)message).getRoom();
-            Logger.info("CHATROOM "+roomChannel+" created.");
+            this.roomChannel=((Room)message);
+            Logger.info("[CHAT] "+roomChannel+" created.");
         }
-        if(message instanceof GameMessages.SystemMessage)
+        if(message instanceof SystemMessage)
         {
-            notifyAll("system", "Sketchness", ((GameMessages.SystemMessage)message).getMessage());
+            notifyAll(ChatKind.system, "Sketchness", ((SystemMessage)message).getMessage());
         }
         if(message instanceof Join) 
         {
-            // Received a Join message
-            Join join = (Join)message;
-            // Check if this username is free.
-            if(playersMap.containsKey(join.username)) {
-                getSender().tell(Messages.get(LanguagePicker.retrieveLocale(),"usernameused"),this.getSelf());
-            } 
-            else if(!gameStarted) 
-            {
-                playersMap.put(join.username, join.channel);
-                notifyAll("join", join.username, Messages.get(LanguagePicker.retrieveLocale(),"join"));
-                GameBus.getInstance().publish(new GameMessages.PlayerJoin(join.username, roomChannel));
-                getSender().tell("OK",this.getSelf());
-                Logger.debug("[GAME] added player "+join.username);
-            }
-            //[TODO]Disabling game started control for debug messages
-            else
-            {
-            	getSender().tell(Messages.get(LanguagePicker.retrieveLocale(),"matchstarted"),this.getSelf());
-            }
+            handleJoin((Join)message);
         }
-        else if(message instanceof Talk)  {
-            
+        else
+            if(message instanceof GameEvent) {
+                GameEvent event= (GameEvent)message;
+                switch(event.getType()) {
+                    case gameStarted :gameStarted=true;break;
+                    case gameEnded:gameStarted=false;break;
+                    case talk:handleTalk(event.getUsername(),event.getMessage());break;
+                    case task:retrieveTask(event.getObject());break;
+                    case askTag:handleAskTag();break;
+                    case quit:handleQuitter(event.getMessage());
+                }
+            }
+            else {
+                unhandled(message);
+            } 
+    }
+    
+    private void handleAskTag()
+    {
+        notifyAll(ChatKind.system, "Sketchness", Messages.get(LanguagePicker.retrieveLocale(),"asktag"));askTag=true;
+    }
+    
+    private void handleJoin(Join message)
+    {
+        // Check if this username is free.
+        if(playersMap.containsKey(message.getUsername())) {
+            getSender().tell(Messages.get(LanguagePicker.retrieveLocale(),"usernameused"),this.getSelf());
+        } 
+        else if(!gameStarted) 
+        {
+            playersMap.put(message.getUsername(), message.getChannel());
+            notifyAll(ChatKind.join, message.getUsername(), Messages.get(LanguagePicker.retrieveLocale(),"join"));
+            GameBus.getInstance().publish(new GameEvent(message.getUsername(), roomChannel,GameEventType.join));
+            getSender().tell("OK",this.getSelf());
+            Logger.debug("[CHAT] added player "+message.getUsername());
+        }
+        else
+        {
+            getSender().tell(Messages.get(LanguagePicker.retrieveLocale(),"matchstarted"),this.getSelf());
+        }
+    }
+    
+    
+    private void handleTalk(String username, String text)
+    {
             // Received a Talk message
-            Talk talk = (Talk)message;
+            //If we are asking the sketcher for a tag, then save the tag
             if(askTag)
             {
                 askTag=false;
-                GameBus.getInstance().publish(new GameEvent(talk.text,roomChannel,"tag"));
+                GameBus.getInstance().publish(new GameEvent(text,username,roomChannel,GameEventType.tag));
             }
             else
             if(gameStarted)
 	    {
                  //Compare the message sent with the tag in order to establish if we have a right guess
-				 levenshteinDistance distanza = new levenshteinDistance();
-				 switch(distanza.computeLevenshteinDistance(talk.text, currentGuess)){
-					case 0:	GameBus.getInstance().publish(new GameEvent(talk.username,roomChannel,"guessed"));
-					        break;
-					case 1: notifyAll("talkNear", talk.username, talk.text);
-					        break;
-					case 2: notifyAll("talkWarning", talk.username, talk.text);
-					        break;
-					default: notifyAll("talkError", talk.username, talk.text);
-			                 break;
-				}
+                 levenshteinDistance distanza = new levenshteinDistance();
+                 switch(distanza.computeLevenshteinDistance(text, currentGuess)){
+                        case 0:	GameBus.getInstance().publish(new GameEvent(username,roomChannel,GameEventType.guessed));
+                                break;
+                        case 1: notifyAll(ChatKind.talkNear, username, text);
+                                break;
+                        case 2: notifyAll(ChatKind.talkWarning, username, text);
+                                break;
+                        default: notifyAll(ChatKind.talkError, username, text);
+                         break;
+                }
             }
             else
                 //The players are just chatting, not playing
-                notifyAll("talk", talk.username, talk.text);
-            
-        } 
-        else
-        if(message instanceof GameMessages.GameEvent)
-        {
-            GameEvent event= (GameEvent)message;
-            switch(event.getType())
-            {
-                case "gameStart":gameStarted=true;break;
-                case "newGame":case "gameEnded":gameStarted=false;break;
-                case "task":retrieveTask(event.getObject());break;
-                case "askTag":notifyAll("system", "Sketchness", Messages.get(LanguagePicker.retrieveLocale(),"asktag"));askTag=true;break;
-                case "quit":handleQuitter(event.getMessage());
-            }
-        }
-        else if(message instanceof Quit)  {
-            
-            // Received a Quit message
-            Quit quit = (Quit)message;
-            playersMap.remove(quit.username);
-            notifyAll("quit", quit.username, Messages.get(LanguagePicker.retrieveLocale(),"quit"));
-            GameBus.getInstance().publish(new PlayerQuit(quit.username,roomChannel));
-        } else {
-            unhandled(message);
-        } 
+                notifyAll(ChatKind.talk, username, text);
     }
     
-    private  void handleQuitter(String quitter) throws InterruptedException
-    {
-                    for (Map.Entry<String, WebSocket.Out<JsonNode>> entry : playersMap.entrySet()) {
-                        if (entry.getKey().equalsIgnoreCase(quitter))
-                        {
-                            //Close the websocket
-                            entry.getValue().close();
-                            playersMap.remove(quitter);
-                            notifyAll("quit", quitter, Messages.get(LanguagePicker.retrieveLocale(),"quit"));
-                            Logger.debug("[CHAT] "+quitter+" has disconnected.");
-                            GameBus.getInstance().publish(new GameEvent(quitter,roomChannel,"quit"));
-                        } 
-                    }
+    private  void handleQuitter(String quitter) throws InterruptedException {
+        for (Map.Entry<String, WebSocket.Out<JsonNode>> entry : playersMap.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(quitter)) {
+                //Close the websocket
+                entry.getValue().close();
+                playersMap.remove(quitter);
+                notifyAll(ChatKind.quit, quitter, Messages.get(LanguagePicker.retrieveLocale(),"quit"));
+                Logger.debug("[CHAT] "+quitter+" has disconnected.");
+                GameBus.getInstance().publish(new GameEvent(quitter,roomChannel,GameEventType.quit));
+            } 
+        }
     }
 
     
-    private void retrieveTask(ObjectNode task)
-    {
-        currentGuess=task.get("word").asText();
+    private void retrieveTask(ObjectNode task) {
+        currentGuess=task.get("tag").asText();
     }
     
     // Send a Json event to all members
-    public void notifyAll(String kind, String user, String text) {
+    private void notifyAll(ChatKind kind, String user, String text) {
         for(WebSocket.Out<JsonNode> channel: playersMap.values()) {
             
             ObjectNode event = Json.newObject();
-            event.put("kind", kind);
+            event.put("kind", kind.name());
             event.put("user", user);
             event.put("message", text);
             
@@ -178,6 +153,9 @@ public class Chat extends UntypedActor {
             channel.write(event);
         }
     }   
+}
 
-     
+enum ChatKind
+{
+    system,join,quit,talk,talkNear,talkWarning,talkError
 }

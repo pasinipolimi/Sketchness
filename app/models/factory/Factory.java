@@ -4,14 +4,15 @@ import utils.gamebus.GameBus;
 import play.libs.*;
 import play.libs.F.*;
 import akka.actor.*;
-import utils.Messages.*;
+import utils.gamebus.GameMessages.Room;
 import utils.levenshteinDistance.*;
 
 public abstract class Factory {
     /**
      * Join the default room.
      */
-    protected static ActorRef create(final String room, Class module) throws Exception{
+    @SuppressWarnings("rawtypes")
+    protected static ActorRef create(final String room, Class module) throws Exception {
         ActorRef newRoom;                
         String roomID=room+"_"+module.getSimpleName();
         //Try to see if we have already registered this actor in the system, if it is the case return the reference
@@ -25,7 +26,6 @@ public abstract class Factory {
             newRoom.tell(new Room(room),newRoom);
             GameBus.getInstance().subscribe(newRoom, room);
         }
-
         return newRoom;
     }
 

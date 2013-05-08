@@ -5,23 +5,18 @@ import java.util.ListIterator;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 
-
-
-
-
 public class Segment{
     
     private ArrayList<ArrayList<Point>> points;
     private String eraser;
 
     public Segment(String eraser) {
-        points = new ArrayList<>();
+        points = new ArrayList<ArrayList<Point>>();
         this.eraser=eraser;
     }
     
 
-    public void ensureCapacity(int row,int column)
-    {
+    public void ensureCapacity(int row,int column) {
 	while(row >= getRowSize())
 	{
 	   points.add(new ArrayList<Point>());
@@ -32,24 +27,20 @@ public class Segment{
         }
     }
     
-    public void setPoint(int row, int column, Point point)
-    {
+    public void setPoint(int row, int column, Point point) {
         ensureCapacity(row,column);
         points.get(row).set(column, point);
     }
     
-    public Point getPoint(int row, int column)
-    {
+    public Point getPoint(int row, int column) {
         return points.get(row).get(column);
     }
     
-    public int getRowSize()
-    {
+    public int getRowSize() {
         return points.size();
     }
     
-    public int getColumnSize(int row)
-    {
+    public int getColumnSize(int row) {
         if(getRowSize()>0)
             return points.get(row).size();
         else
@@ -59,12 +50,11 @@ public class Segment{
     
     
     //Reconstruct the final segment, removing the traces that have been erased
-    public ArrayNode filter()
-    {
+    public ArrayNode filter(int taskWidth, int taskHeight, int canvasWidth, int canvasHeight) {
         
         ArrayNode toReturn = new ArrayNode(JsonNodeFactory.instance);
-        ArrayList<PositionedPoint> finalSegment = new ArrayList<>();
-        ArrayList<PositionedPoint> copy = new ArrayList<>();
+        ArrayList<PositionedPoint> finalSegment = new ArrayList<PositionedPoint>();
+        ArrayList<PositionedPoint> copy = new ArrayList<PositionedPoint>();
         
         //Make a copy of the traces storing the orders in which the points have been saved
         for(int i = 0;i<points.size();i++)
@@ -78,6 +68,7 @@ public class Segment{
         
         //Remove the points that have been erased, keeping the ones that have 
         //not
+        @SuppressWarnings("rawtypes")
         ListIterator it = finalSegment.listIterator(finalSegment.size());
         while(it.hasPrevious())
         {
@@ -85,6 +76,7 @@ public class Segment{
             Point currentPoint = current.getPoint();
             if(currentPoint.getColor().equals(eraser))
             {
+                @SuppressWarnings("rawtypes")
                 ListIterator copyIt = copy.listIterator(copy.size());
                 while(copyIt.hasPrevious())
                 {
@@ -92,7 +84,7 @@ public class Segment{
                     Point checkPoint = check.getPoint();
                     if(checkPoint.inRange(currentPoint.getX(), currentPoint.getY(), currentPoint.getSize()) && !checkPoint.getColor().equals(eraser) && check.getPosition()<=current.getPosition())
                     {
-                        copyIt.remove();
+                        checkPoint.setRemoved(true);
                     }
                 }
             }
@@ -100,21 +92,22 @@ public class Segment{
         
         //Return just the ordered list of points to be traced, without the eraser
         //information
+        @SuppressWarnings("rawtypes")
         ListIterator copyIt = copy.listIterator();
         while(copyIt.hasNext())
         {
             Point current=((PositionedPoint)copyIt.next()).getPoint();
-            if(!current.getColor().equals(eraser))
+            current.setX((taskWidth*current.getX())/canvasWidth);
+            current.setY((taskHeight*current.getY())/canvasHeight);
+            if(!current.getColor().equals(eraser)&&current.getX()>=0&&current.getY()>=0)
                 toReturn.add(current.toJson());
         }
-        
         return toReturn;
     }
 }
 
 
-class PositionedPoint
-{
+class PositionedPoint {
     int position;
     Point point;
 

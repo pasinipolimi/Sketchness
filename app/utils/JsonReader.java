@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package utils;
 
 
@@ -11,10 +7,7 @@ import play.libs.F.Promise;
 import play.libs.WS;
 import play.libs.WS.Response;
 
-/**
- *
- * @author Leyart
- */
+
 public class JsonReader {
 
   public JsonNode  readJsonArrayFromUrl(String url) {
