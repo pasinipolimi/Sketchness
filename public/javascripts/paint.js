@@ -298,17 +298,12 @@ var gameloop = (function(){
                             }
 			break;
 			
-		case "guesser":
+		case "points":
                             if(m.name===pname)
                             {
                                     score=score+m.points;
                                     guessed=true;
                             }
-			break;
-			
-		case "sketcher":
-                            if(m.name===pname)
-                                    score=score+m.points;
 			break;
 			
 		case "timeChange":
@@ -317,13 +312,6 @@ var gameloop = (function(){
 			break;
 			
 		case "showImages":	
-                            //We want to save the image that has been created by the sketcher
-                            if(role==="SKETCHER")
-                            {
-                                    //Save the drawings done by the player
-                                    var dataURL = canvas.toDataURL('image/png');
-                                    send({type: 'segment', src: taskImage.src, image: dataURL, name: pname});
-                            }
                             role="ROUNDCHANGE";
                             timerObj.createCountdown("round",m.seconds,"roundEndMessage");
 			break;

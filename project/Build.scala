@@ -12,8 +12,7 @@ object ApplicationBuild extends Build {
 		javaCore,
 		javaJdbc,
 		javaEbean,
-		"org.json" % "json" % "20090211",
-		"net.coobird" % "thumbnailator" % "0.4.3"
+		"org.json" % "json" % "20090211"
 	)
 
     /** Defines a new setting key that contains the resources list */

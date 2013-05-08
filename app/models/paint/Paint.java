@@ -2,14 +2,11 @@ package models.paint;
 
 import akka.actor.UntypedActor;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.net.URL;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.imageio.ImageIO;
-import javax.xml.bind.DatatypeConverter;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
 import play.Logger;
@@ -21,7 +18,6 @@ import models.Point;
 import models.Segment;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages.GameEvent;
-import net.coobird.thumbnailator.Thumbnails;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.json.JSONException;
@@ -223,6 +219,7 @@ public class Paint extends UntypedActor{
     private void sendTask(String sketcher,ObjectNode task) throws Exception
     {
         task.remove("type");
+        task.remove("role");
         task.put("type", "task");
         //Send to the users the information about their role
          for(Map.Entry<String, Painter> entry : painters.entrySet()) {
@@ -275,36 +272,6 @@ public class Paint extends UntypedActor{
             if(painter.name.equalsIgnoreCase(username))
                  painter.channel.write(json);
         }
-    }
-    
-    
-    /*
-     * Function used to store on the server the results of the segmentation of 
-     * the players. It will be modified to use the CMS in the future
-     */
-    private void writeSegment(JsonNode json) throws Exception
-    {
-                String image=json.get("image").getTextValue();
-                image=image.replace("data:image/png;base64,", "");
-                byte[] decodedBytes = DatatypeConverter.parseBase64Binary(image);
-                Logger.debug("Decoded upload data : " + decodedBytes.length);
-
-                String urlSegment = "./results/"+taskUrl+"_segment.png";
-                String urlTask = "./results/"+taskUrl+".png";
-
-                BufferedImage imageB = ImageIO.read(new ByteArrayInputStream(decodedBytes));
-                
-                imageB=Thumbnails.of(imageB).forceSize(taskImage.getWidth(), taskImage.getHeight()).asBufferedImage();
-                
-                if (imageB == null) {
-                      Logger.error("Buffered Image is null");
-                  }
-                File fTask = new File(urlTask);
-                File fSegment = new File(urlSegment);
-
-                // write the image and the segment
-                ImageIO.write(taskImage, "png", fTask);
-                ImageIO.write(imageB, "png", fSegment);
     }
 }
 
