@@ -368,10 +368,6 @@ var gameloop = (function(){
                             }
                             playerExtend(m);
 			break;
-			
-		case "youAre":
-                            role = m.role;
-			break;
 		
 		case "disconnect": //[TODO]
                             //deletePlayer(m.username);
@@ -389,7 +385,6 @@ var gameloop = (function(){
   function roundEndMessage()
   {
 	send({type: 'roundEnded', player: pname});
-	console.log("Round message sent");
   }
   
   window.roundEndMessage=roundEndMessage;

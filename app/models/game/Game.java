@@ -150,6 +150,12 @@ public class Game extends UntypedActor {
          GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(),"newround"), roomChannel));
          GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(),"choosingroles"), roomChannel));
 
+         //Set all the players as GUESSERS at the beginning
+         for(int i=0;i<currentPlayers;i++)
+         {
+            playersVect.get(i).role="GUESSER";
+         }
+         
          //Keep searching for a new sketcher
          while(sketcherPainter==null)
          {
@@ -169,6 +175,7 @@ public class Game extends UntypedActor {
                 if(!playersVect.get(index).hasBeenSketcher)
                 {
                         sketcherPainter=playersVect.get(index);
+                        sketcherPainter.role="SKETCHER";
                         sketcherPainter.hasBeenSketcher=true;
                 }
                 count++;
@@ -527,7 +534,16 @@ public class Game extends UntypedActor {
        show.put("type", "showImages");
        show.put("seconds",5);
        showImages.setObject(show);
-       GameBus.getInstance().publish(showImages);	
+       GameBus.getInstance().publish(showImages);
+       //Send also the image to be shown
+       for (Painter painter : playersVect) {
+           if(!painter.role.equals("SKETCHER")&&painter.guessed==false) { 
+             GameEvent eventGuesser = new GameEvent(painter.name,roomChannel,GameEventType.guessedObject);
+             eventGuesser.setObject(guessObject);
+             GameBus.getInstance().publish(eventGuesser);
+           }
+       }
+       
     }
     
     

@@ -186,7 +186,6 @@ public class Paint extends UntypedActor{
          //It's the first match of the game, we have noting to store
          if(currentSegment!=null)
          {
-
              saveTraces();
          }
          //Reset the traces storage
