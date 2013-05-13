@@ -39,6 +39,7 @@
   //GAME STATUS
   var score = 0;
   var defaultRoundTime=90;
+  var askTimer=20;
   var matchStarted = false;
   var guessWord="";
   var guessed=false;
@@ -249,6 +250,8 @@ var gameloop = (function(){
 		case "tag"://Send the current task (image) to the player
                             tagging=true;
                             document.getElementById('timeCounter').innerHTML="";
+							timerObj.createCountdown("round",askTimer,"roundEndMessage");
+                            timerObj.createTimer("round");
                             if(m.role==="SKETCHER")
                             {
                                     $('#talk').removeAttr('disabled');
@@ -290,8 +293,7 @@ var gameloop = (function(){
                             else
                             {
                                     var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('asktag')+"</font>"+"<b>"+"</font>";
-                                    //[TODO] Possible exploit, they can still send messages if they enable the textfield
-                                    $('#talk').attr('disabled', 'disabled');
+                                    $('#talk').removeAttr('disabled');
                                     document.getElementById('topMessage').innerHTML=htmlMessage;
                                     taskContext.clearRect(0, 0, canvas.width, canvas.height);
                                     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -673,7 +675,7 @@ var result= getPosition(obj);
 	document.getElementById('score').innerHTML=htmlMessage;
 
 	//Time positioning
-	if(matchStarted&&!tagging)
+	if(matchStarted)
 	{
 		var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('time')+timerObj.retrieveCountdown('round')+"<b>"+"</font>";
 		document.getElementById('timeCounter').innerHTML=htmlMessage;

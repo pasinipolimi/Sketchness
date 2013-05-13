@@ -26,6 +26,7 @@ public class Chat extends UntypedActor {
     String  currentGuess;
     Boolean gameStarted=false;
     Boolean askTag=false;
+    String askTagSketcher;
     // Members of this room.
     ConcurrentHashMap<String, WebSocket.Out<JsonNode>> playersMap = new ConcurrentHashMap<String, WebSocket.Out<JsonNode>>();
     
@@ -53,7 +54,7 @@ public class Chat extends UntypedActor {
                     case gameEnded:gameStarted=false;break;
                     case talk:handleTalk(event.getUsername(),event.getMessage());break;
                     case task:retrieveTask(event.getObject());break;
-                    case askTag:handleAskTag();break;
+                    case askTag:handleAskTag(event);break;
                     case quit:handleQuitter(event.getMessage());
                 }
             }
@@ -62,8 +63,9 @@ public class Chat extends UntypedActor {
             } 
     }
     
-    private void handleAskTag()
+    private void handleAskTag(GameEvent message)
     {
+        askTagSketcher=message.getMessage();
         notifyAll(ChatKind.system, "Sketchness", Messages.get(LanguagePicker.retrieveLocale(),"asktag"));askTag=true;
     }
     
@@ -92,7 +94,7 @@ public class Chat extends UntypedActor {
     {
             // Received a Talk message
             //If we are asking the sketcher for a tag, then save the tag
-            if(askTag)
+            if(askTag&&username.equals(askTagSketcher))
             {
                 askTag=false;
                 GameBus.getInstance().publish(new GameEvent(text,username,roomChannel,GameEventType.tag));
@@ -130,7 +132,6 @@ public class Chat extends UntypedActor {
             } 
         }
     }
-
     
     private void retrieveTask(ObjectNode task) {
         currentGuess=task.get("tag").asText();

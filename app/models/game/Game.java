@@ -50,6 +50,7 @@ public class Game extends UntypedActor {
     //Variables used to manage the rounds
     private Boolean guessedWord=false; //Has the word been guessed for the current round?
     private Boolean gameStarted=false;
+    private Boolean areWeAsking=false;
     private Integer roundNumber=0;  //Starts with round number 1
     private Integer sketcherPointsRemaining=0;  //The number of points available to the sketcher: for the first reply he gets 5, for the second 4 and so on
     private Integer guesserPointsRemaining=maxGuesserPointsRemaining;  //The number of points available to the guessers:the first get 10, the second 9 and so on
@@ -282,13 +283,14 @@ public class Game extends UntypedActor {
      }
      
      public void sendTask(Boolean ask) {
-         if(ask)
-         {
+         if(ask) {
+            areWeAsking=true;
             GameEvent task = new GameEvent(sketcherPainter.name,roomChannel,GameEventType.askTag);
             task.setObject(taskImage);
             GameBus.getInstance().publish(task);
          }
          else {
+            areWeAsking=false;
             GameBus.getInstance().publish(new GameEvent(sketcherPainter.name,roomChannel,GameEventType.nextRound));
             GameEvent task = new GameEvent(sketcherPainter.name,roomChannel,GameEventType.task);
             task.setObject(taskImage);
@@ -328,13 +330,13 @@ public class Game extends UntypedActor {
             if((missingPlayers-disconnectedPlayers)==0)
             {
                 //Before calling the new round, show the solution to all the players
-		if(shownImages==false)
+		if(shownImages==false&&areWeAsking==false)
 		{
 		    showImages();
 		    shownImages=true;
 		    missingPlayers=requiredPlayers;
 		}
-                //If the solution has been given, start a new round
+                //If the solution has been given or a tag has not been chosen, start a new round
 		else
 		{
 		  nextRound();
