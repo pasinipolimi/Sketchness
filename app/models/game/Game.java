@@ -95,6 +95,7 @@ public class Game extends UntypedActor {
                 case timeExpired: playerTimeExpired(event.getMessage());break;
                 case finalTraces: sendFinalTraces(event.getObject());break;
                 case tag: taskImage.remove("tag");taskImage.put("tag",event.getMessage());sendTask(false);break;
+                case skipTask: skipTask(event.getMessage());break;
             }
         }
     }
@@ -107,7 +108,7 @@ public class Game extends UntypedActor {
      * <p>
      * @return The object related to the task: image + tag
      */
-    public ObjectNode retrieveTaskImage()
+    private ObjectNode retrieveTaskImage()
     {
          guessObject=null;
          int size = taskHashSet.size();
@@ -142,7 +143,7 @@ public class Game extends UntypedActor {
      * <p>
      * @return The object related to the task: image + tag
      */
-     public String nextSketcher()
+     private String nextSketcher()
      {
          sketcherPainter=null;
          int currentPlayers=requiredPlayers-disconnectedPlayers;
@@ -196,7 +197,7 @@ public class Game extends UntypedActor {
      * respective players
      * <p>
      */
-    public void checkStart() throws Exception
+    private void checkStart() throws Exception
     {
                 if(!triggerStart())
                 //Send a message to inform about the missing players
@@ -209,7 +210,7 @@ public class Game extends UntypedActor {
                 }
     }
     
-    public boolean triggerStart() throws Exception
+    private boolean triggerStart() throws Exception
     {
                 boolean canStart=true;
                 for (Painter painter : playersVect) {
@@ -245,7 +246,7 @@ public class Game extends UntypedActor {
      /*
      * Start a new round of the game
      */
-     public void nextRound()
+     private void nextRound()
      {
          roundNumber++;
          if(roundNumber<=maxRound)
@@ -282,7 +283,7 @@ public class Game extends UntypedActor {
          } 
      }
      
-     public void sendTask(Boolean ask) {
+     private void sendTask(Boolean ask) {
          if(ask) {
             areWeAsking=true;
             GameEvent task = new GameEvent(sketcherPainter.name,roomChannel,GameEventType.askTag);
@@ -305,7 +306,7 @@ public class Game extends UntypedActor {
      * Check if the timer for all the players has expired, show the solution for the current
      * round and start a new one
      */
-     public void playerTimeExpired(String name) {
+     private void playerTimeExpired(String name) {
          //If all the players have disconnected during a game, start a new one
          if(((requiredPlayers-disconnectedPlayers)<=1)&&gameStarted)
          {
@@ -339,7 +340,10 @@ public class Game extends UntypedActor {
                 //If the solution has been given or a tag has not been chosen, start a new round
 		else
 		{
-		  nextRound();
+                  if(areWeAsking)
+                       GameBus.getInstance().publish(new SystemMessage(sketcherPainter.name+" "+Messages.get(LanguagePicker.retrieveLocale(),"notag"), roomChannel));
+		  areWeAsking=false;
+                  nextRound();
 		  shownImages=false;
 		  missingPlayers=requiredPlayers;
 		}
@@ -480,7 +484,7 @@ public class Game extends UntypedActor {
             {
                 //Send the time change once just a player has guessed
                 GameEvent timeEvent = new GameEvent(roomChannel,GameEventType.timerChange);
-                timeEvent.setObject(timerChange(remainingTimeOnGuess));
+                timeEvent.setObject(timerChange(remainingTimeOnGuess, CountdownTypes.round));
                 GameBus.getInstance().publish(timeEvent);   
             }
         }
@@ -488,13 +492,13 @@ public class Game extends UntypedActor {
         {
                 //Send the message to change the time for everyone to end the round
                 GameEvent timeEvent = new GameEvent(roomChannel,GameEventType.timerChange);
-                timeEvent.setObject(timerChange(remainingTimeOnAllGuess));
+                timeEvent.setObject(timerChange(remainingTimeOnAllGuess, CountdownTypes.round));
                 GameBus.getInstance().publish(timeEvent);
         }
         guessedWord=true;     
     }
     
-    public void gameEnded() {
+    private void gameEnded() {
             GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.gameEnded));
             GameEvent endEvent = new GameEvent(roomChannel, GameEventType.leaderboard);
             endEvent.setObject(compileLeaderboard());
@@ -522,15 +526,24 @@ public class Game extends UntypedActor {
         return leaderboard;
     }
 	
-    public ObjectNode timerChange(int remainingTime) {
+    private ObjectNode timerChange(int remainingTime, CountdownTypes timeObject) {
         ObjectNode timeChange = Json.newObject();
         timeChange.put("type", "timeChange");
         timeChange.put("amount",remainingTime);
+        timeChange.put("timeObject",timeObject.name());
         return timeChange;
     }
     
+    private void skipTask(String kind)
+    {
+        GameBus.getInstance().publish(new SystemMessage(sketcherPainter.name+" "+Messages.get(LanguagePicker.retrieveLocale(),"skiptask"), roomChannel));
+        GameEvent timeEvent = new GameEvent(roomChannel,GameEventType.timerChange);
+        timeEvent.setObject(timerChange(0,CountdownTypes.valueOf(kind)));
+        GameBus.getInstance().publish(timeEvent);   
+    }
+    
      
-    public void showImages() {
+    private void showImages() {
        GameEvent showImages =  new GameEvent(roomChannel,GameEventType.showImages);
        ObjectNode show =  Json.newObject();
        show.put("type", "showImages");
@@ -602,5 +615,11 @@ public class Game extends UntypedActor {
             }
         }  
     }
-
 }
+
+  enum CountdownTypes
+    {
+        round,tag
+    }
+
+

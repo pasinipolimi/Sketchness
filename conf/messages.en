@@ -23,4 +23,6 @@ end=The match has ended!
 usernameused=This username is already in use
 matchstarted=The match has already started
 thesketcheris=The SKETCHER is
+skiptask=has passed the round.
+notag=has not chosen what to draw.
 

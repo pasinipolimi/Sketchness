@@ -169,6 +169,9 @@ var gameloop = (function(){
   var taskContext = taskCanvas.getContext("2d");
   var positionCanvas = document.getElementById("positions");
   var positionContext = positionCanvas.getContext("2d");
+  var skipButton = $('#skipTask');
+  skipButton.attr('hidden', 'true');
+  skipButton.click(sendSkipTask);
   /*******************************MANAGING THE INCOMING MESSAGES*****************/
   onSocketMessage = function (e) {
     var m = JSON.parse(e.data);
@@ -190,7 +193,7 @@ var gameloop = (function(){
                                     $('#mainPage').removeClass('guesser');
                                     $('#mainPage').addClass('sketcher');
                                     $('#talk').attr('disabled', 'disabled');
-
+									skipButton.removeAttr('hidden');
                             }
                             else
                             {
@@ -198,10 +201,11 @@ var gameloop = (function(){
                                     $('#mainPage').removeClass('sketcher');
                                     $('#mainPage').addClass('guesser');
                                     $('#talk').removeAttr('disabled');
-
+									skipButton.attr('hidden', 'true');
                             }
                             timerObj.createCountdown("round",defaultRoundTime,"roundEndMessage");
                             timerObj.createTimer("round");
+							timerObj.deleteCountdown("tag");
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                             taskContext.clearRect(0, 0, canvas.width, canvas.height);
                             positionContext.clearRect(0, 0, canvas.width, canvas.height);
@@ -249,12 +253,14 @@ var gameloop = (function(){
 	
 		case "tag"://Send the current task (image) to the player
                             tagging=true;
+							matchStarted=true;
                             document.getElementById('timeCounter').innerHTML="";
-							timerObj.createCountdown("round",askTimer,"roundEndMessage");
-                            timerObj.createTimer("round");
+							timerObj.createCountdown("tag",askTimer,"roundEndMessage");
+							role=m.role;
                             if(m.role==="SKETCHER")
                             {
                                     $('#talk').removeAttr('disabled');
+									skipButton.removeAttr('hidden');
                                     var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('asktagsketcher')+"</font>";
                                     document.getElementById('topMessage').innerHTML=htmlMessage;
                                     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -294,6 +300,7 @@ var gameloop = (function(){
                             {
                                     var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('asktag')+"</font>"+"<b>"+"</font>";
                                     $('#talk').removeAttr('disabled');
+									skipButton.attr('hidden', 'true');
                                     document.getElementById('topMessage').innerHTML=htmlMessage;
                                     taskContext.clearRect(0, 0, canvas.width, canvas.height);
                                     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -305,17 +312,22 @@ var gameloop = (function(){
                             {
                                     score=score+m.points;
                                     guessed=true;
+									skipButton.attr('hidden', 'true');
                             }
 			break;
 			
 		case "timeChange":
-                            if(timerObj.retrieveCountdown('round')>m.amount)
-                                    timerObj.changeCountdown('round',m.amount);
+                            if(timerObj.retrieveCountdown(m.timeObject)>m.amount)
+                                    timerObj.changeCountdown(m.timeObject,m.amount);
 			break;
 			
 		case "showImages":	
                             role="ROUNDCHANGE";
+							skipButton.attr('hidden', 'true');
+							timerObj.deleteCountdown("round");
                             timerObj.createCountdown("round",m.seconds,"roundEndMessage");
+							$('#mainPage').removeClass('sketcher');
+                            $('#mainPage').addClass('guesser');
 			break;
 		
 		case "leaderboard":
@@ -387,6 +399,15 @@ var gameloop = (function(){
   function roundEndMessage()
   {
 	send({type: 'roundEnded', player: pname});
+  }
+  
+  function sendSkipTask()
+  {
+    if(role==="SKETCHER")
+		if(tagging)
+			send({type: 'skipTask', timerObject: 'tag'});
+		else
+			send({type: 'skipTask', timerObject: 'round'});
   }
   
   window.roundEndMessage=roundEndMessage;
@@ -663,9 +684,12 @@ var result= getPosition(obj);
 				
 			case "ENDED":
                                 var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('leaderboard')+"<b>"+"</font>";
-                                document.getElementById('topMessage').innerHTML=htmlMessage;
+								document.getElementById('topMessage').innerHTML=htmlMessage;
+								htmlMessage="<font size='5'>"+"<b><b>"+"</font>";
+								document.getElementById('timeCounter').innerHTML=htmlMessage;
                                 $('#mainPage').removeClass('guesser');
                                 $('#mainPage').removeClass('sketcher');
+								skipButton.attr('hidden', 'true');
                             break;
 				
 		}
@@ -677,10 +701,16 @@ var result= getPosition(obj);
 	//Time positioning
 	if(matchStarted)
 	{
-		var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('time')+timerObj.retrieveCountdown('round')+"<b>"+"</font>";
-		document.getElementById('timeCounter').innerHTML=htmlMessage;
+		if(!tagging){
+			var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('time')+timerObj.retrieveCountdown('round')+"<b>"+"</font>";
+			document.getElementById('timeCounter').innerHTML=htmlMessage;
+		}
+		else{
+			var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('time')+timerObj.retrieveCountdown('tag')+"<b>"+"</font>";
+			document.getElementById('timeCounter').innerHTML=htmlMessage;
+		}
 	}
-    if(!matchStarted || role==="GUESSER" || role==="ENDED" || role==="ROUNDCHANGE")
+    if(!matchStarted || tagging || role==="GUESSER" || role==="ENDED" || role==="ROUNDCHANGE" || role===undefined)
     {
               //Draw nothing till now
     }

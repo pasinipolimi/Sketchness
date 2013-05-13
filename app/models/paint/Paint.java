@@ -74,8 +74,8 @@ public class Paint extends UntypedActor{
                                     painter.updateFromJson(json);
                                 };break;
                  case roundended: GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel,GameEventType.timeExpired));break;
-                 case trace:addTrace(json);break;
-                     
+                 case trace: addTrace(json);break;
+                 case skiptask: GameBus.getInstance().publish(new GameEvent(json.get("timerObject").getTextValue(), roomChannel,GameEventType.skipTask));break;
              }
              notifyAll(json);
         }
@@ -87,7 +87,7 @@ public class Paint extends UntypedActor{
             {
                 case gameEnded:gameStarted=false;break;
                 case gameStarted:gameStarted=true;break;
-                case showImages:notifyAll(event.getObject());break;
+                case showImages:notifyAll(event.getObject());saveTraces();break;
                 case nextRound:nextRound(event.getMessage());break;
                 case task:sendTask(event.getMessage(),event.getObject());break;
                 case askTag:sendTag(event.getMessage(),event.getObject());break;
@@ -183,11 +183,6 @@ public class Paint extends UntypedActor{
    
     private void nextRound(String sketcher)
     {
-         //It's the first match of the game, we have noting to store
-         if(currentSegment!=null)
-         {
-             saveTraces();
-         }
          //Reset the traces storage
          traces=new ObjectNode(factory);
          currentSegment = new Segment("rgba(255,255,255,1.0)");
@@ -276,5 +271,5 @@ public class Paint extends UntypedActor{
 
 enum JsonNodeType
 {
-    segment,change,trace,roundended, move 
+    segment,change,trace,roundended, move, skiptask
 }

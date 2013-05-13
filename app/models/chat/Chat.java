@@ -55,6 +55,7 @@ public class Chat extends UntypedActor {
                     case talk:handleTalk(event.getUsername(),event.getMessage());break;
                     case task:retrieveTask(event.getObject());break;
                     case askTag:handleAskTag(event);break;
+                    case skipTask:askTag=false;break; //Reset to the initial status, even if we don't know if it was a normal task or a question
                     case quit:handleQuitter(event.getMessage());
                 }
             }
