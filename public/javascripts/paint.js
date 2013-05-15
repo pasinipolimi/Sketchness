@@ -434,7 +434,7 @@ var gameloop = (function(){
   }
   
   //Send the points to the server as a trace message. It sends the points, the number of the trace sent, the name of the player that has sent the trace
-  function sendPoints () {
+  function sendPoints() {
     lastSent = +new Date(); //Refresh the countdown timer
 	var gameTimer = timerObj.retrieveTimer("round");
     send({type: "trace", points: points, num: numTrace, name: pname, time: gameTimer});
@@ -449,7 +449,10 @@ var gameloop = (function(){
 
   //Can we send? If the current time - the last update is bigger than the treshold, we can send the packets
   function canSendNow () {
-    return +new Date() - lastSent > MIN_SEND_RATE;
+    if(!tagging)
+		return +new Date() - lastSent > MIN_SEND_RATE;
+	else
+		return false;
   }
 
   ctx.lineCap = 'round';
@@ -497,7 +500,7 @@ var gameloop = (function(){
 
   function onMouseDown (e) {
 	//If the player is a sketcher, update the mouse pressed status to send his traces
-    if(role==="SKETCHER")
+    if(role==="SKETCHER"&&!tagging)
         {
             var o = positionWithE(e,canvas);
             position = o;
@@ -508,7 +511,7 @@ var gameloop = (function(){
 
   function onMouseUp (e) {
     //If the player is the sketcher, send the last trace and disable the drawing function
-    if(role==="SKETCHER")
+    if(role==="SKETCHER"&&!tagging)
         {
             lineTo(position.x, position.y);
             addPoint(position.x, position.y, size, color);

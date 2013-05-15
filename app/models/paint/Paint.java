@@ -87,14 +87,15 @@ public class Paint extends UntypedActor{
             {
                 case gameEnded:gameStarted=false;break;
                 case gameStarted:gameStarted=true;break;
-                case showImages:notifyAll(event.getObject());saveTraces();break;
+                case showImages:notifyAll(event.getObject());break;
+                case saveTraces:saveTraces();break;
                 case nextRound:nextRound(event.getMessage());break;
                 case task:sendTask(event.getMessage(),event.getObject());break;
                 case askTag:sendTag(event.getMessage(),event.getObject());break;
                 case points:notifySingle(event.getMessage(),event.getObject());break;
                 case guessedObject:notifySingle(event.getMessage(),event.getObject());break;
                 case timerChange:notifyAll(event.getObject());break;
-                case leaderboard:saveTraces();notifyAll(event.getObject());break;
+                case leaderboard:notifyAll(event.getObject());break;
                 case quit:handleQuitter(event.getMessage());
             }
         }
@@ -132,11 +133,11 @@ public class Paint extends UntypedActor{
     {
         GameEvent tracesMessage = new GameEvent(roomChannel,GameEventType.finalTraces);
         ObjectNode finalTraces = new ObjectNode(factory);
+        ArrayNode filtered = currentSegment.filter(taskWidth,taskHeight,420,350);
         finalTraces.put("id", taskUrl);
         finalTraces.put("label", guessWord);
-        finalTraces.put("traces", traces);
-        ArrayNode filtered = currentSegment.filter(taskWidth,taskHeight,420,350);
-        finalTraces.put("history", filtered);
+        finalTraces.put("traces", filtered);
+        finalTraces.put("history", traces);
         tracesMessage.setObject(finalTraces);
         GameBus.getInstance().publish(tracesMessage);
     }

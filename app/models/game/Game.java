@@ -225,10 +225,13 @@ public class Game extends UntypedActor {
                         disconnectedPlayers=0;
                         roundNumber=0;
                 	gameStarted=true;
+                        //Find the new sketcher
+                        nextSketcher();
                         //We start the game
-                        nextRound();
-                        if(sketcherPainter!=null)
+                        if(sketcherPainter!=null) {
                             GameBus.getInstance().publish(new GameEvent(roomChannel,GameEventType.gameStarted));
+                            nextRound();
+                        }
                         else
                             throw new Exception("[GAME]: Cannot find a suitable Sketcher!");
                     }
@@ -260,10 +263,6 @@ public class Game extends UntypedActor {
            for (Painter reset : playersVect) {
                  reset.guessed=false;
            }
-           //Find the new sketcher
-           nextSketcher();
-           //We send the right task to the right sketcher
-           
            //Check if a tag for the current image as already been provided;if not, ask for a new one
            taskImage = retrieveTaskImage();
            String label=taskImage.get("tag").asText();
@@ -330,12 +329,15 @@ public class Game extends UntypedActor {
             //If we have received a response from all the active players in the game, end the round
             if((missingPlayers-disconnectedPlayers)==0)
             {
-                //Before calling the new round, show the solution to all the players
+                //Before calling the new round, show the solution to all the players and end the round
 		if(shownImages==false&&areWeAsking==false)
 		{
 		    showImages();
 		    shownImages=true;
 		    missingPlayers=requiredPlayers;
+                    //If at least one player has guessed, it means that the drawn contour is a good one
+                    if(guessedWord)
+                        GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.saveTraces));
 		}
                 //If the solution has been given or a tag has not been chosen, start a new round
 		else
