@@ -225,12 +225,11 @@ public class Game extends UntypedActor {
                         disconnectedPlayers=0;
                         roundNumber=0;
                 	gameStarted=true;
-                        //Find the new sketcher
-                        nextSketcher();
+                        nextRound();
                         //We start the game
                         if(sketcherPainter!=null) {
                             GameBus.getInstance().publish(new GameEvent(roomChannel,GameEventType.gameStarted));
-                            nextRound();
+                            
                         }
                         else
                             throw new Exception("[GAME]: Cannot find a suitable Sketcher!");
@@ -263,6 +262,7 @@ public class Game extends UntypedActor {
            for (Painter reset : playersVect) {
                  reset.guessed=false;
            }
+           nextSketcher();
            //Check if a tag for the current image as already been provided;if not, ask for a new one
            taskImage = retrieveTaskImage();
            String label=taskImage.get("tag").asText();
@@ -345,6 +345,7 @@ public class Game extends UntypedActor {
                   if(areWeAsking)
                        GameBus.getInstance().publish(new SystemMessage(sketcherPainter.name+" "+Messages.get(LanguagePicker.retrieveLocale(),"notag"), roomChannel));
 		  areWeAsking=false;
+                  //Start a new round
                   nextRound();
 		  shownImages=false;
 		  missingPlayers=requiredPlayers;
@@ -415,7 +416,7 @@ public class Game extends UntypedActor {
         String traces = finalTraces.get("traces").toString();
         String history = finalTraces.get("history").toString();
         
-        String urlParameters = "label="+label+"&coordinates="+traces+"&history="+history+"&user_id="+sketcherPainter.name+"&language="+LanguagePicker.retrieveIsoCode();
+        String urlParameters = "label="+label+"&coordinates="+traces+"&history="+history+"&user_id="+sketcherPainter.name+"&language="+LanguagePicker.retrieveIsoCode()+"&session_id=2251";
         String request = rootUrl+"/wsmc/image/"+id+"/segment";
         
         WS.url(request).setContentType("application/x-www-form-urlencoded").post(urlParameters);

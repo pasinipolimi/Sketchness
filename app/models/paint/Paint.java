@@ -39,7 +39,7 @@ public class Paint extends UntypedActor{
     String sketcher;
     String guessWord;
     
-    private Segment currentSegment=null;
+    private Segment currentSegment = new Segment("rgba(255,255,255,1.0)");
     
    // The list of all connected painters (identified by ids)
    private ConcurrentHashMap<String, Painter> painters = new ConcurrentHashMap<String, Painter>();
