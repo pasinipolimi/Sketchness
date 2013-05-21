@@ -112,7 +112,7 @@ public class Renderer extends UntypedActor{
         {
             JavascriptColor c = colors[i];
             JsonNode current=imageSegments.get(i);
-            current=current.get("polyline_history");
+            current=current.get("polyline");
             ObjectMapper mapper = new ObjectMapper();
             JsonFactory factory = mapper.getJsonFactory(); // since 2.1 use mapper.getFactory() instead
             JsonParser jp = factory.createJsonParser(current.asText());
