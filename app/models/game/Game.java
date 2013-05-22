@@ -420,6 +420,10 @@ public class Game extends UntypedActor {
         String request = rootUrl+"/wsmc/image/"+id+"/segment";
         
         WS.url(request).setContentType("application/x-www-form-urlencoded").post(urlParameters);
+        
+        urlParameters ="tag="+label+"&user_id="+sketcherPainter.name+"&language="+LanguagePicker.retrieveIsoCode()+"&session_id=2251";
+        request = rootUrl+"/wsmc/image/"+id+"/tag";
+        WS.url(request).setContentType("application/x-www-form-urlencoded").post(urlParameters);
     }
     
     private void handleQuitter(String quitter) {
