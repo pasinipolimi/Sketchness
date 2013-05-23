@@ -25,13 +25,13 @@ object ApplicationBuild extends Build {
 		// Resource(name: String, path :String, url :String = null, zipped :Boolean = true)
 		Resource("Results Folder", "results"),
 		Resource("Lib Folder", "lib"),
-		Resource("jQuery", "public/javascripts/jquery-1.7.1.min.js", "http://code.jquery.com/jquery-1.7.1.min.js", false),
-		Resource("jQuery i18n", "public/javascripts/jquery.i18n.properties-min-1.0.9.js", "http://jquery-i18n-properties.googlecode.com/files/jquery.i18n.properties-min-1.0.9.js", false),
-		Resource("jScrollPane", "public/javascripts/jquery.jscrollpane.min.js", "http://jscrollpane.kelvinluck.com/script/jquery.jscrollpane.min.js", false),
-		Resource("jScrollPane MouseWheel", "public/javascripts/jquery.mousewheel.js", "http://jscrollpane.kelvinluck.com/script/jquery.mousewheel.js", false),
-		Resource("jScrollPane MouseWheelIntent", "public/javascripts/mwheelIntent.js", "http://jscrollpane.kelvinluck.com/script/mwheelIntent.js", false),
-		Resource("jScrollPane CSS", "public/stylesheets/jquery.jscrollpane.css", "http://jscrollpane.kelvinluck.com/style/jquery.jscrollpane.css", false),
-		Resource("Bootstrap CSS", "public/stylesheets/bootstrap.css", "https://raw.github.com/twitter/bootstrap/1c7c5f750fc221ee94e435e4e49bc2ba1a6be5e6/bootstrap.css", false),
+		Resource("jQuery", "public/javascripts/lib/jquery.js", "http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js", false),
+		Resource("jQuery i18n", "public/javascripts/lib/jquery.i18n.properties.js", "http://jquery-i18n-properties.googlecode.com/files/jquery.i18n.properties-min-1.0.9.js", false),
+		Resource("jScrollPane", "public/javascripts/lib/jquery.jscrollpane.js", "http://jscrollpane.kelvinluck.com/script/jquery.jscrollpane.min.js", false),
+		Resource("jScrollPane MouseWheel", "public/javascripts/lib/jquery.mousewheel.js", "http://jscrollpane.kelvinluck.com/script/jquery.mousewheel.js", false),
+		Resource("jScrollPane MouseWheelIntent", "public/javascripts/lib/mwheelIntent.js", "http://jscrollpane.kelvinluck.com/script/mwheelIntent.js", false),
+		Resource("jScrollPane CSS", "public/stylesheets/lib/jquery.jscrollpane.css", "http://jscrollpane.kelvinluck.com/style/jquery.jscrollpane.css", false),
+		Resource("Bootstrap CSS", "public/stylesheets/lib/bootstrap.css", "https://raw.github.com/twitter/bootstrap/1c7c5f750fc221ee94e435e4e49bc2ba1a6be5e6/bootstrap.css", false),
 		Resource("Website Images", "public/images", "http://ubuntuone.com/6TzTau0tmLx38sUSTi8WBa")
     )
 
