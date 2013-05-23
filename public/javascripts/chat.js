@@ -1,29 +1,25 @@
 (function() {
-                            
+
     function setError (message) {
         $("#onError span").text(message);
         $("#onError").show();
         $("#pageheader").hide();
         $("#mainPage").hide();
     }
-                                        
+
     if (!window.WebSocket) {
-        if (!window.MozWebSocket)
-        {
             setError("WebSockets are not supported by your browser.");
             return;
-        }
     }
 
     if (!(function(e){return e.getContext && e.getContext('2d');}(document.getElementById("me")))) {
         setError("Canvas is not supported by your browser.");
         return;
     }
-                                        
-                                        
-                                        
-    var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
-    var chatSocket = new WS($('#chatWebSocket').data('ws'));
+
+
+
+    var chatSocket = new window.WebSocket($('#chatWebSocket').data('ws'));
 
     var sendMessage = function() {
         chatSocket.send(JSON.stringify({text: $("#talk").val()}));

@@ -2,19 +2,6 @@
 
   var timerObj=new TimerObj();
 
-
-  // Polyfills
-  window.requestAnimFrame = (function(){
-  return window.requestAnimationFrame ||
-          window.webkitRequestAnimationFrame ||
-          window.mozRequestAnimationFrame ||
-          window.oRequestAnimationFrame ||
-          window.msRequestAnimationFrame ||
-          function( callback ){
-            window.setTimeout(callback, 1000 / 60);
-          }; 
-          })();
-
   var insideIframe = (window.parent !== window);
   var isMobile = /ipad|iphone|android/i.test(navigator.userAgent);
 
@@ -24,18 +11,18 @@
   var TRACKER = 'red';
   var SIZE = 5;
   var MIN_SEND_RATE = 50; // the min interval in ms between 2 send
-  
+
   // STATES
   var pid;
   var pname;
   var meCtx;
   var role;
   var tagging=false;
-  
+
   // TOOLS STATUS
   var color = PEN;
   var size = SIZE;
-  
+
   //GAME STATUS
   var score = 0;
   var defaultRoundTime=90;
@@ -45,7 +32,7 @@
   var guessed=false;
   var drawTool = true;
   var taskImage;
-  
+
   var trackX;
   var trackY;
 
@@ -57,17 +44,17 @@
   var players = new Array();
 
   var viewport = document.getElementById('viewport');
-  
-  
-  
+
+
+
   function setError (message) {
       $("#onError span").text(message);
       $("#onError").show();
       $("#pageheader").hide();
       $("#mainPage").hide();
   }
-  
-  
+
+
   /*****************************UTILITY FUNCTIONS********************************************/
 
   // Init pname
@@ -79,7 +66,7 @@
     }
     return n || pname;
   }
-  
+
  //pname = localStorage.getItem("pname");
   if (!insideIframe && !pname) {
      pname = queryPname();
@@ -95,8 +82,7 @@
 
   function connect () {
     try {
-	  var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
-	  socket = new WS($('#paintWebSocket').data('ws'));
+	  socket = new window.WebSocket($('#paintWebSocket').data('ws'));
       socket.onmessage = onSocketMessage;
 	  queryPname();
 
@@ -121,7 +107,7 @@
     if (!connected) return;
     socket.send(JSON.stringify(o));
   }
-  
+
   function getPlayer(username)
   {
 	for (i=0;i<players.length;i++)
@@ -132,7 +118,7 @@
 		}
 	}
   }
-  
+
   function deletePlayer(username)
   {
 	for (i=0;i<players.length;i++)
@@ -144,7 +130,7 @@
 		}
 	}
   }
-  
+
   function playerExtend(message)
   {
 	var username=message.name;
@@ -156,7 +142,7 @@
 		}
 	}
   }
-  
+
 
 
 
@@ -210,12 +196,12 @@ var gameloop = (function(){
                             taskContext.clearRect(0, 0, canvas.width, canvas.height);
                             positionContext.clearRect(0, 0, canvas.width, canvas.height);
 			break;
-			
+
 		case "move"://We need to update the current position of the player
                             trackX=m.x;
                             trackY=m.y;
 			break;
-			
+
 		case "task"://Send the current task (image + tag) to the player
                             tagging=false;
                             guessWord=m.tag;
@@ -250,7 +236,7 @@ var gameloop = (function(){
                                             taskContext.restore();
                             };
 			break;
-	
+
 		case "tag"://Send the current task (image) to the player
                             tagging=true;
 							matchStarted=true;
@@ -306,7 +292,7 @@ var gameloop = (function(){
                                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                             }
 			break;
-			
+
 		case "points":
                             if(m.name===pname)
                             {
@@ -315,13 +301,13 @@ var gameloop = (function(){
 									skipButton.attr('hidden', 'true');
                             }
 			break;
-			
+
 		case "timeChange":
                             if(timerObj.retrieveCountdown(m.timeObject)>m.amount)
                                     timerObj.changeCountdown(m.timeObject,m.amount);
 			break;
-			
-		case "showImages":	
+
+		case "showImages":
                             role="ROUNDCHANGE";
 							skipButton.attr('hidden', 'true');
 							timerObj.deleteCountdown("round");
@@ -329,7 +315,7 @@ var gameloop = (function(){
 							$('#mainPage').removeClass('sketcher');
                             $('#mainPage').addClass('guesser');
 			break;
-		
+
 		case "leaderboard":
                             role="ENDED";
                             //Clear all the canvas and draw the leaderboard
@@ -347,7 +333,7 @@ var gameloop = (function(){
                                     taskContext.fillText(i+"): "+m.playerList[i-1].name+" = "+m.playerList[i-1].points+$.i18n.prop('points'),30,50+50*(i-1));
                             }
 			break;
-		
+
 		case "trace":
                             player = getPlayer(m.name);
                             if(player.color===ERASER)
@@ -372,7 +358,7 @@ var gameloop = (function(){
                               meCtx.clearRect(0,0,meCtx.canvas.width,meCtx.canvas.height);
                             }
 			break;
-			
+
 		case "change":
                             var player = getPlayer(m.name);
                             if (player === undefined)
@@ -382,11 +368,11 @@ var gameloop = (function(){
                             }
                             playerExtend(m);
 			break;
-		
+
 		case "disconnect": //[TODO]
                             //deletePlayer(m.username);
 			break;
-		
+
 	}
 	dirtyPositions = true;
   };
@@ -395,12 +381,12 @@ var gameloop = (function(){
   var w = canvas.width, h = canvas.height;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  
+
   function roundEndMessage()
   {
 	send({type: 'roundEnded', player: pname});
   }
-  
+
   function sendSkipTask()
   {
     if(role==="SKETCHER")
@@ -409,7 +395,7 @@ var gameloop = (function(){
 		else
 			send({type: 'skipTask', timerObject: 'round'});
   }
-  
+
   window.roundEndMessage=roundEndMessage;
 })();
 
@@ -432,7 +418,7 @@ var gameloop = (function(){
   function addPoint (x, y, size, color) {
     points.push({x: x, y: y, size: size, color: color});
   }
-  
+
   //Send the points to the server as a trace message. It sends the points, the number of the trace sent, the name of the player that has sent the trace
   function sendPoints() {
     lastSent = +new Date(); //Refresh the countdown timer
@@ -440,7 +426,7 @@ var gameloop = (function(){
     send({type: "trace", points: points, num: numTrace, name: pname, time: gameTimer});
     points = [];
   }
-  
+
   //Send the tracking position of the player that is drawing, sending his current position and name
   function sendMove (x, y) {
     lastSent = +new Date();
@@ -488,7 +474,7 @@ var gameloop = (function(){
         addPoint(o.x, o.y, size, color);
       }
     }
-    else 
+    else
 	{
 	  //The mouse is not pressed, can we just send the position of the player?
       if (canSendNow() && role==="SKETCHER") {
@@ -539,12 +525,12 @@ var result= getPosition(obj);
           y: e.clientY-result.y
         };
   };
-  
+
   //Return the position of the element in the page
   function getPosition(element) {
     var xPosition = 0;
     var yPosition = 0;
-  
+
     while(element) {
         xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
         yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
@@ -587,8 +573,8 @@ var result= getPosition(obj);
         }
   }
 
-  requestAnimFrame(function loop () {
-    requestAnimFrame(loop);
+  window.requestAnimationFrame(function loop () {
+    window.requestAnimationFrame(loop);
     render();
   }, canvas);
 })();
@@ -600,7 +586,7 @@ var result= getPosition(obj);
 (function(){
   var hud = document.getElementById("hud");
   var ctx = hud.getContext("2d");
-  
+
   //ICONS
   var penEnabled= new Image();
   var eraserEnabled = new Image();
@@ -610,20 +596,20 @@ var result= getPosition(obj);
   eraserEnabled.src = 'assets/images/UI/Controls/eraser.png';
   penDisabled.src = 'assets/images/UI/Controls/pencilD.png';
   eraserDisabled.src = 'assets/images/UI/Controls/eraserD.png';
-  
+
   function setColor (c)
   {
     color = c;
     send({type: 'change', size: size, color: color, name: pname, role: role});
   }
-  
+
   function setSize (s) {
     size = s;
     send({type: 'change', size: size, color: color, name: pname, role: role});
   }
 
   function setup() {
-  
+
 	//[TODO] It should be screen and resolution independent, it can't work like that
     hud.addEventListener("click", function (e) {
     var o = positionWithE(e,hud);
@@ -642,7 +628,7 @@ var result= getPosition(obj);
     });
   }
 
-  
+
   /************TOOLS PANEL RENDERING***********************/
   function render()
   {
@@ -662,7 +648,7 @@ var result= getPosition(obj);
                                     document.getElementById('topMessage').innerHTML=htmlMessage;
                                }
                             break;
-				
+
 			case "GUESSER":
                                 if(!tagging){
                                     if(!guessed)
@@ -677,14 +663,14 @@ var result= getPosition(obj);
                                     }
                                 }
                             break;
-				
+
 			case "ROUNDCHANGE":
                                 if(!tagging){
                                     var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('solution')+"<font color='red'>"+guessWord+"</font>"+"<b>"+"</font>";
                                     document.getElementById('topMessage').innerHTML=htmlMessage;
                                 }
                             break;
-				
+
 			case "ENDED":
                                 var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('leaderboard')+"<b>"+"</font>";
 								document.getElementById('topMessage').innerHTML=htmlMessage;
@@ -694,7 +680,7 @@ var result= getPosition(obj);
                                 $('#mainPage').removeClass('sketcher');
 								skipButton.attr('hidden', 'true');
                             break;
-				
+
 		}
     }
 
@@ -734,8 +720,8 @@ var result= getPosition(obj);
   }
 
   setup();
-  requestAnimFrame(function loop(){
-    requestAnimFrame(loop);
+  window.requestAnimationFrame(function loop(){
+    window.requestAnimationFrame(loop);
     render();
   });
 
