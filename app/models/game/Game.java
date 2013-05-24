@@ -6,6 +6,7 @@ import play.libs.F.*;
 import play.i18n.Messages;
 import akka.actor.*;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -210,7 +211,7 @@ public class Game extends UntypedActor {
                 }
     }
     
-    private boolean triggerStart() throws Exception
+    private boolean triggerStart() throws Error
     {
                 boolean canStart=true;
                 for (Painter painter : playersVect) {
@@ -232,7 +233,7 @@ public class Game extends UntypedActor {
                             
                         }
                         else
-                            throw new Exception("[GAME]: Cannot find a suitable Sketcher!");
+                            throw new Error("[GAME]: Cannot find a suitable Sketcher!");
                     }
                     else
                     {
@@ -574,13 +575,20 @@ public class Game extends UntypedActor {
      * Retrieving data from the CMS [TODO] Right now we are not retrieving based on the requirements of our tasks
      * such as completing tasks that have not been already faced and so on. We will add this feature in the future.
     **/
-    public void taskSetInitialization() throws MalformedURLException, IOException, JSONException, Exception {
+    public void taskSetInitialization() throws Error{
         
        taskAcquired=false;
        JsonReader jsonReader= new JsonReader();
-       JsonNode retrieved= jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image.json");
-       
-       //[TODO] NOT THE RIGHT POSITION, JUST FOR TESTING PURPOSES
+       JsonNode retrieved=null;
+       try{
+            retrieved= jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image.json");
+       }
+       catch(IllegalArgumentException e)
+       {
+           throw new RuntimeException("The request to the CMS is malformed");
+       }
+       if(retrieved!=null)
+       {
         for (JsonNode item : retrieved) {
             if(item.getElements().hasNext())
             {
@@ -621,6 +629,9 @@ public class Game extends UntypedActor {
                 }
             }
         }  
+    }
+    else
+           throw new Error("Cannot retrieve the tasks from the CMS.");
     }
 }
 
