@@ -1,6 +1,6 @@
 (function(){
 
-  var timerObj=new TimerObj();
+  var time = new Time();
 
   var insideIframe = (window.parent !== window);
   var isMobile = /ipad|iphone|android/i.test(navigator.userAgent);
@@ -189,9 +189,9 @@ var gameloop = (function(){
                                     $('#talk').removeAttr('disabled');
 									skipButton.attr('hidden', 'true');
                             }
-                            timerObj.createCountdown("round",defaultRoundTime,"roundEndMessage");
-                            timerObj.createTimer("round");
-							timerObj.deleteCountdown("tag");
+                            time.setCountdown("round", defaultRoundTime * Time.second, Time.second, $.noop, roundEndMessage);
+                            time.setTimer("round");
+							time.clearCountdown("tag");
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                             taskContext.clearRect(0, 0, canvas.width, canvas.height);
                             positionContext.clearRect(0, 0, canvas.width, canvas.height);
@@ -241,7 +241,7 @@ var gameloop = (function(){
                             tagging=true;
 							matchStarted=true;
                             document.getElementById('timeCounter').innerHTML="";
-							timerObj.createCountdown("tag",askTimer,"roundEndMessage");
+							time.setCountdown("tag", askTimer * Time.second, Time.second, $.noop, roundEndMessage);
 							role=m.role;
                             if(m.role==="SKETCHER")
                             {
@@ -303,15 +303,15 @@ var gameloop = (function(){
 			break;
 
 		case "timeChange":
-                            if(timerObj.retrieveCountdown(m.timeObject)>m.amount)
-                                    timerObj.changeCountdown(m.timeObject,m.amount);
+                            if(time.getCountdown(m.timeObject) > (m.amount * Time.second))
+                                    time.changeCountdown(m.timeObject, m.amount * Time.second);
 			break;
 
 		case "showImages":
                             role="ROUNDCHANGE";
 							skipButton.attr('hidden', 'true');
-							timerObj.deleteCountdown("round");
-                            timerObj.createCountdown("round",m.seconds,"roundEndMessage");
+							time.clearCountdown("round");
+                            time.setCountdown("round", m.seconds * Time.second, Time.second, $.noop, roundEndMessage);
 							$('#mainPage').removeClass('sketcher');
                             $('#mainPage').addClass('guesser');
 			break;
@@ -319,7 +319,6 @@ var gameloop = (function(){
 		case "leaderboard":
                             role="ENDED";
                             //Clear all the canvas and draw the leaderboard
-                            time=0;
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                             taskContext.clearRect(0, 0, canvas.width, canvas.height);
                             positionContext.clearRect(0, 0, canvas.width, canvas.height);
@@ -421,22 +420,22 @@ var gameloop = (function(){
 
   //Send the points to the server as a trace message. It sends the points, the number of the trace sent, the name of the player that has sent the trace
   function sendPoints() {
-    lastSent = +new Date(); //Refresh the countdown timer
-	var gameTimer = timerObj.retrieveTimer("round");
+    lastSent = Date.now(); //Refresh the countdown timer
+	var gameTimer = time.getTimer("round");
     send({type: "trace", points: points, num: numTrace, name: pname, time: gameTimer});
     points = [];
   }
 
   //Send the tracking position of the player that is drawing, sending his current position and name
   function sendMove (x, y) {
-    lastSent = +new Date();
+    lastSent = Date.now();
     send({type: "move", x: x, y: y, name: pname});
   }
 
   //Can we send? If the current time - the last update is bigger than the treshold, we can send the packets
   function canSendNow () {
     if(!tagging)
-		return +new Date() - lastSent > MIN_SEND_RATE;
+		return Date.now() - lastSent > MIN_SEND_RATE;
 	else
 		return false;
   }
@@ -691,11 +690,11 @@ var result= getPosition(obj);
 	if(matchStarted)
 	{
 		if(!tagging){
-			var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('time')+timerObj.retrieveCountdown('round')+"<b>"+"</font>";
+			var htmlMessage = "<font size='5'>" + "<b>" + $.i18n.prop('time') + Time.round(time.getCountdown('round'), Time.second) + "<b>" + "</font>";
 			document.getElementById('timeCounter').innerHTML=htmlMessage;
 		}
 		else{
-			var htmlMessage="<font size='5'>"+"<b>"+$.i18n.prop('time')+timerObj.retrieveCountdown('tag')+"<b>"+"</font>";
+			var htmlMessage="<font size='5'>" + "<b>" + $.i18n.prop('time') + Time.round(time.getCountdown('tag'), Time.second) + "<b>"+"</font>";
 			document.getElementById('timeCounter').innerHTML=htmlMessage;
 		}
 	}

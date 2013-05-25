@@ -14,6 +14,26 @@ if(!window.WebSocket && window.MozWebSocket) {
 	window.WebSocket = window.MozWebSocket;
 }
 
+if (!Function.prototype.bind) {
+	Function.prototype.bind = function(context) {
+		if(typeof this !== "function") {
+			throw new TypeError("Function.prototype.bind called on incompatible object");
+		}
+
+		var self = this;
+		var args = Array.prototype.slice.call(arguments, 1);
+		return function() {
+			return self.apply(context, args.concat(arguments));
+		};
+	};
+}
+
+if (!Date.prototype.now) {
+	Date.prototype.now = function() {
+		return +(new Date());
+	};
+}
+
 if(false) { // TODO: I'm not sure if it's useful, neither where to place it..think about it!
 	var typeOf = function(obj) {
 		if (obj === null) return "null";
