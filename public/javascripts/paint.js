@@ -71,41 +71,24 @@ jQuery(function($) {
 	}
 
 	// WebSocket
-	var connected = false;
+	var communicator = new Communicator($('#paintWebSocket').data('ws'));
 
-	var connect = function() {
-		try {
-			socket = new window.WebSocket($('#paintWebSocket').data('ws'));
-			$(socket).on("message", onSocketMessage);
-
-			socket.onopen = function (evt) {
-				connected = true;
-				send({
-					type: 'change',
-					size: size,
-					color: color,
-					name: pname
-				});
-			};
-
-			socket.onclose = function (evt) {
-				connected = false;
-				setError("Connection lost");
-			};
-
-			socket.onerror = function (evt) {
-				console.error("error", evt);
-			};
-		} catch (e) {
-			setError("WebSocket connection failed.");
+	$(communicator.websocket).on({
+		open: function(evt) {
+			communicator.send({
+				type: 'change',
+				size: size,
+				color: color,
+				name: pname
+			});
+		},
+		close: function (evt) {
+			setError("Connection lost");
+		},
+		error: function (evt) {
+			console.error("error", evt);
 		}
-	};
-
-	var send = function(obj) {
-		if (connected) {
-			socket.send(JSON.stringify(obj));
-		}
-	};
+	});
 
 	var getPlayer = function(username) {
 		for (i = 0; i < players.length; i++) {
@@ -153,218 +136,216 @@ jQuery(function($) {
 			}
 		});
 		/*******************************MANAGING THE INCOMING MESSAGES*****************/
-		onSocketMessage = function(e) {
-			var message = e.data;
-			console.log(message);
-			switch (message.type) {
-				case "role":
-					tagging = false;
-					//Fix the drawing style for the player
-					ctx.globalCompositeOperation = "destination-out";
-					guessed = false;
-					role = message.role;
-					matchStarted = true;
-					var player = getPlayer(pname);
-					player.role = message.role;
-					send({
-						type: 'change',
-						size: size,
-						color: color,
-						name: pname,
-						role: role
-					});
-					if (role === "SKETCHER") {
-						$('#roleSpan').text($.i18n.prop('sketcher'));
-						$('#mainPage').removeClass('guesser');
-						$('#mainPage').addClass('sketcher');
-						$('#talk').attr('disabled', 'disabled');
-						skipButton.show();
-					} else {
-						$('#roleSpan').text($.i18n.prop('guesser'));
-						$('#mainPage').removeClass('sketcher');
-						$('#mainPage').addClass('guesser');
-						$('#talk').removeAttr('disabled');
-						skipButton.hide();
-					}
-					time.setCountdown("round", CONSTANTS.DEFAULT_ROUND_TIME * Time.second, Time.second, $.noop, roundEndMessage);
-					time.setTimer("round");
-					time.clearCountdown("tag");
-					ctx.clearRect(0, 0, canvas.width, canvas.height);
-					taskContext.clearRect(0, 0, canvas.width, canvas.height);
-					positionContext.clearRect(0, 0, canvas.width, canvas.height);
-					break;
-
-				case "move": //We need to update the current position of the player
-					trackX = message.x;
-					trackY = message.y;
-					break;
-
-				case "task": //Send the current task (image + tag) to the player
-					tagging = false;
-					guessWord = message.tag;
-					taskImage = null;
-					taskImage = new Image();
-					taskImage.src = message.image;
-					//Wait for the image to be loaded before drawing it to canvas to avoid errors
-					taskImage.onload = function () {
-						taskContext.save();
-						taskContext.beginPath();
-						var x = 0;
-						var y = 0;
-						var style = window.getComputedStyle(taskCanvas);
-						var width = style.getPropertyValue('width');
-						width = parseInt(width, 10);
-						var height = style.getPropertyValue('height');
-						height = parseInt(height, 10);
-						radius = 50;
-						taskContext.moveTo(x + radius, y);
-						taskContext.lineTo(x + width - radius, y);
-						taskContext.quadraticCurveTo(x + width, y, x + width, y + radius);
-						taskContext.lineTo(x + width, y + height - radius);
-						taskContext.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-						taskContext.lineTo(x + radius, y + height);
-						taskContext.quadraticCurveTo(x, y + height, x, y + height - radius);
-						taskContext.lineTo(x, y + radius);
-						taskContext.quadraticCurveTo(x, y, x + radius, y);
-						taskContext.closePath();
-						taskContext.clip();
-						taskContext.drawImage(taskImage, 0, 0, width, height);
-						taskContext.restore();
-					};
-					break;
-
-				case "tag": //Send the current task (image) to the player
-					tagging = true;
-					matchStarted = true;
-					$("#timeCounter").html("");
-					time.setCountdown("tag", CONSTANTS.DEFAULT_ASK_TIME * Time.second, Time.second, $.noop, roundEndMessage);
-					role = message.role;
-					if (message.role === "SKETCHER") {
-						$('#talk').removeAttr('disabled');
-						skipButton.show();
-						var htmlMessage = "<font size='5'>" + "<b>" + $.i18n.prop('asktagsketcher') + "</font>";
-						$("#topMessage").html(htmlMessage);
-						ctx.clearRect(0, 0, canvas.width, canvas.height);
-						taskContext.clearRect(0, 0, canvas.width, canvas.height);
-						taskImage = null;
-						taskImage = new Image();
-						taskImage.src = message.image;
-						//Wait for the image to be loaded before drawing it to canvas to avoid
-						//errors
-						taskImage.onload = function () {
-							taskContext.save();
-							taskContext.beginPath();
-							var x = 0;
-							var y = 0;
-							var style = window.getComputedStyle(taskCanvas);
-							var width = style.getPropertyValue('width');
-							width = parseInt(width, 10);
-							var height = style.getPropertyValue('height');
-							height = parseInt(height, 10);
-							radius = 50;
-							taskContext.moveTo(x + radius, y);
-							taskContext.lineTo(x + width - radius, y);
-							taskContext.quadraticCurveTo(x + width, y, x + width, y + radius);
-							taskContext.lineTo(x + width, y + height - radius);
-							taskContext.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-							taskContext.lineTo(x + radius, y + height);
-							taskContext.quadraticCurveTo(x, y + height, x, y + height - radius);
-							taskContext.lineTo(x, y + radius);
-							taskContext.quadraticCurveTo(x, y, x + radius, y);
-							taskContext.closePath();
-							taskContext.clip();
-							taskContext.drawImage(taskImage, 0, 0, width, height);
-							taskContext.restore();
-						};
-					} else {
-						$('#talk').removeAttr('disabled');
-						skipButton.hide();
-						var htmlMessage = "<font size='5'>" + "<b>" + $.i18n.prop('asktag') + "</font>" + "<b>" + "</font>";
-						$("#topMessage").html(htmlMessage);
-						taskContext.clearRect(0, 0, canvas.width, canvas.height);
-						ctx.clearRect(0, 0, canvas.width, canvas.height);
-					}
-					break;
-
-				case "points":
-					if (message.name === pname) {
-						score = score + message.points;
-						guessed = true;
-						skipButton.hide();
-					}
-					break;
-
-				case "timeChange":
-					if (time.getCountdown(message.timeObject) > (message.amount * Time.second))
-						time.changeCountdown(message.timeObject, message.amount * Time.second);
-					break;
-
-				case "showImages":
-					role = "ROUNDCHANGE";
-					skipButton.hide();
-					time.clearCountdown("round");
-					time.setCountdown("round", message.seconds * Time.second, Time.second, $.noop, roundEndMessage);
-					$('#mainPage').removeClass('sketcher');
-					$('#mainPage').addClass('guesser');
-					break;
-
-				case "leaderboard":
-					role = "ENDED";
-					//Clear all the canvas and draw the leaderboard
-					ctx.clearRect(0, 0, canvas.width, canvas.height);
-					taskContext.clearRect(0, 0, canvas.width, canvas.height);
-					positionContext.clearRect(0, 0, canvas.width, canvas.height);
-
-					//Disable the chat
-					$('#talk').attr('disabled', 'disabled');
-					for (var i = 1; i <= message.playersNumber; i++) {
-						taskContext.fillStyle = "#000000";
-						taskContext.font = "bold 30px sans-serif";
-						taskContext.fillText(i + "): " + message.playerList[i - 1].name + " = " + message.playerList[i - 1].points + $.i18n.prop('points'), 30, 50 + 50 * (i - 1));
-					}
-					break;
-
-				case "trace":
-					player = getPlayer(message.name);
-					if (player.color === CONSTANTS.ERASER_COLOR) {
-						ctx.globalCompositeOperation = "destination-out";
-					} else {
-						ctx.globalCompositeOperation = "source-over";
-					}
-					ctx.lineWidth = player.size;
-					ctx.beginPath();
-					var points = message.points;
-					points[0] && ctx.moveTo(points[0].x, points[0].y);
-					points.forEach(function (p) {
-						ctx.strokeStyle = p.color;
-						ctx.lineTo(p.x, p.y);
-					});
-					ctx.stroke();
-
-					trackX = points[points.length - 1].x;
-					trackY = points[points.length - 1].y;
-
-					// clear local canvas if synchronized
-					if (message.name === pname && numTrace === message.num) {
-						meCtx.clearRect(0, 0, meCtx.canvas.width, meCtx.canvas.height);
-					}
-					break;
-
-				case "change":
-					var player = getPlayer(message.name);
-					if (player === undefined) {
-						player = players[players.length] = message;
-						console.log(player);
-					}
-					playerExtend(message);
-					break;
-
-				case "disconnect": //[TODO]
-					//deletePlayer(message.username);
-					break;
-
+		communicator.on("role", function(e, message) {
+			tagging = false;
+			//Fix the drawing style for the player
+			ctx.globalCompositeOperation = "destination-out";
+			guessed = false;
+			role = message.role;
+			matchStarted = true;
+			var player = getPlayer(pname);
+			player.role = message.role;
+			send({
+				type: 'change',
+				size: size,
+				color: color,
+				name: pname,
+				role: role
+			});
+			if (role === "SKETCHER") {
+				$('#roleSpan').text($.i18n.prop('sketcher'));
+				$('#mainPage').removeClass('guesser');
+				$('#mainPage').addClass('sketcher');
+				$('#talk').attr('disabled', 'disabled');
+				skipButton.show();
+			} else {
+				$('#roleSpan').text($.i18n.prop('guesser'));
+				$('#mainPage').removeClass('sketcher');
+				$('#mainPage').addClass('guesser');
+				$('#talk').removeAttr('disabled');
+				skipButton.hide();
 			}
-			dirtyPositions = true;
+			time.setCountdown("round", CONSTANTS.DEFAULT_ROUND_TIME * Time.second, Time.second, $.noop, roundEndMessage);
+			time.setTimer("round");
+			time.clearCountdown("tag");
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			taskContext.clearRect(0, 0, canvas.width, canvas.height);
+			positionContext.clearRect(0, 0, canvas.width, canvas.height);
+		});
+
+		communicator.on("move", function(e, message) {
+			trackX = message.x;
+			trackY = message.y;
+		});
+
+		communicator.on("task", function(e, message) {
+			tagging = false;
+			guessWord = message.tag;
+			taskImage = null;
+			taskImage = new Image();
+			taskImage.src = message.image;
+			//Wait for the image to be loaded before drawing it to canvas to avoid errors
+			$(taskImage).on("load", function () {
+				taskContext.save();
+				taskContext.beginPath();
+				var x = 0;
+				var y = 0;
+				var style = window.getComputedStyle(taskCanvas);
+				var width = style.getPropertyValue('width');
+				width = parseInt(width, 10);
+				var height = style.getPropertyValue('height');
+				height = parseInt(height, 10);
+				radius = 50;
+				taskContext.moveTo(x + radius, y);
+				taskContext.lineTo(x + width - radius, y);
+				taskContext.quadraticCurveTo(x + width, y, x + width, y + radius);
+				taskContext.lineTo(x + width, y + height - radius);
+				taskContext.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+				taskContext.lineTo(x + radius, y + height);
+				taskContext.quadraticCurveTo(x, y + height, x, y + height - radius);
+				taskContext.lineTo(x, y + radius);
+				taskContext.quadraticCurveTo(x, y, x + radius, y);
+				taskContext.closePath();
+				taskContext.clip();
+				taskContext.drawImage(taskImage, 0, 0, width, height);
+				taskContext.restore();
+			});
+		});
+
+		communicator.on("tag", function(e, message) {
+			tagging = true;
+			matchStarted = true;
+			$("#timeCounter").html("");
+			time.setCountdown("tag", CONSTANTS.DEFAULT_ASK_TIME * Time.second, Time.second, $.noop, roundEndMessage);
+			role = message.role;
+			if (message.role === "SKETCHER") {
+				$('#talk').removeAttr('disabled');
+				skipButton.show();
+				var htmlMessage = "<font size='5'>" + "<b>" + $.i18n.prop('asktagsketcher') + "</font>";
+				$("#topMessage").html(htmlMessage);
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				taskContext.clearRect(0, 0, canvas.width, canvas.height);
+				taskImage = null;
+				taskImage = new Image();
+				taskImage.src = message.image;
+				//Wait for the image to be loaded before drawing it to canvas to avoid
+				//errors
+				taskImage.on("load", function () {
+					taskContext.save();
+					taskContext.beginPath();
+					var x = 0;
+					var y = 0;
+					var style = window.getComputedStyle(taskCanvas);
+					var width = style.getPropertyValue('width');
+					width = parseInt(width, 10);
+					var height = style.getPropertyValue('height');
+					height = parseInt(height, 10);
+					radius = 50;
+					taskContext.moveTo(x + radius, y);
+					taskContext.lineTo(x + width - radius, y);
+					taskContext.quadraticCurveTo(x + width, y, x + width, y + radius);
+					taskContext.lineTo(x + width, y + height - radius);
+					taskContext.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+					taskContext.lineTo(x + radius, y + height);
+					taskContext.quadraticCurveTo(x, y + height, x, y + height - radius);
+					taskContext.lineTo(x, y + radius);
+					taskContext.quadraticCurveTo(x, y, x + radius, y);
+					taskContext.closePath();
+					taskContext.clip();
+					taskContext.drawImage(taskImage, 0, 0, width, height);
+					taskContext.restore();
+				});
+			} else {
+				$('#talk').removeAttr('disabled');
+				skipButton.hide();
+				var htmlMessage = "<font size='5'>" + "<b>" + $.i18n.prop('asktag') + "</font>" + "<b>" + "</font>";
+				$("#topMessage").html(htmlMessage);
+				taskContext.clearRect(0, 0, canvas.width, canvas.height);
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+			}
+		});
+
+		communicator.on("points", function(e, message) {
+			if (message.name === pname) {
+				score = score + message.points;
+				guessed = true;
+				skipButton.hide();
+			}
+		});
+
+		communicator.on("timeChange", function(e, message) {
+			if (time.getCountdown(message.timeObject) > (message.amount * Time.second)) {
+				time.changeCountdown(message.timeObject, message.amount * Time.second);
+			}
+		});
+
+		communicator.on("showImages", function(e, message) {
+			role = "ROUNDCHANGE";
+			skipButton.hide();
+			time.clearCountdown("round");
+			time.setCountdown("round", message.seconds * Time.second, Time.second, $.noop, roundEndMessage);
+			$('#mainPage').removeClass('sketcher');
+			$('#mainPage').addClass('guesser');
+		});
+
+		communicator.on("leaderboard", function(e, message) {
+			role = "ENDED";
+			//Clear all the canvas and draw the leaderboard
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			taskContext.clearRect(0, 0, canvas.width, canvas.height);
+			positionContext.clearRect(0, 0, canvas.width, canvas.height);
+
+			//Disable the chat
+			$('#talk').attr('disabled', 'disabled');
+			for (var i = 1; i <= message.playersNumber; i++) {
+				taskContext.fillStyle = "#000000";
+				taskContext.font = "bold 30px sans-serif";
+				taskContext.fillText(i + "): " + message.playerList[i - 1].name + " = " + message.playerList[i - 1].points + $.i18n.prop('points'), 30, 50 + 50 * (i - 1));
+			}
+		});
+
+		communicator.on("trace", function(e, message) {
+			player = getPlayer(message.name);
+			if (player.color === CONSTANTS.ERASER_COLOR) {
+				ctx.globalCompositeOperation = "destination-out";
+			} else {
+				ctx.globalCompositeOperation = "source-over";
+			}
+			ctx.lineWidth = player.size;
+			ctx.beginPath();
+			var points = message.points;
+			points[0] && ctx.moveTo(points[0].x, points[0].y);
+			points.forEach(function (p) {
+				ctx.strokeStyle = p.color;
+				ctx.lineTo(p.x, p.y);
+			});
+			ctx.stroke();
+
+			trackX = points[points.length - 1].x;
+			trackY = points[points.length - 1].y;
+
+			// clear local canvas if synchronized
+			if (message.name === pname && numTrace === message.num) {
+				meCtx.clearRect(0, 0, meCtx.canvas.width, meCtx.canvas.height);
+			}
+		});
+
+		communicator.on("change", function(e, message) {
+			var player = getPlayer(message.name);
+			if (player === undefined) {
+				player = players[players.length] = message;
+				console.log(player);
+			}
+			playerExtend(message);
+		});
+
+		communicator.on("disconnect", function(e, message) {
+			//[TODO]
+			//deletePlayer(message.username);
+		});
+
+		onSocketMessage = function(e) {
+			dirtyPositions = true; //RIVEDERE L'AGGIORNAMENTO DEL TRACKING
 		};
 
 		ctx.lineCap = 'round';
