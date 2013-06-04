@@ -18,56 +18,182 @@ jQuery(function($) {
 	};
 
 	// STATES
-	var pid;
-	var pname;
-	var meCtx;
-	var role;
-	var tagging = false;
+	var user = {
+		id: null,
+		name: null,
+	}
+
+	// CANVASES
+	var canvases = {
+		me: {
+			el: $("#me"),
+			ctx: $("#me")[0].getContext("2d")
+		},
+		positions: {
+			el: $("#positions"),
+			ctx: $("#positions")[0].getContext("2d")
+		},
+		draws: {
+			el: $("#draws"),
+			ctx: $("#draws")[0].getContext("2d")
+		},
+		task: {
+			el: $("#task"),
+			ctx: $("#task")[0].getContext("2d")
+		},
+		hud: {
+			el: $("#hud"),
+			ctx: $("#hud")[0].getContext("2d")
+		},
+	}
 
 	// TOOLS STATUS
-	var color = CONSTANTS.PEN_COLOR;
-	var size = CONSTANTS.PEN_SIZE;
+	var tool = {
+		color: CONSTANTS.PEN_COLOR,
+		size: CONSTANTS.PEN_SIZE,
+		draw: true
+	}
 
 	//GAME STATUS
-	var score = 0;
-	var matchStarted = false;
-	var guessWord = "";
-	var guessed = false;
-	var drawTool = true;
-	var taskImage;
+	var game = {
+		role: null,
+		score: 0,
+		matchStarted: false,
+		guessWord: "",
+		guessed: false,
+		taskImage: null,
+		tagging: false,
+		traceNum: 1
+	}
 
-	var trackX;
-	var trackY;
+	var track = {
+		x: null,
+		y: null
+	}
 
-	var numTrace = 1;
-	var onSocketMessage;
 	var dirtyPositions = false;
 
 	// every player positions
 	var players = [];
 
-	var viewport = $("#viewport")[0];
-
 	// Dunno, variables before in an enclosure causing problems
 	var skipButton;
-	var roundEndMessage;
-	var socket;
+	var roundEnd;
 
-	var setError = function(message) {
-		$("#onError span").text(message);
-		$("#onError").show();
-		$("#pageheader").hide();
-		$("#mainPage").hide();
-		throw new Error(message);
+	var write = {
+		score: function(score) {
+			var html = "<font size='5'><b>" + score + "</b></font>";
+			$("#score").html(html);
+		},
+		time: function(time) {
+			var html = "";
+			if(time || time === 0) {
+				html = "<font size='5'><b>" + $.i18n.prop('time') + Time.round(time, Time.second) + "</b></font>";
+			}
+			$("#timeCounter").html(html);
+		},
+		top: function(text, red) {
+			var html = "<font size='5'><b>" + text;
+			if(red !== undefined) {
+				html += "<font color='red'>" + red + "</font>";
+			}
+			html += "</b></font>";
+
+			$("#topMessage").html(html);
+		},
+		error: function(message) {
+			$("#onError span").text(message);
+			$("#onError").show();
+			$("#pageheader").hide();
+			$("#mainPage").hide();
+		}
+	}
+
+	var setColor = function(c) {
+		tool.color = c;
+		communicator.send({
+			type: 'change',
+			size: tool.size,
+			color: tool.color,
+			name: user.name,
+			role: game.role
+		});
 	};
+
+	var setSize = function(s) {
+		tool.size = s;
+		communicator.send({
+			type: 'change',
+			size: tool.size,
+			color: tool.color,
+			name: user.name,
+			role: game.role
+		});
+	};
+
+	var hud = {
+		tools: {
+			pen: {
+				enabled: "assets/images/UI/Controls/pencil.png",
+				disabled: "assets/images/UI/Controls/pencilD.png",
+				size: { x: 70, y: 70 },
+				position: { x: 0, y: 130 }
+			},
+			eraser: {
+				enabled: "assets/images/UI/Controls/eraser.png",
+				disabled: "assets/images/UI/Controls/eraserD.png",
+				size: { x: 70, y: 70 },
+				position: { x: 0, y: 200 }
+			}
+		},
+		preload: function(canvas) {
+			$.each(this.tools, function(name, tool) {
+				$.each(["enabled", "disabled"], function(key, status) {
+					var src = tool[status];
+					tool[status] = new Image();
+					tool[status].src = src;
+				});
+			});
+		},
+		clear: function() {
+			canvases.hud.ctx.clearRect(0, 0, canvases.hud.el.width(), canvases.hud.el.height());
+		},
+		paint: function(active) {
+			this.clear();
+			$.each(this.tools, function(name, tool) {
+				var status = (name === active ? "enabled" : "disabled");
+				canvases.hud.ctx.drawImage(tool[status], tool.position.x, tool.position.y, tool.size.x, tool.size.y);
+			});
+		},
+		bindClick: function() {
+			var self = this;
+			//[TODO] It should be screen and resolution independent, it can't work like that
+			canvases.hud.el.on("click", function (e) {
+				var o = relativePosition(e, canvases.hud.el);
+				if ((o.y >= 130) && (o.y < 200)) {
+					setColor(CONSTANTS.PEN_COLOR);
+					setSize(CONSTANTS.PEN_SIZE);
+					self.paint("pen");
+				} else if ((o.y >= 200) && (o.y <= 270)) {
+					setColor(CONSTANTS.ERASER_COLOR);
+					setSize(CONSTANTS.ERASER_SIZE);
+					self.paint("eraser");
+				}
+			});
+		},
+		unbindClick: function() {
+			canvases.hud.el.off("click");
+		}
+	}
+	hud.preload();
 
 	/*****************************UTILITY FUNCTIONS********************************************/
 
-	if (!pname) {
-		pname = $('#currentNickname').text() ||
+	if (!user.name) {
+		user.name = $('#currentNickname').text() ||
 			localStorage.getItem("pname") ||
 			("iam" + Math.floor(100 * Math.random()));
-		localStorage.setItem("pname", pname);
+		localStorage.setItem("pname", user.name);
 	}
 
 	// WebSocket
@@ -77,16 +203,19 @@ jQuery(function($) {
 		open: function(evt) {
 			communicator.send({
 				type: 'change',
-				size: size,
-				color: color,
-				name: pname
+				size: tool.size,
+				color: tool.color,
+				name: user.name
 			});
 		},
-		close: function (evt) {
-			setError("Connection lost");
+		close: function(evt) {
+			write.error("Connection lost");
 		},
-		error: function (evt) {
+		error: function(evt) {
 			console.error("error", evt);
+		},
+		message: function() {
+			dirtyPositions = true;
 		}
 	});
 
@@ -118,41 +247,35 @@ jQuery(function($) {
 
 	//***************************TAKING CARE OF THE LINE STROKES*****************************/
 	(function() {
-		var canvas = $("#draws")[0];
-		var ctx = canvas.getContext("2d");
-		var taskCanvas = $("#task")[0];
-		var taskContext = taskCanvas.getContext("2d");
-		var positionCanvas = $("#positions")[0];
-		var positionContext = positionCanvas.getContext("2d");
 		skipButton = $('#skipTask');
 		skipButton.hide();
 		skipButton.on("click", function() {
-			if (role === "SKETCHER") {
-				if (tagging) {
-					send({ type: 'skipTask', timerObject: 'tag' });
+			if (game.role === "SKETCHER") {
+				if (game.tagging) {
+					communicator.send({ type: 'skipTask', timerObject: 'tag' });
 				} else {
-					send({ type: 'skipTask', timerObject: 'round' });
+					communicator.send({ type: 'skipTask', timerObject: 'round' });
 				}
 			}
 		});
 		/*******************************MANAGING THE INCOMING MESSAGES*****************/
 		communicator.on("role", function(e, message) {
-			tagging = false;
+			game.tagging = false;
 			//Fix the drawing style for the player
-			ctx.globalCompositeOperation = "destination-out";
-			guessed = false;
-			role = message.role;
-			matchStarted = true;
-			var player = getPlayer(pname);
+			canvases.draws.ctx.globalCompositeOperation = "destination-out";
+			game.guessed = false;
+			game.role = message.role;
+			game.matchStarted = true;
+			var player = getPlayer(user.name);
 			player.role = message.role;
-			send({
+			communicator.send({
 				type: 'change',
-				size: size,
-				color: color,
-				name: pname,
-				role: role
+				size: tool.size,
+				color: tool.color,
+				name: user.name,
+				role: game.role
 			});
-			if (role === "SKETCHER") {
+			if (game.role === "SKETCHER") {
 				$('#roleSpan').text($.i18n.prop('sketcher'));
 				$('#mainPage').removeClass('guesser');
 				$('#mainPage').addClass('sketcher');
@@ -165,110 +288,105 @@ jQuery(function($) {
 				$('#talk').removeAttr('disabled');
 				skipButton.hide();
 			}
-			time.setCountdown("round", CONSTANTS.DEFAULT_ROUND_TIME * Time.second, Time.second, $.noop, roundEndMessage);
+			time.setCountdown("round", CONSTANTS.DEFAULT_ROUND_TIME * Time.second, Time.second, write.time, roundEnd);
 			time.setTimer("round");
 			time.clearCountdown("tag");
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			taskContext.clearRect(0, 0, canvas.width, canvas.height);
-			positionContext.clearRect(0, 0, canvas.width, canvas.height);
+			canvases.draws.ctx.clearRect(0, 0, canvases.draws.el.width(), canvases.draws.el.height());
+			canvases.task.ctx.clearRect(0, 0, canvases.task.el.width(), canvases.task.el.height());
+			canvases.positions.ctx.clearRect(0, 0, canvases.positions.el.width(), canvases.positions.el.height());
 		});
 
 		communicator.on("move", function(e, message) {
-			trackX = message.x;
-			trackY = message.y;
+			track.x = message.x;
+			track.y = message.y;
 		});
 
 		communicator.on("task", function(e, message) {
-			tagging = false;
-			guessWord = message.tag;
-			taskImage = null;
-			taskImage = new Image();
-			taskImage.src = message.image;
+			if (game.role === "SKETCHER") {
+				hud.paint("pen");
+				hud.bindClick();
+			}
+
+			game.tagging = false;
+			game.guessWord = message.tag;
+			game.taskImage = new Image();
+			game.taskImage.src = message.image;
 			//Wait for the image to be loaded before drawing it to canvas to avoid errors
-			$(taskImage).on("load", function () {
-				taskContext.save();
-				taskContext.beginPath();
+			$(game.taskImage).on("load", function () {
+				canvases.task.ctx.save();
+				canvases.task.ctx.beginPath();
 				var x = 0;
 				var y = 0;
-				var style = window.getComputedStyle(taskCanvas);
-				var width = style.getPropertyValue('width');
-				width = parseInt(width, 10);
-				var height = style.getPropertyValue('height');
-				height = parseInt(height, 10);
+				var width = Math.round(canvases.task.el.width());
+				var height = Math.round(canvases.task.el.height());
 				radius = 50;
-				taskContext.moveTo(x + radius, y);
-				taskContext.lineTo(x + width - radius, y);
-				taskContext.quadraticCurveTo(x + width, y, x + width, y + radius);
-				taskContext.lineTo(x + width, y + height - radius);
-				taskContext.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-				taskContext.lineTo(x + radius, y + height);
-				taskContext.quadraticCurveTo(x, y + height, x, y + height - radius);
-				taskContext.lineTo(x, y + radius);
-				taskContext.quadraticCurveTo(x, y, x + radius, y);
-				taskContext.closePath();
-				taskContext.clip();
-				taskContext.drawImage(taskImage, 0, 0, width, height);
-				taskContext.restore();
+				canvases.task.ctx.moveTo(x + radius, y);
+				canvases.task.ctx.lineTo(x + width - radius, y);
+				canvases.task.ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+				canvases.task.ctx.lineTo(x + width, y + height - radius);
+				canvases.task.ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+				canvases.task.ctx.lineTo(x + radius, y + height);
+				canvases.task.ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+				canvases.task.ctx.lineTo(x, y + radius);
+				canvases.task.ctx.quadraticCurveTo(x, y, x + radius, y);
+				canvases.task.ctx.closePath();
+				canvases.task.ctx.clip();
+				canvases.task.ctx.drawImage(game.taskImage, 0, 0, width, height);
+				canvases.task.ctx.restore();
 			});
 		});
 
 		communicator.on("tag", function(e, message) {
-			tagging = true;
-			matchStarted = true;
-			$("#timeCounter").html("");
-			time.setCountdown("tag", CONSTANTS.DEFAULT_ASK_TIME * Time.second, Time.second, $.noop, roundEndMessage);
-			role = message.role;
+			game.tagging = true;
+			game.matchStarted = true;
+			write.time(null);
+			time.setCountdown("tag", CONSTANTS.DEFAULT_ASK_TIME * Time.second, Time.second, write.time, roundEnd);
+			game.role = message.role;
 			if (message.role === "SKETCHER") {
 				$('#talk').removeAttr('disabled');
 				skipButton.show();
-				var htmlMessage = "<font size='5'>" + "<b>" + $.i18n.prop('asktagsketcher') + "</font>";
-				$("#topMessage").html(htmlMessage);
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
-				taskContext.clearRect(0, 0, canvas.width, canvas.height);
-				taskImage = null;
-				taskImage = new Image();
-				taskImage.src = message.image;
+				write.top($.i18n.prop('asktagsketcher'));
+				canvases.draws.ctx.clearRect(0, 0, canvases.draws.el.width(), canvases.draws.el.height());
+				canvases.task.ctx.clearRect(0, 0, canvases.task.el.width(), canvases.task.el.height());
+				game.taskImage = new Image();
+				game.taskImage.src = message.image;
 				//Wait for the image to be loaded before drawing it to canvas to avoid
 				//errors
-				taskImage.on("load", function () {
-					taskContext.save();
-					taskContext.beginPath();
+				$(game.taskImage).on("load", function () {
+					canvases.task.ctx.save();
+					canvases.task.ctx.beginPath();
 					var x = 0;
 					var y = 0;
-					var style = window.getComputedStyle(taskCanvas);
-					var width = style.getPropertyValue('width');
-					width = parseInt(width, 10);
-					var height = style.getPropertyValue('height');
-					height = parseInt(height, 10);
+					var width = Math.round(canvases.task.el.width());
+					var height = Math.round(canvases.task.el.height());
 					radius = 50;
-					taskContext.moveTo(x + radius, y);
-					taskContext.lineTo(x + width - radius, y);
-					taskContext.quadraticCurveTo(x + width, y, x + width, y + radius);
-					taskContext.lineTo(x + width, y + height - radius);
-					taskContext.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-					taskContext.lineTo(x + radius, y + height);
-					taskContext.quadraticCurveTo(x, y + height, x, y + height - radius);
-					taskContext.lineTo(x, y + radius);
-					taskContext.quadraticCurveTo(x, y, x + radius, y);
-					taskContext.closePath();
-					taskContext.clip();
-					taskContext.drawImage(taskImage, 0, 0, width, height);
-					taskContext.restore();
+					canvases.task.ctx.moveTo(x + radius, y);
+					canvases.task.ctx.lineTo(x + width - radius, y);
+					canvases.task.ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+					canvases.task.ctx.lineTo(x + width, y + height - radius);
+					canvases.task.ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+					canvases.task.ctx.lineTo(x + radius, y + height);
+					canvases.task.ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+					canvases.task.ctx.lineTo(x, y + radius);
+					canvases.task.ctx.quadraticCurveTo(x, y, x + radius, y);
+					canvases.task.ctx.closePath();
+					canvases.task.ctx.clip();
+					canvases.task.ctx.drawImage(game.taskImage, 0, 0, width, height);
+					canvases.task.ctx.restore();
 				});
 			} else {
 				$('#talk').removeAttr('disabled');
 				skipButton.hide();
-				var htmlMessage = "<font size='5'>" + "<b>" + $.i18n.prop('asktag') + "</font>" + "<b>" + "</font>";
-				$("#topMessage").html(htmlMessage);
-				taskContext.clearRect(0, 0, canvas.width, canvas.height);
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				write.top($.i18n.prop('asktag'));
+				canvases.draws.ctx.clearRect(0, 0, canvases.draws.el.width(), canvases.draws.el.height());
+				canvases.task.ctx.clearRect(0, 0, canvases.task.el.width(), canvases.task.el.height());
 			}
 		});
 
 		communicator.on("points", function(e, message) {
-			if (message.name === pname) {
-				score = score + message.points;
-				guessed = true;
+			if (message.name === user.name) {
+				game.score += message.points;
+				game.guessed = true;
 				skipButton.hide();
 			}
 		});
@@ -280,53 +398,53 @@ jQuery(function($) {
 		});
 
 		communicator.on("showImages", function(e, message) {
-			role = "ROUNDCHANGE";
+			game.role = "ROUNDCHANGE";
 			skipButton.hide();
 			time.clearCountdown("round");
-			time.setCountdown("round", message.seconds * Time.second, Time.second, $.noop, roundEndMessage);
+			time.setCountdown("round", message.seconds * Time.second, Time.second, write.time, roundEnd);
 			$('#mainPage').removeClass('sketcher');
 			$('#mainPage').addClass('guesser');
 		});
 
 		communicator.on("leaderboard", function(e, message) {
-			role = "ENDED";
+			game.role = "ENDED";
 			//Clear all the canvas and draw the leaderboard
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			taskContext.clearRect(0, 0, canvas.width, canvas.height);
-			positionContext.clearRect(0, 0, canvas.width, canvas.height);
+			canvases.draws.ctx.clearRect(0, 0, canvases.draws.el.width(), canvases.draws.el.height());
+			canvases.task.ctx.clearRect(0, 0, canvases.task.el.width(), canvases.task.el.height());
+			canvases.positions.ctx.clearRect(0, 0, canvases.positions.el.width(), canvases.positions.el.height());
 
 			//Disable the chat
 			$('#talk').attr('disabled', 'disabled');
 			for (var i = 1; i <= message.playersNumber; i++) {
-				taskContext.fillStyle = "#000000";
-				taskContext.font = "bold 30px sans-serif";
-				taskContext.fillText(i + "): " + message.playerList[i - 1].name + " = " + message.playerList[i - 1].points + $.i18n.prop('points'), 30, 50 + 50 * (i - 1));
+				canvases.task.ctx.fillStyle = "#000000";
+				canvases.task.ctx.font = "bold 30px sans-serif";
+				canvases.task.ctx.fillText(i + "): " + message.playerList[i - 1].name + " = " + message.playerList[i - 1].points + $.i18n.prop('points'), 30, 50 + 50 * (i - 1));
 			}
 		});
 
 		communicator.on("trace", function(e, message) {
 			player = getPlayer(message.name);
 			if (player.color === CONSTANTS.ERASER_COLOR) {
-				ctx.globalCompositeOperation = "destination-out";
+				canvases.draws.ctx.globalCompositeOperation = "destination-out";
 			} else {
-				ctx.globalCompositeOperation = "source-over";
+				canvases.draws.ctx.globalCompositeOperation = "source-over";
 			}
-			ctx.lineWidth = player.size;
-			ctx.beginPath();
+			canvases.draws.ctx.lineWidth = player.size;
+			canvases.draws.ctx.beginPath();
 			var points = message.points;
-			points[0] && ctx.moveTo(points[0].x, points[0].y);
+			points[0] && canvases.draws.ctx.moveTo(points[0].x, points[0].y);
 			points.forEach(function (p) {
-				ctx.strokeStyle = p.color;
-				ctx.lineTo(p.x, p.y);
+				canvases.draws.ctx.strokeStyle = p.color;
+				canvases.draws.ctx.lineTo(p.x, p.y);
 			});
-			ctx.stroke();
+			canvases.draws.ctx.stroke();
 
-			trackX = points[points.length - 1].x;
-			trackY = points[points.length - 1].y;
+			track.x = points[points.length - 1].x;
+			track.y = points[points.length - 1].y;
 
 			// clear local canvas if synchronized
-			if (message.name === pname && numTrace === message.num) {
-				meCtx.clearRect(0, 0, meCtx.canvas.width, meCtx.canvas.height);
+			if (message.name === user.name && game.traceNum === message.num) {
+				canvases.me.ctx.clearRect(0, 0, canvases.me.el.width(), canvases.me.el.height());
 			}
 		});
 
@@ -344,15 +462,15 @@ jQuery(function($) {
 			//deletePlayer(message.username);
 		});
 
-		onSocketMessage = function(e) {
-			dirtyPositions = true; //RIVEDERE L'AGGIORNAMENTO DEL TRACKING
-		};
+		canvases.draws.ctx.lineCap = 'round';
+		canvases.draws.ctx.lineJoin = 'round';
 
-		ctx.lineCap = 'round';
-		ctx.lineJoin = 'round';
-
-		roundEndMessage = function() {
-			send({ type: 'roundEnded', player: pname });
+		roundEnd = function() {
+			if (game.role === "SKETCHER") {
+				hud.clear();
+				hud.unbindClick();
+			}
+			communicator.send({ type: 'roundEnded', player: user.name });
 		};
 
 	})();
@@ -360,35 +478,16 @@ jQuery(function($) {
 	/*************************DRAWING PANEL**********************/
 
 	//Return the current position of the cursor within the specified element
-	var positionWithE = function(e, obj) {
-		var leftm = topm = 0;
-		var result = getPosition(obj);
+	var relativePosition = function(event, element) {
+		var offset = $(element).offset();
 		return {
-			x: e.clientX - result.x,
-			y: e.clientY - result.y
-		};
-	};
-
-	//Return the position of the element in the page
-	var getPosition = function(element) {
-		var xPosition = 0;
-		var yPosition = 0;
-
-		while (element) {
-			xPosition += (element.offsetLeft - element.scrollLeft + element.clientLeft);
-			yPosition += (element.offsetTop - element.scrollTop + element.clientTop);
-			element = element.offsetParent;
+			x: (event.pageX - offset.left),
+			y: (event.pageY - offset.top)
 		}
-		return {
-			x: xPosition,
-			y: yPosition
-		};
 	};
 
 	// The "me" canvas is where the sketcher draws before sending the update status to all the other players
 	(function() {
-		var canvas = $("#me")[0];
-		var ctx = meCtx = canvas.getContext("2d");
 		var pressed;
 		var position;
 
@@ -411,11 +510,11 @@ jQuery(function($) {
 		var sendPoints = function() {
 			lastSent = Date.now(); //Refresh the countdown timer
 			var gameTimer = time.getTimer("round");
-			send({
+			communicator.send({
 				type: "trace",
 				points: points,
-				num: numTrace,
-				name: pname,
+				num: game.traceNum,
+				name: user.name,
 				time: gameTimer
 			});
 			points = [];
@@ -425,123 +524,116 @@ jQuery(function($) {
 
 		var sendMove = function(x, y) {
 			lastSent = Date.now();
-			send({
+			communicator.send({
 				type: "move",
 				x: x,
 				y: y,
-				name: pname
+				name: user.name
 			});
 		};
 
 		//Can we send? If the current time - the last update is bigger than the treshold, we can send the packets
 
 		var canSendNow = function() {
-			if (!tagging)
+			if (!game.tagging)
 				return Date.now() - lastSent > CONSTANTS.MIN_SEND_RATE;
 			else
 				return false;
 		};
 
-		ctx.lineCap = 'round';
-		ctx.lineJoin = 'round';
+		canvases.me.ctx.lineCap = 'round';
+		canvases.me.ctx.lineJoin = 'round';
 
 		//Create a line from the starting point to the end point
 
 		var lineTo = function(x, y) {
-			ctx.strokeStyle = color;
-			ctx.lineWidth = size;
-			ctx.beginPath();
-			ctx.moveTo(position.x, position.y);
-			ctx.lineTo(x, y);
-			ctx.stroke();
+			canvases.me.ctx.strokeStyle = tool.color;
+			canvases.me.ctx.lineWidth = tool.size;
+			canvases.me.ctx.beginPath();
+			canvases.me.ctx.moveTo(position.x, position.y);
+			canvases.me.ctx.lineTo(x, y);
+			canvases.me.ctx.stroke();
 		};
 
 		//Handle the mouse movement when drawing
 
-		var onMouseMove = function(e) {
+		//Add the event listeners to handle movements, mouse up and mouse down, eventually supporting also mobile devices
+		$(document).on((isMobile ? "touchstart" : "mousedown"), function(e) {
+			//If the player is a sketcher, update the mouse pressed status to send his traces
+			if (game.role === "SKETCHER" && !game.tagging) {
+				var o = relativePosition(e, canvases.me.el);
+				position = o;
+				addPoint(o.x, o.y, tool.size, tool.color);
+				pressed = true;
+			}
+		});
+
+		$("#viewport").on((isMobile ? "touchmove" : "mousemove"), function(e) {
 			e.preventDefault();
 			//Get the current position with respect to the canvas element we want to draw to
-			var o = positionWithE(e, canvas);
+			var o = relativePosition(e, canvases.me.el);
 			//If the mouse is pressed and the player is a sketcher
-			if (pressed && role === "SKETCHER") {
+			if (pressed && game.role === "SKETCHER") {
 				//Draw the local line
 				lineTo(o.x, o.y);
 				//Add the points to the points to be sent
-				addPoint(o.x, o.y, size, color);
+				addPoint(o.x, o.y, tool.size, tool.color);
 				//We have created a trace
-				++numTrace;
+				++(game.traceNum);
 				//Can we send the batch of points?
 				if (canSendNow()) {
 					sendPoints();
 					sendMove(o.x, o.y);
-					addPoint(o.x, o.y, size, color);
+					addPoint(o.x, o.y, tool.size, tool.color);
 				}
 			} else {
 				//The mouse is not pressed, can we just send the position of the player?
-				if (canSendNow() && role === "SKETCHER") {
+				if (canSendNow() && game.role === "SKETCHER") {
 					sendMove(o.x, o.y);
 				}
 			}
 			position = o;
-		};
+		});
 
-		var onMouseDown = function(e) {
-			//If the player is a sketcher, update the mouse pressed status to send his traces
-			if (role === "SKETCHER" && !tagging) {
-				var o = positionWithE(e, canvas);
-				position = o;
-				addPoint(o.x, o.y, size, color);
-				pressed = true;
-			}
-		};
-
-		var onMouseUp = function(e) {
+		$(document).on((isMobile ? "touchend" : "mouseup"), function(e) {
 			//If the player is the sketcher, send the last trace and disable the drawing function
-			if (role === "SKETCHER" && !tagging) {
+			if (game.role === "SKETCHER" && !game.tagging) {
 				lineTo(position.x, position.y);
-				addPoint(position.x, position.y, size, color);
-				addPoint(position.x, position.y, size, "end");
+				addPoint(position.x, position.y, tool.size, tool.color);
+				addPoint(position.x, position.y, tool.size, "end");
 				sendPoints();
 				pressed = false;
 			}
-		};
-
-		//Add the event listeners to handle movements, mouse up and mouse down, eventually supporting also mobile devices
-		document.addEventListener(isMobile ? "touchstart" : "mousedown", onMouseDown);
-		document.addEventListener(isMobile ? "touchend" : "mouseup", onMouseUp);
-		viewport.addEventListener(isMobile ? "touchmove" : "mousemove", onMouseMove);
+		});
 
 	})();
 
 	/*************************DRAW PLAYERS POSITION**********************/
 
 	(function () {
-		var canvas = $("#positions")[0];
-		var ctx = canvas.getContext("2d");
-
-		ctx.font = "9px monospace";
-		ctx.textAlign = "center";
-		ctx.textBaseline = "bottom";
+		canvases.positions.ctx.font = "9px monospace";
+		canvases.positions.ctx.textAlign = "center";
+		canvases.positions.ctx.textBaseline = "bottom";
 
 		var render = function() {
-			if (tagging) {
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
+			if (game.tagging) {
+				canvases.positions.ctx.clearRect(0, 0, canvases.positions.el.width(), canvases.positions.el.height());
 				return;
 			}
 			if (!dirtyPositions) return;
 			dirtyPositions = false;
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			if (matchStarted) {
+			canvases.positions.ctx.clearRect(0, 0, canvases.positions.el.width(), canvases.positions.el.height());
+			if (game.matchStarted) {
 				for (i = 0; i < players.length; i++) {
 					var player = players[i];
 					if (player.role !== "SKETCHER") continue;
-					ctx.beginPath();
-					ctx.strokeStyle = CONSTANTS.TRACKER_COLOR;
-					ctx.arc(trackX, trackY, player.size / 2, 0, 2 * Math.PI);
-					ctx.stroke();
-					ctx.font = "10px sans-serif";
-					ctx.fillStyle = CONSTANTS.TRACKER_COLOR;
-					ctx.fillText((player.name + "").substring(0, 20), trackX, trackY - Math.round(player.size / 2) - 4);
+					canvases.positions.ctx.beginPath();
+					canvases.positions.ctx.strokeStyle = CONSTANTS.TRACKER_COLOR;
+					canvases.positions.ctx.arc(track.x, track.y, player.size / 2, 0, 2 * Math.PI);
+					canvases.positions.ctx.stroke();
+					canvases.positions.ctx.font = "10px sans-serif";
+					canvases.positions.ctx.fillStyle = CONSTANTS.TRACKER_COLOR;
+					canvases.positions.ctx.fillText((player.name + "").substring(0, 20), track.x, track.y - Math.round(player.size / 2) - 4);
 				}
 			}
 		};
@@ -549,103 +641,45 @@ jQuery(function($) {
 		window.requestAnimationFrame(function loop() {
 			window.requestAnimationFrame(loop);
 			render();
-		}, canvas);
+		}, canvases.positions.el[0]);
 	})();
 
 	/*************************TOOLS PANEL MANAGEMENT**********************/
 	(function () {
-		var hud = $("#hud")[0];
-		var ctx = hud.getContext("2d");
-
-		//ICONS
-		var penEnabled = new Image();
-		var eraserEnabled = new Image();
-		var penDisabled = new Image();
-		var eraserDisabled = new Image();
-		penEnabled.src = 'assets/images/UI/Controls/pencil.png';
-		eraserEnabled.src = 'assets/images/UI/Controls/eraser.png';
-		penDisabled.src = 'assets/images/UI/Controls/pencilD.png';
-		eraserDisabled.src = 'assets/images/UI/Controls/eraserD.png';
-
-		var setColor = function(c) {
-			color = c;
-			send({
-				type: 'change',
-				size: size,
-				color: color,
-				name: pname,
-				role: role
-			});
-		};
-
-		var setSize = function(s) {
-			size = s;
-			send({
-				type: 'change',
-				size: size,
-				color: color,
-				name: pname,
-				role: role
-			});
-		};
-
-		var setup = function() {
-
-			//[TODO] It should be screen and resolution independent, it can't work like that
-			hud.addEventListener("click", function (e) {
-				var o = positionWithE(e, hud);
-				if ((o.y >= 130) && (o.y < 200)) {
-					setColor(CONSTANTS.PEN_COLOR);
-					setSize(CONSTANTS.PEN_SIZE);
-					drawTool = true;
-				} else if ((o.y >= 200) && (o.y <= 270)) {
-					setColor(CONSTANTS.ERASER_COLOR);
-					setSize(CONSTANTS.ERASER_SIZE);
-					drawTool = false;
-				}
-			});
-		};
+		//there was ICONS
 
 		/************TOOLS PANEL RENDERING***********************/
 
 		var render = function() {
-			ctx.clearRect(0, 0, hud.width, hud.height);
-			if (!matchStarted && !tagging) {
-				var htmlMessage = "<font size='5'>" + "<b>" + $.i18n.prop('waiting') + "<b>" + "</font>";
-				$("#topMessage").html(htmlMessage);
+			if (!game.matchStarted && !game.tagging) {
+				write.top($.i18n.prop('waiting'));
 			} else {
-				switch (role) {
+				switch (game.role) {
 					case "SKETCHER":
-						if (!tagging) {
-							var htmlMessage = "<font size='5'>" + "<b>" + $.i18n.prop('draw') + "<font color='red'>" + guessWord + "</font>" + "<b>" + "</font>";
-							$("#topMessage").html(htmlMessage);
+						if (!game.tagging) {
+							write.top($.i18n.prop('draw'), game.guessWord);
 						}
 						break;
 
 					case "GUESSER":
-						if (!tagging) {
-							if (!guessed) {
-								var htmlMessage = "<font size='5'>" + "<b>" + $.i18n.prop('guess') + "<b>" + "</font>";
-								$("#topMessage").html(htmlMessage);
+						if (!game.tagging) {
+							if (!game.guessed) {
+								write.top($.i18n.prop('guess'));
 							} else {
-								var htmlMessage = "<font size='5'>" + "<b>" + $.i18n.prop('guessed') + "<font color='red'>" + guessWord + "</font>" + "<b>" + "</font>";
-								$("#topMessage").html(htmlMessage);
+								write.top($.i18n.prop('guessed'), game.guessWord);
 							}
 						}
 						break;
 
 					case "ROUNDCHANGE":
-						if (!tagging) {
-							var htmlMessage = "<font size='5'>" + "<b>" + $.i18n.prop('solution') + "<font color='red'>" + guessWord + "</font>" + "<b>" + "</font>";
-							$("#topMessage").html(htmlMessage);
+						if (!game.tagging) {
+							write.top($.i18n.prop('solution'), game.guessWord);
 						}
 						break;
 
 					case "ENDED":
-						var htmlMessage = "<font size='5'>" + "<b>" + $.i18n.prop('leaderboard') + "<b>" + "</font>";
-						$("#topMessage").html(htmlMessage);
-						htmlMessage = "<font size='5'>" + "<b><b>" + "</font>";
-						$("#timeCounter").html(htmlMessage);
+						write.top($.i18n.prop('leaderboard'));
+						write.time(null);
 						$('#mainPage').removeClass('guesser');
 						$('#mainPage').removeClass('sketcher');
 						skipButton.hide();
@@ -653,34 +687,19 @@ jQuery(function($) {
 				}
 			}
 
-			var htmlMessage = "<font size='5'>" + "<b>" + score + "<b>" + "</font>";
-			$("#score").html(htmlMessage);
+			write.score(game.score);
 
 			//Time positioning
-			if (matchStarted) {
-				if (!tagging) {
-					var htmlMessage = "<font size='5'>" + "<b>" + $.i18n.prop('time') + Time.round(time.getCountdown('round'), Time.second) + "<b>" + "</font>";
-					$("#timeCounter").html(htmlMessage);
-				} else {
-					var htmlMessage = "<font size='5'>" + "<b>" + $.i18n.prop('time') + Time.round(time.getCountdown('tag'), Time.second) + "<b>" + "</font>";
-					$("#timeCounter").html(htmlMessage);
-				}
+			if (game.matchStarted) {
+				// There was time update changed to callbacks
 			}
-			if (!matchStarted || tagging || role === "GUESSER" || role === "ENDED" || role === "ROUNDCHANGE" || role === undefined) {
+			if (!game.matchStarted || game.tagging || game.role === "GUESSER" || game.role === "ENDED" || game.role === "ROUNDCHANGE" || game.role === undefined) {
 				//Draw nothing till now
 			} else {
-				//Drawing tools
-				if (drawTool) {
-					ctx.drawImage(penEnabled, 0, 130, 70, 70);
-					ctx.drawImage(eraserDisabled, 0, 200, 70, 70);
-				} else {
-					ctx.drawImage(penDisabled, 0, 130, 70, 70);
-					ctx.drawImage(eraserEnabled, 0, 200, 70, 70);
-				}
+				//There was Drawing tools hud update
 			}
 		};
 
-		setup();
 		window.requestAnimationFrame(function loop() {
 			window.requestAnimationFrame(loop);
 			render();
@@ -688,5 +707,4 @@ jQuery(function($) {
 
 	})();
 
-	connect();
 });
