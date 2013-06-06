@@ -109,6 +109,8 @@ jQuery(function($) {
 		}
 	}
 
+	if (!game.matchStarted) write.top($.i18n.prop('waiting'));
+
 	var setColor = function(c) {
 		tool.color = c;
 		communicator.send({
@@ -287,6 +289,8 @@ jQuery(function($) {
 				$('#mainPage').addClass('guesser');
 				$('#talk').removeAttr('disabled');
 				skipButton.hide();
+
+				write.top($.i18n.prop('guess'));
 			}
 			time.setCountdown("round", CONSTANTS.DEFAULT_ROUND_TIME * Time.second, Time.second, write.time, roundEnd);
 			time.setTimer("round");
@@ -302,13 +306,19 @@ jQuery(function($) {
 		});
 
 		communicator.on("task", function(e, message) {
+			game.tagging = false;
+			game.guessWord = message.tag;
+
 			if (game.role === "SKETCHER") {
 				hud.paint("pen");
 				hud.bindClick();
+				write.top($.i18n.prop('draw'), game.guessWord);
+			} else if (game.guessed) {
+				write.top($.i18n.prop('guessed'), game.guessWord);
+			} else {
+				write.top($.i18n.prop('solution'), game.guessWord);
 			}
 
-			game.tagging = false;
-			game.guessWord = message.tag;
 			game.taskImage = new Image();
 			game.taskImage.src = message.image;
 			//Wait for the image to be loaded before drawing it to canvas to avoid errors
@@ -408,6 +418,13 @@ jQuery(function($) {
 
 		communicator.on("leaderboard", function(e, message) {
 			game.role = "ENDED";
+
+			write.top($.i18n.prop('leaderboard'));
+			write.time(null);
+			$('#mainPage').removeClass('guesser');
+			$('#mainPage').removeClass('sketcher');
+			skipButton.hide();
+
 			//Clear all the canvas and draw the leaderboard
 			canvases.draws.ctx.clearRect(0, 0, canvases.draws.el.width(), canvases.draws.el.height());
 			canvases.task.ctx.clearRect(0, 0, canvases.task.el.width(), canvases.task.el.height());
@@ -452,7 +469,6 @@ jQuery(function($) {
 			var player = getPlayer(message.name);
 			if (player === undefined) {
 				player = players[players.length] = message;
-				console.log(player);
 			}
 			playerExtend(message);
 		});
@@ -470,6 +486,7 @@ jQuery(function($) {
 				hud.clear();
 				hud.unbindClick();
 			}
+			write.time(null);
 			communicator.send({ type: 'roundEnded', player: user.name });
 		};
 
@@ -642,69 +659,6 @@ jQuery(function($) {
 			window.requestAnimationFrame(loop);
 			render();
 		}, canvases.positions.el[0]);
-	})();
-
-	/*************************TOOLS PANEL MANAGEMENT**********************/
-	(function () {
-		//there was ICONS
-
-		/************TOOLS PANEL RENDERING***********************/
-
-		var render = function() {
-			if (!game.matchStarted && !game.tagging) {
-				write.top($.i18n.prop('waiting'));
-			} else {
-				switch (game.role) {
-					case "SKETCHER":
-						if (!game.tagging) {
-							write.top($.i18n.prop('draw'), game.guessWord);
-						}
-						break;
-
-					case "GUESSER":
-						if (!game.tagging) {
-							if (!game.guessed) {
-								write.top($.i18n.prop('guess'));
-							} else {
-								write.top($.i18n.prop('guessed'), game.guessWord);
-							}
-						}
-						break;
-
-					case "ROUNDCHANGE":
-						if (!game.tagging) {
-							write.top($.i18n.prop('solution'), game.guessWord);
-						}
-						break;
-
-					case "ENDED":
-						write.top($.i18n.prop('leaderboard'));
-						write.time(null);
-						$('#mainPage').removeClass('guesser');
-						$('#mainPage').removeClass('sketcher');
-						skipButton.hide();
-						break;
-				}
-			}
-
-			write.score(game.score);
-
-			//Time positioning
-			if (game.matchStarted) {
-				// There was time update changed to callbacks
-			}
-			if (!game.matchStarted || game.tagging || game.role === "GUESSER" || game.role === "ENDED" || game.role === "ROUNDCHANGE" || game.role === undefined) {
-				//Draw nothing till now
-			} else {
-				//There was Drawing tools hud update
-			}
-		};
-
-		window.requestAnimationFrame(function loop() {
-			window.requestAnimationFrame(loop);
-			render();
-		});
-
 	})();
 
 });
