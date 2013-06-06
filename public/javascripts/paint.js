@@ -66,13 +66,6 @@ jQuery(function($) {
 		traceNum: 1
 	}
 
-	var track = {
-		x: null,
-		y: null
-	}
-
-	var dirtyPositions = false;
-
 	// every player positions
 	var players = [];
 
@@ -189,6 +182,33 @@ jQuery(function($) {
 	}
 	hud.preload();
 
+	var positions = {
+		init: function() {
+			canvases.positions.ctx.font = "9px monospace";
+			canvases.positions.ctx.textAlign = "center";
+			canvases.positions.ctx.textBaseline = "bottom";
+		},
+		clear: function() {
+			canvases.positions.ctx.clearRect(0, 0, canvases.positions.el.width(), canvases.positions.el.height());
+		},
+		paint: function(x,y) {
+			this.clear();
+			for (i = 0; i < players.length; i++) {
+				var player = players[i];
+				if (player.role === "SKETCHER") {
+					canvases.positions.ctx.beginPath();
+					canvases.positions.ctx.strokeStyle = CONSTANTS.TRACKER_COLOR;
+					canvases.positions.ctx.arc(x, y, player.size / 2, 0, 2 * Math.PI);
+					canvases.positions.ctx.stroke();
+					canvases.positions.ctx.font = "10px sans-serif";
+					canvases.positions.ctx.fillStyle = CONSTANTS.TRACKER_COLOR;
+					canvases.positions.ctx.fillText((player.name + "").substring(0, 20), x, y - Math.round(player.size / 2) - 4);
+				}
+			}
+		}
+	}
+	positions.init();
+
 	/*****************************UTILITY FUNCTIONS********************************************/
 
 	if (!user.name) {
@@ -215,9 +235,6 @@ jQuery(function($) {
 		},
 		error: function(evt) {
 			console.error("error", evt);
-		},
-		message: function() {
-			dirtyPositions = true;
 		}
 	});
 
@@ -301,8 +318,7 @@ jQuery(function($) {
 		});
 
 		communicator.on("move", function(e, message) {
-			track.x = message.x;
-			track.y = message.y;
+			positions.paint(message.x, message.y);
 		});
 
 		communicator.on("task", function(e, message) {
@@ -349,7 +365,6 @@ jQuery(function($) {
 		communicator.on("tag", function(e, message) {
 			game.tagging = true;
 			game.matchStarted = true;
-			write.time(null);
 			time.setCountdown("tag", CONSTANTS.DEFAULT_ASK_TIME * Time.second, Time.second, write.time, roundEnd);
 			game.role = message.role;
 			if (message.role === "SKETCHER") {
@@ -420,7 +435,6 @@ jQuery(function($) {
 			game.role = "ENDED";
 
 			write.top($.i18n.prop('leaderboard'));
-			write.time(null);
 			$('#mainPage').removeClass('guesser');
 			$('#mainPage').removeClass('sketcher');
 			skipButton.hide();
@@ -456,9 +470,6 @@ jQuery(function($) {
 			});
 			canvases.draws.ctx.stroke();
 
-			track.x = points[points.length - 1].x;
-			track.y = points[points.length - 1].y;
-
 			// clear local canvas if synchronized
 			if (message.name === user.name && game.traceNum === message.num) {
 				canvases.me.ctx.clearRect(0, 0, canvases.me.el.width(), canvases.me.el.height());
@@ -486,6 +497,7 @@ jQuery(function($) {
 				hud.clear();
 				hud.unbindClick();
 			}
+			positions.clear();
 			write.time(null);
 			communicator.send({ type: 'roundEnded', player: user.name });
 		};
@@ -624,41 +636,4 @@ jQuery(function($) {
 		});
 
 	})();
-
-	/*************************DRAW PLAYERS POSITION**********************/
-
-	(function () {
-		canvases.positions.ctx.font = "9px monospace";
-		canvases.positions.ctx.textAlign = "center";
-		canvases.positions.ctx.textBaseline = "bottom";
-
-		var render = function() {
-			if (game.tagging) {
-				canvases.positions.ctx.clearRect(0, 0, canvases.positions.el.width(), canvases.positions.el.height());
-				return;
-			}
-			if (!dirtyPositions) return;
-			dirtyPositions = false;
-			canvases.positions.ctx.clearRect(0, 0, canvases.positions.el.width(), canvases.positions.el.height());
-			if (game.matchStarted) {
-				for (i = 0; i < players.length; i++) {
-					var player = players[i];
-					if (player.role !== "SKETCHER") continue;
-					canvases.positions.ctx.beginPath();
-					canvases.positions.ctx.strokeStyle = CONSTANTS.TRACKER_COLOR;
-					canvases.positions.ctx.arc(track.x, track.y, player.size / 2, 0, 2 * Math.PI);
-					canvases.positions.ctx.stroke();
-					canvases.positions.ctx.font = "10px sans-serif";
-					canvases.positions.ctx.fillStyle = CONSTANTS.TRACKER_COLOR;
-					canvases.positions.ctx.fillText((player.name + "").substring(0, 20), track.x, track.y - Math.round(player.size / 2) - 4);
-				}
-			}
-		};
-
-		window.requestAnimationFrame(function loop() {
-			window.requestAnimationFrame(loop);
-			render();
-		}, canvases.positions.el[0]);
-	})();
-
 });
