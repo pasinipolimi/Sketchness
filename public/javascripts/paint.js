@@ -340,11 +340,12 @@ var gameloop = (function(){
 
                             //Disable the chat
                             $('#talk').attr('disabled', 'disabled');
+							skipButton.attr('hidden', 'true');
                             for(var i=1;i<=m.playersNumber;i++)
                             {
                                     taskContext.fillStyle = "#000000";
                                     taskContext.font = "bold 30px sans-serif";
-                                    taskContext.fillText(i+"): "+m.playerList[i-1].name+" = "+m.playerList[i-1].points+$.i18n.prop('points'),30,50+50*(i-1));
+                                    taskContext.fillText(i+"): "+m.playerList[i-1].name+" = "+m.playerList[i-1].points+" "+$.i18n.prop('points'),30,50+50*(i-1));
                             }
 			break;
 		
@@ -378,7 +379,6 @@ var gameloop = (function(){
                             if (player === undefined)
                             {
                                     player = players[players.length] = m;
-                                    console.log(player);
                             }
                             playerExtend(m);
 			break;
