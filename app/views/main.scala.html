@@ -1,23 +1,24 @@
 @(username: String, room: String)(content: Html)
 
- <!-- CLEANED CODE-->
+<!-- CLEANED CODE-->
 <!--THIS IS THE MAIN PAGE THAT IS SERVED BY THE PLAY FRAMEWORK-->
 <!DOCTYPE html>
 
 <html>
-    <head>
-        <title>Sketchness!</title>
-        
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap.css")">
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
-        <!-- styles needed by jScrollPane -->
-        <link type="text/css" href="@routes.Assets.at("stylesheets/jquery.jscrollpane.css")" rel="stylesheet" media="all" />
-        <link type="text/css" href="@routes.Assets.at("stylesheets/jquery.jscrollpane.lozenge.css")" rel="stylesheet" media="all" />
+	<head>
+		<title>Sketchness!</title>
 
-        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-        <script src="@routes.Assets.at("javascripts/jquery-1.7.1.min.js")" type="text/javascript"></script>
-		<script src="@routes.Assets.at("javascripts/jquery.i18n.properties-min-1.0.9.js")" type="text/javascript"></script>
-		
+		<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/lib/bootstrap.css")">
+		<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+		<!-- styles needed by jScrollPane -->
+		<link type="text/css" href="@routes.Assets.at("stylesheets/lib/jquery.jscrollpane.css")" rel="stylesheet" media="all" />
+		<link type="text/css" href="@routes.Assets.at("stylesheets/jquery.jscrollpane.lozenge.css")" rel="stylesheet" media="all" />
+
+		<link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+		<script src="@routes.Assets.at("javascripts/polyfills.js")" type="text/javascript"></script>
+		<script src="@routes.Assets.at("javascripts/lib/jquery.js")" type="text/javascript"></script>
+		<script src="@routes.Assets.at("javascripts/lib/jquery.i18n.properties.js")" type="text/javascript"></script>
+
 		<!-- Adding support for Internazionalization -->
 		 <script type="text/javascript">
 			$(document).ready(function(){
@@ -32,40 +33,15 @@
 		</script>
 
 
-        <!-- the mousewheel plugin - optional to provide mousewheel support -->
-        <script type="text/javascript" src="@routes.Assets.at("javascripts/jquery.mousewheel.js")"></script>
+		<!-- the mousewheel plugin - optional to provide mousewheel support -->
+		<script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery.mousewheel.js")"></script>
 
-        <!-- the jScrollPane script -->
-        <script type="text/javascript" src="@routes.Assets.at("javascripts/jquery.jscrollpane.min.js")"></script>
+		<!-- the jScrollPane script -->
+		<script type="text/javascript" src="@routes.Assets.at("javascripts/lib/jquery.jscrollpane.js")"></script>
 
-        <!-- Script to initialize jScrollPane -->
-        <script type="text/javascript">
-        $(function()
-        {
-        var settings = {
-        showArrows: true,
-        mantainPosition: true,
-        stickToBottom:true,
-        animateScroll: true
-        };
-        var pane = $('.jscroll')
-        pane.jScrollPane(settings);
-        $('.scroll-pane-arrows').jScrollPane(
-        {
-        showArrows: true,
-        mantainPosition: true,
-        stickToBottom:true,
-        animateScroll: true,
-        horizontalGutter: 10
-        }
-        );
-        });
-        </script>
-    </head>
-    
-    <body>
-        <div class="content">
-            @content
-        </div>
-    </body>
+	<body>
+		<div class="content">
+			@content
+		</div>
+	</body>
 </html>

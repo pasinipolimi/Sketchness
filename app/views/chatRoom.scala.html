@@ -1,18 +1,18 @@
 @(username: String, room: String)
 
 @main(username, room) {
-    <!--TODO: BETTER INTERFACE FOR THE ERRORS, POSSIBLY AN OVERLAY-->
-    <div id="onError" class="alert-message error">
-        <p>
-            <strong>Oops! </strong><span></span>
-        </p>
-    </div>
-    
-    <div id="mainPage">
-        
-        <!--THIS IS THE AREA IN WHICH THE DRAWINGS ARE MADE-->
-        <div id="gameArea" class="span10">
-            <div id="viewport">
+	<!--TODO: BETTER INTERFACE FOR THE ERRORS, POSSIBLY AN OVERLAY-->
+	<div id="onError" class="alert-message error">
+		<p>
+			<strong>Oops! </strong><span></span>
+		</p>
+	</div>
+
+	<div id="mainPage">
+
+		<!--THIS IS THE AREA IN WHICH THE DRAWINGS ARE MADE-->
+		<div id="gameArea" class="span10">
+			<div id="viewport">
 				<div id="canvaswindows">
 					<!-- CANVAS USED TO STORE THE LAST DRAWING SEGMENT-->
 					<canvas id="me" width="420" height="350"></canvas>
@@ -23,73 +23,52 @@
 					<!-- CANVAS USED TO SHOW THE IMAGE-->
 					<canvas id="task" width="420" height="350"></canvas>
 				</div>
-            </div>
-            <button id="skipTask">Skip Round</button>
-        </div>
-        
-        
-        <div id="chatPanel" class="span4">
-            <div id="messages" class="jscroll scroll-pane-arrows jspScrollable">
-            </div>
-        </div>
-        <textarea id="talk"></textarea>
-        
-		<script type="text/javascript">
-		window.onload=function()
-		{
-			var string = $.i18n.prop('text_area_message');
-			$("#talk").val(string);
-		}
-		</script>
-        
-        <!-- A SIMPLE CANVAS USED AS AN HUD TO DRAW TOOLS-->
-        <div id="hudArea">
-            <canvas id="hud" width="800" height="300"></canvas>
-        </div>
-        
-        <!--MESSAGES AND SCORES FOR THE PLAYERS-->
-        <div id="topMessage"></div>
+			</div>
+			<button id="skipTask">Skip Round</button>
+		</div>
+
+
+		<div id="chatPanel" class="span4">
+			<div id="messages" class="jscroll scroll-pane-arrows jspScrollable">
+			</div>
+		</div>
+		<textarea id="talk"></textarea>
+
+
+		<!-- A SIMPLE CANVAS USED AS AN HUD TO DRAW TOOLS-->
+		<div id="hudArea">
+			<canvas id="hud" width="800" height="300"></canvas>
+		</div>
+
+		<!--MESSAGES AND SCORES FOR THE PLAYERS-->
+		<div id="topMessage"></div>
 		<div id="timeCounter"></div>
-        <div id="score"></div>
+		<div id="score"></div>
 
-        <!--HANDLING ALL THE USERS CURRENTLY CONNECTED-->
-        <div id="currentNickname">@username</div>
-        <div id="opponent1"></div>
-        <div id="opponent2"></div>
-        <div id="opponent3"></div>
-        <div id="opponent4"></div>
+		<!--HANDLING ALL THE USERS CURRENTLY CONNECTED-->
+		<div id="currentNickname">@username</div>
+		<div id="opponent1"></div>
+		<div id="opponent2"></div>
+		<div id="opponent3"></div>
+		<div id="opponent4"></div>
 
-        <!--WE CAN'T USE ROUTES IN STATIC JAVASCRIPT, SO WE MUST REFERENCE THEM OUTSIDE-->
-        <div id="chatWebSocket" data-ws="@routes.Sketchness.chatStream(username,room).webSocketURL()">
-        <div id="paintWebSocket" data-ws="@routes.Sketchness.paintStream(username,room).webSocketURL()">
-            
-        <script type="text/javascript" src="/assets/javascripts/timer.js"></script>    
-        <script type="text/javascript" src="/assets/javascripts/chat.js"></script>
-        <script type="text/javascript" src="/assets/javascripts/paint.js"></script>
-		
+		<!--WE CAN'T USE ROUTES IN STATIC JAVASCRIPT, SO WE MUST REFERENCE THEM OUTSIDE-->
+		<div id="chatWebSocket" data-ws="@routes.Sketchness.chatStream(username,room).webSocketURL()"></div>
+		<div id="paintWebSocket" data-ws="@routes.Sketchness.paintStream(username,room).webSocketURL()"></div>
+
+		<script type="text/javascript" src="/assets/javascripts/jquery.socketmessage.js"></script>
+		<script type="text/javascript" src="/assets/javascripts/Class.js"></script>
+		<script type="text/javascript" src="/assets/javascripts/Time.js"></script>
+		<script type="text/javascript" src="/assets/javascripts/Communicator.js"></script>
+		<script type="text/javascript" src="/assets/javascripts/chat.js"></script>
+		<script type="text/javascript" src="/assets/javascripts/paint.js"></script>
+
 		<!-- DISABLE THE REFRESH BUTTON-->
 		<script type="text/javascript">
-			function disableF5(e) { if (e.which == 116) e.preventDefault(); };
 			// To disable f5
-			$(document).bind("keydown", disableF5);
+			$(document).on("keydown", function (e) {
+				if (e.which == 116) e.preventDefault();
+			});
 		</script>
-
-        <!--HANDLE DEFAULT VALUES FOR TEXT AREA-->
-        <script type="text/javascript">
-            $("#talk").focus(function() {
-                if( $(this).val() == $.i18n.prop('text_area_message')) {
-                $(this).val("");
-                }
-
-            });
-            
-            $("#talk").blur(function() {
-
-                if( $(this).val() == "" ) {
-                $(this).val($.i18n.prop('text_area_message'));
-                }
-
-            });
-        </script>
 </div>
 }
