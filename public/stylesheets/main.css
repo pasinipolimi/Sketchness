@@ -149,6 +149,38 @@ top:530px;
     width: 181px;
 }
 
+#skipTask {
+background-color: transparent;
+background-image: url("../images/UI/skipUnpressed.png");
+height:66px;
+left:230px;
+position:absolute;
+top:500px;
+    width: 181px;
+}
+
+#skipTask:hover {
+background-color: transparent;
+background-image: url("../images/UI/skipHover.png");
+height:66px;
+left:230px;
+position:absolute;
+top:500px;
+    width: 181px;
+}
+
+#skipTask:active {
+background-color: transparent;
+background-image: url("../images/UI/skipPressed.png");
+height:46px;
+left:230px;
+position:absolute;
+top:500px;
+    width: 181px;
+}
+
+
+
 #username:focus {
 box-shadow:-2px -2px 6px #B01AA6, -2px 2px 6px #B01AA6, 4px 2px 6px #B01AA6, 4px -2px 6px #B01AA6;
 }
@@ -205,16 +237,6 @@ left: 89.5px;
     left: 89.5px;
     background: white;
     position: relative;
-}
-
-#skipTask {
-    width: 200px;
-    height: 50px;
-    left: 89.5px;
-    background: white;
-    position: relative;
-	top: 70px;
-	left: 200px;
 }
 
 #positions {
