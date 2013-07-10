@@ -6,7 +6,7 @@ This is an implementation of a GWAP used for image segmentation of fashion image
 
 ## Set up development environment
 
-* Get Java JDK 7 and istall it
+* Get Java JDK 7 and install it
 * Get [Play Framework](http://www.playframework.com)
 * Unpack it and add the destination dir to the system path
 * Clone the this repository and checkout
