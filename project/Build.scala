@@ -23,7 +23,6 @@ object ApplicationBuild extends Build {
     val sketchnessResourcesSetting = sketchnessResources := Seq(
 		// Add here the required resources
 		// Resource(name: String, path :String, url :String = null, zipped :Boolean = true)
-		Resource("Results Folder", "results"),
 		Resource("Lib Folder", "lib"),
 		Resource("jQuery", "public/javascripts/lib/jquery.js", "http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js", false),
 		Resource("jQuery i18n", "public/javascripts/lib/jquery.i18n.properties.js", "http://jquery-i18n-properties.googlecode.com/files/jquery.i18n.properties-min-1.0.9.js", false),
@@ -32,7 +31,7 @@ object ApplicationBuild extends Build {
 		Resource("jScrollPane MouseWheelIntent", "public/javascripts/lib/mwheelIntent.js", "http://jscrollpane.kelvinluck.com/script/mwheelIntent.js", false),
 		Resource("jScrollPane CSS", "public/stylesheets/lib/jquery.jscrollpane.css", "http://jscrollpane.kelvinluck.com/style/jquery.jscrollpane.css", false),
 		Resource("Bootstrap CSS", "public/stylesheets/lib/bootstrap.css", "https://raw.github.com/twitter/bootstrap/1c7c5f750fc221ee94e435e4e49bc2ba1a6be5e6/bootstrap.css", false),
-		Resource("Website Images", "public/images", "http://ubuntuone.com/6TzTau0tmLx38sUSTi8WBa")
+		Resource("Website Images", "public/images", "https://dl.dropboxusercontent.com/u/1264722/images.zip?dl=1",true)
     )
 
     /** Defines a new task key for retrieving all the resources

@@ -30,15 +30,26 @@ position: relative;
     min-height: 10px;
 }
 
-.backgroundimage {
-background-image:url('../images/UI/home.png');
-background-repeat:no-repeat;
-background-position:center;
-margin-left: auto ;
+.homepage {
+	background-image:url('../images/UI/home.png');
+	background-repeat:no-repeat;
+	background-position:center;
+	margin-left: auto ;
     margin-right: auto ;
-position: relative;
-height: 600px;
-width: 800px;
+	position: relative;
+	height: 600px;
+	width: 800px;
+}
+
+.lobbypage {
+	background-image:url('../images/UI/lobby.png');
+	background-repeat:no-repeat;
+	background-position:center;
+	margin-left: auto ;
+    margin-right: auto ;
+	position: relative;
+	height: 600px;
+	width: 800px;
 }
 
 /* Page header tweaks */
@@ -187,13 +198,46 @@ box-shadow:-2px -2px 6px #B01AA6, -2px 2px 6px #B01AA6, 4px 2px 6px #B01AA6, 4px
 
 #chatPanel {
     overflow: hidden;
-position: absolute;
-height:290px;
-left:600px;
-min-height:160px;
-top:260px;
-width:180px;
-z-index:10;
+	position: absolute;
+	z-index:10;
+}
+
+.lobbyChat {
+	height:290px;
+	left:300px;
+	min-height:160px;
+	top:200px;
+	width:280px;
+}
+
+.gameChat {
+	height:290px;
+	left:600px;
+	min-height:160px;
+	top:260px;
+	width:180px;
+}
+
+li.avatarIcon {
+	list-style-type: none;
+	background: url('../images/favicon.png') no-repeat top left;
+	background-size:40px 40px;
+	height: 46px;
+	width: 70px;
+	word-wrap: break-word;
+	padding-left: 40px;
+	padding-top: 10px;
+	color: black;
+	font-weight:bold;
+}
+
+.userList {
+	position: absolute;
+	height:290px;
+	left:650px;
+	min-height:160px;
+	top:140px;
+	width:180px;
 }
 
 #onError, #onChat {
@@ -353,22 +397,31 @@ footer {
 
 #messages {
     position: absolute;
-height: 265px;
-top:10px;
-overflow-y: scroll;
+	height: 265px;
+	top:10px;
+	overflow-y: scroll;
 }
 
 
 #talk {
     position: absolute;
-    left: 605px;
-    width: 170px;
     height: 20px;
-top:545px;
-background-color:transparent;
-border-color:transparent;
-z-index:11;
-resize: none;
+	background-color:transparent;
+	border-color:transparent;
+	z-index:11;
+	resize: none;
+}
+
+.lobbyTalk {
+	left: 345px;
+	width: 250px;
+	top: 508px;
+}
+
+.gameTalk {
+	left: 605px;
+    width: 170px;
+	top:545px;
 }
 
 

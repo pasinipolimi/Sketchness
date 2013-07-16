@@ -80,6 +80,7 @@ public class Chat extends UntypedActor {
         {
             playersMap.put(message.getUsername(), message.getChannel());
             notifyAll(ChatKind.join, message.getUsername(), Messages.get(LanguagePicker.retrieveLocale(),"join"));
+            notifyMemberChange();
             GameBus.getInstance().publish(new GameEvent(message.getUsername(), roomChannel,GameEventType.join));
             getSender().tell("OK",this.getSelf());
             Logger.debug("[CHAT] added player "+message.getUsername());
@@ -128,6 +129,7 @@ public class Chat extends UntypedActor {
                 entry.getValue().close();
                 playersMap.remove(quitter);
                 notifyAll(ChatKind.quit, quitter, Messages.get(LanguagePicker.retrieveLocale(),"quit"));
+                notifyMemberChange();
                 Logger.debug("[CHAT] "+quitter+" has disconnected.");
                 GameBus.getInstance().publish(new GameEvent(quitter,roomChannel,GameEventType.quit));
             } 
@@ -143,7 +145,7 @@ public class Chat extends UntypedActor {
         for(WebSocket.Out<JsonNode> channel: playersMap.values()) {
             
             ObjectNode event = Json.newObject();
-            event.put("kind", kind.name());
+            event.put("type", kind.name());
             event.put("user", user);
             event.put("message", text);
             
@@ -155,9 +157,25 @@ public class Chat extends UntypedActor {
             channel.write(event);
         }
     }   
+    
+    // Send the updated list of members to the users
+    private void notifyMemberChange() {
+        for(WebSocket.Out<JsonNode> channel: playersMap.values()) {
+            
+            ObjectNode event = Json.newObject();
+            event.put("type", ChatKind.membersChange.name());
+            
+            ArrayNode m = event.putArray("members");
+            for(String u: playersMap.keySet()) {
+                m.add(u);
+            }
+            
+            channel.write(event);
+        }
+    } 
 }
 
 enum ChatKind
 {
-    system,join,quit,talk,talkNear,talkWarning,talkError
+    system,join,quit,talk,talkNear,talkWarning,talkError,membersChange
 }

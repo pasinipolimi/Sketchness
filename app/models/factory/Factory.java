@@ -14,7 +14,7 @@ public abstract class Factory {
     @SuppressWarnings("rawtypes")
     protected static ActorRef create(final String room, Class module) throws Exception {
         ActorRef newRoom;                
-        String roomID=room+"_"+module.getSimpleName();
+        String roomID=module.getSimpleName()+"_"+room;
         //Try to see if we have already registered this actor in the system, if it is the case return the reference
         newRoom=Akka.system().actorFor("akka://application/user/"+roomID);
         if(newRoom instanceof EmptyLocalActorRef)

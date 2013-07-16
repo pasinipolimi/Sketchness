@@ -1,0 +1,31 @@
+@(username: String)
+
+@main(username,null) {
+	<!--TODO: BETTER INTERFACE FOR THE ERRORS, POSSIBLY AN OVERLAY-->
+	<div id="onError" class="alert-message error">
+		<p>
+			<strong>Oops! </strong><span></span>
+		</p>
+	</div>
+
+	<div class="lobbypage">
+            <div id="chatPanel" class="span4 lobbyChat">
+			<div id="messages" class="jscroll scroll-pane-arrows jspScrollable">
+			</div>
+            </div>
+            <textarea id="talk" class="lobbyTalk"></textarea>
+            <div class="userList">
+                <ul id="unorderedUserList">
+                </ul>
+            </div>
+        
+        </div>
+        
+        
+        <div id="chatWebSocket" data-ws="@routes.Sketchness.chatStream(username,"lobby").webSocketURL()"></div>
+
+        <script type="text/javascript" src="/assets/javascripts/jquery.socketmessage.js"></script>
+        <script type="text/javascript" src="/assets/javascripts/Class.js"></script>
+        <script type="text/javascript" src="/assets/javascripts/Communicator.js"></script>
+        <script type="text/javascript" src="/assets/javascripts/chat.js"></script>      
+}
