@@ -12,8 +12,6 @@ jQuery(function($) {
 	var communicator = new Communicator($('#chatWebSocket').data('ws'));
 
 	$(communicator.websocket).on({
-		open: function(evt) {
-		},
 		close: function(evt) {
 			setError("Connection lost");
 			write.error("Connection lost");
@@ -32,37 +30,8 @@ jQuery(function($) {
 		animateScroll: true,
 		horizontalGutter: 10
 	});
-	
-	communicator.on("system", function(e, message) {
-		sendMessage(message);
-	});
-	
-	communicator.on("join", function(e, message) {
-		sendMessage(message);
-	});
-	
-	communicator.on("quit", function(e, message) {
-		sendMessage(message);
-	});
-	
-	communicator.on("talk", function(e, message) {
-		sendMessage(message);
-	});
-	
-	communicator.on("talkNear", function(e, message) {
-		sendMessage(message);
-	});
-	
-	communicator.on("talkWarning", function(e, message) {
-		sendMessage(message);
-	});
-	
-	communicator.on("talkError", function(e, message) {
-		sendMessage(message);
-	});
-	
-	var sendMessage=function(data)
-	{
+
+	communicator.on("system join quit talk talkNear talkWarning talkError", function(e, data) {
 		// Create the message element
 		var el = $('<div class="message"><span></span><p></p></div>');
 		$("span", el).text(data.user);
@@ -74,9 +43,8 @@ jQuery(function($) {
 		paneApi.getContentPane().append(el);
 		paneApi.reinitialise();
 		paneApi.scrollToBottom();
-	};
-	
-	
+	});
+
 	communicator.on("membersChange", function(e, data) {
 		var $list = $("#unorderedUserList");
 		// Update the members list
@@ -99,7 +67,7 @@ jQuery(function($) {
 					$("#opponent" + userCounter).text(this);
 				}
 			});
-		}	
+		}
 	});
 
 

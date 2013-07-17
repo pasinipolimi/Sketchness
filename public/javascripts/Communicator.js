@@ -17,8 +17,9 @@
 
 			var $this = $(this);
 			$(this.websocket).on("message", function(event) {
-				event.type = event.data.type;
-				$this.trigger(event, [event.data]);
+				var message = JSON.parse(event.originalEvent.data);
+				event.type = message.type;
+				$this.trigger(event, [message]);
 			});
 		},
 
