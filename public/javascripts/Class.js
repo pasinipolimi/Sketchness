@@ -1,4 +1,4 @@
-(function($) {
+define(["jquery"], function($) {
 
 	/**
 	 * Class factory
@@ -35,6 +35,6 @@
 		}
 	};
 
-	this.Class = Class._init(Class);
+	return Class._init(Class);
 
-})(jQuery);
+});

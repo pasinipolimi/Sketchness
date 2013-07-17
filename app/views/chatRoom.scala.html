@@ -56,18 +56,16 @@
 		<div id="chatWebSocket" data-ws="@routes.Sketchness.chatStream(username,room).webSocketURL()"></div>
 		<div id="paintWebSocket" data-ws="@routes.Sketchness.paintStream(username,room).webSocketURL()"></div>
 
-		<script type="text/javascript" src="/assets/javascripts/jquery.socketmessage.js"></script>
-		<script type="text/javascript" src="/assets/javascripts/Class.js"></script>
-		<script type="text/javascript" src="/assets/javascripts/Time.js"></script>
-		<script type="text/javascript" src="/assets/javascripts/Communicator.js"></script>
 		<script type="text/javascript" src="/assets/javascripts/chat.js"></script>
 		<script type="text/javascript" src="/assets/javascripts/paint.js"></script>
 
 		<!-- DISABLE THE REFRESH BUTTON-->
 		<script type="text/javascript">
 			// To disable f5
-			$(document).on("keydown", function (e) {
-				if (e.which == 116) e.preventDefault();
+			require(["jquery"], function($) {
+				$(document).on("keydown", function (e) {
+					if (e.which == 116) e.preventDefault();
+				});
 			});
 		</script>
 </div>

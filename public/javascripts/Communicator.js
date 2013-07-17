@@ -1,9 +1,9 @@
-(function($) {
+define(["Class","jquery"], function(Class, $) {
 
 	/**
 	 * Handles comunications with the server
 	 */
-	var Communicator = this.Communicator = new Class({
+	return new Class({
 		_name: "Communicator",
 
 		/**
@@ -92,4 +92,4 @@
 		}
 	});
 
-})(jQuery);
+});
