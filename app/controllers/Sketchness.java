@@ -1,8 +1,6 @@
 package controllers;
 
-import akka.actor.ActorSelection;
-import java.util.ArrayList;
-import models.chat.ChatRoomFactory;
+import models.chat.ChatFactory;
 import play.mvc.*;
 
 import org.codehaus.jackson.JsonNode;
@@ -11,14 +9,14 @@ import views.html.index;
 import views.html.chatRoom;
 import views.html.lobby;
 
-import models.game.GameRoomFactory;
-import models.paint.Paint;
-import models.paint.PaintRoomFactory;
+import models.game.GameFactory;
+import models.lobby.LobbyFactory;
+import models.paint.PaintFactory;
 import play.i18n.Lang;
-import play.libs.Akka;
 import static play.mvc.Controller.request;
 import static play.mvc.Results.ok;
 import utils.LanguagePicker;
+import utils.gamemanager.GameManager;
 
 
 
@@ -38,7 +36,7 @@ public class Sketchness extends Controller {
     /**
      * Display the chat room.
      */
-    public static Result chatRoom(final String username, final String roomName) throws Exception {
+    public static Result chatRoom(final String username, String roomName) throws Exception {
         if(LanguagePicker.retrieveIsoCode().equals(""))
         {
             LanguagePicker.setLanguage(Lang.preferred(request().acceptLanguages()));
@@ -48,7 +46,12 @@ public class Sketchness extends Controller {
             flash("error", "Please choose a valid username.");
             return redirect(routes.Sketchness.index());
         }
-        GameRoomFactory.createGame(roomName);
+        if(roomName.trim().equals(""))
+        {
+            flash("error", "Wrong room id.");
+            return redirect(routes.Sketchness.lobby(username));
+        }
+        GameFactory.createGame(roomName,4);
         return ok(chatRoom.render(username,roomName));
     }
     
@@ -64,7 +67,27 @@ public class Sketchness extends Controller {
                 
                 // Join the chat room.
                 try { 
-                    ChatRoomFactory.createChat(username, roomName, in, out);
+                    ChatFactory.createChat(username, roomName, in, out);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        };
+    }
+    
+    /**
+     * Handle the chat websocket.
+     */
+    public static WebSocket<JsonNode> lobbyStream(final String username) {
+        return new WebSocket<JsonNode>() {
+            
+            // Called when the Websocket Handshake is done.
+            @Override
+            public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out){
+                
+                // Join the chat room.
+                try { 
+                    LobbyFactory.createLobby(username, in, out);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -83,7 +106,7 @@ public class Sketchness extends Controller {
         @Override
         public void onReady(In<JsonNode> in, Out<JsonNode> out) {
             try{
-                PaintRoomFactory.createPaint(username, roomName, in, out);
+                PaintFactory.createPaint(username, roomName, in, out);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -105,17 +128,7 @@ public class Sketchness extends Controller {
             flash("error", "Please choose a valid username.");
             return redirect(routes.Sketchness.index());
         }
-        existingRooms(Paint.class);
-        return ok(lobby.render(username));
-    }
-    
-    
-    private static ArrayList<String> existingRooms(Class roomClass)
-    {
-        ActorSelection existingRooms = Akka.system().actorSelection("akka://application/user/");
-        String roomPrefix=roomClass.getSimpleName();
-        return null;
-    }
-    
-  
+        GameManager.getInstance().getCurrentGames();
+        return ok(lobby.render(username,null));
+    }  
 }

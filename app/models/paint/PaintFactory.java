@@ -15,7 +15,7 @@ import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.Join;
 
 
-public class PaintRoomFactory extends Factory{
+public class PaintFactory extends Factory{
     
     public static synchronized void createPaint(final String username, final String room, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception
     {

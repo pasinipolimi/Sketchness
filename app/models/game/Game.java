@@ -4,9 +4,7 @@ package models.game;
 import play.libs.*;
 import play.libs.F.*;
 import play.i18n.Messages;
-import akka.actor.*;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -20,7 +18,7 @@ import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import models.Painter;
-import org.json.JSONException;
+import models.factory.GameRoom;
 import play.Play;
 import scala.concurrent.duration.Duration;
 
@@ -29,11 +27,13 @@ import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages.*;
 import utils.LanguagePicker;
 import utils.gamebus.GameEventType;
+import utils.gamemanager.GameManager;
+
 
 /**
  * A chat room is an Actor.
  */
-public class Game extends UntypedActor {
+public class Game extends GameRoom {
 
     private final Integer remainingTimeOnGuess=Integer.parseInt(Play.application().configuration().getString("remainingTimeOnGuess"));  //Once a player has guessed, change the time for everyone to 20 seconds
     private final Integer remainingTimeOnAllGuess=Integer.parseInt(Play.application().configuration().getString("remainingTimeOnAllGuess")); //If all have guessed, reduce the timer to 3 seconds
@@ -43,6 +43,7 @@ public class Game extends UntypedActor {
     private final Integer minGuesserPointsRemaining = Integer.parseInt(Play.application().configuration().getString("minGuesserPointsRemaining"));
     private final Integer maxRound=Integer.parseInt(Play.application().configuration().getString("maxRounds"));  //Maximum number of rounds
     private final Integer requiredPlayers=Integer.parseInt(Play.application().configuration().getString("requiredPlayers"));
+    private Integer maxPlayers=requiredPlayers;
     //Minimum tags that an image should have to avoid asking to the users for new tags
     private final Integer minimumTags=Integer.parseInt(Play.application().configuration().getString("minimumTags"));
     //Url of the CMS system
@@ -63,15 +64,19 @@ public class Game extends UntypedActor {
     private Room  roomChannel;  //Name of the room
     private Boolean taskAcquired=false;
     // Members of this room.
-    private CopyOnWriteArrayList<Painter> playersVect = new CopyOnWriteArrayList<Painter>();
+    private CopyOnWriteArrayList<Painter> playersVect = new CopyOnWriteArrayList<>();
     
     //Control Variables
     private ObjectNode guessObject;
     private Integer missingPlayers=requiredPlayers;
     private Integer disconnectedPlayers=0;
     private Boolean shownImages=false;
-    private HashSet<ObjectNode> taskHashSet = new HashSet<ObjectNode>();
+    private HashSet<ObjectNode> taskHashSet = new HashSet<>();
     private ObjectNode taskImage;
+
+    public Game() {
+        super(Game.class);
+    }
     
     /*
      * Handles all the messages sent to this actor
@@ -82,21 +87,23 @@ public class Game extends UntypedActor {
         if(message instanceof Room)
         {
             this.roomChannel=((Room)message);
+            maxPlayers=requiredPlayers;
             newGameSetup();
-            Logger.info("[GAME] "+roomChannel+" created.");
+            Logger.info("[GAME] "+roomChannel.getRoom()+" created.");
         }
         if(message instanceof GameEvent)
         {
             GameEvent event= (GameEvent)message;
             switch(event.getType())
             {
-                case join:playerJoin(event.getMessage());break;
-                case quit:handleQuitter(event.getMessage());break;
+                case join:playerJoin(event.getMessage());publishLobbyEvent(GameEventType.gameInfo);break;
+                case quit:handleQuitter(event.getMessage());publishLobbyEvent(GameEventType.gameInfo);break;
                 case guessed:guessed(event.getMessage());break;
                 case timeExpired: playerTimeExpired(event.getMessage());break;
                 case finalTraces: sendFinalTraces(event.getObject());break;
                 case tag: taskImage.remove("tag");taskImage.put("tag",event.getMessage());sendTask(false);break;
                 case skipTask: skipTask(event.getMessage());break;
+                case getGameInfo: publishLobbyEvent(GameEventType.gameInfo);break;
             }
         }
     }
@@ -221,6 +228,8 @@ public class Game extends UntypedActor {
                 //We need to wait for all the modules to receive the player list
                 if(canStart&&playersVect.size()>=requiredPlayers)
                 {
+                    GameManager.getInstance().removeInstance(getSelf());
+                    publishLobbyEvent(GameEventType.gameStarted);
                     if(taskAcquired)
                     {
                         disconnectedPlayers=0;
@@ -279,7 +288,6 @@ public class Game extends UntypedActor {
          else
          {
              gameEnded();
-             newGameSetup();
          } 
      }
      
@@ -312,7 +320,6 @@ public class Game extends UntypedActor {
          {
              //Restart the game
              gameEnded();
-             newGameSetup();
          }
          //There are still players in game
          else
@@ -356,14 +363,13 @@ public class Game extends UntypedActor {
      }
      
      /*
-     * Initialization of the variables to start a new game
-     * [TODO] Shouldn't we kill the current actor and all the associated ones?
+      * Initialization of the variables to start a new game
      */
      public void newGameSetup() {
          disconnectedPlayers=0;
          roundNumber=0;
          gameStarted=false;
-         playersVect =  new CopyOnWriteArrayList<Painter>();
+         playersVect =  new CopyOnWriteArrayList<>();
          Akka.system().scheduler().scheduleOnce(
             Duration.create(1, TimeUnit.MILLISECONDS),
             new Runnable() {
@@ -385,6 +391,7 @@ public class Game extends UntypedActor {
     
     
     private void playerJoin(String username) throws Exception {
+        Logger.debug("[GAME]: Player Joined");
         int count=0;
         for (Painter painter : playersVect) {
             if(painter.name.equalsIgnoreCase(username)){
@@ -400,14 +407,30 @@ public class Game extends UntypedActor {
            painter.setnModulesReceived(1);
             //Add the new entered player, it has never been a sketcher in this game (false)
             playersVect.add(painter);
+            publishLobbyEvent(GameEventType.join);
             Logger.info("[GAME]: added player "+playersVect.get(playersVect.size()-1).name);
             //Check if we can start the game and, in such a case, start it
        }
        //Wait to see if all the modules have received the login information from the players
        else if (modules>1 ? count>(modules-1) : count>1)
        {
+           Logger.info("[GAME]: Check Start");
            checkStart();
        }
+    }
+    
+    private void publishLobbyEvent(GameEventType type)
+    {
+        GameEvent join = new GameEvent(type.toString(),GameManager.getInstance().getLobby(),type);
+        ObjectNode status = new ObjectNode(JsonNodeFactory.instance);
+        //Get the hashcode related to this actoref in order to make it unique
+        status.put("id", this.getSelf().hashCode());
+        status.put("roomName", roomChannel.getRoom());
+        status.put("currentPlayers",playersVect.size());
+        status.put("maxPlayers",maxPlayers);
+        status.put("visible", playersVect.size()<maxPlayers);
+        join.setObject(status);
+        GameBus.getInstance().publish(join);
     }
     
     
@@ -436,12 +459,13 @@ public class Game extends UntypedActor {
                     {
                         playersVect.remove(painter);
                         disconnectedPlayers++;
+                        GameBus.getInstance().publish(new GameEvent("quit",GameManager.getInstance().getLobby(),GameEventType.quit));
                         //End the game if there's just one player or less
                         if(((requiredPlayers-disconnectedPlayers)==1)&&gameStarted)
                             //Restart the game
-                            gameEnded();
+                            gameEnded(); 
                         else if (((requiredPlayers-disconnectedPlayers)<=0)&&gameStarted)
-                            newGameSetup();
+                            publishLobbyEvent(GameEventType.gameEnded);
                     }
                 }
             } 
@@ -507,10 +531,12 @@ public class Game extends UntypedActor {
     }
     
     private void gameEnded() {
-            GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.gameEnded));
             GameEvent endEvent = new GameEvent(roomChannel, GameEventType.leaderboard);
             endEvent.setObject(compileLeaderboard());
             GameBus.getInstance().publish(endEvent);
+            GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.gameEnded));
+            publishLobbyEvent(GameEventType.gameEnded);
+            killActor(); 
    }
     
     
@@ -569,8 +595,6 @@ public class Game extends UntypedActor {
        
     }
     
-    
-     
     /**
      * Retrieving data from the CMS [TODO] Right now we are not retrieving based on the requirements of our tasks
      * such as completing tasks that have not been already faced and so on. We will add this feature in the future.
@@ -580,6 +604,7 @@ public class Game extends UntypedActor {
        taskAcquired=false;
        JsonReader jsonReader= new JsonReader();
        JsonNode retrieved=null;
+       //[TODO] Fail safe in case of not being able to retrieve the instances
        try{
             retrieved= jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image.json");
        }
@@ -633,8 +658,12 @@ public class Game extends UntypedActor {
     else
            throw new Error("Cannot retrieve the tasks from the CMS.");
     }
+    
+    public Boolean isFull()
+    {
+        return playersVect.size()>=maxPlayers;
+    }
 }
-
   enum CountdownTypes
     {
         round,tag

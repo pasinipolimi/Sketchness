@@ -1,4 +1,4 @@
-package models.chat;
+package models.lobby;
 
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
@@ -12,8 +12,6 @@ import play.mvc.WebSocket;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
-import utils.gamebus.GameEventType;
-import utils.gamebus.GameMessages.GameEvent;
 import utils.gamebus.GameMessages.Join;
 
 
@@ -21,39 +19,34 @@ import utils.gamebus.GameMessages.Join;
 
 
 
-  public class ChatRoomFactory extends Factory{
+  public class LobbyFactory extends Factory{
 
 
-  public static synchronized void createChat(final String username, final String room, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception
+  public static synchronized void createLobby(String username, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception
   {
-      final ActorRef finalRoom=create(room, Chat.class);
+      final ActorRef finalRoom=create("lobby", Lobby.class);
       Future<Object> future = Patterns.ask(finalRoom,new Join(username, out), 1000);
         // Send the Join message to the room
       String result = (String)Await.result(future, Duration.create(10, SECONDS));
         
         if("OK".equals(result)) 
         {
-            
+
             //Define the actions to be performed on the websockets
             in.onMessage(new F.Callback<JsonNode>() {
                 @Override
                public void invoke(JsonNode event) {
-                   
-                   // Send a Talk message to the room.
-                   finalRoom.tell(new GameEvent(event.get("text").asText(),username, GameEventType.talk),finalRoom);
-
+                   //We will not handle any incoming message from now
                } 
             });
-            
+
             // When the socket is closed.
             in.onClose(new F.Callback0() {
                @Override
                public void invoke() {
-                   // Send a Quit message to the room.
-                   finalRoom.tell( new GameEvent(username,room,GameEventType.quit),finalRoom);
+                   //We will not handle any incoming message from now
                }
             });
-            
         } 
         else 
         {

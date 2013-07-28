@@ -1,4 +1,4 @@
-@(username: String)
+@(username: String,room: String)
 
 @main(username,null) {
 	<!--TODO: BETTER INTERFACE FOR THE ERRORS, POSSIBLY AN OVERLAY-->
@@ -19,13 +19,47 @@
                 </ul>
             </div>
         
-        </div>
-        
+            <table id="gameList">
+                <thead>
+                    <tr class="head">
+                        <th>Title</th>
+                        <th>Players</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table> 
+            <form id="joinGame" action="@routes.Sketchness.chatRoom()">
+                            <input id="username" name="username" class="input-small" type="hidden" value=@username />
+                            <input id="roomId" name="room" class="input-small" type="hidden" value="" />
+                            <button id="join" type="submit"></button>
+            </form>
+            <form id="backForm" action="@routes.Sketchness.index()">
+                <button type="submit" id="back"></button>
+            </form>
+            
+            <form id="createGameForm" href="#createGamePopUp" class="default_popup ignore-hash">
+                <button type="submit" id="createGame"></button>
+            </form>
+            
+            <div id="createGamePopUp" class="alertBox" style="display:none">
+                <form  action="@routes.Sketchness.chatRoom()">
+                    <p style="text-align:center"><strong>Room Name</strong></p>
+                    <input id="username" name="username" class="input-small" type="hidden" value=@username />
+                    <input id="roomName" name="room" class="input-small" type="text" />
+                    <button id="createGamePopUp" type="submit"></button>
+                </form>
+            </div>
+            
+
+
         
         <div id="chatWebSocket" data-ws="@routes.Sketchness.chatStream(username,"lobby").webSocketURL()"></div>
+        <div id="lobbyWebSocket" data-ws="@routes.Sketchness.lobbyStream(username).webSocketURL()"></div>
 
         <script type="text/javascript" src="/assets/javascripts/jquery.socketmessage.js"></script>
         <script type="text/javascript" src="/assets/javascripts/Class.js"></script>
         <script type="text/javascript" src="/assets/javascripts/Communicator.js"></script>
         <script type="text/javascript" src="/assets/javascripts/chat.js"></script>      
+        <script type="text/javascript" src="/assets/javascripts/lobby.js"></script>    
 }

@@ -29,6 +29,11 @@ public class GameMessages {
               this.type=type;
           }
           
+          public GameEvent(GameEventType type)
+          {
+              this.type=type;
+          }
+          
           
           public GameEvent(String message, Room channel, GameEventType type) 
           {
@@ -108,13 +113,49 @@ public class GameMessages {
     
     public static class Room {
         final String room;
+        final int maxPlayers;
+
+        public Room(String room, int maxPlayers) {
+            this.room = room;
+            this.maxPlayers=maxPlayers;
+        }
 
         public Room(String room) {
             this.room = room;
+            maxPlayers=-1;
         }
-
+        
         public String getRoom() {
             return room;
+        }
+
+        public int getMaxPlayers() {
+            return maxPlayers;
+        }
+        
+    }
+    
+    public static class GameInfo{
+        String roomName;
+        Integer nPlayers;
+        Integer maxPlayers;
+
+        public GameInfo(String roomName, Integer nPlayers, Integer maxPlayers) {
+            this.roomName = roomName;
+            this.nPlayers = nPlayers;
+            this.maxPlayers = maxPlayers;
+        }
+
+        public Integer getMaxPlayers() {
+            return maxPlayers;
+        }
+
+        public String getRoomName() {
+            return roomName;
+        }
+
+        public Integer getnPlayers() {
+            return nPlayers;
         }
     }
 }

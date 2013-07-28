@@ -29,6 +29,8 @@ object ApplicationBuild extends Build {
 		Resource("jScrollPane", "public/javascripts/lib/jquery.jscrollpane.js", "http://jscrollpane.kelvinluck.com/script/jquery.jscrollpane.min.js", false),
 		Resource("jScrollPane MouseWheel", "public/javascripts/lib/jquery.mousewheel.js", "http://jscrollpane.kelvinluck.com/script/jquery.mousewheel.js", false),
 		Resource("jScrollPane MouseWheelIntent", "public/javascripts/lib/mwheelIntent.js", "http://jscrollpane.kelvinluck.com/script/mwheelIntent.js", false),
+		Resource("popUpjs","public/javascripts/lib/popUp.js","https://raw.github.com/Toddish/Popup/master/assets/js/jquery.popup.min.js",false),
+		Resource("popUpCSS","public/stylesheets/lib/popUp.css","https://raw.github.com/Toddish/Popup/master/assets/css/popup.css",false),
 		Resource("jScrollPane CSS", "public/stylesheets/lib/jquery.jscrollpane.css", "http://jscrollpane.kelvinluck.com/style/jquery.jscrollpane.css", false),
 		Resource("Bootstrap CSS", "public/stylesheets/lib/bootstrap.css", "https://raw.github.com/twitter/bootstrap/1c7c5f750fc221ee94e435e4e49bc2ba1a6be5e6/bootstrap.css", false),
 		Resource("Website Images", "public/images", "https://dl.dropboxusercontent.com/u/1264722/images.zip?dl=1",true)

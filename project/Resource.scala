@@ -35,7 +35,7 @@ class Resource private (name: String, path :String, url :String = null, zipped :
 				if(_url == null) _path.mkdirs()
 				else if(zipped) IO.unzipURL(_url, _path)
 				else IO.download(_url, _path)
-				log.success("-> Resource retieved.")
+				log.success("-> Resource retrieved.")
 			} catch {
 				case e: Exception => {
 					log.error("-> Unable to get resource!")

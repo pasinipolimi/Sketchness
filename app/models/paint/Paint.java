@@ -16,6 +16,7 @@ import play.libs.Json;
 import models.Painter;
 import models.Point;
 import models.Segment;
+import models.factory.GameRoom;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages.GameEvent;
 import org.codehaus.jackson.node.ArrayNode;
@@ -27,7 +28,8 @@ import utils.gamebus.GameMessages.Join;
 import utils.gamebus.GameMessages.Room;
 
 
-public class Paint extends UntypedActor{
+
+public class Paint extends GameRoom{
 	
     Boolean gameStarted=false;
     Room  roomChannel;
@@ -47,7 +49,13 @@ public class Paint extends UntypedActor{
    //Traces 
    JsonNodeFactory factory = JsonNodeFactory.instance;
    private ObjectNode traces = new ObjectNode(factory);
-    
+
+    public Paint() {
+        super(Paint.class);
+    }
+   
+   
+   
                     
     //Manage the messages
     @Override
@@ -56,7 +64,7 @@ public class Paint extends UntypedActor{
         if(message instanceof Room)
         {
             this.roomChannel=((Room)message);
-            Logger.info("[PAINT] "+roomChannel+" created.");
+            Logger.info("[PAINT] "+roomChannel.getRoom()+" created.");
         }
         if(message instanceof Join) 
         {
@@ -85,7 +93,7 @@ public class Paint extends UntypedActor{
             GameEvent event= (GameEvent)message;
             switch(event.getType())
             {
-                case gameEnded:gameStarted=false;break;
+                case gameEnded:killActor();gameStarted=false;break;
                 case gameStarted:gameStarted=true;break;
                 case showImages:notifyAll(event.getObject());break;
                 case saveTraces:saveTraces();break;
@@ -166,20 +174,20 @@ public class Paint extends UntypedActor{
     
     private void handleQuitter(String quitter) throws InterruptedException
     {
-                    for (Map.Entry<String, Painter> entry : painters.entrySet()) {
-                        if (entry.getKey().equalsIgnoreCase(quitter))
-                        {
-                            ObjectNode json = Json.newObject();
-                            json.put("type", "disconnect");
-                            json.put("username", quitter);
-                            notifyAll(json);
-                            
-                            entry.getValue().channel.close();
-                            painters.remove(quitter);
-                            Logger.debug("[PAINT] "+quitter+" has disconnected.");
-                            GameBus.getInstance().publish(new GameEvent(quitter,roomChannel,GameEventType.quit));
-                        }
-                    }
+        for (Map.Entry<String, Painter> entry : painters.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(quitter))
+            {
+                ObjectNode json = Json.newObject();
+                json.put("type", "disconnect");
+                json.put("username", quitter);
+                notifyAll(json);
+
+                entry.getValue().channel.close();
+                painters.remove(quitter);
+                Logger.debug("[PAINT] "+quitter+" has disconnected.");
+                GameBus.getInstance().publish(new GameEvent(quitter,roomChannel,GameEventType.quit));
+            }
+        }    
     }
    
     private void nextRound(String sketcher)
@@ -269,7 +277,6 @@ public class Paint extends UntypedActor{
         }
     }
 }
-
 enum JsonNodeType
 {
     segment,change,trace,roundended, move, skiptask

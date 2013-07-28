@@ -1,6 +1,6 @@
 @(username: String, room: String)
 
-@main(username, room) {
+@main(username,room){
 	<!--TODO: BETTER INTERFACE FOR THE ERRORS, POSSIBLY AN OVERLAY-->
 	<div id="onError" class="alert-message error">
 		<p>
@@ -28,7 +28,7 @@
 		</div>
 
 
-		<div id="chatPanel" class="span4 gameChat">
+		<div id="chatPanel" class="gameRoom gameChat">
 			<div id="messages" class="jscroll scroll-pane-arrows jspScrollable">
 			</div>
 		</div>

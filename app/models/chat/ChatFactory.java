@@ -21,7 +21,7 @@ import utils.gamebus.GameMessages.Join;
 
 
 
-  public class ChatRoomFactory extends Factory{
+  public class ChatFactory extends Factory{
 
 
   public static synchronized void createChat(final String username, final String room, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception

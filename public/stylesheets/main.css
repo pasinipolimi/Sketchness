@@ -82,7 +82,7 @@ position: relative;
 
 
 #mainPage{
-background-image: url("../images/UI/guesser.jpg");
+background-image: url("../images/UI/guesser.png");
 background-repeat:no-repeat;
 background-position:center;
 width:800px;
@@ -160,34 +160,109 @@ top:530px;
     width: 181px;
 }
 
+#back {
+	background-color: transparent;
+	background-image: url("../images/UI/backUnpressed.png");
+	height: 45px;
+	left: 600px;
+	position: absolute;
+	top: 530px;
+	width: 160px;
+}
+
+#back:hover {
+	background-color: transparent;
+	background-image: url("../images/UI/backHover.png");
+}
+
+#back:active {
+	background-color: transparent;
+	background-image: url("../images/UI/backPressed.png");
+}
+
+#createGame {
+	background-color: transparent;
+	background-image: url("../images/UI/createUnpressed.png");
+	height: 60px;
+	left: 10px;
+	position: absolute;
+	top: 540px;
+	width: 200px;
+}
+
+#createGame:hover {
+	background-color: transparent;
+	background-image: url("../images/UI/createHover.png");
+}
+
+#createGame:active {
+	background-color: transparent;
+	background-image: url("../images/UI/createPressed.png");
+}
+
+#createGamePopUp {
+	background-color: rgba(0, 0, 0, 0);
+	background-image: url("../images/UI/createUnpressed.png");
+	height: 60px;
+	left: 0px;
+	position: relative;
+	top: 100px;
+	width: 200px;
+}
+
+#roomName{
+	width: 200px;
+}
+
+#createGamePopUp:hover {
+	background-color: transparent;
+	background-image: url("../images/UI/createHover.png");
+}
+
+#createGamePopUp:active {
+	background-color: transparent;
+	background-image: url("../images/UI/createPressed.png");
+}
+
+
 #skipTask {
-background-color: transparent;
-background-image: url("../images/UI/skipUnpressed.png");
-height:66px;
-left:230px;
-position:absolute;
-top:500px;
+	background-color: transparent;
+	background-image: url("../images/UI/skipUnpressed.png");
+	height:66px;
+	left:230px;
+	position:absolute;
+	top:500px;
     width: 181px;
 }
 
 #skipTask:hover {
-background-color: transparent;
-background-image: url("../images/UI/skipHover.png");
-height:66px;
-left:230px;
-position:absolute;
-top:500px;
-    width: 181px;
+	background-color: transparent;
+	background-image: url("../images/UI/skipHover.png");
 }
 
 #skipTask:active {
-background-color: transparent;
-background-image: url("../images/UI/skipPressed.png");
-height:46px;
-left:230px;
-position:absolute;
-top:500px;
-    width: 181px;
+	background-color: transparent;
+	background-image: url("../images/UI/skipPressed.png");
+}
+
+#join {
+	background-color: transparent;
+	background-image: url("../images/UI/joinUnpressed.png");
+	height: 66px;
+	left: 10px;
+	position: absolute;
+	top: 480px;
+	width: 190px;
+}
+
+#join:hover {
+	background-color: transparent;
+	background-image: url("../images/UI/joinHover.png");
+}
+
+#join:active {
+	background-color: transparent;
+	background-image: url("../images/UI/joinPressed.png");
 }
 
 
@@ -202,9 +277,35 @@ box-shadow:-2px -2px 6px #B01AA6, -2px 2px 6px #B01AA6, 4px 2px 6px #B01AA6, 4px
 	z-index:10;
 }
 
+div.popup_cont {
+	height:350px !important;
+	width:350px !important;
+	position: fixed;
+	top: 25% !important;
+	left: 40% !important;
+	background-image: url("../images/UI/alertBox.png");
+}
+
+
+
+.popup_cont .popup{
+	background: rgba(0,0,0,0);
+	padding: 25px;
+	top: 50px;
+	left: 50px;
+	box-shadow: 0 3px 10px rgba(0,0,0,0);
+	position: absolute;
+}
+
+.popup_content{
+	position: absolute;
+	height:200px !important;
+	width:200px !important;
+}
+
 .lobbyChat {
 	height:290px;
-	left:300px;
+	left:360px;
 	min-height:160px;
 	top:200px;
 	width:280px;
@@ -216,6 +317,23 @@ box-shadow:-2px -2px 6px #B01AA6, -2px 2px 6px #B01AA6, 4px 2px 6px #B01AA6, 4px
 	min-height:160px;
 	top:260px;
 	width:180px;
+}
+
+.gameRoom {
+	left:628px;
+}
+
+tr.highlight {
+	background-color: #8888ff;
+}
+
+tr:hover { background-color: #8888ff }
+
+#gameList{
+	position: absolute;
+	width: 260px;
+	top: 130px;
+	left: 30px;
 }
 
 li.avatarIcon {
@@ -269,9 +387,8 @@ li.avatarIcon {
 #viewport {
     width: 500px;
     height: 450px;
-top: -439.5px;
-left: 89.5px;
-    background: white;
+	top: -439.5px;
+	left: 89.5px;
     position: relative;
 }
 
@@ -476,11 +593,11 @@ div#preloaded-images {
 
 
 #mainPage.sketcher {
-background-image: url("../images/UI/sketcher.jpg");
+	background-image: url("../images/UI/sketcher.png");
 }
 
 #mainPage.guesser {
-background-image: url("../images/UI/guesser.jpg");
+	background-image: url("../images/UI/guesser.png");
 }
 
 

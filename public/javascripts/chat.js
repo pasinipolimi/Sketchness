@@ -63,11 +63,12 @@ jQuery(function($) {
 	
 	var sendMessage=function(data)
 	{
+		console.log(data);
 		// Create the message element
 		var el = $('<div class="message"><span></span><p></p></div>');
 		$("span", el).text(data.user);
 		$("p", el).text(data.message);
-		$(el).addClass(data.kind);
+		$(el).addClass(data.type);
 		if (data.user === '@username') $(el).addClass('me');
 
 		var paneApi = $('.jscroll').data('jsp');

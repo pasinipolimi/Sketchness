@@ -1,12 +1,18 @@
 package models.game;
 
+import akka.actor.ActorRef;
 import models.factory.Factory;
+import utils.gamebus.GameBus;
+import utils.gamemanager.GameManager;
 
-public class GameRoomFactory extends Factory{
+public class GameFactory extends Factory{
 
 
-  public static synchronized void createGame(final String room) throws Exception
+  public static synchronized void createGame(final String room, final Integer maxPlayers) throws Exception
   {
-      create(room, Game.class);
+      ActorRef obtained=create(room,maxPlayers, Game.class);
+      GameManager.getInstance().addInstance(maxPlayers, room, obtained);
+      //Subscribe to lobby messages
+      GameBus.getInstance().subscribe(obtained, GameManager.getInstance().getLobby());
   }
 }
