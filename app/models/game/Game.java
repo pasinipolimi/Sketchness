@@ -42,8 +42,7 @@ public class Game extends GameRoom {
     private final Integer maxGuesserPointsRemaining = Integer.parseInt(Play.application().configuration().getString("maxGuesserPointsRemaining"));
     private final Integer minGuesserPointsRemaining = Integer.parseInt(Play.application().configuration().getString("minGuesserPointsRemaining"));
     private final Integer maxRound=Integer.parseInt(Play.application().configuration().getString("maxRounds"));  //Maximum number of rounds
-    private final Integer requiredPlayers=Integer.parseInt(Play.application().configuration().getString("requiredPlayers"));
-    private Integer maxPlayers=requiredPlayers;
+    private Integer requiredPlayers=Integer.parseInt(Play.application().configuration().getString("requiredPlayers"));
     //Minimum tags that an image should have to avoid asking to the users for new tags
     private final Integer minimumTags=Integer.parseInt(Play.application().configuration().getString("minimumTags"));
     //Url of the CMS system
@@ -87,7 +86,8 @@ public class Game extends GameRoom {
         if(message instanceof Room)
         {
             this.roomChannel=((Room)message);
-            maxPlayers=requiredPlayers;
+            requiredPlayers=((Room)message).getRequiredPlayers();
+            missingPlayers=requiredPlayers;
             newGameSetup();
             Logger.info("[GAME] "+roomChannel.getRoom()+" created.");
         }
@@ -427,8 +427,8 @@ public class Game extends GameRoom {
         status.put("id", this.getSelf().hashCode());
         status.put("roomName", roomChannel.getRoom());
         status.put("currentPlayers",playersVect.size());
-        status.put("maxPlayers",maxPlayers);
-        status.put("visible", playersVect.size()<maxPlayers);
+        status.put("maxPlayers",requiredPlayers);
+        status.put("visible", playersVect.size()<requiredPlayers);
         join.setObject(status);
         GameBus.getInstance().publish(join);
     }
@@ -659,10 +659,6 @@ public class Game extends GameRoom {
            throw new Error("Cannot retrieve the tasks from the CMS.");
     }
     
-    public Boolean isFull()
-    {
-        return playersVect.size()>=maxPlayers;
-    }
 }
   enum CountdownTypes
     {

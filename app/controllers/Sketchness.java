@@ -36,7 +36,7 @@ public class Sketchness extends Controller {
     /**
      * Display the chat room.
      */
-    public static Result chatRoom(final String username, String roomName) throws Exception {
+    public static Result chatRoom(final String username, String roomName, Integer nPlayers) throws Exception {
         if(LanguagePicker.retrieveIsoCode().equals(""))
         {
             LanguagePicker.setLanguage(Lang.preferred(request().acceptLanguages()));
@@ -51,7 +51,12 @@ public class Sketchness extends Controller {
             flash("error", "Wrong room id.");
             return redirect(routes.Sketchness.lobby(username));
         }
-        GameFactory.createGame(roomName,4);
+        if(nPlayers<2||nPlayers>4)
+            nPlayers=3;
+        //Force the room name to be without spaces. We cannot create actors with 
+        //spaces in it.
+        roomName=roomName.replaceAll(" ", "");
+        GameFactory.createGame(roomName,nPlayers);
         return ok(chatRoom.render(username,roomName));
     }
     

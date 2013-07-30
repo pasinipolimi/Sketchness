@@ -63,7 +63,6 @@ jQuery(function($) {
 	
 	var sendMessage=function(data)
 	{
-		console.log(data);
 		// Create the message element
 		var el = $('<div class="message"><span></span><p></p></div>');
 		$("span", el).text(data.user);

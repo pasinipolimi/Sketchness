@@ -113,24 +113,24 @@ public class GameMessages {
     
     public static class Room {
         final String room;
-        final int maxPlayers;
+        final int requiredPlayers;
 
-        public Room(String room, int maxPlayers) {
+        public Room(String room, int requiredPlayers) {
             this.room = room;
-            this.maxPlayers=maxPlayers;
+            this.requiredPlayers=requiredPlayers;
         }
 
         public Room(String room) {
             this.room = room;
-            maxPlayers=-1;
+            requiredPlayers=-1;
         }
         
         public String getRoom() {
             return room;
         }
 
-        public int getMaxPlayers() {
-            return maxPlayers;
+        public int getRequiredPlayers() {
+            return requiredPlayers;
         }
         
     }
