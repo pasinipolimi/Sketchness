@@ -8,6 +8,14 @@ jQuery(function($) {
 		$("#mainPage").hide();
 	};
 	
+	$("#gameListBody").jScrollPane({
+		showArrows: true,
+		mantainPosition: true,
+		stickToBottom:true,
+		animateScroll: true,
+		horizontalGutter: 10
+	});
+	
 	//Popup for the game creation panel
 	var options = { width:350, height:350, top:200,left:100 };
 	$('.default_popup').popup(options);
@@ -77,7 +85,11 @@ jQuery(function($) {
 			{
 				var html = '';
 				html += '<tr id='+data.id+' name='+data.roomName+'><td>' + data.roomName + '</td><td>' + data.currentPlayers +'/' + data.maxPlayers + '</td></tr>';
-				$('#gameList tbody').first().after(html);
+				var paneApi = $("#gameListBody").data('jsp');
+				paneApi.getContentPane().append(html);
+				paneApi.reinitialise();
+				paneApi.scrollToBottom();
+				//$("#gameList tbody").append(html);
 			}
 		}
 	});

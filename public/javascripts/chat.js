@@ -25,7 +25,7 @@ jQuery(function($) {
 	});
 
 	// Init jScrollPane
-	$('.jscroll').jScrollPane({
+	$("#messages").jScrollPane({
 		showArrows: true,
 		mantainPosition: true,
 		stickToBottom:true,
@@ -70,7 +70,7 @@ jQuery(function($) {
 		$(el).addClass(data.type);
 		if (data.user === '@username') $(el).addClass('me');
 
-		var paneApi = $('.jscroll').data('jsp');
+		var paneApi = $("#messages").data('jsp');
 		paneApi.getContentPane().append(el);
 		paneApi.reinitialise();
 		paneApi.scrollToBottom();

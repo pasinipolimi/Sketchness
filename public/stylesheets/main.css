@@ -80,6 +80,27 @@ position: relative;
 }
 
 
+table.gameList {
+    display: table;
+    width: 100%;
+}
+table.gameList thead, table.gameList tbody {
+    float: left;
+    width: 100%;
+}
+table.gameList tbody {
+    overflow: auto;
+    height: 300px;
+}
+table.gameList tr {
+    width: 100%;
+    display: table;
+    text-align: left;
+}
+table.gameList th, table.gameList td {
+    width: 33%;
+}
+
 
 #mainPage{
 background-image: url("../images/UI/guesser.png");
@@ -334,6 +355,7 @@ tr:hover { background-color: #8888ff }
 	width: 260px;
 	top: 130px;
 	left: 30px;
+	height: 340px;
 }
 
 li.avatarIcon {
