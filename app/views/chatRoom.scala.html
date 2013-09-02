@@ -1,5 +1,7 @@
 @(username: String, room: String)
 
+@import controllers.routes.javascript._
+
 @main(username,room){
 	<!--TODO: BETTER INTERFACE FOR THE ERRORS, POSSIBLY AN OVERLAY-->
 	<div id="onError" class="alert-message error">
@@ -43,9 +45,12 @@
 		<!--MESSAGES AND SCORES FOR THE PLAYERS-->
 		<div id="topMessage"></div>
 		<div id="timeCounter"></div>
-		<div id="score"></div>
+                <div id="scoreBaloon">
+                    <div id="score"></div>
+                </div>
 
 		<!--HANDLING ALL THE USERS CURRENTLY CONNECTED-->
+                <div id="currentAvatar"></div>
 		<div id="currentNickname">@username</div>
 		<div id="opponent1"></div>
 		<div id="opponent2"></div>
@@ -62,6 +67,8 @@
 		<script type="text/javascript" src="/assets/javascripts/Communicator.js"></script>
 		<script type="text/javascript" src="/assets/javascripts/chat.js"></script>
 		<script type="text/javascript" src="/assets/javascripts/paint.js"></script>
+                
+                <script type="text/javascript" src="@routes.JavascriptController.javascriptRoutes"></script>
 
 		<!-- DISABLE THE REFRESH BUTTON-->
 		<script type="text/javascript">

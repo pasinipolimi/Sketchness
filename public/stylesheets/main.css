@@ -52,6 +52,18 @@ position: relative;
 	width: 800px;
 }
 
+
+.leaderboardpage {
+	background-image:url('../images/UI/gameover.png');
+	background-repeat:no-repeat;
+	background-position:center;
+	margin-left: auto ;
+    margin-right: auto ;
+	position: relative;
+	height: 600px;
+	width: 800px;
+}
+
 /* Page header tweaks */
 .page-header {
     background-color: #f5f5f5;
@@ -101,6 +113,44 @@ table.gameList th, table.gameList td {
     width: 33%;
 }
 
+
+#scoreBaloon{
+	background-image: url("../images/UI/scoreBaloon.png");
+	width: 80px;
+	height: 47px;
+	left: 635px;
+	position: absolute;
+	top: 50px;
+	text-align: center;
+	z-index: 2;
+}
+
+#score{
+	left: 0px;
+	top: 15px;
+	position: relative;
+	z-index: 2;
+}
+
+
+#currentAvatar{
+	background-image: url("../images/UI/femaleAvatar.png");
+	width: 60px;
+	height: 60px;
+	top: 20px;
+	left: 700px;
+	position: absolute;
+}
+
+.opponentAvatar{
+	background-image: url("../images/UI/femaleAvatar.png");
+	background-size: 30px 30px;
+	width: 30px;
+	height: 30px;
+	top: -305px;
+	left: 610px;
+	position: relative;
+}
 
 #mainPage{
 background-image: url("../images/UI/guesser.png");
@@ -201,6 +251,55 @@ top:530px;
 	background-image: url("../images/UI/backPressed.png");
 }
 
+
+#tolobby {
+	background-color: transparent;
+	background-image: url("../images/UI/lobbyUnpressed.png");
+	height: 45px;
+	left: 600px;
+	position: absolute;
+	top: 530px;
+	width: 185px;
+}
+
+#tolobby:hover {
+	background-color: transparent;
+	background-image: url("../images/UI/lobbyHover.png");
+}
+
+#tolobby:active {
+	background-color: transparent;
+	background-image: url("../images/UI/lobbyPressed.png");
+	height: 40px;
+}
+
+#name {
+	position: relative;
+	top: 7px;
+	left: 120px;
+	font-weight:bold;
+	font-size: 20px;
+}
+
+#points {
+	position: relative;
+	top: -12px;
+	left: 400px;
+	display: flex;
+	font-size: 20px;
+	font-weight:bold;
+}
+
+#leaderboardAvatar {
+	background-image: url("../images/UI/femaleAvatar.png");
+	width: 60px;
+	height: 60px;
+	top: 15px;
+	left: 10px;
+	position: relative;
+	display: inline-block;
+}
+
 #createGame {
 	background-color: transparent;
 	background-image: url("../images/UI/createUnpressed.png");
@@ -210,6 +309,20 @@ top:530px;
 	top: 540px;
 	width: 200px;
 }
+
+#scoresArea {
+	position: relative;
+	top: 100px;
+	left: 100px;
+}
+
+.score {
+	height: 96px;
+	width: 509px;
+	background-color: transparent;
+	background-image: url("../images/UI/score.png");
+}
+
 
 #createGame:hover {
 	background-color: transparent;
@@ -473,7 +586,7 @@ width: 380px;
 height: 30px;
 left:108px;
 position:absolute;
-top:60px;
+top:57px;
 text-align:center;
 }
 
@@ -486,14 +599,6 @@ top:557px;
 text-align:center;
 }
 
-#score{
-width: 60px;
-height: 30px;
-left:655px;
-position:absolute;
-top:65px;
-text-align:center;
-}
 
 #hudArea{
 position: absolute;

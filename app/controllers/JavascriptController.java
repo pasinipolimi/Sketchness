@@ -3,9 +3,13 @@ package controllers;
 import java.io.InputStream;
 import java.util.NoSuchElementException;
 import play.Logger;
+import play.Routes;
 import play.mvc.*;
 
 import play.i18n.Lang;
+import static play.mvc.Controller.flash;
+import static play.mvc.Results.ok;
+import views.html.leaderboard;
 
 
 
@@ -21,4 +25,15 @@ public class JavascriptController extends Controller {
         }
         return ok(properties).as("text/plain");
     }
+
+    public static Result javascriptRoutes() {
+    response().setContentType("text/javascript");
+    return ok(
+      Routes.javascriptRouter("jsRoutes",
+        // Routes
+        controllers.routes.javascript.Sketchness.leaderboard()
+      )
+    );
+  }
+    
 }

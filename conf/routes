@@ -9,11 +9,18 @@ GET     /room                             controllers.Sketchness.chatRoom(userna
 GET     /room/chatStream                  controllers.Sketchness.chatStream(username: String ?= null,room: String ?= "default")
 GET     /room/lobbyStream                 controllers.Sketchness.lobbyStream(username: String ?= null)
 GET     /room/paintStream                 controllers.Sketchness.paintStream(username: String ?= null,room: String ?= "default")
+GET     /leaderboard                      controllers.Sketchness.leaderboard(username: String ?= null, result: String ?= null)
+
+
 GET		/renderer						  controllers.Utilities.renderer(imageID: String)
 GET		/rendererStream					  controllers.Utilities.rendererStream(imageID: String)
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 #Retrieving internazionalization messages
 GET /i18n controllers.JavascriptController.i18n()
+
+# Javascript routing
+GET    /javascripts/routes      controllers.JavascriptController.javascriptRoutes()

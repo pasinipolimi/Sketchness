@@ -8,11 +8,13 @@ import org.codehaus.jackson.JsonNode;
 import views.html.index;
 import views.html.chatRoom;
 import views.html.lobby;
+import views.html.leaderboard;
 
 import models.game.GameFactory;
 import models.lobby.LobbyFactory;
 import models.paint.PaintFactory;
 import play.i18n.Lang;
+import static play.mvc.Controller.flash;
 import static play.mvc.Controller.request;
 import static play.mvc.Results.ok;
 import utils.LanguagePicker;
@@ -135,5 +137,20 @@ public class Sketchness extends Controller {
         }
         GameManager.getInstance().getCurrentGames();
         return ok(lobby.render(username,null));
+    }  
+    
+    /**
+     * Display the leaderboard page.
+     */
+    public static Result leaderboard(final String username, String result) throws Exception {
+        result=result.substring(1);
+        String[] splitted = result.split(":");
+        for (int x=0; x<splitted.length; x=x+2)
+        {
+            flash("score"+((x/2)+1),"");
+            flash("name"+((x/2)+1),splitted[x]);
+            flash("points"+((x/2)+1),splitted[x+1]);
+        }
+        return ok(leaderboard.render(username,null));
     }  
 }

@@ -50,8 +50,8 @@ jQuery(function($) {
 	var roundEnd;
 
 	var write = {
-		score: function(score) {
-			var html = "<font size='5'><b>" + score + "</b></font>";
+		score: function() {
+			var html = "<font size='5'><b>" + game.score + "</b></font>";
 			$("#score").html(html);
 		},
 		time: function(time) {
@@ -77,6 +77,7 @@ jQuery(function($) {
 			$("#mainPage").hide();
 		}
 	};
+	write.score();
 
 	if (!game.matchStarted) write.top($.i18n.prop('waiting'));
 
@@ -233,11 +234,6 @@ jQuery(function($) {
 			var rectangle = this.fitImage(width, height);
 			this.context.drawImage(image, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
 			this.context.restore();
-		},
-		leaderboard: function(i, player) {
-			this.context.fillStyle = "#000000";
-			this.context.font = "bold 30px sans-serif";
-			this.context.fillText((i + 1) + "): " + player.name + " = " + player.points + $.i18n.prop('points'), 30, 50 + 50 * i);
 		}
 	};
 
@@ -453,6 +449,7 @@ jQuery(function($) {
 		communicator.on("points", function(e, message) {
 			if (message.name === user.name) {
 				game.score += message.points;
+				write.score();
 				game.guessed = true;
 				skipButton.hide();
 			}
@@ -476,7 +473,6 @@ jQuery(function($) {
 		communicator.on("leaderboard", function(e, message) {
 			game.role = "ENDED";
 
-			write.top($.i18n.prop('leaderboard'));
 			$('#mainPage').removeClass('guesser');
 			$('#mainPage').removeClass('sketcher');
 			skipButton.hide();
@@ -487,9 +483,19 @@ jQuery(function($) {
 
 			//Disable the chat
 			$('#talk').attr('disabled', 'disabled');
+			var results="";
 			for (var i = 0; i < message.playersNumber; i++) {
-				task.leaderboard(i, message.playerList[i]);
+				results+=":"+message.playerList[i].name+":"+message.playerList[i].points;
 			}
+			//Display the leaderboard page with the results
+			jsRoutes.controllers.Sketchness.leaderboard(user.name,results).ajax({
+				success: function(data) {
+					$("#mainPage").html(data);
+				},
+				error: function() {
+				  alert("Error!")
+				}
+			  })
 		});
 
 		communicator.on("trace", function(e, message) {

@@ -68,7 +68,7 @@ jQuery(function($) {
 		$("span", el).text(data.user);
 		$("p", el).text(data.message);
 		$(el).addClass(data.type);
-		if (data.user === '@username') $(el).addClass('me');
+		if (data.user === $('#currentNickname').text()) $(el).addClass('me');
 
 		var paneApi = $("#messages").data('jsp');
 		paneApi.getContentPane().append(el);
@@ -94,9 +94,10 @@ jQuery(function($) {
 		else
 		{
 			$(data.members).each(function() {
-				if (this !== '@username') {
+				if (this != $('#currentNickname').text()) {
 					userCounter++;
-					$("#opponent" + userCounter).text(this);
+					$("#opponent" + userCounter).attr('name',this);
+					$("#opponent" + userCounter).attr('class',"opponentAvatar");
 				}
 			});
 		}	

@@ -1,28 +1,27 @@
 package models.game;
 
-
+import controllers.Sketchness;
 import play.libs.*;
 import play.libs.F.*;
 import play.i18n.Messages;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import play.Logger;
 
 import org.codehaus.jackson.node.*;
-import org.codehaus.jackson.*;
 
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import models.Painter;
 import models.factory.GameRoom;
 import play.Play;
+import play.cache.Cache;
 import scala.concurrent.duration.Duration;
 
-import utils.*;
+import utils.CMS.CMS;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages.*;
 import utils.LanguagePicker;
@@ -45,8 +44,6 @@ public class Game extends GameRoom {
     private Integer requiredPlayers=Integer.parseInt(Play.application().configuration().getString("requiredPlayers"));
     //Minimum tags that an image should have to avoid asking to the users for new tags
     private final Integer minimumTags=Integer.parseInt(Play.application().configuration().getString("minimumTags"));
-    //Url of the CMS system
-    private final String rootUrl=Play.application().configuration().getString("cmsUrl");
     
     //Variables used to manage the rounds
     private Boolean guessedWord=false; //Has the word been guessed for the current round?
@@ -71,7 +68,10 @@ public class Game extends GameRoom {
     private Integer disconnectedPlayers=0;
     private Boolean shownImages=false;
     private HashSet<ObjectNode> taskHashSet = new HashSet<>();
+    private HashSet<ObjectNode> priorityTaskHashSet = new HashSet<>();
+    private Integer uTaskID=null;
     private ObjectNode taskImage;
+    private Integer sessionId;
 
     public Game() {
         super(Game.class);
@@ -100,9 +100,10 @@ public class Game extends GameRoom {
                 case quit:handleQuitter(event.getMessage());publishLobbyEvent(GameEventType.gameInfo);break;
                 case guessed:guessed(event.getMessage());break;
                 case timeExpired: playerTimeExpired(event.getMessage());break;
-                case finalTraces: sendFinalTraces(event.getObject());break;
+                case finalTraces: CMS.closeUTask(uTaskID,CMS.segmentation(event.getObject(),sketcherPainter.name,sessionId));break;
                 case tag: taskImage.remove("tag");taskImage.put("tag",event.getMessage());sendTask(false);break;
                 case skipTask: skipTask(event.getMessage());break;
+                case taskAcquired: taskAcquired();break;
                 case getGameInfo: publishLobbyEvent(GameEventType.gameInfo);break;
             }
         }
@@ -119,28 +120,65 @@ public class Game extends GameRoom {
     private ObjectNode retrieveTaskImage()
     {
          guessObject=null;
-         int size = taskHashSet.size();
-         Integer item=null;
-         do {
-           try {
-              item = new Random().nextInt(size);
-           }
-           catch(IllegalArgumentException ex) {
-              item=null;
-              Logger.error("[GAME] Failed to retrieve Task Image, retrying.");
-           }
-         }while (item==null);
-         int i = 0;
-         for(ObjectNode obj : taskHashSet)
-         {
-            if (i == item)
+         uTaskID=null;
+         //If we have task prioritized, then use them first
+         if(priorityTaskHashSet.size()>0) {
+            int size = priorityTaskHashSet.size();
+            Integer item=null;
+            byte trials=0;
+            do {
+              try {
+                 item = new Random().nextInt(size);
+              }
+              catch(IllegalArgumentException ex) {
+                 item=null;
+                 Logger.error("[GAME] Failed to retrieve Task Image, retrying.");
+                 trials++;
+                 if(trials>=5)
+                     throw new Error("[GAME] Failed to retrieve Task Image, aborting");
+              }
+            }while (item==null);
+            int i = 0;
+            for(ObjectNode obj : priorityTaskHashSet)
             {
-                guessObject=obj;
-                break;
+               if (i == item)
+               {
+                   guessObject=obj;
+                   uTaskID=guessObject.get("utaskid").asInt();
+                   break;
+               }
+               i = i + 1;
             }
-            i = i + 1;
+            priorityTaskHashSet.remove(guessObject);
          }
-         taskHashSet.remove(guessObject);
+         else {
+            int size = taskHashSet.size();
+            Integer item=null;
+            byte trials=0;
+            do {
+              try {
+                 item = new Random().nextInt(size);
+              }
+              catch(IllegalArgumentException ex) {
+                 item=null;
+                 Logger.error("[GAME] Failed to retrieve Task Image, retrying.");
+                 trials++;
+                 if(trials>=5)
+                     throw new Error("[GAME] Failed to retrieve Task Image, aborting");
+              }
+            }while (item==null);
+            int i = 0;
+            for(ObjectNode obj : taskHashSet)
+            {
+               if (i == item)
+               {
+                   guessObject=obj;
+                   break;
+               }
+               i = i + 1;
+            }
+            taskHashSet.remove(guessObject);
+         }
          return guessObject;
     }
     
@@ -228,6 +266,8 @@ public class Game extends GameRoom {
                 //We need to wait for all the modules to receive the player list
                 if(canStart&&playersVect.size()>=requiredPlayers)
                 {
+                    //Create a new session in which to store the actions of the game
+                    sessionId=CMS.openSession();
                     GameManager.getInstance().removeInstance(getSelf());
                     publishLobbyEvent(GameEventType.gameStarted);
                     if(taskAcquired)
@@ -371,20 +411,30 @@ public class Game extends GameRoom {
          gameStarted=false;
          playersVect =  new CopyOnWriteArrayList<>();
          Akka.system().scheduler().scheduleOnce(
-            Duration.create(1, TimeUnit.MILLISECONDS),
+            Duration.create(100, TimeUnit.MILLISECONDS),
             new Runnable() {
               @Override
               public void run() {
-                  try {
-                      taskSetInitialization();
-                  } catch (Exception ex) {
-                      ex.printStackTrace();
+                  Integer trials=0;
+                  Boolean completed=false;
+                  while(trials<5&&!completed){
+                    try {
+                        trials++;
+                        CMS.taskSetInitialization(priorityTaskHashSet,taskHashSet,roomChannel);
+                        completed=true;
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                  }
+                  if(trials>=5) {
+                      killActor();
+                      throw new RuntimeException("[GAME]: Impossible to retrieve the set of image relevant for this game, aborting");
                   }
               }
             },
             Akka.system().dispatcher()
           ); 
-         Logger.debug("[GAME] New game started");
+         Logger.info("[GAME] New game started");
      }
     
     
@@ -400,25 +450,30 @@ public class Game extends GameRoom {
                 Logger.debug("[GAME]: player "+username+" counted "+count);
                 break;
             }
-       }
-       if(count==0)
-       {             
-           Painter painter=new Painter(username, false);
-           painter.setnModulesReceived(1);
-            //Add the new entered player, it has never been a sketcher in this game (false)
-            playersVect.add(painter);
-            publishLobbyEvent(GameEventType.join);
-            Logger.info("[GAME]: added player "+playersVect.get(playersVect.size()-1).name);
-            //Check if we can start the game and, in such a case, start it
-       }
-       //Wait to see if all the modules have received the login information from the players
-       else if (modules>1 ? count>(modules-1) : count>1)
-       {
-           Logger.info("[GAME]: Check Start");
-           checkStart();
-       }
+        }
+        if(count==0)
+        {             
+            Painter painter=new Painter(username, false);
+            painter.setnModulesReceived(1);
+             //Add the new entered player, it has never been a sketcher in this game (false)
+             playersVect.add(painter);
+             publishLobbyEvent(GameEventType.join);
+             Logger.info("[GAME]: added player "+playersVect.get(playersVect.size()-1).name);
+             //Check if we can start the game and, in such a case, start it
+        }
+        //Wait to see if all the modules have received the login information from the players
+        else if (modules>1 ? count>(modules-1) : count>1)
+        {
+            Logger.debug("[GAME]: Check Start");
+            checkStart();
+        }
     }
     
+    
+    /**
+     * Function used to update the status of the lobby room
+     * @param type the type of the event to publish: room created, room destroyed, update status
+     */
     private void publishLobbyEvent(GameEventType type)
     {
         GameEvent join = new GameEvent(type.toString(),GameManager.getInstance().getLobby(),type);
@@ -431,23 +486,6 @@ public class Game extends GameRoom {
         status.put("visible", playersVect.size()<requiredPlayers);
         join.setObject(status);
         GameBus.getInstance().publish(join);
-    }
-    
-    
-    private void sendFinalTraces(ObjectNode finalTraces) throws MalformedURLException, IOException {
-        String id = finalTraces.get("id").getTextValue();
-        String label = finalTraces.get("label").getTextValue();
-        String traces = finalTraces.get("traces").toString();
-        String history = finalTraces.get("history").toString();
-        
-        String urlParameters = "label="+label+"&coordinates="+traces+"&history="+history+"&user_id="+sketcherPainter.name+"&language="+LanguagePicker.retrieveIsoCode()+"&session_id=2251";
-        String request = rootUrl+"/wsmc/image/"+id+"/segment";
-        
-        WS.url(request).setContentType("application/x-www-form-urlencoded").post(urlParameters);
-        
-        urlParameters ="tag="+label+"&user_id="+sketcherPainter.name+"&language="+LanguagePicker.retrieveIsoCode()+"&session_id=2251";
-        request = rootUrl+"/wsmc/image/"+id+"/tag";
-        WS.url(request).setContentType("application/x-www-form-urlencoded").post(urlParameters);
     }
     
     private void handleQuitter(String quitter) {
@@ -531,12 +569,15 @@ public class Game extends GameRoom {
     }
     
     private void gameEnded() {
+            
+            //Close the gaming session
+            CMS.closeSession(sessionId);
             GameEvent endEvent = new GameEvent(roomChannel, GameEventType.leaderboard);
             endEvent.setObject(compileLeaderboard());
             GameBus.getInstance().publish(endEvent);
             GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.gameEnded));
             publishLobbyEvent(GameEventType.gameEnded);
-            killActor(); 
+            killActor();
    }
     
     
@@ -570,6 +611,7 @@ public class Game extends GameRoom {
     
     private void skipTask(String kind)
     {
+        CMS.postAction(sessionId, "skiptask", sketcherPainter.name, "");
         GameBus.getInstance().publish(new SystemMessage(sketcherPainter.name+" "+Messages.get(LanguagePicker.retrieveLocale(),"skiptask"), roomChannel));
         GameEvent timeEvent = new GameEvent(roomChannel,GameEventType.timerChange);
         timeEvent.setObject(timerChange(0,CountdownTypes.valueOf(kind)));
@@ -592,77 +634,21 @@ public class Game extends GameRoom {
              GameBus.getInstance().publish(eventGuesser);
            }
        }
-       
-    }
+    } 
     
-    /**
-     * Retrieving data from the CMS [TODO] Right now we are not retrieving based on the requirements of our tasks
-     * such as completing tasks that have not been already faced and so on. We will add this feature in the future.
-    **/
-    public void taskSetInitialization() throws Error{
-        
-       taskAcquired=false;
-       JsonReader jsonReader= new JsonReader();
-       JsonNode retrieved=null;
-       //[TODO] Fail safe in case of not being able to retrieve the instances
-       try{
-            retrieved= jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image.json");
-       }
-       catch(IllegalArgumentException e)
-       {
-           throw new RuntimeException("The request to the CMS is malformed");
-       }
-       if(retrieved!=null)
-       {
-        for (JsonNode item : retrieved) {
-            if(item.getElements().hasNext())
-            {
-                item=item.get("image");
-                String id=item.get("imgage_id").asText();
-                String url=rootUrl+item.get("image_uri").asText();
-                Integer width = item.get("imgage_width").asInt();
-                Integer height = item.get("imgage_height").asInt();
-                
-                JsonNode imageSegments= jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image/"+id+"/segment.json");
-
-                String label="";
-                ObjectNode guessWord = Json.newObject();
-                guessWord.put("type", "task");
-                guessWord.put("id", id);
-                if(imageSegments.size()>0 && imageSegments.getElements().hasNext())
-                {
-                    JsonNode tags= jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image/"+id+"/tag.json");
-                    if(tags.size()>=minimumTags && tags.getElements().hasNext())
-                    {
-                        JsonNode retrievedTags=tags.get(new Random().nextInt(tags.size()));
-                        retrievedTags=retrievedTags.get("image").get("tag");
-                        JsonNode retrievedTag = retrievedTags.get(new Random().nextInt(retrievedTags.size())).get("tag");
-                        if(retrievedTag.get("language").get("language_iso_code").asText().equals(LanguagePicker.retrieveIsoCode()))
-                            label=retrievedTag.get("tag_name").asText();
-                    }
-                }
-                guessWord.put("tag",label);
-                guessWord.put("lang",LanguagePicker.retrieveIsoCode());
-                guessWord.put("image",url);
-                guessWord.put("width",width);
-                guessWord.put("height",height);
-                taskHashSet.add(guessWord);
-                if(!taskAcquired)
-                {
-                    taskAcquired = true;
-                    triggerStart();
-                }
-            }
-        }  
-    }
-    else
-           throw new Error("Cannot retrieve the tasks from the CMS.");
-    }
-    
-}
-  enum CountdownTypes
+    private void taskAcquired()
     {
-        round,tag
+        if(!taskAcquired)
+        {
+            taskAcquired = true;
+            triggerStart();
+        }
     }
+}
+
+enum CountdownTypes
+{
+        round,tag
+}
 
 
