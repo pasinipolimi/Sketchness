@@ -18,7 +18,7 @@ require.config({
 		"jscrollpane": {
 			deps: ["jquery", "mousewheel"],
 			exports: "$.fn.jScrollPane"
-		}
+		},
 		"popup": {
 			deps: ["jquery"],
 			exports: "$.fn.popup"
