@@ -1,3 +1,122 @@
+<<<<<<< HEAD
+<<<<<<< HEAD
+jQuery(function($) {
+
+	var time = new Time();
+
+	var isIframe = (window.parent !== window);
+	var isMobile = /ipad|iphone|android/i.test(navigator.userAgent);
+
+	// CONSTANTS
+	var CONSTANTS = {
+		PEN_COLOR: 'red',
+		PEN_SIZE: 5,
+		ERASER_COLOR: "rgba(255,255,255,1.0)",
+		ERASER_SIZE: 25,
+		TRACKER_COLOR: 'red',
+		MIN_SEND_RATE: 50, // the min interval in ms between 2 send
+		DEFAULT_ROUND_TIME: 90,
+		DEFAULT_ASK_TIME: 20
+	};
+
+	// STATES
+	var user = {
+		id: null,
+		name: null,
+	};
+
+	// TOOLS STATUS
+	var tool = {
+		color: CONSTANTS.PEN_COLOR,
+		size: CONSTANTS.PEN_SIZE,
+		draw: true
+	};
+
+	//GAME STATUS
+	var game = {
+		role: null,
+		score: 0,
+		matchStarted: false,
+		guessWord: "",
+		guessed: false,
+		taskImage: null,
+		tagging: false,
+		traceNum: 1
+	};
+
+	// every player positions
+	var players = [];
+
+	// Dunno, variables before in an enclosure causing problems
+	var skipButton;
+	var roundEnd;
+
+	var write = {
+		score: function() {
+			var html = "<font size='5'><b>" + game.score + "</b></font>";
+			$("#score").html(html);
+		},
+		time: function(time) {
+			var html = "";
+			if(time || time === 0) {
+				html = "<font size='5'><b>" + $.i18n.prop('time') + Time.round(time, Time.second) + "</b></font>";
+			}
+			$("#timeCounter").html(html);
+		},
+		top: function(text, red) {
+			var html = "<font size='5'><b>" + text;
+			if(red !== undefined) {
+				html += "<font color='red'>" + red + "</font>";
+			}
+			html += "</b></font>";
+
+			$("#topMessage").html(html);
+		},
+		error: function(message) {
+			$("#onError span").text(message);
+			$("#onError").show();
+			$("#pageheader").hide();
+			$("#mainPage").hide();
+		}
+	};
+	write.score();
+
+	if (!game.matchStarted) write.top($.i18n.prop('waiting'));
+
+	var setColor = function(c) {
+		tool.color = c;
+		communicator.send({
+			type: 'change',
+			size: tool.size,
+			color: tool.color,
+			name: user.name,
+			role: game.role
+		});
+	};
+
+	var setSize = function(s) {
+		tool.size = s;
+		communicator.send({
+			type: 'change',
+			size: tool.size,
+			color: tool.color,
+			name: user.name,
+			role: game.role
+		});
+	};
+
+	var hud = {
+		canvas: $("#hud"),
+		context: $("#hud")[0].getContext("2d"),
+		tools: {
+			pen: {
+				enabled: "assets/images/UI/Controls/pencil.png",
+				disabled: "assets/images/UI/Controls/pencilD.png",
+				size: { x: 70, y: 70 },
+				position: { x: 0, y: 130 }
+=======
+=======
+>>>>>>> 5a4282b06d9deda7713e0757376e4363a7f4449a
 require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time, $) {
 
 	$(function() {
@@ -55,6 +174,10 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 			score: function(score) {
 				var html = "<font size='5'><b>" + score + "</b></font>";
 				$("#score").html(html);
+<<<<<<< HEAD
+>>>>>>> 5a4282b06d9deda7713e0757376e4363a7f4449a
+=======
+>>>>>>> 5a4282b06d9deda7713e0757376e4363a7f4449a
 			},
 			time: function(time) {
 				var html = "";
@@ -70,6 +193,59 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 				}
 				html += "</b></font>";
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+			return rectangle;
+		},
+		paint: function(image, width, height) {
+			this.context.save();
+			this.clear();
+			this.drawFrame();
+			var rectangle = this.fitImage(width, height);
+			this.context.drawImage(image, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+			this.context.restore();
+		}
+	};
+
+	var me = {
+		canvas: $("#me"),
+		context: $("#me")[0].getContext("2d"),
+		init: function() {
+			this.context.lineCap = 'round';
+			this.context.lineJoin = 'round';
+		},
+		clear: function() {
+			this.context.clearRect(0, 0, this.canvas.width(), this.canvas.height());
+		},
+		lineTo: function(from, to) {
+			this.context.strokeStyle = tool.color;
+			this.context.lineWidth = tool.size;
+			this.context.beginPath();
+			this.context.moveTo(from.x, from.y);
+			this.context.lineTo(to.x, to.y);
+			this.context.stroke();
+		}
+	};
+	me.init();
+
+	var draws = {
+		canvas: $("#draws"),
+		context: $("#draws")[0].getContext("2d"),
+		init: function() {
+			this.context.lineCap = 'round';
+			this.context.lineJoin = 'round';
+		},
+		clear: function() {
+			this.context.clearRect(0, 0, this.canvas.width(), this.canvas.height());
+		},
+		setTool: function(name) {
+			if(name === "pen") {
+				this.context.globalCompositeOperation = "source-over";
+			} else if(name === "eraser") {
+				this.context.globalCompositeOperation = "destination-out";
+=======
+=======
+>>>>>>> 5a4282b06d9deda7713e0757376e4363a7f4449a
 				$("#topMessage").html(html);
 			},
 			error: function(message) {
@@ -77,6 +253,10 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 				$("#onError").show();
 				$("#pageheader").hide();
 				$("#mainPage").hide();
+<<<<<<< HEAD
+>>>>>>> 5a4282b06d9deda7713e0757376e4363a7f4449a
+=======
+>>>>>>> 5a4282b06d9deda7713e0757376e4363a7f4449a
 			}
 		};
 
@@ -243,6 +423,17 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 			}
 		};
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+		communicator.on("points", function(e, message) {
+			if (message.name === user.name) {
+				game.score += message.points;
+				write.score();
+				game.guessed = true;
+				skipButton.hide();
+=======
+=======
+>>>>>>> 5a4282b06d9deda7713e0757376e4363a7f4449a
 		var me = {
 			canvas: $("#me"),
 			context: $("#me")[0].getContext("2d"),
@@ -260,6 +451,10 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 				this.context.moveTo(from.x, from.y);
 				this.context.lineTo(to.x, to.y);
 				this.context.stroke();
+<<<<<<< HEAD
+>>>>>>> 5a4282b06d9deda7713e0757376e4363a7f4449a
+=======
+>>>>>>> 5a4282b06d9deda7713e0757376e4363a7f4449a
 			}
 		};
 		me.init();
@@ -297,16 +492,38 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 
 		/*****************************UTILITY FUNCTIONS********************************************/
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+			$('#mainPage').removeClass('guesser');
+			$('#mainPage').removeClass('sketcher');
+			skipButton.hide();
+=======
+=======
+>>>>>>> 5a4282b06d9deda7713e0757376e4363a7f4449a
 		if (!user.name) {
 			user.name = $('#currentNickname').text() ||
 				localStorage.getItem("pname") ||
 				("iam" + Math.floor(100 * Math.random()));
 			localStorage.setItem("pname", user.name);
 		}
+<<<<<<< HEAD
+>>>>>>> 5a4282b06d9deda7713e0757376e4363a7f4449a
+=======
+>>>>>>> 5a4282b06d9deda7713e0757376e4363a7f4449a
 
 		// WebSocket
 		var communicator = new Communicator($('#paintWebSocket').data('ws'));
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+			//Disable the chat
+			$('#talk').attr('disabled', 'disabled');
+			var results="";
+			for (var i = 0; i < message.playersNumber; i++) {
+				results+=":"+message.playerList[i].name+":"+message.playerList[i].points;
+=======
+=======
+>>>>>>> 5a4282b06d9deda7713e0757376e4363a7f4449a
 		$(communicator.websocket).on({
 			open: function(evt) {
 				communicator.send({
@@ -321,7 +538,20 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 			},
 			error: function(evt) {
 				console.error("error", evt);
+<<<<<<< HEAD
+>>>>>>> 5a4282b06d9deda7713e0757376e4363a7f4449a
+=======
+>>>>>>> 5a4282b06d9deda7713e0757376e4363a7f4449a
 			}
+			//Display the leaderboard page with the results
+			jsRoutes.controllers.Sketchness.leaderboard(user.name,results).ajax({
+				success: function(data) {
+					$("#mainPage").html(data);
+				},
+				error: function() {
+				  alert("Error!")
+				}
+			  })
 		});
 
 		var getPlayer = function(username) {
@@ -464,6 +694,7 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 				if (time.getCountdown(message.timeObject) > (message.amount * Time.second)) {
 					time.changeCountdown(message.timeObject, message.amount * Time.second);
 				}
+<<<<<<< HEAD
 			});
 
 			communicator.on("showImages", function(e, message) {
@@ -478,6 +709,22 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 			communicator.on("leaderboard", function(e, message) {
 				game.role = "ENDED";
 
+=======
+			});
+
+			communicator.on("showImages", function(e, message) {
+				game.role = "ROUNDCHANGE";
+				skipButton.hide();
+				time.clearCountdown("round");
+				time.setCountdown("round", message.seconds * Time.second, Time.second, write.time, roundEnd);
+				$('#mainPage').removeClass('sketcher');
+				$('#mainPage').addClass('guesser');
+			});
+
+			communicator.on("leaderboard", function(e, message) {
+				game.role = "ENDED";
+
+>>>>>>> 5a4282b06d9deda7713e0757376e4363a7f4449a
 				write.top($.i18n.prop('leaderboard'));
 				$('#mainPage').removeClass('guesser');
 				$('#mainPage').removeClass('sketcher');
