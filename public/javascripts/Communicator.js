@@ -1,9 +1,9 @@
-(function($) {
+define(["Class","jquery"], function(Class, $) {
 
 	/**
 	 * Handles comunications with the server
 	 */
-	var Communicator = this.Communicator = new Class({
+	return new Class({
 		_name: "Communicator",
 
 		/**
@@ -17,8 +17,9 @@
 
 			var $this = $(this);
 			$(this.websocket).on("message", function(event) {
-				event.type = event.data.type;
-				$this.trigger(event, [event.data]);
+				var message = JSON.parse(event.originalEvent.data);
+				event.type = message.type;
+				$this.trigger(event, [message]);
 			});
 		},
 
@@ -91,4 +92,4 @@
 		}
 	});
 
-})(jQuery);
+});
