@@ -14,8 +14,8 @@ html, body {
 }
 
 .brand{
-top:300;
-left:400;
+	top:300;
+	left:400;
 }
 
 
@@ -153,81 +153,82 @@ table.gameList th, table.gameList td {
 }
 
 #mainPage{
-background-image: url("../images/UI/guesser.png");
-background-repeat:no-repeat;
-background-position:center;
-width:800px;
-height:600px;
-margin-left:auto;
-margin-right:auto;
-position: relative;
+	background-image: url("../images/UI/guesser.png");
+	background-repeat:no-repeat;
+	background-position:center;
+	width:800px;
+	height:600px;
+	margin-left:auto;
+	margin-right:auto;
+	position: relative;
 }
 
 #username {
-background-color: transparent;
-border-color: transparent;
-left:312px;
-position:absolute;
-top:457px;
+	background-color: transparent;
+	border-color: transparent;
+	left:312px;
+	position:absolute;
+	top:457px;
     width: 200px;
 	height:35px;
-font-weight:bold;
-color: #B01AA6;
-text-align:center;
+	font-weight:bold;
+	color: #B01AA6;
+	text-align:center;
 }
 
 #facebook {
-background-color: transparent;
-background-image: url("../images/UI/facebook.png");
-background-repeat:no-repeat;
-background-position:center;
-height:40px;
-left:430px;
-position:absolute;
-top:535px;
+	background-color: transparent;
+	background-image: url("../images/UI/facebook.png");
+	background-repeat:no-repeat;
+	background-position:center;
+	height:40px;
+	left:430px;
+	position:absolute;
+	top:535px;
     width: 40px;
 }
 
 #twitter {
-background-color: transparent;
-background-image: url("../images/UI/twitterInactive.png");
-background-repeat:no-repeat;
-background-position:center;
-height:40px;
-left:480px;
-position:absolute;
-top:534px;
+	background-color: transparent;
+	background-image: url("../images/UI/twitterInactive.png");
+	background-repeat:no-repeat;
+	background-position:center;
+	height:40px;
+	left:480px;
+	position:absolute;
+	top:534px;
     width: 40px;
 }
 
 
 #login {
-background-color: transparent;
-background-image: url("../images/UI/loginUnpressed.png");
-height:66px;
-left:330px;
-position:absolute;
-top:520px;
+	background-color: transparent;
+	background-image: url("../images/UI/loginUnpressed.png");
+	height:66px;
+	left:330px;
+	position:absolute;
+	top:520px;
+	border-width: 0px;
     width: 181px;
 }
 
 #login:hover {
-background-color: transparent;
-background-image: url("../images/UI/loginHover.png");
-height:66px;
-left:330px;
-position:absolute;
-top:520px;
+	background-color: transparent;
+	background-image: url("../images/UI/loginHover.png");
+	height:66px;
+	left:330px;
+	position:absolute;
+	top:520px;
     width: 181px;
 }
 
 #login:active {
-background-color: transparent;
-background-image: url("../images/UI/loginPressed.png");
-height:46px;
-left:330px;
-position:absolute;
-top:530px;
+	background-color: transparent;
+	background-image: url("../images/UI/loginPressed.png");
+	height:46px;
+	left:330px;
+	position:absolute;
+	top:530px;
     width: 181px;
 }
 
@@ -237,6 +238,7 @@ top:530px;
 	height: 45px;
 	left: 600px;
 	position: absolute;
+	border-width: 0px;
 	top: 530px;
 	width: 160px;
 }
@@ -258,6 +260,7 @@ top:530px;
 	height: 45px;
 	left: 600px;
 	position: absolute;
+	border-width: 0px;
 	top: 530px;
 	width: 185px;
 }
@@ -306,6 +309,7 @@ top:530px;
 	height: 60px;
 	left: 10px;
 	position: absolute;
+	border-width: 0px;
 	top: 540px;
 	width: 200px;
 }
@@ -340,6 +344,7 @@ top:530px;
 	height: 60px;
 	left: 0px;
 	position: relative;
+	border-width: 0px;
 	top: 30px;
 	width: 200px;
 }
@@ -365,6 +370,7 @@ top:530px;
 	height:66px;
 	left:230px;
 	position:absolute;
+	border-width: 0px;
 	top:500px;
     width: 181px;
 }
@@ -385,6 +391,7 @@ top:530px;
 	height: 66px;
 	left: 10px;
 	position: absolute;
+	border-width: 0px;
 	top: 480px;
 	width: 190px;
 }
@@ -409,6 +416,8 @@ box-shadow:-2px -2px 6px #B01AA6, -2px 2px 6px #B01AA6, 4px 2px 6px #B01AA6, 4px
     overflow: hidden;
 	position: absolute;
 	z-index:10;
+	margin-left:0px;
+	padding-left: 0px;
 }
 
 div.popup_cont {
@@ -438,10 +447,10 @@ div.popup_cont {
 }
 
 .lobbyChat {
-	height:290px;
-	left:360px;
+	height:490px;
+	left:340px;
 	min-height:160px;
-	top:200px;
+	top:150px;
 	width:280px;
 }
 
@@ -571,47 +580,47 @@ li.avatarIcon {
 }
 
 #currentNickname{
-width: 110px;
-height: 30px;
-left:680px;
-position:absolute;
-top:88px;
-text-align:center;
-font-size:15px;
-font-weight:bold;
+	width: 110px;
+	height: 30px;
+	left:680px;
+	position:absolute;
+	top:88px;
+	text-align:center;
+	font-size:15px;
+	font-weight:bold;
 }
 
 #topMessage{
-width: 380px;
-height: 30px;
-left:108px;
-position:absolute;
-top:57px;
-text-align:center;
+	width: 380px;
+	height: 30px;
+	left:108px;
+	position:absolute;
+	top:57px;
+	text-align:center;
 }
 
 #timeCounter{
-width: 200px;
-height: 30px;
-left:-10px;
-position:absolute;
-top:557px;
-text-align:center;
+	width: 200px;
+	height: 30px;
+	left:-10px;
+	position:absolute;
+	top:557px;
+	text-align:center;
 }
 
 
 #hudArea{
-position: absolute;
-        left: 0;
-top: 0;
-width: 800px;
-height:300px;
+	position: absolute;
+    left: 0;
+	top: 0;
+	width: 800px;
+	height:300px;
 }
 
 #hud{
-width: 800px;
-height:300px;
-z-index: 1;
+	width: 800px;
+	height:300px;
+	z-index: 1;
 }
 
 
@@ -639,13 +648,16 @@ footer {
     padding: 10px 0;
 }
 
+.lobbyMessages{
+	height: 330px!important;
+}
+
 #messages {
     position: absolute;
 	height: 265px;
 	top:10px;
 	overflow-y: scroll;
 }
-
 
 #talk {
     position: absolute;
@@ -695,18 +707,18 @@ word-wrap: break-word;
 
 
 .message.talkError p{
-color: #FF0000;
-font-weight: bold;
+	color: #FF0000;
+	font-weight: bold;
 }
 
 .message.talkWarning p{
-color: #FE9A2E;
-font-weight: bold;
+	color: #FE9A2E;
+	font-weight: bold;
 }
 
 .message.talkNear p{
-color:#9FF781;
-font-weight: bold;
+	color:#9FF781;
+	font-weight: bold;
 }
 
 div#preloaded-images {
@@ -732,12 +744,12 @@ div#preloaded-images {
 .jscroll,
 .scroll-pane-arrows
 {
-width: 100%;
-height: 200px;
-overflow: auto;
+	width: 100%;
+	height: 200px;
+	overflow: auto;
 }
 .horizontal-only
 {
-height: auto;
-max-height: 200px;
+	height: auto;
+	max-height: 200px;
 }

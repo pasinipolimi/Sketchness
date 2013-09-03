@@ -89,6 +89,8 @@ var gameloop = (function(){
   var ctx = canvas.getContext("2d");
   var taskCanvas = document.getElementById("task");
   var taskContext = taskCanvas.getContext("2d");
+  var maskCanvas = document.getElementById("mask");
+  var maskContext = maskCanvas.getContext("2d");
   /*******************************MANAGING THE INCOMING MESSAGES*****************/
   onSocketMessage = function (e) {
     var m = JSON.parse(e.data);
@@ -101,6 +103,10 @@ var gameloop = (function(){
                             taskImage=null;
                             taskImage=new Image();
                             taskImage.src=m.image;
+							taskContext.font="30px Arial";
+							taskContext.fillText("Loading Image...",10,50);
+							maskContext.font="30px Arial";
+							maskContext.fillText("Computing Aggregated Mask...",10,50);
                             //Wait for the image to be loaded before drawing it to canvas to avoid
                             //errors
                             taskImage.onload = function() {
@@ -116,7 +122,20 @@ var gameloop = (function(){
                                             taskContext.restore();
 											socket.send(JSON.stringify(guessWord));
                             };
-			break;
+							maskImage = null;
+							maskImage = new Image();
+							maskImage.src = "/retrieveMask?imageID="+m.id;
+							maskImage.onload = function() {
+                                            maskContext.save();
+                                            maskContext.beginPath();
+                                            x=0;
+                                            y=0;
+											maskCanvas.width=m.width;
+											maskCanvas.height=m.height;
+                                            maskContext.drawImage(maskImage,0,0,m.width,m.height);
+                                            maskContext.restore();
+                            };
+ 			break;
 		
 		case "trace":
 							ctx.lineJoin = "round";

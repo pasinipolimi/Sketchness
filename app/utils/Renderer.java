@@ -20,6 +20,7 @@ import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
+import play.Logger;
 import play.Play;
 import play.api.mvc.Response;
 
@@ -158,19 +159,22 @@ public class Renderer extends UntypedActor{
         @SuppressWarnings("unchecked")
         Props properties= new Props(Renderer.class);
         final ActorRef finalRoom =  Akka.system().actorOf(properties);
-        Future<Object> future = Patterns.ask(finalRoom, ImageID, 1000000);
+        Future<Object> future = Patterns.ask(finalRoom, ImageID, 1000000000);
           // Send the Join message to the room
         File result = (File)Await.result(future, Duration.create(180, SECONDS));
         if(result instanceof File) 
         {
+              Logger.info("[AGGREGATOR] Retrieved mask for image "+ImageID);
               return result;
         }
+        Logger.error("[AGGREGATOR] Retrieved mask for image "+ImageID);
         return null;
       }
       
       
       private void createMask(String id) throws IOException, Exception
       {
+          Logger.info("[AGGREGATOR] Retrieving aggregated mask for image "+id);
           imageId=id;
           Image retrieved=aggregate(false);
           BufferedImage bufIm = (BufferedImage)retrieved;
