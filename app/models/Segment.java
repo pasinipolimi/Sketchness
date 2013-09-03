@@ -11,7 +11,7 @@ public class Segment{
     private String eraser;
 
     public Segment(String eraser) {
-        points = new ArrayList<ArrayList<Point>>();
+        points = new ArrayList<>();
         this.eraser=eraser;
     }
     
@@ -53,8 +53,11 @@ public class Segment{
     public ArrayNode filter(int taskWidth, int taskHeight, int canvasWidth, int canvasHeight) {
         
         ArrayNode toReturn = new ArrayNode(JsonNodeFactory.instance);
-        ArrayList<PositionedPoint> finalSegment = new ArrayList<PositionedPoint>();
-        ArrayList<PositionedPoint> copy = new ArrayList<PositionedPoint>();
+        ArrayList<PositionedPoint> finalSegment = new ArrayList<>();
+        ArrayList<PositionedPoint> copy = new ArrayList<>();
+        int fixedWidth=0;
+        if(taskHeight>canvasHeight)
+            fixedWidth=canvasHeight*taskWidth/taskHeight;
         
         //Make a copy of the traces storing the orders in which the points have been saved
         for(int i = 0;i<points.size();i++)
@@ -97,7 +100,7 @@ public class Segment{
         while(copyIt.hasNext())
         {
             Point current=((PositionedPoint)copyIt.next()).getPoint();
-            current.setX((taskWidth*current.getX())/canvasWidth);
+            current.setX((taskWidth*(current.getX()-((canvasWidth-fixedWidth)/2)))/fixedWidth);
             current.setY((taskHeight*current.getY())/canvasHeight);
             if(!current.getColor().equals(eraser)&&current.getX()>=0&&current.getY()>=0)
                 toReturn.add(current.toJson());

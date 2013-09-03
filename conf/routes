@@ -14,6 +14,7 @@ GET     /leaderboard                      controllers.Sketchness.leaderboard(use
 
 GET		/renderer						  controllers.Utilities.renderer(imageID: String)
 GET		/rendererStream					  controllers.Utilities.rendererStream(imageID: String)
+GET 	/retrieveMask					  controllers.Utilities.retrieveMask(imageID: String)
 
 
 # Map static resources from the /public folder to the /assets URL path

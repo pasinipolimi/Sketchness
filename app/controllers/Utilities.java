@@ -1,5 +1,6 @@
 package controllers;
 
+import java.io.File;
 import org.codehaus.jackson.JsonNode;
 import play.mvc.Result;
 import static play.mvc.Results.ok;
@@ -12,6 +13,20 @@ import views.html.renderer;
  * @author Luca Galli <lgalli@elet.polimi.it>
  */
 public class Utilities {
+    
+    public static Result retrieveMask(final String imageID) {
+        try{
+            File result=Renderer.retrieveMask(imageID);
+            if(null!=result)
+                return ok(result);
+            else
+                return ok("[SKETCHNESS] Cannot retrieve the mask for image "+imageID);
+        }
+        catch(Exception e)
+        {
+            return ok("[SKETCHNESS] "+e.toString());
+        }
+    }
     
     public static Result renderer(final String imageID) {
             return ok(renderer.render(imageID));

@@ -1,6 +1,5 @@
 package models.paint;
 
-import akka.actor.UntypedActor;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 
@@ -44,7 +43,7 @@ public class Paint extends GameRoom{
     private Segment currentSegment = new Segment("rgba(255,255,255,1.0)");
     
    // The list of all connected painters (identified by ids)
-   private ConcurrentHashMap<String, Painter> painters = new ConcurrentHashMap<String, Painter>();
+   private ConcurrentHashMap<String, Painter> painters = new ConcurrentHashMap<>();
    
    //Traces 
    JsonNodeFactory factory = JsonNodeFactory.instance;
