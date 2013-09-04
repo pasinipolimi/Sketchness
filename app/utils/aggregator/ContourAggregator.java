@@ -4,12 +4,9 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
-import java.io.File;
 import java.util.ArrayList;
 
 
@@ -23,7 +20,7 @@ public class ContourAggregator {
 
     public int [] iMask;
 
-    public static double THRESHOLD = 0.5;
+    public static double THRESHOLD = 0.4;
 
 
     public ContourAggregator(Polygon[] polygons, int max_x, int max_y) {
@@ -60,12 +57,12 @@ public class ContourAggregator {
             for(int y=0;y<max_y;y++){
                 int voters = 0;
                 for(Polygon p : polygons){if(p.contains(x,y)){voters++;}}
-                if(voters/polygons.length > THRESHOLD){
+                if(((double)voters/polygons.length) > THRESHOLD){
                     raster.setSample(x, y, 0, 1);
                 } else {
                     raster.setSample(x,y,0,0);
                 }
-                this.iMask[x*max_x+y] = (voters/polygons.length > THRESHOLD)?1:0;
+                this.iMask[x*max_x+y] = (((double)voters/polygons.length) > THRESHOLD)?1:0;
             }
         }
 
@@ -105,7 +102,6 @@ public class ContourAggregator {
         for(int x=1;x<max_x-1;x++){
             for(int y=1;y<max_y-1;y++){
                 if(surroundedWithPoints(rst,x,y)){
-                    //System.out.println("TO DESTROY");
                     xToDestroy.add(x);
                     yToDestroy.add(y);
                 }
@@ -171,9 +167,9 @@ public class ContourAggregator {
     }
 
 
-    public static Image simpleAggregator(String[] contours) throws Exception  {
+    public static Image simpleAggregator(String[] contours,Integer width,Integer height) throws Exception  {
 
-        ContourAggregator ca = new ContourAggregator(contours,590,885);
+        ContourAggregator ca = new ContourAggregator(contours,width,height);
 
         Image im = ca.getMask();
         return im;

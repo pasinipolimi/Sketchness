@@ -7,8 +7,6 @@ import akka.pattern.Patterns;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -22,12 +20,10 @@ import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 import play.Logger;
 import play.Play;
-import play.api.mvc.Response;
 
 import play.libs.Akka;
 import play.libs.F;
 import play.libs.Json;
-import play.mvc.Result;
 import play.mvc.WebSocket;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -48,7 +44,7 @@ public class Renderer extends UntypedActor{
       @SuppressWarnings("unchecked")
       Props properties= new Props(Renderer.class);
       final ActorRef finalRoom =  Akka.system().actorOf(properties);
-      Future<Object> future = Patterns.ask(finalRoom,new Join(imageID, out), 1000);
+      Future<Object> future = Patterns.ask(finalRoom,new Join(imageID, out), 1000000000);
         // Send the Join message to the room
       String result = (String)Await.result(future, Duration.create(10, SECONDS));
         
@@ -118,6 +114,8 @@ public class Renderer extends UntypedActor{
         JavascriptColor[] colors = JavascriptColor.values();
         JsonReader jsonReader= new JsonReader();
         JsonNode imageSegments= jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image/"+imageId+".json");
+        Integer imWidth = imageSegments.get("width").asInt();
+        Integer imHeight = imageSegments.get("height").asInt();
         imageSegments= imageSegments.get("descriptions").get("segmentation");
         Image toReturn=null;
         if(null!=imageSegments)
@@ -150,7 +148,7 @@ public class Renderer extends UntypedActor{
                         }
                     }
                 }
-                toReturn=ContourAggregator.simpleAggregator(toAggregate);
+                toReturn=ContourAggregator.simpleAggregator(toAggregate,imWidth,imHeight);
          }
         return toReturn;
       }
