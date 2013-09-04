@@ -127,7 +127,7 @@ table.gameList th, table.gameList td {
 
 #score{
 	left: 0px;
-	top: 15px;
+	top: 8px;
 	position: relative;
 	z-index: 2;
 }
@@ -147,9 +147,10 @@ table.gameList th, table.gameList td {
 	background-size: 30px 30px;
 	width: 30px;
 	height: 30px;
-	top: -305px;
+	top: 195px;
 	left: 610px;
-	position: relative;
+	position: absolute;
+	display: block;
 }
 
 #mainPage{
@@ -168,7 +169,7 @@ table.gameList th, table.gameList td {
 	border-color: transparent;
 	left:312px;
 	position:absolute;
-	top:457px;
+	top:460px;
     width: 200px;
 	height:35px;
 	font-weight:bold;
@@ -286,7 +287,7 @@ table.gameList th, table.gameList td {
 
 #points {
 	position: relative;
-	top: -12px;
+	top: -19px;
 	left: 400px;
 	display: flex;
 	font-size: 20px;
@@ -485,7 +486,7 @@ li.avatarIcon {
 	background: url('../images/favicon.png') no-repeat top left;
 	background-size:40px 40px;
 	height: 46px;
-	width: 70px;
+	width: 120px;
 	word-wrap: break-word;
 	padding-left: 40px;
 	padding-top: 10px;
@@ -496,7 +497,7 @@ li.avatarIcon {
 .userList {
 	position: absolute;
 	height:290px;
-	left:650px;
+	left:620px;
 	min-height:160px;
 	top:140px;
 	width:180px;
@@ -595,7 +596,7 @@ li.avatarIcon {
 	height: 30px;
 	left:108px;
 	position:absolute;
-	top:57px;
+	top:50px;
 	text-align:center;
 }
 
@@ -604,7 +605,7 @@ li.avatarIcon {
 	height: 30px;
 	left:-10px;
 	position:absolute;
-	top:557px;
+	top:550px;
 	text-align:center;
 }
 
@@ -661,10 +662,10 @@ footer {
 
 #talk {
     position: absolute;
-    height: 20px;
 	background-color:transparent;
 	border-color:transparent;
 	z-index:11;
+	height:30px;
 	resize: none;
 }
 

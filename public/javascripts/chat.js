@@ -65,7 +65,11 @@ require(["Communicator", "jquery", "i18n", "jscrollpane"], function(Communicator
 					if (this != $('#currentNickname').text()) {
 						userCounter++;
 						$("#opponent" + userCounter).attr('name',this);
+						$("#opponent" + userCounter).attr('title',this);
+						$("#opponent" + userCounter).removeAttr('style');
 						$("#opponent" + userCounter).attr('class',"opponentAvatar");
+						var startingLeft = $("#opponent" + userCounter).css( "left" );
+						$("#opponent" + userCounter).attr('style', "left:"+(parseInt(startingLeft, 10)+(userCounter-1)*47)+"px");
 					}
 				});
 			}

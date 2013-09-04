@@ -52,10 +52,10 @@
 		<!--HANDLING ALL THE USERS CURRENTLY CONNECTED-->
                 <div id="currentAvatar"></div>
 		<div id="currentNickname">@username</div>
-		<div id="opponent1"></div>
-		<div id="opponent2"></div>
-		<div id="opponent3"></div>
-		<div id="opponent4"></div>
+		<span id="opponent1"></span>
+		<span id="opponent2"></span>
+		<span id="opponent3"></span>
+		<span id="opponent4"></span>
 
 		<!--WE CAN'T USE ROUTES IN STATIC JAVASCRIPT, SO WE MUST REFERENCE THEM OUTSIDE-->
 		<div id="chatWebSocket" data-ws="@routes.Sketchness.chatStream(username,room).webSocketURL()"></div>
