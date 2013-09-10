@@ -1,4 +1,4 @@
-require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time, $) {
+require(["Communicator", "Time", "Painter", "jquery", "i18n"], function(Communicator, Time, Painter, $) {
 
 	$(function() {
 
@@ -85,7 +85,7 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 			}
 		};
 		write.score();
-		
+
 		if (!game.matchStarted) write.top($.i18n.prop('waiting'));
 
 		var setColor = function(c) {
@@ -169,6 +169,8 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 		};
 		hud.preload();
 
+		var painter = new Painter("task", "draws", "positions");
+
 		var positions = {
 			canvas: $("#positions"),
 			context: $("#positions")[0].getContext("2d"),
@@ -192,64 +194,6 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 			}
 		};
 		positions.init();
-
-		var task = {
-			canvas: $("#task"),
-			context: $("#task")[0].getContext("2d"),
-			clear: function() {
-				this.context.clearRect(0, 0, this.canvas.width(), this.canvas.height());
-			},
-			drawFrame: function() {
-				var width = this.canvas.width();
-				var height = this.canvas.height();
-				var radius = 50;
-				this.context.beginPath();
-				this.context.moveTo(radius, 0);
-				this.context.lineTo(width - radius, 0);
-				this.context.quadraticCurveTo(width, 0, width, radius);
-				this.context.lineTo(width, height - radius);
-				this.context.quadraticCurveTo(width, height, width - radius, height);
-				this.context.lineTo(radius, height);
-				this.context.quadraticCurveTo(0, height, 0, height - radius);
-				this.context.lineTo(0, radius);
-				this.context.quadraticCurveTo(0, 0, radius, 0);
-				this.context.closePath();
-				this.context.clip();
-			},
-			fitImage: function(imgWidth, imgHeight) {
-				var canvasWidth = this.canvas.width();
-				var canvasHeight = this.canvas.height();
-
-				var rectangle = { x: 0, y: 0, width: canvasWidth, height: canvasHeight };
-				if(imgWidth < canvasWidth && imgHeight < canvasHeight) {
-					rectangle.height = imgHeight;
-					rectangle.y = (canvasHeight - rectangle.height) / 2;
-					rectangle.width = imgWidth;
-					rectangle.x = (canvasWidth - rectangle.width) / 2;
-				}
-				else {
-					var widthScale = canvasWidth / imgWidth;
-					var heightScale = canvasHeight / imgHeight;
-					if (widthScale < heightScale) {
-						rectangle.height = imgHeight * widthScale;
-						rectangle.y = (canvasHeight - rectangle.height) / 2;
-					} else {
-						rectangle.width = imgWidth * heightScale;
-						rectangle.x = (canvasWidth - rectangle.width) / 2;
-					}
-				}
-
-				return rectangle;
-			},
-			paint: function(image, width, height) {
-				this.context.save();
-				this.clear();
-				this.drawFrame();
-				var rectangle = this.fitImage(width, height);
-				this.context.drawImage(image, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
-				this.context.restore();
-			}
-		};
 
 		var me = {
 			canvas: $("#me"),
@@ -411,7 +355,7 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 				time.setTimer("round");
 				time.clearCountdown("tag");
 				draws.clear();
-				task.clear();
+				painter.hideImage();
 			});
 
 			communicator.on("move", function(e, message) {
@@ -433,12 +377,8 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 				} else {
 					write.top($.i18n.prop('solution'), game.guessWord);
 				}
-				game.taskImage = new Image();
-				game.taskImage.src = message.image;
-				//Wait for the image to be loaded before drawing it to canvas to avoid errors
-				$(game.taskImage).on("load", function () {
-					task.paint(game.taskImage, message.width, message.height);
-				});
+
+				painter.showImage(message.image, message.width, message.height);
 			});
 
 			communicator.on("tag", function(e, message) {
@@ -452,11 +392,7 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 					skipButton.show();
 					write.top($.i18n.prop('asktagsketcher'));
 					draws.clear();
-					game.taskImage = new Image();
-					game.taskImage.src = message.image;
-					$(game.taskImage).on("load", function () {
-						task.paint(game.taskImage, message.width, message.height);
-					});
+					painter.showImage(message.image, message.width, message.height);
 					$("#warnPre").html($.i18n.prop('warnTag'));
 					$("#warnTag").show();
 					$("#warnTag").click(function() {
@@ -467,13 +403,8 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 					skipButton.hide();
 					write.top($.i18n.prop('asktag'));
 					draws.clear();
-					draws.clear();
-					game.taskImage = new Image();
-					game.taskImage.src = $('#questionMark').attr("src");
 					write.canvasMessage($.i18n.prop('sketchertagging'));
-					$(game.taskImage).on("load", function () {
-						task.paint(game.taskImage, $('#questionMark').attr("rwidth"), $('#questionMark').attr("rheight"));
-					});
+					painter.showImage($('#questionMark').attr("src"), $('#questionMark').attr("rwidth"), $('#questionMark').attr("rheight"));
 				}
 			});
 
@@ -511,7 +442,7 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 
 				//Clear all the canvas and draw the leaderboard
 				draws.clear();
-				task.clear();
+				painter.hideImage();
 
 				//Disable the chat
 				$('#talk').attr('disabled', 'disabled');
