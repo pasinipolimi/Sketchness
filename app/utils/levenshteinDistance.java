@@ -56,6 +56,6 @@ public class levenshteinDistance {
 
                     return distance[stringa1Length][stringa2Length];
                 }
-                else return 0;
+                else return -1;
         }
 }

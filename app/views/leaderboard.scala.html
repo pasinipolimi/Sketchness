@@ -11,7 +11,12 @@
             </div>
             <form id="backForm" action="@routes.Sketchness.lobby()">
                 <button type="submit" id="tolobby"></button>
-                <input id="username" name="username" class="input-small" type="hidden" value=@username />
+                <input id="username" name="username" class="input-small" type="hidden" value="@username" />
             </form>
         </div>  
+        <div id="preloaded-images">
+                    <img src="../assets/images/UI/lobbyUnpressed.png" width="1" height="1" alt="tolobbyPressed" />
+                    <img src="../assets/images/UI/lobbyHover.png" width="1" height="1" alt="toLobbyHover" />
+                    <img src="../assets/images/UI/lobbyPressed.png" width="1" height="1" alt="toLobbyUnpressed" />
+        </div>
 }

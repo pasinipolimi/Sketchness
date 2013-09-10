@@ -77,6 +77,11 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 				$("#onError").show();
 				$("#pageheader").hide();
 				$("#mainPage").hide();
+			},
+			canvasMessage: function(message) {
+				var html = "<font size='5'><b><pre id='canvasPre'>" + message + "</pre></b></font>";
+				$("#canvasMessage").show();
+				$("#canvasMessage").html(html);
 			}
 		};
 		write.score();
@@ -216,15 +221,22 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 				var canvasHeight = this.canvas.height();
 
 				var rectangle = { x: 0, y: 0, width: canvasWidth, height: canvasHeight };
-
-				var widthScale = canvasWidth / imgWidth;
-				var heightScale = canvasHeight / imgHeight;
-				if (widthScale < heightScale) {
-					rectangle.height = imgHeight * widthScale;
+				if(imgWidth < canvasWidth && imgHeight < canvasHeight) {
+					rectangle.height = imgHeight;
 					rectangle.y = (canvasHeight - rectangle.height) / 2;
-				} else {
-					rectangle.width = imgWidth * heightScale;
+					rectangle.width = imgWidth;
 					rectangle.x = (canvasWidth - rectangle.width) / 2;
+				}
+				else {
+					var widthScale = canvasWidth / imgWidth;
+					var heightScale = canvasHeight / imgHeight;
+					if (widthScale < heightScale) {
+						rectangle.height = imgHeight * widthScale;
+						rectangle.y = (canvasHeight - rectangle.height) / 2;
+					} else {
+						rectangle.width = imgWidth * heightScale;
+						rectangle.x = (canvasWidth - rectangle.width) / 2;
+					}
 				}
 
 				return rectangle;
@@ -351,6 +363,7 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 			skipButton = $('#skipTask');
 			skipButton.hide();
 			skipButton.on("click", function() {
+				$("#warnTag").hide();
 				if (game.role === "SKETCHER") {
 					if (game.tagging) {
 						communicator.send({ type: 'skipTask', timerObject: 'tag' });
@@ -381,6 +394,8 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 					$('#mainPage').removeClass('guesser');
 					$('#mainPage').addClass('sketcher');
 					$('#talk').attr('disabled', 'disabled');
+					$('#canvasMessage').hide();
+					$("#warnTag").hide();
 					skipButton.show();
 				} else {
 					$('#roleSpan').text($.i18n.prop('guesser'));
@@ -388,7 +403,8 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 					$('#mainPage').addClass('guesser');
 					$('#talk').removeAttr('disabled');
 					skipButton.hide();
-
+					$('#canvasMessage').hide();
+					$("#warnTag").hide();
 					write.top($.i18n.prop('guess'));
 				}
 				time.setCountdown("round", CONSTANTS.DEFAULT_ROUND_TIME * Time.second, Time.second, write.time, roundEnd);
@@ -405,7 +421,9 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 			communicator.on("task", function(e, message) {
 				game.tagging = false;
 				game.guessWord = message.tag;
-
+				
+				$('#canvasMessage').hide();
+				$("#warnTag").hide();
 				if (game.role === "SKETCHER") {
 					hud.paint("pen");
 					hud.bindClick();
@@ -415,7 +433,6 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 				} else {
 					write.top($.i18n.prop('solution'), game.guessWord);
 				}
-
 				game.taskImage = new Image();
 				game.taskImage.src = message.image;
 				//Wait for the image to be loaded before drawing it to canvas to avoid errors
@@ -429,6 +446,7 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 				game.matchStarted = true;
 				time.setCountdown("tag", CONSTANTS.DEFAULT_ASK_TIME * Time.second, Time.second, write.time, roundEnd);
 				game.role = message.role;
+				$('#canvasMessage').hide();
 				if (message.role === "SKETCHER") {
 					$('#talk').removeAttr('disabled');
 					skipButton.show();
@@ -439,12 +457,23 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 					$(game.taskImage).on("load", function () {
 						task.paint(game.taskImage, message.width, message.height);
 					});
+					$("#warnPre").html($.i18n.prop('warnTag'));
+					$("#warnTag").show();
+					$("#warnTag").click(function() {
+						$(this).hide();
+					});
 				} else {
 					$('#talk').removeAttr('disabled');
 					skipButton.hide();
 					write.top($.i18n.prop('asktag'));
 					draws.clear();
-					task.clear();
+					draws.clear();
+					game.taskImage = new Image();
+					game.taskImage.src = $('#questionMark').attr("src");
+					write.canvasMessage($.i18n.prop('sketchertagging'));
+					$(game.taskImage).on("load", function () {
+						task.paint(game.taskImage, $('#questionMark').attr("rwidth"), $('#questionMark').attr("rheight"));
+					});
 				}
 			});
 
@@ -474,7 +503,8 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 
 			communicator.on("leaderboard", function(e, message) {
 				game.role = "ENDED";
-
+				$("#warnTag").hide();
+				$('#canvasMessage').hide();
 				$('#mainPage').removeClass('guesser');
 				$('#mainPage').removeClass('sketcher');
 				skipButton.hide();

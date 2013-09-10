@@ -26,7 +26,7 @@
 					<canvas id="task" width="420" height="350"></canvas>
 				</div>
 			</div>
-            <button id="skipTask"></button>
+                <button id="skipTask"></button>
 		</div>
 
 
@@ -45,9 +45,11 @@
 		<!--MESSAGES AND SCORES FOR THE PLAYERS-->
 		<div id="topMessage"></div>
 		<div id="timeCounter"></div>
+                <div id="canvasMessage"></div>
                 <div id="scoreBaloon">
                     <div id="score"></div>
                 </div>
+                <div id="warnTag" style="display:none"><pre id="warnPre"></pre></div>
 
 		<!--HANDLING ALL THE USERS CURRENTLY CONNECTED-->
                 <div id="currentAvatar"></div>
@@ -75,5 +77,14 @@
 				});
 			});
 		</script>
+                
+
+                <!--THIS HIDDEN DIV IS USED JUST TO PRELOAD IMAGES SO THAT THEY WON'T "FLICKER"-->
+                <div id="preloaded-images">
+                    <img src="../assets/images/UI/skipUnpressed.png" width="1" height="1" alt="skipPressed" />
+                    <img src="../assets/images/UI/skipHover.png" width="1" height="1" alt="skipHover" />
+                    <img src="../assets/images/UI/skipPressed.png" width="1" height="1" alt="skipUnpressed" />
+                    <img id="questionMark" src="../assets/images/UI/questionMark.png" rwidth="289" rheight="326" width="1" height="1" alt="questionMark" />
+                </div>
 </div>
 }

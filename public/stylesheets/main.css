@@ -23,7 +23,7 @@ html, body {
 .content {
     background-color: #fff;
     padding: 20px;
-position: relative;
+	position: relative;
     margin: 0 -90px; /* negative indent the amount of the padding to maintain the grid system */
     margin-left: auto ;
     margin-right: auto ;
@@ -421,6 +421,18 @@ box-shadow:-2px -2px 6px #B01AA6, -2px 2px 6px #B01AA6, 4px 2px 6px #B01AA6, 4px
 	padding-left: 0px;
 }
 
+#warnTag {
+	height: 200px !important;
+	width: 200px !important;
+	position: relative;
+	top: -170px;
+	left: 590px;
+	background-image: url("../images/UI/alertBox.png");
+	z-index: 900;
+	background-repeat: no-repeat;
+	background-size: contain;
+}
+
 div.popup_cont {
 	height:350px !important;
 	width:350px !important;
@@ -600,6 +612,53 @@ li.avatarIcon {
 	text-align:center;
 }
 
+#canvasMessage{
+	width: 380px;
+	height: 30px;
+	left:108px;
+	position:absolute;
+	top:350px;
+	text-align:center;
+	z-index:900;
+}
+
+#warnPre{
+	display: block;
+	padding: 9.5px;
+	margin: 0 0 10px;
+	font-size: 20px;
+	line-height: 1.428571429;
+	color: #333;
+	word-break: break-word;
+	word-wrap: break-word;
+	background-color: rgba(0, 0, 0, 0);
+	border: 0px solid rgba(0, 0, 0, 0);
+	border-radius: 4px;
+	width: 150px;
+	height: 100px;
+	top: 20px;
+	left: 40px;
+	position: relative;
+}
+
+#canvasPre{
+	display: block;
+	padding: 9.5px;
+	margin: 0 0 10px;
+	font-size: 20px;
+	line-height: 1.428571429;
+	color: #333;
+	word-break: break-word;
+	word-wrap: break-word;
+	background-color: rgba(0, 0, 0, 0);
+	border: 0px solid rgba(0, 0, 0, 0);
+	border-radius: 4px;
+	width: 300px;
+	height: 100px;
+	left: 40px;
+	position: relative;
+}
+
 #timeCounter{
 	width: 200px;
 	height: 30px;
@@ -688,7 +747,7 @@ footer {
 }
 
 .message span {
-    width: 80px;
+    width: 90px;
     overflow: hidden;
     text-align: right;
     font-weight: bold;
