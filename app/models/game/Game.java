@@ -69,6 +69,9 @@ public class Game extends GameRoom {
     private Boolean shownImages=false;
     private HashSet<ObjectNode> taskHashSet = new HashSet<>();
     private HashSet<ObjectNode> priorityTaskHashSet = new HashSet<>();
+    //We should not assign the same uTask to the same match, keep a list of the 
+    //uTasks that has been already used
+    private HashSet<Integer> usedUTasks = new HashSet<>();
     private Integer uTaskID=null;
     private ObjectNode taskImage;
     private Integer sessionId;
@@ -122,7 +125,7 @@ public class Game extends GameRoom {
          guessObject=null;
          uTaskID=null;
          //If we have task prioritized, then use them first
-         if(priorityTaskHashSet.size()>0) {
+         while(priorityTaskHashSet.size()>0&&guessObject==null) {
             int size = priorityTaskHashSet.size();
             Integer item=null;
             byte trials=0;
@@ -144,14 +147,23 @@ public class Game extends GameRoom {
                if (i == item)
                {
                    guessObject=obj;
-                   uTaskID=guessObject.get("utaskid").asInt();
+                   Integer task=guessObject.get("taskid").asInt();
+                   if(usedUTasks.contains(task)) {
+                       priorityTaskHashSet.remove(guessObject);
+                       guessObject=null;
+                   }
+                   else {
+                       uTaskID=guessObject.get("utaskid").asInt();
+                       usedUTasks.add(task);
+                   }
                    break;
                }
                i = i + 1;
             }
-            priorityTaskHashSet.remove(guessObject);
+            if(guessObject!=null)
+                priorityTaskHashSet.remove(guessObject);
          }
-         else {
+         if(guessObject==null) {
             int size = taskHashSet.size();
             Integer item=null;
             byte trials=0;
@@ -161,7 +173,7 @@ public class Game extends GameRoom {
               }
               catch(IllegalArgumentException ex) {
                  item=null;
-                 Logger.error("[GAME] Failed to retrieve Task Image, retrying.");
+                 Logger.error("[GAME] Failed to retrieve Task Image, retrying. Exception: "+ex);
                  trials++;
                  if(trials>=5)
                      throw new Error("[GAME] Failed to retrieve Task Image, aborting");
@@ -411,7 +423,7 @@ public class Game extends GameRoom {
          gameStarted=false;
          playersVect =  new CopyOnWriteArrayList<>();
          Akka.system().scheduler().scheduleOnce(
-            Duration.create(100, TimeUnit.MILLISECONDS),
+            Duration.create(1000, TimeUnit.MILLISECONDS),
             new Runnable() {
               @Override
               public void run() {

@@ -1,3 +1,24 @@
+var rendererGlobalVar = (function() {
+    var imageId; //shared variable available only inside your module
+	var socket;
+
+    return {
+        setImageId: function(val) {
+            imageId=val;
+        },
+        getImageId: function() {
+            return imageId;
+        },
+		setSocket: function(val) {
+			socket=val;
+		},
+		getSocket: function() {
+            return socket;
+        }
+    };
+})();
+
+
 (function(){
 
   // Polyfills
@@ -60,10 +81,13 @@
     try {
 	  var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
 	  socket = new WS($('#renderWebSocket').data('ws'));
+	  
       socket.onmessage = onSocketMessage;
 
       socket.onopen = function(evt) {
+		console.log( evt, this );
         connected = true;
+		rendererGlobalVar.setSocket(socket);
       };
 
       socket.onclose = function (evt) {
@@ -71,6 +95,7 @@
       };
 
       socket.onerror = function(evt) {console.error("error", evt);};
+	  
     }
     catch (e) {
 		console.error("Error in the connection");
@@ -91,6 +116,8 @@ var gameloop = (function(){
   var taskContext = taskCanvas.getContext("2d");
   var maskCanvas = document.getElementById("mask");
   var maskContext = maskCanvas.getContext("2d");
+  taskContext.font="30px Arial";
+  taskContext.fillText("Loading the list of tags...",10,50);
   /*******************************MANAGING THE INCOMING MESSAGES*****************/
   onSocketMessage = function (e) {
     var m = JSON.parse(e.data);
@@ -106,7 +133,9 @@ var gameloop = (function(){
 							taskContext.font="30px Arial";
 							taskContext.fillText("Loading Image...",10,50);
 							maskContext.font="30px Arial";
-							maskContext.fillText("Computing Aggregated Mask...",10,50);
+							maskContext.fillText("Select an available tag from",10,50);
+							maskContext.fillText("the dropdown menu.",10,80);
+							rendererGlobalVar.setImageId(m.id);
                             //Wait for the image to be loaded before drawing it to canvas to avoid
                             //errors
                             taskImage.onload = function() {
@@ -120,20 +149,6 @@ var gameloop = (function(){
 											canvas.height=m.height;
                                             taskContext.drawImage(taskImage,0,0,m.width,m.height);
                                             taskContext.restore();
-											socket.send(JSON.stringify(guessWord));
-                            };
-							maskImage = null;
-							maskImage = new Image();
-							maskImage.src = "/retrieveMask?imageID="+m.id;
-							maskImage.onload = function() {
-                                            maskContext.save();
-                                            maskContext.beginPath();
-                                            x=0;
-                                            y=0;
-											maskCanvas.width=m.width;
-											maskCanvas.height=m.height;
-                                            maskContext.drawImage(maskImage,0,0,m.width,m.height);
-                                            maskContext.restore();
                             };
  			break;
 		
@@ -170,9 +185,18 @@ var gameloop = (function(){
 										
                                     };								
 			break;
+		
+		case "tags":
+							var tagList=m.tags;
+							var html = "<option></option>";
+							for (i=0;i<tagList.length;i++) {
+								html+="<option>"+tagList[i]+"</option>";
+							}
+							$("#tagList").html(html);	
+							$("#tagList").attr("disabled",false);
+							$("#tagForm").show();
 			
-		
-		
+			break;
 	}
 	dirtyPositions = true;
   };
@@ -184,3 +208,44 @@ var gameloop = (function(){
 
   connect();
 })();
+
+function tagSelected() { 
+	var canvas = document.getElementById("draws");
+	var ctx = canvas.getContext("2d");
+	var taskCanvas = document.getElementById("task");
+	var taskContext = taskCanvas.getContext("2d");
+	var maskCanvas = document.getElementById("mask");
+	var maskContext = maskCanvas.getContext("2d");
+	maskCanvas.width=taskCanvas.width;
+	maskCanvas.height=taskCanvas.height;
+	var tag = $("#tagList option:selected").text();
+	if(tag!="") {
+		maskContext.font="30px Arial";
+		maskContext.clearRect(0,0,maskCanvas.width,maskCanvas.height);
+		ctx.clearRect(0,0,canvas.width,canvas.height);
+		maskContext.fillText("Computing aggregated mask...",10,50);
+		var serverSocket = rendererGlobalVar.getSocket();
+		serverSocket.send(JSON.stringify({"type":"tag","tag":tag}));
+		maskImage = null;
+		maskImage = new Image();
+		maskImage.src = "/retrieveMask?imageID="+rendererGlobalVar.getImageId()+"&tag="+tag;
+		maskImage.onload = function() {
+			maskContext.save();
+			maskContext.beginPath();
+			x=0;
+			y=0;
+			maskCanvas.width=taskCanvas.width;
+			maskCanvas.height=taskCanvas.height;
+			maskContext.drawImage(maskImage,0,0,maskCanvas.width,maskCanvas.height);
+			maskContext.restore();
+		};
+	}
+	//If they chose the white tag, just clean the canvas
+	else {
+		ctx.clearRect(0,0,canvas.width,canvas.height);
+		maskContext.clearRect(0,0,maskCanvas.width,maskCanvas.height);
+		maskContext.font="30px Arial";
+		maskContext.fillText("Select an available tag from",10,50);
+		maskContext.fillText("the dropdown menu.",10,80);
+	}
+};

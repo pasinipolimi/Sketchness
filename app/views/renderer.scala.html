@@ -10,6 +10,11 @@
     <div id="renderer">
 
         <!--THIS IS THE AREA IN WHICH THE DRAWINGS ARE MADE-->
+        <form id="tagForm" style="display:none">
+            <span style="font-size: x-large; font-weight: bold;">Select a tag from the list:</span>
+            <select id="tagList" onchange="tagSelected()" style="font-size: x-large; font-weight: bold;">
+            </select>
+            </form>
         <div id="drawArea" class="span10">
             <div id="viewport">
 				<span id="canvaswindows">

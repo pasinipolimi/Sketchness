@@ -117,53 +117,64 @@ public class CMS{
                     //If the task is still open
                     if(item.get("status").asInt()==1)
                     {
+                        String taskId=item.get("id").getTextValue();
                         item=jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/task/"+item.get("id").getTextValue()+".json");
                         item=item.get("task");
                         Logger.debug("[CMS] Retrieved open task "+item.toString());
                         JsonNode uTasks=item.get("uTask");
                         String id=item.get("image").getElements().next().getElements().next().asText();
                         JsonNode image = jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image/"+id+".json");
-                        //Retrieve all the uTask for the current task and assign them
-                        for (JsonNode utask : uTasks) {
-                            if(utask.getElements().hasNext()) {
-                                utask=jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/utask/"+utask.get("id").getTextValue()+".json");
-                                utask=utask.get("uTask");
-                                if(utask.get("status").asInt()==1) {
-                                    ObjectNode guessWord = Json.newObject();
-                                    guessWord.put("type", "task");
-                                    guessWord.put("id", id);
-                                    //Change the task to assign based on the kind of task that has to be performed
-                                    //for now just tagging and segmentation are supported for the images.
-                                    switch (utask.get("taskType").asText()) {
-                                        case "tagging":
-                                            guessWord.put("tag",chooseTag(null));
-                                            guessWord.put("lang",LanguagePicker.retrieveIsoCode());
-                                            guessWord.put("image",rootUrl+image.get("mediaLocator").asText());
-                                            guessWord.put("width",image.get("width").asInt());
-                                            guessWord.put("height",image.get("height").asInt());
-                                            guessWord.put("utaskid", utask.get("id").asInt());
-                                            priorityTaskHashSet.add(guessWord);
-                                            sendTaskAcquired(roomChannel);
-                                            break;
-                                        case "segmentation":
-                                            ArrayList<String> tags;
-                                            //Get all the segments that have been stored for the image
-                                            JsonNode imageSegments= image.get("descriptions");
-                                            if(imageSegments!=null) {
-                                                tags=retrieveTags(imageSegments);
-                                                guessWord.put("tag",chooseTag(tags));
+                        if(uTasks!=null)
+                        {
+                            //Retrieve all the uTask for the current task and assign them
+                            for (JsonNode utask : uTasks) {
+                                if(utask.getElements().hasNext()) {
+                                    utask=jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/utask/"+utask.get("id").getTextValue()+".json");
+                                    utask=utask.get("uTask");
+                                    if(utask.get("status").asInt()==1) {
+                                        ObjectNode guessWord = Json.newObject();
+                                        guessWord.put("type", "task");
+                                        guessWord.put("id", id);
+                                        //Change the task to assign based on the kind of task that has to be performed
+                                        //for now just tagging and segmentation are supported for the images.
+                                        switch (utask.get("taskType").asText()) {
+                                            case "tagging":
+                                                guessWord.put("tag",chooseTag(null));
                                                 guessWord.put("lang",LanguagePicker.retrieveIsoCode());
                                                 guessWord.put("image",rootUrl+image.get("mediaLocator").asText());
                                                 guessWord.put("width",image.get("width").asInt());
                                                 guessWord.put("height",image.get("height").asInt());
                                                 guessWord.put("utaskid", utask.get("id").asInt());
+                                                guessWord.put("taskid",taskId);
                                                 priorityTaskHashSet.add(guessWord);
                                                 sendTaskAcquired(roomChannel);
-                                            }
-                                            break;
+                                                break;
+                                            case "segmentation":
+                                                HashSet<String> tags;
+                                                //Get all the segments that have been stored for the image
+                                                JsonNode imageSegments= image.get("descriptions");
+                                                if(imageSegments!=null) {
+                                                    tags=retrieveTags(imageSegments);
+                                                    guessWord.put("tag",chooseTag(tags));
+                                                    guessWord.put("lang",LanguagePicker.retrieveIsoCode());
+                                                    guessWord.put("image",rootUrl+image.get("mediaLocator").asText());
+                                                    guessWord.put("width",image.get("width").asInt());
+                                                    guessWord.put("height",image.get("height").asInt());
+                                                    guessWord.put("utaskid", utask.get("id").asInt());
+                                                    guessWord.put("taskid",taskId);
+                                                    priorityTaskHashSet.add(guessWord);
+                                                    sendTaskAcquired(roomChannel);
+                                                }
+                                                break;
+                                        }
                                     }
                                 }
                             }
+                        }
+                        //There are no more uTasks left, close the task
+                        else
+                        {
+                            Logger.info("[CMS] Closing the task "+taskId);
                         }
                     }
                 }
@@ -186,7 +197,7 @@ public class CMS{
                 
                 //Get all the segments that have been stored for the image
                 JsonNode imageSegments= item.get("descriptions").get("segmentation");
-                ArrayList<String> tags = new ArrayList<>();
+                HashSet<String> tags = new HashSet<>();
                 ObjectNode guessWord = Json.newObject();
                 guessWord.put("type", "task");
                 guessWord.put("id", id);
@@ -217,24 +228,21 @@ private static void sendTaskAcquired(Room roomChannel)
     GameBus.getInstance().publish(taskAcquired); 
 }
     
-private static ArrayList<String> retrieveTags(JsonNode imageSegments)
+private static HashSet<String> retrieveTags(JsonNode imageSegments)
 {
-    ArrayList<String> tags = new ArrayList<>();
-    for(JsonNode segment:imageSegments)
+    HashSet<String> tags = new HashSet<>();
+    imageSegments=imageSegments.get("segmentation");
+    if(imageSegments!=null)
     {
-        if(segment.getElements().hasNext())
+        for(JsonNode segment:imageSegments)
         {
-            JsonNode textAnnotations = segment.getElements().next().get("itemAnnotations");
-            if(null!=textAnnotations) {
-                for(JsonNode annotation:textAnnotations)
-                {
-                    //For each annotation stored for the image
-                    if(annotation.getElements().hasNext())
-                    {
-                        //If the annotation is a tag and is in the same language as the one defined in the system, add the tag to the list of possible tags
-                        if((annotation.get("name").asText().equals("tag"))&&annotation.get("language").asText().equals(LanguagePicker.retrieveIsoCode())) 
-                            tags.add(annotation.get("value").asText());
-                    }
+            if(segment.getElements().hasNext())
+            {
+                JsonNode textAnnotations = segment.get("itemAnnotations").get(0);
+                if(null!=textAnnotations) {
+                            //If the annotation is a tag and is in the same language as the one defined in the system, add the tag to the list of possible tags
+                            if((textAnnotations.get("name").asText().equals("tag"))&&textAnnotations.get("language").asText().equals(LanguagePicker.retrieveIsoCode())) 
+                                tags.add(textAnnotations.get("value").asText());
                 }
             }
         }
@@ -244,15 +252,19 @@ private static ArrayList<String> retrieveTags(JsonNode imageSegments)
     
     
     
-/*
- * Returns a tag based on a particular choice policy
- * @return String retrieved tag following a policy
- */
-private static String chooseTag(ArrayList<String> tags)
-{
-    if(tags!=null&&tags.size()>0)
-        return tags.get(new Random().nextInt(tags.size()));
-    else
-        return "";
-}
+    /*
+     * Returns a tag based on a particular choice policy
+     * @return String retrieved tag following a policy
+     */
+    private static String chooseTag(HashSet<String> tags)
+    {
+        if(tags!=null&&tags.size()>0)
+        {
+            Object[] stringTags=tags.toArray();
+            String toReturn=(String)stringTags[(new Random().nextInt(tags.size()))];
+            return toReturn;
+        }
+        else
+            return "";
+    }
 }

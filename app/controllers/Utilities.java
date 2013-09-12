@@ -14,17 +14,17 @@ import views.html.renderer;
  */
 public class Utilities {
     
-    public static Result retrieveMask(final String imageID) {
+    public static Result retrieveMask(final String imageID, final String tag) {
         try{
-            File result=Renderer.retrieveMask(imageID);
+            File result=Renderer.retrieveMask(imageID,tag);
             if(null!=result)
                 return ok(result);
             else
-                return ok("[SKETCHNESS] Cannot retrieve the mask for image "+imageID);
+                return ok("[AGGREGATOR] Cannot retrieve the mask for image "+imageID+" and tag "+tag);
         }
         catch(Exception e)
         {
-            return ok("[SKETCHNESS] "+e.toString());
+            return ok("[AGGREGATOR] "+e.toString());
         }
     }
     
