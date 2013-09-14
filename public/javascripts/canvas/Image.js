@@ -18,7 +18,7 @@ define(["Class", "paper", "jquery"], function(Class, paper, $) {
 			this.view = this.project.view;
 
 			this.raster = new paper.Raster({
-				center: this.view.center,
+				position: this.view.center,
 				visible: false
 			});
 
@@ -26,6 +26,7 @@ define(["Class", "paper", "jquery"], function(Class, paper, $) {
 			this.raster.on("load", function() {
 				that.fit();
 				that.raster.setVisible(true);
+				that.view.draw();
 
 				// TODO: handle the load event externally
 				$(that).trigger("load");
@@ -61,6 +62,7 @@ define(["Class", "paper", "jquery"], function(Class, paper, $) {
 			 */
 			hide: function() {
 				this.raster.setVisible(false);
+				this.view.draw();
 			},
 
 			/**
@@ -68,8 +70,8 @@ define(["Class", "paper", "jquery"], function(Class, paper, $) {
 			 * the view area keeping ratio.
 			 */
 			fit: function() {
-				if (this.imgsize.width > this.view.size.width
-					|| this.imgsize.height > this.view.size.height) {
+				if (this.imgsize.width > this.view.size.width ||
+					this.imgsize.height > this.view.size.height) {
 
 					this.raster.fitBounds(this.view.bounds);
 				}

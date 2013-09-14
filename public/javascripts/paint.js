@@ -1,4 +1,4 @@
-require(["Communicator", "Time", "Painter", "jquery", "i18n"], function(Communicator, Time, Painter, $) {
+require(["Communicator", "Time", "canvas/Painter", "jquery", "i18n"], function(Communicator, Time, Painter, $) {
 
 	$(function() {
 
@@ -171,29 +171,7 @@ require(["Communicator", "Time", "Painter", "jquery", "i18n"], function(Communic
 
 		var painter = new Painter("task", "draws", "positions");
 
-		var positions = {
-			canvas: $("#positions"),
-			context: $("#positions")[0].getContext("2d"),
-			init: function() {
-				this.context.font = "9px monospace";
-				this.context.textAlign = "center";
-				this.context.textBaseline = "bottom";
-			},
-			clear: function() {
-				this.context.clearRect(0, 0, this.canvas.width(), this.canvas.height());
-			},
-			paint: function(player, x, y) {
-				this.clear();
-				this.context.beginPath();
-				this.context.strokeStyle = CONSTANTS.TRACKER_COLOR;
-				this.context.arc(x, y, player.size / 2, 0, 2 * Math.PI);
-				this.context.stroke();
-				this.context.font = "10px sans-serif";
-				this.context.fillStyle = CONSTANTS.TRACKER_COLOR;
-				this.context.fillText((player.name + "").substring(0, 20), x, y - Math.round(player.size / 2) - 4);
-			}
-		};
-		positions.init();
+		painter.setColor(CONSTANTS.TRACKER_COLOR);
 
 		var me = {
 			canvas: $("#me"),
@@ -359,13 +337,15 @@ require(["Communicator", "Time", "Painter", "jquery", "i18n"], function(Communic
 			});
 
 			communicator.on("move", function(e, message) {
-				positions.paint(getPlayer(message.name), message.x, message.y);
+				painter.setName(message.name);
+				painter.setSize(getPlayer(message.name).size);
+				painter.setPoint(message.x, message.y);
 			});
 
 			communicator.on("task", function(e, message) {
 				game.tagging = false;
 				game.guessWord = message.tag;
-				
+
 				$('#canvasMessage').hide();
 				$("#warnTag").hide();
 				if (game.role === "SKETCHER") {
@@ -456,9 +436,9 @@ require(["Communicator", "Time", "Painter", "jquery", "i18n"], function(Communic
 						$("#mainPage").html(data);
 					},
 					error: function() {
-					  alert("Error!")
+						alert("Error!");
 					}
-				  })
+				});
 
 			});
 
@@ -495,7 +475,7 @@ require(["Communicator", "Time", "Painter", "jquery", "i18n"], function(Communic
 					hud.clear();
 					hud.unbindClick();
 				}
-				positions.clear();
+				painter.hidePosition();
 				write.time(null);
 				communicator.send({ type: 'roundEnded', player: user.name });
 			};

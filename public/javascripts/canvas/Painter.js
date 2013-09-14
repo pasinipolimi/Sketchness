@@ -1,4 +1,4 @@
-define(["Class", "./Image"], function(Class, Image) {
+define(["Class", "./Image", "./Position"], function(Class, Image, Position) {
 
 	/**
 	 * General proxy handler for canvases.
@@ -16,6 +16,7 @@ define(["Class", "./Image"], function(Class, Image) {
 		 */
 		_init: function(image, path, position) {
 			this.image = new Image(image);
+			this.position = new Position(position);
 		},
 
 		_proto: {
@@ -31,10 +32,55 @@ define(["Class", "./Image"], function(Class, Image) {
 			},
 
 			/**
-			 * Hide the image
+			 * Hides the image
 			 */
 			hideImage: function() {
 				this.image.hide();
+			},
+
+			/**
+			 * Sets the color of the tool
+			 *
+			 * @param color :String The color of the tool
+			 */
+			setColor: function(color) {
+				this.position.setColor(color);
+			},
+
+			/**
+			 * Set the tool size
+			 *
+			 * @param size :Number The size of the tool
+			 */
+			setSize: function(size) {
+				this.position.setSize(size);
+			},
+
+			/**
+			 * Set the name label for the cursor
+			 *
+			 * @param name :String The name of the sketcher
+			 */
+			setName: function(name) {
+				this.position.setText(name);
+			},
+
+			/**
+			 * Set the current position point
+			 * for position and path
+			 *
+			 * @param x :Number The x position
+			 * @param y :Number The y position
+			 */
+			setPoint: function(x, y) {
+				this.position.draw([x, y]);
+			},
+
+			/**
+			 * Hides the position from the canvas.
+			 */
+			hidePosition: function() {
+				this.position.hide();
 			}
 		}
 	});
