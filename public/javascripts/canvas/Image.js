@@ -70,11 +70,12 @@ define(["Class", "paper", "jquery"], function(Class, paper, $) {
 			 * the view area keeping ratio.
 			 */
 			fit: function() {
-				if (this.imgsize.width > this.view.size.width ||
-					this.imgsize.height > this.view.size.height) {
+				var bounds = new paper.Rectangle({
+					center: this.view.center,
+					size: paper.Size.min(this.view.size, this.imgsize)
+				});
 
-					this.raster.fitBounds(this.view.bounds);
-				}
+				this.raster.fitBounds(bounds);
 			}
 		}
 	});

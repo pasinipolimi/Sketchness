@@ -1,4 +1,4 @@
-define(["Class", "./Image", "./Position"], function(Class, Image, Position) {
+define(["Class", "./Image", "./Path", "./Position"], function(Class, Image, Path, Position) {
 
 	/**
 	 * General proxy handler for canvases.
@@ -16,6 +16,7 @@ define(["Class", "./Image", "./Position"], function(Class, Image, Position) {
 		 */
 		_init: function(image, path, position) {
 			this.image = new Image(image);
+			// this.path = new Path(path); // TODO: uncomment to introduce paper handled paths
 			this.position = new Position(position);
 		},
 
@@ -45,6 +46,7 @@ define(["Class", "./Image", "./Position"], function(Class, Image, Position) {
 			 */
 			setColor: function(color) {
 				this.position.setColor(color);
+				//this.path.setColor(color); // TODO: uncomment to introduce paper handled paths
 			},
 
 			/**
@@ -54,6 +56,7 @@ define(["Class", "./Image", "./Position"], function(Class, Image, Position) {
 			 */
 			setSize: function(size) {
 				this.position.setSize(size);
+				// this.path.setSize(size); // TODO: uncomment to introduce paper handled paths
 			},
 
 			/**
@@ -74,6 +77,7 @@ define(["Class", "./Image", "./Position"], function(Class, Image, Position) {
 			 */
 			setPoint: function(x, y) {
 				this.position.draw([x, y]);
+				// this.path.add([x, y]); // TODO: uncomment to introduce paper handled paths
 			},
 
 			/**
@@ -81,6 +85,36 @@ define(["Class", "./Image", "./Position"], function(Class, Image, Position) {
 			 */
 			hidePosition: function() {
 				this.position.hide();
+			},
+
+			/**
+			 * Hides the draw from the canvas.
+			 */
+			clearPath: function() {
+				this.path.clear();
+			},
+
+			/**
+			 * Begin a new path
+			 */
+			beginPath: function() {
+				this.path.begin();
+			},
+
+			/**
+			 * Ends and simplify the path
+			 */
+			endPath: function() {
+				this.path.end();
+			},
+
+			/**
+			 * Switch the mode between pen and eraser
+			 *
+			 * @param eraser :Boolean True to activate eraser
+			 */
+			setEraser: function(eraser) {
+				this.path.setEraser(eraser);
 			}
 		}
 	});
