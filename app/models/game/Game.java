@@ -169,7 +169,11 @@ public class Game extends GameRoom {
             byte trials=0;
             do {
               try {
-                 item = new Random().nextInt(size);
+                 size = taskHashSet.size();
+                 if(size>0)
+                    item = new Random().nextInt(size);
+                 else
+                     break;
               }
               catch(IllegalArgumentException ex) {
                  item=null;
@@ -179,17 +183,21 @@ public class Game extends GameRoom {
                      throw new Error("[GAME] Failed to retrieve Task Image, aborting");
               }
             }while (item==null);
-            int i = 0;
-            for(ObjectNode obj : taskHashSet)
-            {
-               if (i == item)
-               {
-                   guessObject=obj;
-                   break;
-               }
-               i = i + 1;
+            if(item!=null) {
+                int i = 0;
+                for(ObjectNode obj : taskHashSet)
+                {
+                   if (i == item)
+                   {
+                       guessObject=obj;
+                       break;
+                   }
+                   i = i + 1;
+                }
+                taskHashSet.remove(guessObject);
             }
-            taskHashSet.remove(guessObject);
+            else
+                guessObject=null;
          }
          return guessObject;
     }
@@ -327,6 +335,7 @@ public class Game extends GameRoom {
            nextSketcher();
            //Check if a tag for the current image as already been provided;if not, ask for a new one
            taskImage = retrieveTaskImage();
+           if(taskImage!=null) {
            String label=taskImage.get("tag").asText();
            if(label.equals(""))
                //We need to ask for a new tag
@@ -334,6 +343,10 @@ public class Game extends GameRoom {
            else
                //We have already a tag that has been provided, use that one
                sendTask(false);
+           }
+           //We have no more things to do
+           else
+               gameEnded();
          }
          //We have played all the rounds for the game, inform the users and the modules
          //that the match has ended

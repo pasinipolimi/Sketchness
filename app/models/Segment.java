@@ -55,7 +55,7 @@ public class Segment{
         ArrayNode toReturn = new ArrayNode(JsonNodeFactory.instance);
         ArrayList<PositionedPoint> finalSegment = new ArrayList<>();
         ArrayList<PositionedPoint> copy = new ArrayList<>();
-        int fixedWidth=0;
+        int fixedWidth=canvasWidth;
         if(taskHeight>canvasHeight)
             fixedWidth=canvasHeight*taskWidth/taskHeight;
         
