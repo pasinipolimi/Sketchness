@@ -17,22 +17,35 @@ define(["Class", "paper"], function(Class, paper) {
 			this.project = paper.project;
 			this.view = this.project.view;
 
-			this.eraser = false;
+			this.tools = {
+				pen: {
+					blendMode: "source-over"
+				},
+				eraser: {
+					blendMode: "destination-out"
+				}
+			}
+
+			this.tool = "pen";
 			this.color = new paper.Color();
 			this.size = 5;
 
 			this.path = null;
 			this.group = new paper.Group();
+
+			this.closed = false;
 		},
 
 		_proto: {
 			/**
 			 * Switch the mode between pen and eraser
 			 *
-			 * @param eraser :Boolean True to activate eraser
+			 * @param tool :String("pen"|"eraser") The tool type
 			 */
-			setEraser: function(eraser) {
-				this.eraser = eraser;
+			setTool: function(tool) {
+				if(tool in this.tools) {
+					this.tool = tool;
+				}
 			},
 
 			/**
@@ -55,14 +68,21 @@ define(["Class", "paper"], function(Class, paper) {
 
 			/**
 			 * Begins a path with the given properties
+			 * (If the paths were hidden before, deletes
+			 * them cleaning the canvas)
 			 */
 			begin: function() {
 				this.project.activate();
 
+				if(!this.group.visible) {
+					this.group.removeChildren();
+					this.group.setVisible(true);
+				}
+
 				this.path = new paper.Path({
 					strokeColor: this.color,
 					strokeWidth: this.size,
-					blendMode: (this.eraser ? "destination-out" : "source-over")
+					blendMode: this.tools[this.tool].blendMode
 				});
 
 				this.group.addChild(this.path);
@@ -76,9 +96,9 @@ define(["Class", "paper"], function(Class, paper) {
 			add: function(point) {
 				if(this.path !== null) {
 					this.path.add(point);
-				}
 
-				this.view.draw();
+					this.view.draw();
+				}
 			},
 
 			/**
@@ -94,10 +114,20 @@ define(["Class", "paper"], function(Class, paper) {
 			},
 
 			/**
-			 * Clears the path canvas
+			 * Hides the draws
 			 */
-			clear: function() {
-				this.group.removeChildren();
+			hide: function() {
+				this.end();
+				this.group.setVisible(false);
+
+				this.view.draw();
+			},
+
+			/**
+			 * Shows the paths if hidden
+			 */
+			show: function() {
+				this.group.setVisible(true);
 				this.view.draw();
 			}
 		}

@@ -29,6 +29,7 @@ object ApplicationBuild extends Build {
 		Resource("Lib Folder", "lib"),
 		Resource("RequireJS", "public/javascripts/lib/require.js", "http://requirejs.org/docs/release/2.1.8/minified/require.js", false),
 		Resource("PaperJS", "public/javascripts/lib/paper.js", "https://raw.github.com/paperjs/paper.js/v0.9.9/dist/paper-full.js", false),
+		Resource("JS State Machine", "public/javascripts/lib/state-machine.js", "https://raw.github.com/jakesgordon/javascript-state-machine/master/state-machine.js", false),
 		Resource("jQuery", "public/javascripts/lib/jquery.js", "http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js", false),
 		Resource("jQuery i18n", "public/javascripts/lib/jquery.i18n.properties.js", "http://jquery-i18n-properties.googlecode.com/files/jquery.i18n.properties-min-1.0.9.js", false),
 		Resource("jScrollPane", "public/javascripts/lib/jquery.jscrollpane.js", "http://jscrollpane.kelvinluck.com/script/jquery.jscrollpane.min.js", false),

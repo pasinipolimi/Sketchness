@@ -7,6 +7,7 @@ require.config({
 		"jscrollpane": "lib/jquery.jscrollpane",
 		"popup": "lib/popUp",
 		"paper": "lib/paper"
+		"StateMachine": "lib/state-machine"
 	},
 	shim: {
 		"jquery": {
@@ -26,6 +27,9 @@ require.config({
 		},
 		"paper": {
 			exports: "paper"
+		},
+		"StateMachine": {
+			exports: "StateMachine"
 		}
 	}
 });

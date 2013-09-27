@@ -2,6 +2,11 @@ require(["Communicator", "jquery", "popup", "jscrollpane"], function(Communicato
 
 	$(function() {
 
+		var sketchness = {
+			players: [],
+			myself: $('#username').val(),
+		};
+
 		// Show error message
 		var setError = function(message) {
 			$("#onError span").text(message);
@@ -24,18 +29,6 @@ require(["Communicator", "jquery", "popup", "jscrollpane"], function(Communicato
 
 		var chosenId = undefined;
 
-		// WebSocket
-		var communicator = new Communicator($('#lobbyWebSocket').data('ws'));
-
-		$(communicator.websocket).on({
-			close: function(evt) {
-				setError("Connection lost");
-			},
-			error: function(evt) {
-				setError(evt);
-			}
-		});
-
 		//Set the game ID when the user select a row in the
 		//game list; highlight the chosen row
 		$('#gameList').on('click', 'tr', function(event) {
@@ -54,6 +47,57 @@ require(["Communicator", "jquery", "popup", "jscrollpane"], function(Communicato
 					.removeClass("highlight");
 				//Highlight the curront row
 				$tr.addClass("highlight");
+			}
+		});
+
+		// WebSocket
+		var communicator = new Communicator($('#lobbyWebSocket').data('ws'));
+		$(communicator.websocket).on({
+			close: function(evt) {
+				setError("Connection lost");
+			},
+			error: function(evt) {
+				setError(evt);
+			}
+		});
+
+		var chat = new Chat($("#messages"), $("#talk"));
+		$(chat).on("send", function(e, message) {
+			communicator.send("chat", { message: message });
+		});
+
+		communicator.on({
+			chat: function(e, content) {
+				chat.message(sketchness.players[content.user].name, content.message, content.user === sketchness.myself);
+			},
+			log: function(e, content) {
+				chat.log(content.level, content.message);
+			}
+		});
+
+		var writePlayers = function(players, myself) {
+			var container = $("#unorderedUserList");
+			container.empty();
+			$.each(players, function(id, player) {
+				if(id !== myself) {
+					container.append($('<li class="avatarIcon">' + player.name + '</li>'));
+				}
+			});
+		};
+
+		communicator.on({
+			join: function(e, content) {
+				sketchness.players[content.user] = {
+					id: content.user,
+					name: content.name,
+					img: content.img,
+				};
+
+				writePlayers(sketchness.players, sketchness.myself);
+			},
+			leave: function(e, content) {
+				delete sketchness.players[content.user];
+				writePlayers(sketchness.players, sketchness.myself);
 			}
 		});
 

@@ -28,6 +28,7 @@ define(["Class","Countdown"], function(Class, Countdown){
 			 * @param event :Function The function to run at the end
 			 */
 			setCountdown: function(name, duration, step, update, event) {
+				this.clearCountdown(name);
 				this.countdowns[name] = new Countdown(name, duration, step, update, event);
 			},
 

@@ -1,251 +1,54 @@
-require(["Communicator", "Time", "canvas/Painter", "jquery", "i18n"], function(Communicator, Time, Painter, $) {
+require(["Chat", "StateMachine", "Communicator", "Time", "Writer", "canvas/Painter", "jquery", "i18n"],
+function( Chat,   StateMachine,   Communicator,   Time,   Writer,   Painter,          $) {
 
 	$(function() {
 
-		var time = new Time();
-
-		var isIframe = (window.parent !== window);
-		var isMobile = /ipad|iphone|android/i.test(navigator.userAgent);
-
-		// CONSTANTS
-		var CONSTANTS = {
-			PEN_COLOR: 'red',
-			PEN_SIZE: 5,
-			ERASER_COLOR: "rgba(255,255,255,1.0)",
-			ERASER_SIZE: 25,
-			TRACKER_COLOR: 'red',
-			MIN_SEND_RATE: 50, // the min interval in ms between 2 send
-			DEFAULT_ROUND_TIME: 90,
-			DEFAULT_ASK_TIME: 20
+		var sketchness = {
+			players: [],
+			myself: $('#currentNickname').text(),
+			sketcher: null,
+			task: null,
+			word: null,
+			isMobile: /ipad|iphone|android/i.test(navigator.userAgent)
 		};
 
-		// STATES
-		var user = {
-			id: null,
-			name: null,
+		var constants = {
+			tagTime: 30,
+			taskTime: 90,
+			solutionTime: 5
 		};
 
-		// TOOLS STATUS
-		var tool = {
-			color: CONSTANTS.PEN_COLOR,
-			size: CONSTANTS.PEN_SIZE,
-			draw: true
+		var elements = {
+			header: $("#pageheader"),
+			main: $("#mainPage"),
+			score: $("#score"),
+			time: $("#timeCounter"),
+			top: $("#topMessage"),
+			error: $("#onError"),
+			canvasMessage: $("#canvasMessage"),
+			warnTag: $("#warnTag"),
+			websocket: $('#paintWebSocket'),
+			chatContainer: $("#messages"),
+			chatInput: $("#talk"),
+			opponents: $("#opponents"),
+			wordInput: $("#wordInput"),
+			skip: $('#skipTask'),
+			questionMark: $('#questionMark'),
+			hudArea: $("#hudArea"),
+			hud: $("#hud"),
+			tool: $("#tool"),
+			size: $("#size"),
+			color: $("#color"),
+			viewport: $("#viewport"),
+			task: $("#task"),
+			draws: $("#draws"),
+			positions: $("#positions")
 		};
 
-		//GAME STATUS
-		var game = {
-			role: null,
-			score: 0,
-			matchStarted: false,
-			guessWord: "",
-			guessed: false,
-			taskImage: null,
-			tagging: false,
-			traceNum: 1
-		};
+		var write = new Writer(elements, sketchness.myself);
 
-		// every player positions
-		var players = [];
-
-		// Dunno, variables before in an enclosure causing problems
-		var skipButton;
-		var roundEnd;
-
-		var write = {
-			score: function() {
-				var html = "<font size='5'><b>" + game.score + "</b></font>";
-				$("#score").html(html);
-			},
-			time: function(time) {
-				var html = "";
-				if(time || time === 0) {
-					html = "<font size='5'><b>" + $.i18n.prop('time') + Time.round(time, Time.second) + "</b></font>";
-				}
-				$("#timeCounter").html(html);
-			},
-			top: function(text, red) {
-				var html = "<font size='5'><b>" + text;
-				if(red !== undefined) {
-					html += "<font color='red'>" + red + "</font>";
-				}
-				html += "</b></font>";
-
-				$("#topMessage").html(html);
-			},
-			error: function(message) {
-				$("#onError span").text(message);
-				$("#onError").show();
-				$("#pageheader").hide();
-				$("#mainPage").hide();
-			},
-			canvasMessage: function(message) {
-				var html = "<font size='5'><b><pre id='canvasPre'>" + message + "</pre></b></font>";
-				$("#canvasMessage").show();
-				$("#canvasMessage").html(html);
-			}
-		};
-		write.score();
-
-		if (!game.matchStarted) write.top($.i18n.prop('waiting'));
-
-		var setColor = function(c) {
-			tool.color = c;
-			communicator.send({
-				type: 'change',
-				size: tool.size,
-				color: tool.color,
-				name: user.name,
-				role: game.role
-			});
-		};
-
-		var setSize = function(s) {
-			tool.size = s;
-			communicator.send({
-				type: 'change',
-				size: tool.size,
-				color: tool.color,
-				name: user.name,
-				role: game.role
-			});
-		};
-
-		var hud = {
-			canvas: $("#hud"),
-			context: $("#hud")[0].getContext("2d"),
-			tools: {
-				pen: {
-					enabled: "assets/images/UI/Controls/pencil.png",
-					disabled: "assets/images/UI/Controls/pencilD.png",
-					size: { x: 70, y: 70 },
-					position: { x: 0, y: 130 }
-				},
-				eraser: {
-					enabled: "assets/images/UI/Controls/eraser.png",
-					disabled: "assets/images/UI/Controls/eraserD.png",
-					size: { x: 70, y: 70 },
-					position: { x: 0, y: 200 }
-				}
-			},
-			preload: function() {
-				$.each(this.tools, function(name, tool) {
-					$.each(["enabled", "disabled"], function(key, status) {
-						var src = tool[status];
-						tool[status] = new Image();
-						tool[status].src = src;
-					});
-				});
-			},
-			clear: function() {
-				this.context.clearRect(0, 0, this.canvas.width(), this.canvas.height());
-			},
-			paint: function(active) {
-				this.clear();
-				var self = this;
-				$.each(this.tools, function(name, tool) {
-					var status = (name === active ? "enabled" : "disabled");
-					self.context.drawImage(tool[status], tool.position.x, tool.position.y, tool.size.x, tool.size.y);
-				});
-			},
-			bindClick: function() {
-				var self = this;
-				//[TODO] It should be screen and resolution independent, it can't work like that
-				this.canvas.on("click", function (e) {
-					var o = relativePosition(e, self.canvas);
-					if ((o.y >= 130) && (o.y < 200)) {
-						setColor(CONSTANTS.PEN_COLOR);
-						setSize(CONSTANTS.PEN_SIZE);
-						self.paint("pen");
-					} else if ((o.y >= 200) && (o.y <= 270)) {
-						setColor(CONSTANTS.ERASER_COLOR);
-						setSize(CONSTANTS.ERASER_SIZE);
-						self.paint("eraser");
-					}
-				});
-			},
-			unbindClick: function() {
-				this.canvas.off("click");
-			}
-		};
-		hud.preload();
-
-		var painter = new Painter("task", "draws", "positions");
-
-		painter.setColor(CONSTANTS.TRACKER_COLOR);
-
-		var me = {
-			canvas: $("#me"),
-			context: $("#me")[0].getContext("2d"),
-			init: function() {
-				this.context.lineCap = 'round';
-				this.context.lineJoin = 'round';
-			},
-			clear: function() {
-				this.context.clearRect(0, 0, this.canvas.width(), this.canvas.height());
-			},
-			lineTo: function(from, to) {
-				this.context.strokeStyle = tool.color;
-				this.context.lineWidth = tool.size;
-				this.context.beginPath();
-				this.context.moveTo(from.x, from.y);
-				this.context.lineTo(to.x, to.y);
-				this.context.stroke();
-			}
-		};
-		me.init();
-
-		var draws = {
-			canvas: $("#draws"),
-			context: $("#draws")[0].getContext("2d"),
-			init: function() {
-				this.context.lineCap = 'round';
-				this.context.lineJoin = 'round';
-			},
-			clear: function() {
-				this.context.clearRect(0, 0, this.canvas.width(), this.canvas.height());
-			},
-			setTool: function(name) {
-				if(name === "pen") {
-					this.context.globalCompositeOperation = "source-over";
-				} else if(name === "eraser") {
-					this.context.globalCompositeOperation = "destination-out";
-				}
-			},
-			draw: function(points, size) {
-				this.context.lineWidth = size;
-				this.context.beginPath();
-				if(points[0]) this.context.moveTo(points[0].x, points[0].y);
-				var self = this;
-				points.forEach(function (point) {
-					self.context.strokeStyle = point.color;
-					self.context.lineTo(point.x, point.y);
-				});
-				this.context.stroke();
-			}
-		};
-		draws.init();
-
-		/*****************************UTILITY FUNCTIONS********************************************/
-
-		if (!user.name) {
-			user.name = $('#currentNickname').text() ||
-				localStorage.getItem("pname") ||
-				("iam" + Math.floor(100 * Math.random()));
-			localStorage.setItem("pname", user.name);
-		}
-
-		// WebSocket
-		var communicator = new Communicator($('#paintWebSocket').data('ws'));
-
+		var communicator = new Communicator(elements.websocket.data('ws'));
 		$(communicator.websocket).on({
-			open: function(evt) {
-				communicator.send({
-					type: 'change',
-					size: tool.size,
-					color: tool.color,
-					name: user.name
-				});
-			},
 			close: function(evt) {
 				write.error("Connection lost");
 			},
@@ -254,354 +57,596 @@ require(["Communicator", "Time", "canvas/Painter", "jquery", "i18n"], function(C
 			}
 		});
 
-		var getPlayer = function(username) {
-			for (var i = 0; i < players.length; i++) {
-				if (players[i].name.toLowerCase() === username.toLowerCase()) {
-					return players[i];
-				}
+		var chat = new Chat(elements.chatContainer, elements.chatInput);
+		$(chat).on("send", function(e, message) {
+			communicator.send("chat", { message: message });
+		});
+
+		communicator.on({
+			chat: function(e, content) {
+				chat.message(sketchness.players[content.user].name, content.message, content.user === sketchness.myself);
+			},
+			log: function(e, content) {
+				chat.log(content.level, content.message);
 			}
-		};
+		});
 
-		var deletePlayer = function(username) {
-			for (var i = 0; i < players.length; i++) {
-				if (players[i].name.toLowerCase() === username.toLowerCase()) {
-					delete players[i];
-					return;
-				}
-			}
-		};
+		var painter = new Painter(elements.task[0], elements.draws[0], elements.positions[0]);
 
-		var playerExtend = function(message) {
-			var username = message.name;
-			for (var i = 0; i < players.length; i++) {
-				if (players[i].name.toLowerCase() === username.toLowerCase()) {
-					players[i] = $.extend(players[i], message);
-				}
-			}
-		};
+		/**
+		 * Finite state machine that handle
+		 * each game phase.
+		 */
+		var GameFSM = new Class({
+			_name: "GameFSM",
 
-		//***************************TAKING CARE OF THE LINE STROKES*****************************/
-		(function() {
-			skipButton = $('#skipTask');
-			skipButton.hide();
-			skipButton.on("click", function() {
-				$("#warnTag").hide();
-				if (game.role === "SKETCHER") {
-					if (game.tagging) {
-						communicator.send({ type: 'skipTask', timerObject: 'tag' });
-					} else {
-						communicator.send({ type: 'skipTask', timerObject: 'round' });
-					}
-				}
-			});
-			/*******************************MANAGING THE INCOMING MESSAGES*****************/
-			communicator.on("role", function(e, message) {
-				game.tagging = false;
-				//Fix the drawing style for the player
-				draws.setTool("eraser");
-				game.guessed = false;
-				game.role = message.role;
-				game.matchStarted = true;
-				var player = getPlayer(user.name);
-				player.role = message.role;
-				communicator.send({
-					type: 'change',
-					size: tool.size,
-					color: tool.color,
-					name: user.name,
-					role: game.role
-				});
-				if (game.role === "SKETCHER") {
-					$('#roleSpan').text($.i18n.prop('sketcher'));
-					$('#mainPage').removeClass('guesser');
-					$('#mainPage').addClass('sketcher');
-					$('#talk').attr('disabled', 'disabled');
-					$('#canvasMessage').hide();
-					$("#warnTag").hide();
-					skipButton.show();
-				} else {
-					$('#roleSpan').text($.i18n.prop('guesser'));
-					$('#mainPage').removeClass('sketcher');
-					$('#mainPage').addClass('guesser');
-					$('#talk').removeAttr('disabled');
-					skipButton.hide();
-					$('#canvasMessage').hide();
-					$("#warnTag").hide();
-					write.top($.i18n.prop('guess'));
-				}
-				time.setCountdown("round", CONSTANTS.DEFAULT_ROUND_TIME * Time.second, Time.second, write.time, roundEnd);
-				time.setTimer("round");
-				time.clearCountdown("tag");
-				draws.clear();
-				painter.hideImage();
-			});
+			/**
+			 * Initialize the component with the given options
+			 *
+			 * @param options :Object The configuration object for the FSM
+			 *     @property sketchness :Object The game variables
+			 *     @property constants :Object The game constants
+			 *     @property communicator :Communicator The communicator to listen
+			 *     @property write :Writer The DOM writer utility
+			 *     @property chat :Chat The chat handler
+			 *     @property painter :Painter The canvas handler
+			 *     @property elements :Chat The DOM elements to manipulate
+			 */
+			_init: function(options) {
+				$.extend(this, options);
 
-			communicator.on("move", function(e, message) {
-				painter.setName(message.name);
-				painter.setSize(getPlayer(message.name).size);
-				painter.setPoint(message.x, message.y);
-			});
+				this.startup();
+			},
 
-			communicator.on("task", function(e, message) {
-				game.tagging = false;
-				game.guessWord = message.tag;
+			_proto: {
+				/**
+				 * Setup of wait players state
+				 */
+				onenterplayersWait: function() {
+					var that = this,
+						write = this.write,
+						sk = this.sketchness;
 
-				$('#canvasMessage').hide();
-				$("#warnTag").hide();
-				if (game.role === "SKETCHER") {
-					hud.paint("pen");
-					hud.bindClick();
-					write.top($.i18n.prop('draw'), game.guessWord);
-				} else if (game.guessed) {
-					write.top($.i18n.prop('guessed'), game.guessWord);
-				} else {
-					write.top($.i18n.prop('solution'), game.guessWord);
-				}
+					write.top($.i18n.prop('waiting'));
 
-				painter.showImage(message.image, message.width, message.height);
-			});
-
-			communicator.on("tag", function(e, message) {
-				game.tagging = true;
-				game.matchStarted = true;
-				time.setCountdown("tag", CONSTANTS.DEFAULT_ASK_TIME * Time.second, Time.second, write.time, roundEnd);
-				game.role = message.role;
-				$('#canvasMessage').hide();
-				if (message.role === "SKETCHER") {
-					$('#talk').removeAttr('disabled');
-					skipButton.show();
-					write.top($.i18n.prop('asktagsketcher'));
-					draws.clear();
-					painter.showImage(message.image, message.width, message.height);
-					$("#warnPre").html($.i18n.prop('warnTag'));
-					$("#warnTag").show();
-					$("#warnTag").click(function() {
-						$(this).hide();
+					this.communicator.on({
+						join: function(e, content) {
+							sk.players[content.user] = {
+								id: content.user,
+								name: content.name,
+								img: content.img,
+								score: 0
+							};
+							write.players(sk.players);
+						},
+						leave: function(e, content) {
+							delete sk.players[content.user];
+							write.players(sk.players);
+						},
+						beginRound: function(e, content) {
+							that.beginRound(content.sketcher);
+						}
 					});
-				} else {
-					$('#talk').removeAttr('disabled');
-					skipButton.hide();
-					write.top($.i18n.prop('asktag'));
-					draws.clear();
-					write.canvasMessage($.i18n.prop('sketchertagging'));
-					painter.showImage($('#questionMark').attr("src"), $('#questionMark').attr("rwidth"), $('#questionMark').attr("rheight"));
-				}
-			});
+				},
 
-			communicator.on("points", function(e, message) {
-				if (message.name === user.name) {
-					game.score += message.points;
-					write.score();
-					game.guessed = true;
-					skipButton.hide();
-				}
-			});
+				/**
+				 * Tear down of wait players state
+				 */
+				onleaveplayersWait: function() {
+					this.write.top();
 
-			communicator.on("timeChange", function(e, message) {
-				if (time.getCountdown(message.timeObject) > (message.amount * Time.second)) {
-					time.changeCountdown(message.timeObject, message.amount * Time.second);
-				}
-			});
+					this.communicator.off("join leave beginRound");
+				},
 
-			communicator.on("showImages", function(e, message) {
-				game.role = "ROUNDCHANGE";
-				skipButton.hide();
-				time.clearCountdown("round");
-				time.setCountdown("round", message.seconds * Time.second, Time.second, write.time, roundEnd);
-				$('#mainPage').removeClass('sketcher');
-				$('#mainPage').addClass('guesser');
-			});
-
-			communicator.on("leaderboard", function(e, message) {
-				game.role = "ENDED";
-				$("#warnTag").hide();
-				$('#canvasMessage').hide();
-				$('#mainPage').removeClass('guesser');
-				$('#mainPage').removeClass('sketcher');
-				skipButton.hide();
-
-				//Clear all the canvas and draw the leaderboard
-				draws.clear();
-				painter.hideImage();
-
-				//Disable the chat
-				$('#talk').attr('disabled', 'disabled');
-				var results="";
-				for (var i = 0; i < message.playersNumber; i++) {
-					results+=":"+message.playerList[i].name+":"+message.playerList[i].points;
-				}
-				//Display the leaderboard page with the results
-				jsRoutes.controllers.Sketchness.leaderboard(user.name,results).ajax({
-					success: function(data) {
-						$("#mainPage").html(data);
-					},
-					error: function() {
-						alert("Error!");
+				/**
+				 * Utility method to trigger the event for
+				 * a new round automatically choosing between
+				 * sketcher and guesser state.
+				 *
+				 * @param sketcher :String The sketcher ID
+				 */
+				beginRound: function(sketcher) {
+					var sk = this.sketchness;
+					sk.sketcher = sketcher;
+					if(sk.sketcher === sk.myself) {
+						this.beSketcher();
+					} else {
+						this.beGuesser();
 					}
-				});
+				},
 
-			});
+				/**
+				 * Setup of sketcher state
+				 */
+				onenterSketcher: function() {
+					var that = this;
+					this.communicator.on({
+						tag: function() {
+							that.tag();
+						},
+						task: function(e, content) {
+							that.task(content.word);
+						}
+					});
+				},
 
-			communicator.on("trace", function(e, message) {
-				var player = getPlayer(message.name);
-				if (player.color === CONSTANTS.ERASER_COLOR) {
-					draws.setTool("eraser");
-				} else {
-					draws.setTool("pen");
-				}
-				draws.draw(message.points, player.size);
+				/**
+				 * Tear down of sketcher state
+				 */
+				onleaveSketcher: function() {
+					this.communicator.off("tag task");
+				},
 
-				// clear local canvas if synchronized
-				if (message.name === user.name && game.traceNum === message.num) {
-					me.clear();
-				}
-			});
+				/**
+				 * Setup of guesser state
+				 */
+				onenterGuesser: function() {
+					var that = this;
+					this.communicator.on({
+						tag: function() {
+							that.tag();
+						},
+						task: function() {
+							that.task();
+						}
+					});
+				},
 
-			communicator.on("change", function(e, message) {
-				var player = getPlayer(message.name);
-				if (player === undefined) {
-					player = players[players.length] = message;
-				}
-				playerExtend(message);
-			});
+				/**
+				 * Tear down of guesser state
+				 */
+				onleaveGuesser: function() {
+					this.communicator.off("tag task");
+				},
 
-			communicator.on("disconnect", function(e, message) {
-				//[TODO]
-				//deletePlayer(message.username);
-			});
+				/**
+				 * Utility method to send the timeout
+				 * message to the server
+				 */
+				timeUp: function() {
+					this.communicator.send("timer", null);
+				},
 
-			roundEnd = function() {
-				if (game.role === "SKETCHER") {
-					hud.clear();
-					hud.unbindClick();
-				}
-				painter.hidePosition();
-				write.time(null);
-				communicator.send({ type: 'roundEnded', player: user.name });
-			};
+				/**
+				 * Setup of tag insertion state
+				 */
+				onentertagInsertion: function() {
+					var elements = this.elements;
 
-		})();
+					elements.mainPage.addClass("sketcher");
+					this.write.top($.i18n.prop("asktagsketcher"));
+					this.write.warnTag($.i18n.prop("warnTag"));
+					elements.skip.show();
+					elements.wordInput.show();
+					this.chat.disable();
 
-		/*************************DRAWING PANEL**********************/
+					this.time.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time, this.timeUp.bind(this));
 
-		//Return the current position of the cursor within the specified element
-		var relativePosition = function(event, element) {
-			var offset = $(element).offset();
-			return {
-				x: (event.pageX - offset.left),
-				y: (event.pageY - offset.top)
-			};
-		};
+					var that = this;
 
-		// The "me" canvas is where the sketcher draws before sending the update status to all the other players
-		(function() {
-			var pressed;
-			var position;
+					this.communicator.on({
+						image: function(e, content) {
+							that.painter.showImage(content.url, content.width, content.height);
+						},
+						beginRound: function(e, content) {
+							that.beginRound(content.sketcher);
+						},
+						task: function(e, content) {
+							that.task(content.word);
+						}
+					});
 
-			var points = [];
-			var lastSent = 0;
+					elements.skip.one("click", function() {
+						that.communicator.send("skip", null);
+					});
 
-			//Add the current point to the list of points to be sent
+					elements.wordInput.on("keypress", function(event) {
+						if (event.which === 13 && $(this).val() !== "") {
+							event.preventDefault();
 
-			var addPoint = function(x, y, size, color) {
-				points.push({
-					x: x,
-					y: y,
-					size: size,
-					color: color
-				});
-			};
+							that.communicator.send("tag", {
+								word: $(this).val()
+							});
 
-			//Send the points to the server as a trace message. It sends the points, the number of the trace sent, the name of the player that has sent the trace
+							$(this).val("");
 
-			var sendPoints = function() {
-				lastSent = Date.now(); //Refresh the countdown timer
-				var gameTimer = time.getTimer("round");
-				communicator.send({
-					type: "trace",
-					points: points,
-					num: game.traceNum,
-					name: user.name,
-					time: gameTimer
-				});
-				points = [];
-			};
+							$(this).off("keypress");
+						}
+					});
+				},
 
-			//Send the tracking position of the player that is drawing, sending his current position and name
+				/**
+				 * Tear down of tag insertion state
+				 */
+				onleavetagInsertion: function() {
+					var elements = this.elements;
 
-			var sendMove = function(x, y) {
-				lastSent = Date.now();
-				communicator.send({
-					type: "move",
-					x: x,
-					y: y,
-					name: user.name
-				});
-			};
+					elements.mainPage.removeClass("sketcher");
+					this.write.top();
+					this.write.warnTag();
+					this.write.time();
+					elements.skip.hide();
+					elements.wordInput.hide();
+					this.chat.enable();
 
-			//Can we send? If the current time - the last update is bigger than the treshold, we can send the packets
+					this.time.clearCountdown("tag");
 
-			var canSendNow = function() {
-				if (!game.tagging)
-					return Date.now() - lastSent > CONSTANTS.MIN_SEND_RATE;
-				else
-					return false;
-			};
+					this.painter.hideImage();
 
+					this.communicator.off("image beginRound task");
+					elements.skip.off("click");
+					elements.wordInput.off("keypress");
+				},
 
-			//Handle the mouse movement when drawing
+				/**
+				 * Setup of tag wait state
+				 */
+				onentertagWait: function() {
+					this.write.top($.i18n.prop('asktag'));
+					this.write.canvasMessage($.i18n.prop('sketchertagging'));
 
-			//Add the event listeners to handle movements, mouse up and mouse down, eventually supporting also mobile devices
-			$(document).on((isMobile ? "touchstart" : "mousedown"), function(e) {
-				//If the player is a sketcher, update the mouse pressed status to send his traces
-				if (game.role === "SKETCHER" && !game.tagging) {
-					var o = relativePosition(e, me.canvas);
-					position = o;
-					addPoint(o.x, o.y, tool.size, tool.color);
-					pressed = true;
-				}
-			});
+					var question = this.elements.questionMark;
+					this.painter.showImage(question.attr("src"), question.attr("rwidth"), question.attr("rheight"));
 
-			$("#viewport").on((isMobile ? "touchmove" : "mousemove"), function(e) {
-				e.preventDefault();
-				//Get the current position with respect to the canvas element we want to draw to
-				var o = relativePosition(e, me.canvas);
-				//If the mouse is pressed and the player is a sketcher
-				if (pressed && game.role === "SKETCHER") {
-					//Draw the local line
-					me.lineTo(position, o);
-					//Add the points to the points to be sent
-					addPoint(o.x, o.y, tool.size, tool.color);
-					//We have created a trace
-					++(game.traceNum);
-					//Can we send the batch of points?
-					if (canSendNow()) {
-						sendPoints();
-						sendMove(o.x, o.y);
-						addPoint(o.x, o.y, tool.size, tool.color);
+					this.time.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time, this.timeUp.bind(this));
+
+					var that = this;
+
+					this.communicator.on({
+						beginRound: function(e, content) {
+							that.beginRound(content.sketcher);
+						},
+						task: function() {
+							that.task();
+						}
+					});
+				},
+
+				/**
+				 * Tear down of tag wait state
+				 */
+				onleavetagWait: function() {
+					this.write.top();
+					this.write.canvasMessage();
+					this.write.time();
+
+					this.time.clearCountdown("tag");
+
+					this.painter.hideImage();
+
+					this.communicator.off("beginRound task");
+				},
+
+				/**
+				 * Transition method between tag and task
+				 * which saves the task word if given.
+				 *
+				 * @param word :String The word to draw
+				 */
+				ontask: function(evt, from, to, word) {
+					this.sketchness.word = word || null;
+				},
+
+				/**
+				 * Setup of task drawing state
+				 */
+				onentertaskDrawing: function() {
+					var elements = this.elements;
+					elements.mainPage.addClass("sketcher");
+					this.write.top($.i18n.prop("draw"), this.word);
+					elements.skip.show();
+					elements.hudArea.show();
+					this.chat.disable();
+
+					this.time.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time, this.timeUp.bind(this));
+
+					var that = this,
+						painter = this.painter,
+						sk = this.sketchness;
+
+					painter.setName(sk.players[sk.sketcher].name);
+
+					this.communicator.on({
+						image: function(e, content) {
+							painter.showImage(content.url, content.width, content.height);
+						},
+						timer: function(e, content) {
+							that.time.changeCountdown("task", content.time * Time.second);
+						},
+						guess: function(e, content) {
+							that.chat.guess(sk.players[content.user].name, content.word, content.affinity, content.user == sk.myself;
+						},
+						score: function(e, content) {
+							sk.players[content.user].score += content.score;
+
+							if(content.user == sk.myself) {
+								that.write.score(sk.players[content.user].score);
+							}
+						},
+						roundEnd: function(e, content) {
+							that.endRound(content.word);
+						}
+					});
+
+					elements.skip.one("click", function() {
+						that.communicator.send("skip", null);
+					});
+
+					elements.hud.on("change", function() {
+						var tool = {
+							tool: elements.tool.val(),
+							size: elements.size.val(),
+							color: elements.color.val()
+						};
+
+						painter.setTool(tool);
+						that.communicator.send("changeTool", tool);
+					});
+					elements.hud.trigger("change");
+
+					var started = false;
+
+					var setPoint = function(event) {
+						var offset = elements.viewport.offset();
+
+						var point = {
+							x: (event.pageX - offset.left),
+							y: (event.pageY - offset.top)
+						};
+
+						if (point.x > 0 && point.x < elements.viewport.width() &&
+							point.y > 0 && point.y < elements.viewport.height()) {
+
+							painter.setPoint(point);
+							that.communicator.send("point", point);
+						}
+					};
+
+					elements.viewport.on((sk.isMobile ? "touchstart" : "mousedown"), function(e) {
+						if(!started) {
+							that.communicator.send("beginPath", null);
+							painter.beginPath();
+
+							setPoint(e);
+						}
+					});
+
+					elements.viewport.on((sk.isMobile ? "touchmove" : "mousemove"), function(e) {
+						e.preventDefault();
+						setPoint(e);
+					});
+
+					$(document).on((sk.isMobile ? "touchend" : "mouseup"), function(e) {
+						if(started) {
+							setPoint(e);
+
+							that.communicator.send("endPath", null);
+							painter.endPath();
+						}
+					});
+
+				},
+
+				/**
+				 * Tear down of task drawing state
+				 */
+				onleavetaskDrawing: function() {
+					var elements = this.elements;
+					elements.mainPage.removeClass('sketcher');
+					this.write.top();
+					this.write.time();
+					elements.skip.hide();
+					elements.hudArea.hide();
+					this.chat.enable();
+
+					this.time.clearCountdown("task");
+
+					elements.skipTask.off("click");
+					elements.hud.off("change");
+
+					elements.viewport.off(this.isMobile ? "touchstart" : "mousedown");
+					elements.viewport.off(this.isMobile ? "touchmove" : "mousemove");
+					$(document).trigger(this.isMobile ? "touchend" : "mouseup");
+					$(document).off(this.isMobile ? "touchend" : "mouseup");
+
+					this.painter.hideImage();
+					this.painter.hidePosition();
+					this.painter.hidePath();
+
+					this.communicator.off("image timer guess guessed score roundEnd");
+				},
+
+				/**
+				 * Setup of task guessing state
+				 */
+				onentertaksGuessing: function() {
+					var that = this,
+						sk = this.sketchness,
+						wordInput = this.elements.wordInput,
+						painter = this.painter;
+
+					this.write.top($.i18n.prop('guess'));
+					wordInput.show();
+
+					this.time.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time, this.timeUp.bind(this));
+
+					painter.setName(sk.players[sk.sketcher].name);
+
+					wordInput.on("keypress", function(event) {
+						if (event.which === 13) {
+							event.preventDefault();
+
+							that.communicator.send("guess", {
+								word: $(this).val()
+							});
+
+							$(this).val("");
+						}
+					});
+
+					this.communicator.on({
+						timer: function(e, content) {
+							that.time.changeCountdown("task", content.time * Time.second);
+						},
+						changeTool: function(e, tool) {
+							painter.setTool(tool);
+						},
+						beginPath: function() {
+							painter.beginPath();
+						},
+						point: function(e, point) {
+							painter.setPoint(point);
+						},
+						endPath: function() {
+							painter.endPath();
+						},
+						guess: function(e, content) {
+							that.chat.guess(sk.players[content.user].name, content.word, content.affinity, content.user == sk.myself);
+						},
+						guessed: function(e, content) {
+							sk.word = content.word;
+							that.write.top($.i18n.prop('guessed'), sk.word);
+							wordInput.hide().off("keypress");
+							this.one("image", function(e, content) {
+								painter.showImage(content.url, content.width, content.height);
+							});
+						},
+						score: function(e, content) {
+							sk.players[content.user].score += content.score;
+
+							if(content.user == sk.myself) {
+								that.write.score(sk.players[content.user].score);
+							}
+						},
+						roundEnd: function(e, content) {
+							that.endRound(content.word);
+						}
+					});
+				},
+
+				/**
+				 * Tear down of task guessing state
+				 */
+				onleavetaskGuessing: function() {
+					this.write.top();
+					this.write.time();
+
+					this.elements.wordInput.hide().off("keypress");
+
+					this.time.clearCountdown("task");
+
+					this.painter.hidePosition();
+					this.painter.hidePath();
+
+					this.communicator.off("timer change beginPath point endPath guess guessed score roundEnd");
+				},
+
+				/**
+				 * Transition method between task and image viewing
+				 * which saves the solution word.
+				 *
+				 * @param word :String The solution word
+				 */
+				onendRound: (event, from, to, word) {
+					this.sketchness.word = word;
+				},
+
+				/**
+				 * Setup of image viewing state
+				 */
+				onenterimageViewing: function() {
+					this.write.top($.i18n.prop('solution'), this.word);
+
+					this.time.setCountdown("solution", this.constants.solutionTime * Time.second, Time.second, write.time, this.timeUp.bind(this));
+
+					var that = this;
+
+					this.communicator.on({
+						image: function(e, content) {
+							that.painter.showImage(content.url, content.width, content.height);
+						},
+						beginRound: function(e, content) {
+							that.beginRound(content.sketcher);
+						},
+						leaderboard: function(e, content) {
+							that.quit(content);
+						}
+					});
+				},
+
+				/**
+				 * Tear down of image viewing state
+				 */
+				onleaveimageViewing: function() {
+					this.write.top();
+					this.write.time();
+
+					this.time.clearCountdown("solution");
+
+					this.painter.hideImage();
+
+					this.communicator.off("image beginRound leaderboard");
+				},
+
+				/**
+				 * Transition method between image viewing and leatherboard
+				 * which stores the players scores.
+				 *
+				 * @param scores :String The scores
+				 */
+				onquit: function(event, from, to, scores) {
+					this.scores = scores;
+				},
+
+				/**
+				 * Setup of leaderboard state
+				 */
+				onenterleaderboard: function() {
+					var results="",
+						that = this,
+						sk = this.sketchness;
+
+					for (var i = 0; i < this.scores.lenght; i++) {
+						results += ":" + sk.players[this.scores[i].user].name + ":" + this.scores[i].points;
 					}
-				} else {
-					//The mouse is not pressed, can we just send the position of the player?
-					if (canSendNow() && game.role === "SKETCHER") {
-						sendMove(o.x, o.y);
-					}
-				}
-				position = o;
-			});
 
-			$(document).on((isMobile ? "touchend" : "mouseup"), function(e) {
-				//If the player is the sketcher, send the last trace and disable the drawing function
-				if (game.role === "SKETCHER" && !game.tagging) {
-					var o = relativePosition(e, me.canvas);
-					me.lineTo(position, o);
-					addPoint(o.x, o.y, tool.size, tool.color);
-					addPoint(o.x, o.y, tool.size, "end");
-					position = o;
-					sendPoints();
-					pressed = false;
+					this.jsRoutes.controllers.Sketchness.leaderboard(sk.players[sk.myself].name, results).ajax({
+						success: function(data) {
+							that.elements.mainPage.html(data);
+						},
+						error: function() {
+							that.write.error("Error!");
+						}
+					});
 				}
-			});
+			}
+		});
 
-		})();
+		StateMachine.create({
+			target: GameFSM.prototype,
+
+			events: [
+				{ name: "startup", from: "none", to: "playersWait" },
+				{ name: "beSketcher", from: ["playersWait", "imageViewing", "tagInsertion", "tagWait"], to: "sketcher" },
+				{ name: "beGuesser", from: ["playersWait", "imageViewing", "tagInsertion", "tagWait"], to: "guesser" },
+				{ name: "tag", from: "sketcher", to: "tagInsertion" },
+				{ name: "tag", from: "guesser", to: "tagWait" },
+				{ name: "task", from: ["sketcher", "tagInsertion"], to: "taskDrawing" },
+				{ name: "task", from: ["guesser", "tagWait"], to: "taskGuessing" },
+				{ name: "endRound", from: ["taskGuessing", "taskDrawing"], to: "imageViewing" },
+				{ name: "quit", from: "imageViewing", to: "leaderboard" }
+			]
+		});
+
+		var game = new GameFSM({
+			sketchness: sketchness,
+			constants: constants,
+			communicator: communicator,
+			write: write,
+			chat: chat,
+			painter: painter,
+			elements: elements
+		});
 	});
+
 });

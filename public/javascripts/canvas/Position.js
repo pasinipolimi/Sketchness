@@ -102,6 +102,14 @@ define(["Class", "paper"], function(Class, paper) {
 			hide: function() {
 				this.group.setVisible(false);
 				this.view.draw();
+			},
+
+			/**
+			 * Shows the position if hidden
+			 */
+			show: function() {
+				this.group.setVisible(true);
+				this.view.draw();
 			}
 		}
 	});

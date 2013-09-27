@@ -16,7 +16,7 @@ define(["Class", "./Image", "./Path", "./Position"], function(Class, Image, Path
 		 */
 		_init: function(image, path, position) {
 			this.image = new Image(image);
-			// this.path = new Path(path); // TODO: uncomment to introduce paper handled paths
+			this.path = new Path(path);
 			this.position = new Position(position);
 		},
 
@@ -40,23 +40,21 @@ define(["Class", "./Image", "./Path", "./Position"], function(Class, Image, Path
 			},
 
 			/**
-			 * Sets the color of the tool
+			 * Sets the tools properties
 			 *
-			 * @param color :String The color of the tool
+			 * @param tool :Object The properties of the tool
+			 *     @property tool :String("pen"|"eraser") The tool type
+			 *     @property color :String The color of the tool
+			 *     @property size :Number The size of the tool
 			 */
-			setColor: function(color) {
-				this.position.setColor(color);
-				//this.path.setColor(color); // TODO: uncomment to introduce paper handled paths
-			},
+			setTool: function(tool) {
+				this.path.setTool(tool.tool);
 
-			/**
-			 * Set the tool size
-			 *
-			 * @param size :Number The size of the tool
-			 */
-			setSize: function(size) {
-				this.position.setSize(size);
-				// this.path.setSize(size); // TODO: uncomment to introduce paper handled paths
+				this.position.setColor(tool.color);
+				this.path.setColor(tool.color);
+
+				this.position.setSize(tool.size);
+				this.path.setSize(tool.size);
 			},
 
 			/**
@@ -72,12 +70,11 @@ define(["Class", "./Image", "./Path", "./Position"], function(Class, Image, Path
 			 * Set the current position point
 			 * for position and path
 			 *
-			 * @param x :Number The x position
-			 * @param y :Number The y position
+			 * @param point :paper.Point The x y coordinates of the point
 			 */
-			setPoint: function(x, y) {
-				this.position.draw([x, y]);
-				// this.path.add([x, y]); // TODO: uncomment to introduce paper handled paths
+			setPoint: function(point) {
+				this.position.draw(point);
+				this.path.add(point);
 			},
 
 			/**
@@ -88,10 +85,24 @@ define(["Class", "./Image", "./Path", "./Position"], function(Class, Image, Path
 			},
 
 			/**
+			 * Shows the position on the canvas.
+			 */
+			showPosition: function() {
+				this.position.show();
+			},
+
+			/**
 			 * Hides the draw from the canvas.
 			 */
-			clearPath: function() {
-				this.path.clear();
+			hidePath: function() {
+				this.path.hide();
+			},
+
+			/**
+			 * Shows the draw on the canvas.
+			 */
+			showPath: function() {
+				this.path.show();
 			},
 
 			/**
@@ -106,15 +117,6 @@ define(["Class", "./Image", "./Path", "./Position"], function(Class, Image, Path
 			 */
 			endPath: function() {
 				this.path.end();
-			},
-
-			/**
-			 * Switch the mode between pen and eraser
-			 *
-			 * @param eraser :Boolean True to activate eraser
-			 */
-			setEraser: function(eraser) {
-				this.path.setEraser(eraser);
 			}
 		}
 	});

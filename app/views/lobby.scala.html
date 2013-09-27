@@ -4,74 +4,76 @@
 	<!--TODO: BETTER INTERFACE FOR THE ERRORS, POSSIBLY AN OVERLAY-->
 	<div id="onError" class="alert-message error">
 		<p>
-			<strong>Oops! </strong><span></span>
+			<strong>Oops! </strong>
+			<span></span>
 		</p>
 	</div>
 
 	<div class="lobbypage">
-            <div id="chatPanel" class="span4 lobbyChat">
-			<div id="messages" class="jscroll scroll-pane-arrows jspScrollable lobbyMessages">
-			</div>
-            </div>
-            <textarea id="talk" class="lobbyTalk"></textarea>
-            <div class="userList">
-                <ul id="unorderedUserList">
-                </ul>
-            </div>
-        
-            <table class="gameList" id="gameList">
-                <thead>
-                    <tr class="head">
-                        <th>Title</th>
-                        <th>Players</th>
-                    </tr>
-                </thead>
-                <tbody id="gameListBody" class="jscroll scroll-pane-arrows jspScrollable">
-                </tbody>
-            </table> 
-            <form id="joinGame" action="@routes.Sketchness.chatRoom()">
-                            <input id="username" name="username" class="input-small" type="hidden" value="@username" />
-                            <input id="roomId" name="room" class="input-small" type="hidden" value="" />
-                            <button id="join" type="submit"></button>
-            </form>
-            <form id="backForm" action="@routes.Sketchness.index()">
-                <button type="submit" id="back"></button>
-            </form>
-            
-            <form id="createGameForm" href="#createGamePopUp" class="default_popup ignore-hash">
-                <button type="submit" id="createGame"></button>
-            </form>
-            
-            <div id="createGamePopUp" class="alertBox" style="display:none">
-                <form  action="@routes.Sketchness.chatRoom()">
-                    <p style="text-align:center"><strong>Room Name</strong></p>
-                    <input id="username" name="username" class="input-small" type="hidden" value="@username" />
-                    <input id="roomName" name="room" class="input-small" type="text" />
-                    <p></p>
-                    <p style="text-align:center"><strong>Number of Players</strong></p>
-                    <input type="number" name="nPlayers" min="2" max="4" step="1" value="3">
-                    <button id="createGamePopUp" type="submit"></button>
-                </form>
-            </div>
-            
+		<div id="chatPanel" class="span4 lobbyChat">
+			<div id="messages" class="jscroll scroll-pane-arrows jspScrollable lobbyMessages"></div>
+		</div>
+		<textarea id="talk" class="lobbyTalk"></textarea>
 
+		<div class="userList">
+			<ul id="unorderedUserList"></ul>
+		</div>
 
-        
-        <div id="chatWebSocket" data-ws="@routes.Sketchness.chatStream(username,"lobby").webSocketURL()"></div>
-        <div id="lobbyWebSocket" data-ws="@routes.Sketchness.lobbyStream(username).webSocketURL()"></div>
+		<table class="gameList" id="gameList">
+			<thead>
+				<tr class="head">
+					<th>Title</th>
+					<th>Players</th>
+				</tr>
+			</thead>
+			<tbody id="gameListBody" class="jscroll scroll-pane-arrows jspScrollable"></tbody>
+		</table>
 
-	<script type="text/javascript" src="/assets/javascripts/chat.js"></script>
-	<script type="text/javascript" src="/assets/javascripts/lobby.js"></script>
-     </div>
-     <div id="preloaded-images">
-                    <img src="../assets/images/UI/joinUnpressed.png" width="1" height="1" alt="joinPressed" />
-                    <img src="../assets/images/UI/joinHover.png" width="1" height="1" alt="joinHover" />
-                    <img src="../assets/images/UI/joinPressed.png" width="1" height="1" alt="joinUnpressed" />
-                    <img src="../assets/images/UI/backUnpressed.png" width="1" height="1" alt="backPressed" />
-                    <img src="../assets/images/UI/backHover.png" width="1" height="1" alt="backHover" />
-                    <img src="../assets/images/UI/backPressed.png" width="1" height="1" alt="backUnpressed" />
-                    <img src="../assets/images/UI/createUnpressed.png" width="1" height="1" alt="createGamePressed" />
-                    <img src="../assets/images/UI/createHover.png" width="1" height="1" alt="createGameHover" />
-                    <img src="../assets/images/UI/createPressed.png" width="1" height="1" alt="createGameUnpressed" />
-     </div>
+		<form id="joinGame" action="@routes.Sketchness.chatRoom()">
+			<input id="username" name="username" class="input-small" type="hidden" value="@username" />
+			<input id="roomId" name="room" class="input-small" type="hidden" value="" />
+			<button id="join" type="submit"></button>
+		</form>
+
+		<form id="backForm" action="@routes.Sketchness.index()">
+			<button type="submit" id="back"></button>
+		</form>
+
+		<form id="createGameForm" href="#createGamePopUp" class="default_popup ignore-hash">
+			<button type="submit" id="createGame"></button>
+		</form>
+
+		<div id="createGamePopUp" class="alertBox" style="display:none">
+			<form action="@routes.Sketchness.chatRoom()">
+				<p style="text-align:center">
+					<strong>Room Name</strong>
+				</p>
+				<input id="username" name="username" class="input-small" type="hidden" value="@username" />
+				<input id="roomName" name="room" class="input-small" type="text" />
+				<p></p>
+				<p style="text-align:center">
+					<strong>Number of Players</strong>
+				</p>
+				<input type="number" name="nPlayers" min="2" max="4" step="1" value="3" />
+				<button id="createGamePopUp" type="submit"></button>
+			</form>
+		</div>
+
+		<div id="chatWebSocket" data-ws="@routes.Sketchness.chatStream(username,"lobby").webSocketURL()"></div>
+		<div id="lobbyWebSocket" data-ws="@routes.Sketchness.lobbyStream(username).webSocketURL()"></div>
+
+		<script type="text/javascript" src="/assets/javascripts/lobby.js"></script>
+	</div>
+
+	<div id="preloaded-images">
+		<img src="../assets/images/UI/joinUnpressed.png" width="1" height="1" alt="joinPressed" />
+		<img src="../assets/images/UI/joinHover.png" width="1" height="1" alt="joinHover" />
+		<img src="../assets/images/UI/joinPressed.png" width="1" height="1" alt="joinUnpressed" />
+		<img src="../assets/images/UI/backUnpressed.png" width="1" height="1" alt="backPressed" />
+		<img src="../assets/images/UI/backHover.png" width="1" height="1" alt="backHover" />
+		<img src="../assets/images/UI/backPressed.png" width="1" height="1" alt="backUnpressed" />
+		<img src="../assets/images/UI/createUnpressed.png" width="1" height="1" alt="createGamePressed" />
+		<img src="../assets/images/UI/createHover.png" width="1" height="1" alt="createGameHover" />
+		<img src="../assets/images/UI/createPressed.png" width="1" height="1" alt="createGameUnpressed" />
+	</div>
 }
