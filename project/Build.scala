@@ -37,7 +37,7 @@ object ApplicationBuild extends Build {
 		Resource("popUpCSS","public/stylesheets/lib/popUp.css","https://raw.github.com/Toddish/Popup/master/assets/css/popup.css",false),
 		Resource("jScrollPane CSS", "public/stylesheets/lib/jquery.jscrollpane.css", "http://jscrollpane.kelvinluck.com/style/jquery.jscrollpane.css", false),
 		Resource("Bootstrap CSS", "public/stylesheets/lib/bootstrap.css", "https://raw.github.com/twbs/bootstrap/master/dist/css/bootstrap.css", false),
-		Resource("Website Images", "public/images", "https://dl.dropboxusercontent.com/u/1264722/images.zip?dl=1",true)
+		Resource("Website Images", "public/images", "http://54.228.220.100/images.zip",true)
     )
 
     /** Defines a new task key for retrieving all the resources
