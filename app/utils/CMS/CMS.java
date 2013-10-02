@@ -2,7 +2,6 @@ package utils.CMS;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 import org.codehaus.jackson.JsonNode;
@@ -22,10 +21,10 @@ import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.Room;
 
 /**
- *
+ * Wrapper for the CMS API
  * @author Luca Galli <lgalli@elet.polimi.it>
  */
-public class CMS{
+public class CMS {
     
     //Url of the CMS system
     private final static String rootUrl=Play.application().configuration().getString("cmsUrl");
@@ -37,6 +36,14 @@ public class CMS{
             String request = rootUrl+"/wsmc/utask/"+uTaskID+"/"+actionId+"/close";
             WS.url(request).setContentType("application/x-www-form-urlencoded").put("");
             Logger.debug("[CMS] Closing uTask "+uTaskID);
+        }
+    }
+    
+    public static void closeTask(Integer taskID){
+        if(taskID!=null) {
+            String request = rootUrl+"/wsmc/task/"+taskID+"/close";
+            WS.url(request).setContentType("application/x-www-form-urlencoded").put("");
+            Logger.debug("[CMS] Closing Task "+taskID);
         }
     }
     
@@ -57,13 +64,29 @@ public class CMS{
     }
     
     public static Integer textAnnotation(ObjectNode finalTraces, String username,Integer session) throws MalformedURLException, IOException, JSONException {
-        String id = finalTraces.get("id").getTextValue();
+        JsonReader jsonReader= new JsonReader();
         String label = finalTraces.get("label").getTextValue();
+        String id = finalTraces.get("id").getTextValue();
+        JsonNode image = jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image/"+id+".json");
+        JsonNode imageSegments= image.get("descriptions");
+        HashSet<String> available = retrieveTags(imageSegments);
+        //If the tag is not present in the list of the available tags, add it to 
+        //the list
+        if(!available.contains(label))
+        {
+            //Just the list of the single, current tags is saved under a content descriptor called availableTags
+            String urlParameters = "ta_name=tag&ta_val="+label+"&content_type=availableTags&&user_id="+username+"&language="+LanguagePicker.retrieveIsoCode()+"&session_id="+session+"&oauth_consumer_key="+oauthConsumerKey;
+            String request = rootUrl+"/wsmc/image/"+id+"/textAnnotation.json";
+            WS.url(request).setContentType("application/x-www-form-urlencoded").post(urlParameters);
+            Logger.debug("[CMS] Adding new tag: "+label+" for image with id "+id);
+        }
+        //In any case, record that the player has tagged the image with this tag
         String urlParameters = "ta_name=tag&ta_val="+label+"&content_type=tagging&&user_id="+username+"&language="+LanguagePicker.retrieveIsoCode()+"&session_id="+session+"&oauth_consumer_key="+oauthConsumerKey;
         String request = rootUrl+"/wsmc/image/"+id+"/textAnnotation.json";
-        F.Promise<WS.Response> returned =WS.url(request).setContentType("application/x-www-form-urlencoded").post(urlParameters);
+        F.Promise<WS.Response> returned = WS.url(request).setContentType("application/x-www-form-urlencoded").post(urlParameters);
         JSONObject actionInfo = new JSONObject(returned.get().getBody());
         Integer actionId=Integer.parseInt(actionInfo.get("vid").toString());
+        Logger.debug("[CMS] Storing textAnnotation with action "+actionId+" for image with id "+id+" and tag "+label);
         return actionId;
     }
     
@@ -187,8 +210,7 @@ public class CMS{
                         //There are no more uTasks left, close the task
                         else
                         {
-                            //[TODO] Close the Task for real on the cms
-                            Logger.info("[CMS] Closing the task "+taskId);
+                            closeTask(Integer.parseInt(taskId));
                         }
                     }
                 }
@@ -235,7 +257,9 @@ public class CMS{
            throw new Error("[GAME]: Cannot retrieve the tasks from the CMS.");
   }
     
-
+/*
+ * Inform the game that at least one task is ready and we can start the game
+ */
 private static void sendTaskAcquired(Room roomChannel)
 {
     GameMessages.GameEvent taskAcquired = new GameMessages.GameEvent(roomChannel,GameEventType.taskAcquired);
@@ -246,7 +270,7 @@ private static HashSet<String> retrieveTags(JsonNode imageSegments)
 {
     JsonReader jsonReader= new JsonReader();
     HashSet<String> tags = new HashSet<>();
-    imageSegments=imageSegments.get("segmentation");
+    imageSegments=imageSegments.get("availableTags");
     if(imageSegments!=null)
     {
         for(JsonNode segment:imageSegments)
