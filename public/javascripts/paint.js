@@ -393,7 +393,9 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 					$('#roleSpan').text($.i18n.prop('sketcher'));
 					$('#mainPage').removeClass('guesser');
 					$('#mainPage').addClass('sketcher');
-					$('#talk').attr('disabled', 'disabled');
+					//Disable the chat just if we are not in single player mode
+					if(players.length!=1)
+						$('#talk').attr('disabled', 'disabled');
 					$('#canvasMessage').hide();
 					$("#warnTag").hide();
 					skipButton.show();

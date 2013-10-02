@@ -1,6 +1,5 @@
 package models.game;
 
-import controllers.Sketchness;
 import play.libs.*;
 import play.libs.F.*;
 import play.i18n.Messages;
@@ -14,11 +13,9 @@ import org.codehaus.jackson.node.*;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import models.Painter;
 import models.factory.GameRoom;
 import play.Play;
-import play.cache.Cache;
 import scala.concurrent.duration.Duration;
 
 import utils.CMS.CMS;
@@ -164,7 +161,7 @@ public class Game extends GameRoom {
                 priorityTaskHashSet.remove(guessObject);
          }
          if(guessObject==null) {
-            int size = taskHashSet.size();
+            int size;
             Integer item=null;
             byte trials=0;
             do {
@@ -380,8 +377,8 @@ public class Game extends GameRoom {
      * round and start a new one
      */
      private void playerTimeExpired(String name) {
-         //If all the players have disconnected during a game, start a new one
-         if(((requiredPlayers-disconnectedPlayers)<=1)&&gameStarted)
+         //If all the players have disconnected during a game, start a new one if it's not a single player game
+         if(((requiredPlayers-disconnectedPlayers)<=1)&&gameStarted&&requiredPlayers!=1)
          {
              //Restart the game
              gameEnded();
@@ -579,7 +576,11 @@ public class Game extends GameRoom {
             {
                 //Send the time change once just a player has guessed
                 GameEvent timeEvent = new GameEvent(roomChannel,GameEventType.timerChange);
-                timeEvent.setObject(timerChange(remainingTimeOnGuess, CountdownTypes.round));
+                //If we are in single player mode, don't wait
+                if(requiredPlayers==1)
+                    timeEvent.setObject(timerChange(0, CountdownTypes.round));
+                else
+                    timeEvent.setObject(timerChange(remainingTimeOnGuess, CountdownTypes.round));
                 GameBus.getInstance().publish(timeEvent);   
             }
         }
@@ -648,7 +649,11 @@ public class Game extends GameRoom {
        GameEvent showImages =  new GameEvent(roomChannel,GameEventType.showImages);
        ObjectNode show =  Json.newObject();
        show.put("type", "showImages");
-       show.put("seconds",5);
+       //If we are in single player mode, don't show the images again
+       if(requiredPlayers==1)
+            show.put("seconds",0);
+       else
+            show.put("seconds",5);
        showImages.setObject(show);
        GameBus.getInstance().publish(showImages);
        //Send also the image to be shown

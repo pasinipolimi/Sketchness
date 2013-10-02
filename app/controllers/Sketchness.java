@@ -53,7 +53,7 @@ public class Sketchness extends Controller {
             flash("error", "Wrong room id.");
             return redirect(routes.Sketchness.lobby(username));
         }
-        if(nPlayers<2||nPlayers>4)
+        if(nPlayers<0||nPlayers>4)
             nPlayers=3;
         //Force the room name to be without spaces. We cannot create actors with 
         //spaces in it.

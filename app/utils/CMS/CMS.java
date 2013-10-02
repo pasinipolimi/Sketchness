@@ -43,6 +43,7 @@ public class CMS{
     public static Integer segmentation(ObjectNode finalTraces, String username,Integer session) throws MalformedURLException, IOException, JSONException {
         String id = finalTraces.get("id").getTextValue();
         String label = finalTraces.get("label").getTextValue();
+        textAnnotation(finalTraces,username,session);
         String traces = finalTraces.get("traces").toString();
         String history = finalTraces.get("history").toString();   
         
@@ -52,6 +53,17 @@ public class CMS{
         JSONObject actionInfo = new JSONObject(returned.get().getBody());
         Integer actionId=Integer.parseInt(actionInfo.get("vid").toString());
         Logger.debug("[CMS] Storing segmentation with action "+actionId+" for image with id "+id+" and tag "+label);
+        return actionId;
+    }
+    
+    public static Integer textAnnotation(ObjectNode finalTraces, String username,Integer session) throws MalformedURLException, IOException, JSONException {
+        String id = finalTraces.get("id").getTextValue();
+        String label = finalTraces.get("label").getTextValue();
+        String urlParameters = "ta_name=tag&ta_val="+label+"&content_type=tagging&&user_id="+username+"&language="+LanguagePicker.retrieveIsoCode()+"&session_id="+session+"&oauth_consumer_key="+oauthConsumerKey;
+        String request = rootUrl+"/wsmc/image/"+id+"/textAnnotation.json";
+        F.Promise<WS.Response> returned =WS.url(request).setContentType("application/x-www-form-urlencoded").post(urlParameters);
+        JSONObject actionInfo = new JSONObject(returned.get().getBody());
+        Integer actionId=Integer.parseInt(actionInfo.get("vid").toString());
         return actionId;
     }
     
@@ -118,20 +130,20 @@ public class CMS{
                     if(item.get("status").asInt()==1)
                     {
                         String taskId=item.get("id").getTextValue();
+                        JsonNode uTasks=item.get("utask");
                         item=jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/task/"+item.get("id").getTextValue()+".json");
                         item=item.get("task");
                         Logger.debug("[CMS] Retrieved open task "+item.toString());
-                        JsonNode uTasks=item.get("uTask");
                         String id=item.get("image").getElements().next().getElements().next().asText();
-                        JsonNode image = jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image/"+id+".json");
                         if(uTasks!=null)
                         {
-                            //Retrieve all the uTask for the current task and assign them
+                            //Retrieve the first uTask for the current task and assign it
                             for (JsonNode utask : uTasks) {
                                 if(utask.getElements().hasNext()) {
-                                    utask=jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/utask/"+utask.get("id").getTextValue()+".json");
-                                    utask=utask.get("uTask");
                                     if(utask.get("status").asInt()==1) {
+                                        utask=jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/utask/"+utask.get("id").getTextValue()+".json");
+                                        JsonNode image = jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image/"+id+".json");
+                                        utask=utask.get("uTask");
                                         ObjectNode guessWord = Json.newObject();
                                         guessWord.put("type", "task");
                                         guessWord.put("id", id);
@@ -167,6 +179,7 @@ public class CMS{
                                                 }
                                                 break;
                                         }
+                                        break;
                                     }
                                 }
                             }
@@ -174,6 +187,7 @@ public class CMS{
                         //There are no more uTasks left, close the task
                         else
                         {
+                            //[TODO] Close the Task for real on the cms
                             Logger.info("[CMS] Closing the task "+taskId);
                         }
                     }
@@ -230,6 +244,7 @@ private static void sendTaskAcquired(Room roomChannel)
     
 private static HashSet<String> retrieveTags(JsonNode imageSegments)
 {
+    JsonReader jsonReader= new JsonReader();
     HashSet<String> tags = new HashSet<>();
     imageSegments=imageSegments.get("segmentation");
     if(imageSegments!=null)
@@ -238,7 +253,9 @@ private static HashSet<String> retrieveTags(JsonNode imageSegments)
         {
             if(segment.getElements().hasNext())
             {
-                JsonNode textAnnotations = segment.get("itemAnnotations").get(0);
+                //Retrieve the content descriptor
+                JsonNode textAnnotations = jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/content/"+segment.get("id").asText()+".json");
+                textAnnotations = textAnnotations.get("itemAnnotations").get(0);
                 if(null!=textAnnotations) {
                             //If the annotation is a tag and is in the same language as the one defined in the system, add the tag to the list of possible tags
                             if((textAnnotations.get("name").asText().equals("tag"))&&textAnnotations.get("language").asText().equals(LanguagePicker.retrieveIsoCode())) 

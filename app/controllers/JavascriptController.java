@@ -7,9 +7,7 @@ import play.Routes;
 import play.mvc.*;
 
 import play.i18n.Lang;
-import static play.mvc.Controller.flash;
 import static play.mvc.Results.ok;
-import views.html.leaderboard;
 
 
 
