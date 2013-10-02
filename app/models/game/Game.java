@@ -37,7 +37,7 @@ public class Game extends GameRoom {
     private final Integer minSketcherPointsRemaining = Integer.parseInt(Play.application().configuration().getString("minSketcherPointsRemaining")); 
     private final Integer maxGuesserPointsRemaining = Integer.parseInt(Play.application().configuration().getString("maxGuesserPointsRemaining"));
     private final Integer minGuesserPointsRemaining = Integer.parseInt(Play.application().configuration().getString("minGuesserPointsRemaining"));
-    private final Integer maxRound=Integer.parseInt(Play.application().configuration().getString("maxRounds"));  //Maximum number of rounds
+    private Integer maxRound=Integer.parseInt(Play.application().configuration().getString("maxRounds"));  //Maximum number of rounds
     private Integer requiredPlayers=Integer.parseInt(Play.application().configuration().getString("requiredPlayers"));
     //Minimum tags that an image should have to avoid asking to the users for new tags
     private final Integer minimumTags=Integer.parseInt(Play.application().configuration().getString("minimumTags"));
@@ -87,6 +87,10 @@ public class Game extends GameRoom {
         {
             this.roomChannel=((Room)message);
             requiredPlayers=((Room)message).getRequiredPlayers();
+            //In the initial idea of single player, give 50 images to the 
+            //player that is segmenting
+            if(requiredPlayers==1)
+                maxRound=50;
             missingPlayers=requiredPlayers;
             newGameSetup();
             Logger.info("[GAME] "+roomChannel.getRoom()+" created.");
