@@ -232,7 +232,7 @@ public class CMS {
                 Integer height = item.get("height").asInt();
                 
                 //Get all the segments that have been stored for the image
-                JsonNode imageSegments= item.get("descriptions").get("segmentation");
+                JsonNode imageSegments= item.get("descriptions");
                 HashSet<String> tags = new HashSet<>();
                 ObjectNode guessWord = Json.newObject();
                 guessWord.put("type", "task");
@@ -240,7 +240,7 @@ public class CMS {
                 
                 //Find the valid tags for this task.
                 if(imageSegments!=null) {
-                   retrieveTags(imageSegments);
+                   tags=retrieveTags(imageSegments);
                 }
                 //Add one tag among the ones that have been retrieved following a particular policy
                 guessWord.put("tag",chooseTag(tags));
@@ -268,23 +268,20 @@ private static void sendTaskAcquired(Room roomChannel)
     
 private static HashSet<String> retrieveTags(JsonNode imageSegments)
 {
-    JsonReader jsonReader= new JsonReader();
     HashSet<String> tags = new HashSet<>();
     imageSegments=imageSegments.get("availableTags");
     if(imageSegments!=null)
     {
-        for(JsonNode segment:imageSegments)
-        {
-            if(segment.getElements().hasNext())
+        if(imageSegments.getElements().hasNext()) {
+            imageSegments=imageSegments.get(0).get("itemAnnotations");
+            for(JsonNode segment:imageSegments)
             {
-                //Retrieve the content descriptor
-                JsonNode textAnnotations = jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/content/"+segment.get("id").asText()+".json");
-                textAnnotations = textAnnotations.get("itemAnnotations").get(0);
-                if(null!=textAnnotations) {
-                            //If the annotation is a tag and is in the same language as the one defined in the system, add the tag to the list of possible tags
-                            if((textAnnotations.get("name").asText().equals("tag"))&&textAnnotations.get("language").asText().equals(LanguagePicker.retrieveIsoCode())) 
-                                tags.add(textAnnotations.get("value").asText());
-                }
+                    //Retrieve the content descriptor
+                    if(null!=segment) {
+                                //If the annotation is a tag and is in the same language as the one defined in the system, add the tag to the list of possible tags
+                                if((segment.get("name").asText().equals("tag"))&&segment.get("language").asText().equals(LanguagePicker.retrieveIsoCode())) 
+                                    tags.add(segment.get("value").asText());
+                    }
             }
         }
     }

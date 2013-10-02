@@ -39,7 +39,7 @@ public class Game extends GameRoom {
     private final Integer minGuesserPointsRemaining = Integer.parseInt(Play.application().configuration().getString("minGuesserPointsRemaining"));
     private Integer maxRound=Integer.parseInt(Play.application().configuration().getString("maxRounds"));  //Maximum number of rounds
     private Integer requiredPlayers=Integer.parseInt(Play.application().configuration().getString("requiredPlayers"));
-    //Minimum tags that an image should have to avoid asking to the users for new tags
+    //[TODO] Minimum tags that an image should have to avoid asking to the users for new tags
     private final Integer minimumTags=Integer.parseInt(Play.application().configuration().getString("minimumTags"));
     
     //Variables used to manage the rounds
@@ -287,12 +287,12 @@ public class Game extends GameRoom {
                 //We need to wait for all the modules to receive the player list
                 if(canStart&&playersVect.size()>=requiredPlayers)
                 {
-                    //Create a new session in which to store the actions of the game
-                    sessionId=CMS.openSession();
                     GameManager.getInstance().removeInstance(getSelf());
                     publishLobbyEvent(GameEventType.gameStarted);
                     if(taskAcquired)
                     {
+                        //Create a new session in which to store the actions of the game
+                        sessionId=CMS.openSession();
                         disconnectedPlayers=0;
                         roundNumber=0;
                 	gameStarted=true;
