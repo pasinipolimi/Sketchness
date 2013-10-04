@@ -18,6 +18,7 @@ import static play.mvc.Controller.flash;
 import static play.mvc.Controller.request;
 import static play.mvc.Results.ok;
 import utils.LanguagePicker;
+import utils.LoggerUtils;
 import utils.gamemanager.GameManager;
 
 
@@ -76,7 +77,7 @@ public class Sketchness extends Controller {
                 try { 
                     ChatFactory.createChat(username, roomName, in, out);
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    LoggerUtils.error("CHATFACTORY", ex);
                 }
             }
         };
@@ -96,7 +97,7 @@ public class Sketchness extends Controller {
                 try { 
                     LobbyFactory.createLobby(username, in, out);
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    LoggerUtils.error("LOBBY", ex);
                 }
             }
         };
@@ -114,8 +115,8 @@ public class Sketchness extends Controller {
         public void onReady(In<JsonNode> in, Out<JsonNode> out) {
             try{
                 PaintFactory.createPaint(username, roomName, in, out);
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception ex) {
+                LoggerUtils.error("PAINT", ex);
             }
         }
         };

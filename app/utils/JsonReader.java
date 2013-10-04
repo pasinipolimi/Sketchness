@@ -8,9 +8,13 @@ import play.libs.WS.Response;
 
 public class JsonReader {
 
+  /*
+   * Method that returns a Json object from a request sent to the CMS
+   * @param url Url of the API of the CMS to be called
+   */
   public JsonNode  readJsonArrayFromUrl(String url) {
     //May be improved with http://stackoverflow.com/questions/15453905/promise-timeouts-and-ws-get-timeout-in-playframework-2-1-java
-    Promise<WS.Response> res = null;  
+    Promise<WS.Response> res;  
     try{
         res = WS.url(url).setTimeout(1000000).get();
         if(res!=null)
@@ -21,7 +25,7 @@ public class JsonReader {
             return json;
         }
         else
-            throw new IllegalStateException("The response is not valid.");
+            throw new IllegalStateException("CMS response timeout.");
     }
     catch(Exception mf)
     {

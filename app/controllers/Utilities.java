@@ -5,6 +5,7 @@ import org.codehaus.jackson.JsonNode;
 import play.mvc.Result;
 import static play.mvc.Results.ok;
 import play.mvc.WebSocket;
+import utils.LoggerUtils;
 import utils.Renderer;
 import views.html.renderer;
 
@@ -28,6 +29,34 @@ public class Utilities {
         }
     }
     
+   public static Result retrieveTags(final String imageID) {
+        try{
+            JsonNode result=Renderer.retrieveTags(imageID);
+            if(null!=result)
+                return ok(result);
+            else
+                return ok("[AGGREGATOR] Cannot retrieve the tags for image "+imageID);
+        }
+        catch(Exception e)
+        {
+            return ok("[AGGREGATOR] "+e.toString());
+        }
+    }
+    
+    public static Result retrieveImages() {
+        try{
+            JsonNode result=Renderer.retrieveImages();
+            if(null!=result)
+                return ok(result);
+            else
+                return ok("[AGGREGATOR] Cannot retrieve the images");
+        }
+        catch(Exception e)
+        {
+            return ok("[AGGREGATOR] "+e.toString());
+        }
+    }
+    
     public static Result renderer(final String imageID) {
             return ok(renderer.render(imageID));
         }
@@ -39,7 +68,7 @@ public class Utilities {
                 try{
                     Renderer.createRenderer(imageID, in, out);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LoggerUtils.error("AGGREGATOR", e);
                 }
             }
         };

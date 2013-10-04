@@ -1,5 +1,7 @@
 package models.game;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import play.libs.*;
 import play.libs.F.*;
 import play.i18n.Messages;
@@ -22,6 +24,7 @@ import utils.CMS.CMS;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages.*;
 import utils.LanguagePicker;
+import utils.LoggerUtils;
 import utils.gamebus.GameEventType;
 import utils.gamemanager.GameManager;
 
@@ -449,7 +452,7 @@ public class Game extends GameRoom {
                         CMS.taskSetInitialization(priorityTaskHashSet,taskHashSet,roomChannel);
                         completed=true;
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        LoggerUtils.error("GAME", ex);
                     }
                   }
                   if(trials>=5) {

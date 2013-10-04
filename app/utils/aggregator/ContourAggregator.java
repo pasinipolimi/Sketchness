@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
+import utils.LoggerUtils;
 
 
 public class ContourAggregator {
@@ -168,10 +169,15 @@ public class ContourAggregator {
 
 
     public static Image simpleAggregator(String[] contours,Integer width,Integer height) throws Exception  {
-
-        ContourAggregator ca = new ContourAggregator(contours,width,height);
-
-        Image im = ca.getMask();
-        return im;
+        ContourAggregator ca;
+        try {
+            ca = new ContourAggregator(contours,width,height);
+            Image im = ca.getMask();
+            return im;
+        }
+        catch(Exception e) {
+            LoggerUtils.error("CONTOUR", e);
+            return null;
+        }
     }
 }

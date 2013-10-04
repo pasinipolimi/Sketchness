@@ -266,7 +266,7 @@ private static void sendTaskAcquired(Room roomChannel)
     GameBus.getInstance().publish(taskAcquired); 
 }
     
-private static HashSet<String> retrieveTags(JsonNode imageSegments)
+public static HashSet<String> retrieveTags(JsonNode imageSegments)
 {
     HashSet<String> tags = new HashSet<>();
     imageSegments=imageSegments.get("availableTags");

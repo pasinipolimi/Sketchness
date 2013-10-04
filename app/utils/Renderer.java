@@ -31,13 +31,14 @@ import play.mvc.WebSocket;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import utils.CMS.CMS;
 import utils.aggregator.ContourAggregator;
 import utils.gamebus.GameMessages.Join;
 
 
 public class Renderer extends UntypedActor{
     
-    private final String rootUrl=Play.application().configuration().getString("cmsUrl");
+    private final static String rootUrl=Play.application().configuration().getString("cmsUrl");
     private WebSocket.Out<JsonNode> channel;
     
     String imageId;
@@ -218,6 +219,27 @@ public class Renderer extends UntypedActor{
         return null;
       }
       
+      public static synchronized JsonNode retrieveImages() throws Exception {
+        @SuppressWarnings("unchecked")
+        JsonReader jsonReader= new JsonReader();
+        return jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image.json");
+      }
+      
+      public static synchronized JsonNode retrieveTags(String ImageID) throws Exception {
+        @SuppressWarnings("unchecked")
+        JsonReader jsonReader= new JsonReader();
+        JsonNode image = jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image/"+ImageID+".json");
+        image = image.get("descriptions");
+        ArrayNode result = new ArrayNode(JsonNodeFactory.instance);
+        HashSet<String> tags;
+        if(image!=null)
+              tags=CMS.retrieveTags(image);
+        else
+            tags=new HashSet<>();
+        for(String tag:tags)
+            result.add(tag);
+        return result;
+      }
       
       private void createMask(String id, String tag) throws IOException, Exception
       {
