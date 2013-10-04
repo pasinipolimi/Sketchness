@@ -268,19 +268,21 @@ private static void sendTaskAcquired(Room roomChannel)
     
 public static HashSet<String> retrieveTags(JsonNode imageSegments)
 {
+    JsonReader jsonReader= new JsonReader();
     HashSet<String> tags = new HashSet<>();
     imageSegments=imageSegments.get("availableTags");
     if(imageSegments!=null)
     {
         if(imageSegments.getElements().hasNext()) {
-            imageSegments=imageSegments.get(0).get("itemAnnotations");
             for(JsonNode segment:imageSegments)
             {
                     //Retrieve the content descriptor
                     if(null!=segment) {
+                                JsonNode retrieved = jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/content/"+segment.get("id").getTextValue()+".json");
+                                retrieved=retrieved.get("itemAnnotations").get(0);
                                 //If the annotation is a tag and is in the same language as the one defined in the system, add the tag to the list of possible tags
-                                if((segment.get("name").asText().equals("tag"))&&segment.get("language").asText().equals(LanguagePicker.retrieveIsoCode())) 
-                                    tags.add(segment.get("value").asText());
+                                if((retrieved.get("name").asText().equals("tag"))&&(retrieved.get("language").asText().equals(LanguagePicker.retrieveIsoCode())||LanguagePicker.retrieveIsoCode().equals(""))) 
+                                    tags.add(retrieved.get("value").asText());
                     }
             }
         }

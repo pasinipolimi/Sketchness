@@ -90,8 +90,9 @@ public class Renderer extends UntypedActor{
         }
     }
     
-    private void start(Join message) throws IOException
+    private void start(Join message) throws IOException, Exception
     {
+        
             Join join = message;
             imageId=join.getUsername();
             channel=join.getChannel();
@@ -110,34 +111,11 @@ public class Renderer extends UntypedActor{
             guessWord.put("image",url);
             guessWord.put("width",width);
             guessWord.put("height",height);
-            channel.write(guessWord);
-            
-            JsonNode imageSegments= jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/image/"+imageId+".json");
-            imageSegments= imageSegments.get("descriptions").get("segmentation");
-            HashSet<String> toAggregate = new HashSet<>();
-            if(null!=imageSegments)
-            {
-                    int numberTraces=imageSegments.size();
-                    for(int i=0;i<numberTraces;i++)
-                    {
-                        JsonNode current=imageSegments.get(i);
-                        JsonNode annotation=current.get("itemAnnotations");
-                        for(int j=0;j<annotation.size();j++)
-                        {
-                            JsonNode retrieved=annotation.get(j);
-                            toAggregate.add(retrieved.get("value").asText());
-                        }
-                    }
-            }
-            
+            channel.write(guessWord);    
+            JsonNode toAggregate = retrieveTags(imageId);      
             ObjectNode availableTags = Json.newObject();
-            ArrayNode tagArray = new ArrayNode(JsonNodeFactory.instance);
             availableTags.put("type","tags");
-            for(String retrieved:toAggregate)
-            {
-                tagArray.add(retrieved);
-            }
-            availableTags.put("tags", tagArray);
+            availableTags.put("tags", toAggregate);
             channel.write(availableTags);
     }
     
@@ -159,13 +137,14 @@ public class Renderer extends UntypedActor{
                 {
                     JavascriptColor c = colors[i%colors.length];
                     JsonNode current=imageSegments.get(i);
-                    JsonNode annotation=current.get("itemAnnotations");
-                    for(int j=0;j<annotation.size();j++) {
-                        JsonNode retrieved=annotation.get(j);
+                    JsonNode annotation = jsonReader.readJsonArrayFromUrl(rootUrl+"/wsmc/content/"+current.get("id").asText()+".json");
+                    JsonNode tag = annotation.get("itemAnnotations");
+                    for(int j=0;j<tag.size();j++) {
+                        JsonNode retrieved=tag.get(j);
                         if(retrieved.get("value").asText().equals(requiredTag)) {
                             found=true;
-                            current=current.get("mediaSegment");
-                            for(JsonNode result:current)
+                            annotation=annotation.get("mediaSegment");
+                            for(JsonNode result:annotation)
                             {
                                 if(result.get("name").asText().equals("result"))
                                 {

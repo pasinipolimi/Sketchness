@@ -1,7 +1,5 @@
 package models.game;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import play.libs.*;
 import play.libs.F.*;
 import play.i18n.Messages;
@@ -82,6 +80,7 @@ public class Game extends GameRoom {
     
     /*
      * Handles all the messages sent to this actor
+     * @param message An Object representing a generic message sent to our Actor
      */
     @Override
     public void onReceive(Object message) throws Exception {
@@ -338,7 +337,14 @@ public class Game extends GameRoom {
            }
            nextSketcher();
            //Check if a tag for the current image as already been provided;if not, ask for a new one
-           taskImage = retrieveTaskImage();
+           try {
+              taskImage = retrieveTaskImage();
+           }
+           //We cannot recover the task to be done, recover the error by closing
+           //the game
+           catch(Exception e) {
+               gameEnded();
+           }
            if(taskImage!=null) {
            String label=taskImage.get("tag").asText();
            if(label.equals(""))
@@ -601,8 +607,7 @@ public class Game extends GameRoom {
         guessedWord=true;     
     }
     
-    private void gameEnded() {
-            
+    private void gameEnded() { 
             //Close the gaming session
             CMS.closeSession(sessionId);
             GameEvent endEvent = new GameEvent(roomChannel, GameEventType.leaderboard);
