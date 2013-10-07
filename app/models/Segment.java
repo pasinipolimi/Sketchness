@@ -49,15 +49,31 @@ public class Segment{
         
     
     
-    //Reconstruct the final segment, removing the traces that have been erased
+    //Reconstruct the final segment, removing the traces that have been erased and fitting them into the canvas size
     public ArrayNode filter(int taskWidth, int taskHeight, int canvasWidth, int canvasHeight) {
         
         ArrayNode toReturn = new ArrayNode(JsonNodeFactory.instance);
         ArrayList<PositionedPoint> finalSegment = new ArrayList<>();
         ArrayList<PositionedPoint> copy = new ArrayList<>();
-        int fixedWidth=canvasWidth;
-        if(taskHeight>canvasHeight)
+        int fixedWidth=taskWidth;
+        int fixedHeight=taskHeight;
+        //Just the width is bigger than our canvas
+        if(taskWidth>canvasWidth&&taskHeight<=canvasHeight)
+            fixedHeight=canvasWidth*taskHeight/taskWidth;
+        //Just the height is bigger than our canvas
+        else if(taskHeight>canvasHeight&&taskWidth<=canvasWidth)
             fixedWidth=canvasHeight*taskWidth/taskHeight;
+        //Both the width and the height are bigger than our canvas
+        else if(taskHeight>canvasHeight&&taskWidth>canvasWidth) {
+            if(taskHeight>taskWidth) {
+                fixedWidth=canvasHeight*taskWidth/taskHeight;
+                fixedHeight=fixedWidth*taskHeight/taskWidth;
+            }
+            else {
+                fixedHeight=canvasWidth*taskHeight/taskWidth;
+                fixedWidth=fixedHeight*taskWidth/taskHeight;
+            }
+        }
         
         //Make a copy of the traces storing the orders in which the points have been saved
         for(int i = 0;i<points.size();i++)
@@ -101,7 +117,7 @@ public class Segment{
         {
             Point current=((PositionedPoint)copyIt.next()).getPoint();
             current.setX((taskWidth*(current.getX()-((canvasWidth-fixedWidth)/2)))/fixedWidth);
-            current.setY((taskHeight*current.getY())/canvasHeight);
+            current.setY((taskHeight*(current.getY()-((canvasHeight-fixedHeight)/2)))/fixedHeight);
             if(!current.getColor().equals(eraser)&&current.getX()>=0&&current.getY()>=0)
                 toReturn.add(current.toJson());
         }

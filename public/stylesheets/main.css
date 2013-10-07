@@ -113,6 +113,34 @@ table.gameList th, table.gameList td {
     width: 33%;
 }
 
+.popup_close {
+    float: right;
+	top: 20px;
+	cursor: pointer;
+	right: 20px;
+	color: #FFF;
+	border-radius: 30px;
+	background: #605F61;
+	font-size: 31px;
+	font-weight: bold;
+	display: inline-block;
+	line-height: 0px;
+	padding: 11px 3px;
+}
+
+#facebookLike {
+	width: 300px;
+	top: 530px;
+	position: absolute;
+	left: 20px;
+}
+
+#twitterFollow {
+	width: 300px;
+	top: 560px;
+	position: absolute;
+	left: 20px;
+}
 
 #scoreBaloon{
 	background-image: url("../images/UI/scoreBaloon.png");
@@ -231,6 +259,27 @@ table.gameList th, table.gameList td {
 	position:absolute;
 	top:530px;
     width: 181px;
+}
+
+#backToLobby {
+	background-color: transparent;
+	background-image: url("../images/UI/backUnpressed.png");
+	height: 45px;
+	left: 420px;
+	position: absolute;
+	border-width: 0px;
+	top: 530px;
+	width: 160px;
+}
+
+#backToLobby:hover {
+	background-color: transparent;
+	background-image: url("../images/UI/backHover.png");
+}
+
+#backToLobby:active {
+	background-color: transparent;
+	background-image: url("../images/UI/backPressed.png");
 }
 
 #back {
@@ -387,15 +436,36 @@ table.gameList th, table.gameList td {
 }
 
 
-#skipTask {
+#endSegmentation {
 	background-color: transparent;
-	background-image: url("../images/UI/skipUnpressed.png");
+	background-image: url("../images/UI/endUnpressed.png");
 	height:66px;
 	left:230px;
 	position:absolute;
 	border-width: 0px;
 	top:500px;
     width: 181px;
+}
+
+#endSegmentation:hover {
+	background-color: transparent;
+	background-image: url("../images/UI/endHover.png");
+}
+
+#endSegmentation:active {
+	background-color: transparent;
+	background-image: url("../images/UI/endPressed.png");
+}
+
+#skipTask {
+	background-color: rgba(0, 0, 0, 0);
+	background-image: url("../images/UI/skipUnpressed.png");
+	height: 66px;
+	left: 30px;
+	position: absolute;
+	border-width: 0px;
+	top: 480px;
+	width: 140px;
 }
 
 #skipTask:hover {

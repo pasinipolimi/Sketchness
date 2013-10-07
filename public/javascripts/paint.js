@@ -49,6 +49,7 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 
 		// Dunno, variables before in an enclosure causing problems
 		var skipButton;
+		var endSegmentation;
 		var roundEnd;
 
 		var write = {
@@ -360,8 +361,11 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 
 		//***************************TAKING CARE OF THE LINE STROKES*****************************/
 		(function() {
+			$('#mainPage').append("<button id=\"skipTask\"></button><button id=\"endSegmentation\"></button>");
 			skipButton = $('#skipTask');
+			endSegmentation = $('#endSegmentation');
 			skipButton.hide();
+			endSegmentation.hide();
 			skipButton.on("click", function() {
 				$("#warnTag").hide();
 				if (game.role === "SKETCHER") {
@@ -370,6 +374,11 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 					} else {
 						communicator.send({ type: 'skipTask', timerObject: 'round' });
 					}
+				}
+			});
+			endSegmentation.on("click", function() {
+				if (players.length === 1) {
+						communicator.send({ type: 'endSegmentation', player: user.name  });
 				}
 			});
 			/*******************************MANAGING THE INCOMING MESSAGES*****************/
@@ -396,6 +405,8 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 					//Disable the chat just if we are not in single player mode
 					if(players.length!=1)
 						$('#talk').attr('disabled', 'disabled');
+					else
+						endSegmentation.show();
 					$('#canvasMessage').hide();
 					$("#warnTag").hide();
 					skipButton.show();
@@ -405,6 +416,7 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 					$('#mainPage').addClass('guesser');
 					$('#talk').removeAttr('disabled');
 					skipButton.hide();
+					endSegmentation.hide();
 					$('#canvasMessage').hide();
 					$("#warnTag").hide();
 					write.top($.i18n.prop('guess'));
@@ -417,6 +429,10 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 			});
 
 			communicator.on("move", function(e, message) {
+				positions.paint(getPlayer(message.name), message.x, message.y);
+			});
+			
+			communicator.on("loading", function(e, message) {
 				positions.paint(getPlayer(message.name), message.x, message.y);
 			});
 
@@ -467,6 +483,7 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 				} else {
 					$('#talk').removeAttr('disabled');
 					skipButton.hide();
+					endSegmentation.hide();
 					write.top($.i18n.prop('asktag'));
 					draws.clear();
 					draws.clear();
@@ -485,6 +502,7 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 					write.score();
 					game.guessed = true;
 					skipButton.hide();
+					endSegmentation.hide();
 				}
 			});
 
@@ -497,6 +515,7 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 			communicator.on("showImages", function(e, message) {
 				game.role = "ROUNDCHANGE";
 				skipButton.hide();
+				endSegmentation.hide();
 				time.clearCountdown("round");
 				time.setCountdown("round", message.seconds * Time.second, Time.second, write.time, roundEnd);
 				$('#mainPage').removeClass('sketcher');
@@ -510,7 +529,7 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 				$('#mainPage').removeClass('guesser');
 				$('#mainPage').removeClass('sketcher');
 				skipButton.hide();
-
+				endSegmentation.hide();
 				//Clear all the canvas and draw the leaderboard
 				draws.clear();
 				task.clear();
@@ -531,6 +550,10 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 					}
 				  })
 
+			});
+			
+			communicator.on("starting", function(e, message) {
+				write.top($.i18n.prop('matchstarting'));
 			});
 
 			communicator.on("trace", function(e, message) {

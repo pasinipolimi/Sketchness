@@ -302,7 +302,6 @@ public class Game extends GameRoom {
                         //We start the game
                         if(sketcherPainter!=null) {
                             GameBus.getInstance().publish(new GameEvent(roomChannel,GameEventType.gameStarted));
-                            
                         }
                         else
                             throw new Error("[GAME]: Cannot find a suitable Sketcher!");
@@ -310,6 +309,7 @@ public class Game extends GameRoom {
                     else
                     {
                          GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(),"acquiring"), roomChannel));
+                         GameBus.getInstance().publish(new GameEvent(roomChannel,GameEventType.gameStarting));
                     }
                     return true;
                 }
@@ -528,20 +528,21 @@ public class Game extends GameRoom {
                 if(painter.name.equalsIgnoreCase(quitter)){
                     //Wait for all the modules to announce that the player has disconnected
                     painter.setnModulesReceived(painter.getnModulesReceived()-1);
-                    if(painter.getnModulesReceived()==0)
-                    {
-                        playersVect.remove(painter);
-                        disconnectedPlayers++;
-                        GameBus.getInstance().publish(new GameEvent("quit",GameManager.getInstance().getLobby(),GameEventType.quit));
-                        //End the game if there's just one player or less
-                        if(((requiredPlayers-disconnectedPlayers)==1)&&gameStarted)
-                            //Restart the game
-                            gameEnded(); 
-                        else if (((requiredPlayers-disconnectedPlayers)<=0)&&gameStarted)
-                            publishLobbyEvent(GameEventType.gameEnded);
-                    }
+                    playersVect.remove(painter);
+                    disconnectedPlayers++;
+                    GameBus.getInstance().publish(new GameEvent("quit",GameManager.getInstance().getLobby(),GameEventType.quit));
+                    //End the game if there's just one player or less
+                    if(((requiredPlayers-disconnectedPlayers)==1)&&gameStarted)
+                        //Restart the game
+                        gameEnded(); 
+                    else if (((requiredPlayers-disconnectedPlayers)<=0)&&gameStarted)
+                        publishLobbyEvent(GameEventType.gameEnded);
+                    
                 }
             } 
+            if(playersVect.isEmpty()) {
+                gameEnded();
+            }
     }
     
     private void guessed(String guesser) {
@@ -609,7 +610,8 @@ public class Game extends GameRoom {
     
     private void gameEnded() { 
             //Close the gaming session
-            CMS.closeSession(sessionId);
+            if(sessionId!=null)
+                CMS.closeSession(sessionId);
             GameEvent endEvent = new GameEvent(roomChannel, GameEventType.leaderboard);
             endEvent.setObject(compileLeaderboard());
             GameBus.getInstance().publish(endEvent);
@@ -662,9 +664,9 @@ public class Game extends GameRoom {
        ObjectNode show =  Json.newObject();
        show.put("type", "showImages");
        //If we are in single player mode, don't show the images again
-       if(requiredPlayers==1)
+       /*if(requiredPlayers==1)
             show.put("seconds",0);
-       else
+       else*/
             show.put("seconds",5);
        showImages.setObject(show);
        GameBus.getInstance().publish(showImages);

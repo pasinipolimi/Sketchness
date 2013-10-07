@@ -26,7 +26,6 @@
 					<canvas id="task" width="420" height="350"></canvas>
 				</div>
 			</div>
-                <button id="skipTask"></button>
 		</div>
 
 
@@ -77,6 +76,11 @@
 				});
 			});
 		</script>
+                
+                <form id="backForm" action="@routes.Sketchness.lobby()">
+                    <input id="username" name="username" class="input-small" type="hidden" value="@username" />
+                    <button type="submit" id="backToLobby"></button>
+                </form>
                 
 
                 <!--THIS HIDDEN DIV IS USED JUST TO PRELOAD IMAGES SO THAT THEY WON'T "FLICKER"-->

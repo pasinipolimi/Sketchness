@@ -75,7 +75,6 @@ public class Paint extends GameRoom{
              JsonNodeType type = JsonNodeType.valueOf(json.get("type").getTextValue().toLowerCase());
              switch(type)
              {
-                 case segment: break; //writeSegment(json);break;
                  case change: Painter painter = painters.get(json.get("name").getTextValue());
                                 if(painter != null) {
                                     painter.updateFromJson(json);
@@ -83,6 +82,7 @@ public class Paint extends GameRoom{
                  case roundended: GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel,GameEventType.timeExpired));break;
                  case trace: addTrace(json);break;
                  case skiptask: GameBus.getInstance().publish(new GameEvent(json.get("timerObject").getTextValue(), roomChannel,GameEventType.skipTask));break;
+                 case endsegmentation: GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel,GameEventType.guessed));break;
              }
              notifyAll(json);
         }
@@ -93,6 +93,7 @@ public class Paint extends GameRoom{
             switch(event.getType())
             {
                 case gameEnded:killActor();gameStarted=false;break;
+                case gameStarting:gameStarting();break;
                 case gameStarted:gameStarted=true;break;
                 case showImages:notifyAll(event.getObject());break;
                 case saveTraces:saveTraces();break;
@@ -188,6 +189,18 @@ public class Paint extends GameRoom{
             }
         }    
     }
+    
+    /*
+     * Send a message to all player to wait, since the match is starting
+     */
+    private void gameStarting()
+    {
+         for(Map.Entry<String, Painter> entry : painters.entrySet()) {
+                ObjectNode roleMessage = Json.newObject();
+                roleMessage.put("type", "starting");
+                entry.getValue().channel.write(roleMessage);
+        }
+   }
    
     private void nextRound(String sketcher)
     {
@@ -278,5 +291,5 @@ public class Paint extends GameRoom{
 }
 enum JsonNodeType
 {
-    segment,change,trace,roundended, move, skiptask
+    segment,change,trace,roundended, move, skiptask, endsegmentation
 }
