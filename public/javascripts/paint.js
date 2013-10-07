@@ -601,10 +601,18 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 		//Return the current position of the cursor within the specified element
 		var relativePosition = function(event, element) {
 			var offset = $(element).offset();
-			return {
-				x: (event.pageX - offset.left),
-				y: (event.pageY - offset.top)
-			};
+			if(!isMobile) {
+				return {
+					x: (event.pageX - offset.left),
+					y: (event.pageY - offset.top)
+				};
+			}
+			else {
+				return {
+					x: (event.originalEvent.touches[0].pageX - offset.left),
+					y: (event.originalEvent.touches[0].pageY - offset.top)
+				};
+			}
 		};
 
 		// The "me" canvas is where the sketcher draws before sending the update status to all the other players
