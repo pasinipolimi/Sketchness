@@ -634,9 +634,11 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 			}
 			else {
 				//Touchend does not have the position of when we lifted our finger, so we can keep track of the last position
-				if(event.originalEvent.touches[0].length>0) {
-					positions.oldX = event.originalEvent.touches[0].pageX - offsetX;
-					positions.oldY = event.originalEvent.touches[0].pageY - offsetY;
+				if(event.originalEvent.type!="touchend") {
+					if(typeof event.originalEvent.touches != 'undefined') {
+						positions.oldX = event.originalEvent.touches[0].pageX - offsetX;
+						positions.oldY = event.originalEvent.touches[0].pageY - offsetY;
+					}
 				}
 				return {
 					x: (positions.oldX),
