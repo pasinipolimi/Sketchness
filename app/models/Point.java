@@ -9,13 +9,14 @@ import play.libs.Json;
  * @author Luca Galli <lgalli@elet.polimi.it>
  */
 public class Point {
+
     private int x;
     private int y;
     private int size;
     private boolean removed;
     private String color;
 
-    public Point(int x, int y, int size,boolean removed, String color) {
+    public Point(int x, int y, int size, boolean removed, String color) {
         this.x = x;
         this.y = y;
         this.size = size;
@@ -23,16 +24,14 @@ public class Point {
         this.color = color;
     }
 
-    public Point(){}
-
-    
+    public Point() {
+    }
 
     public String getColor() {
         return color;
     }
 
-    public boolean getRemoved()
-    {
+    public boolean getRemoved() {
         return removed;
     }
 
@@ -63,30 +62,30 @@ public class Point {
     public void setY(int y) {
         this.y = y;
     }
-    
+
     public void setRemoved(boolean removed) {
         this.removed = removed;
     }
-    
-    
+
     //Given the center of a circle and its radius, checks if the points lies
     //inside the circle
-    public boolean inRange(int cx,int cy, int size) {
+    public boolean inRange(int cx, int cy, int size) {
         //Check to see the distance between the point and the center of the circle
-        double d =Math.sqrt(Math.pow((x-cx),2)+Math.pow((y-cy),2));
-        if(d<=(size/2))
+        double d = Math.sqrt(Math.pow((x - cx), 2) + Math.pow((y - cy), 2));
+        if (d <= (size / 2)) {
             return true;
-        else
+        } else {
             return false;
+        }
     }
-    
+
     public JsonNode toJson() {
         ObjectNode json = Json.newObject();
-        json.put("x",x);
-        json.put("y",y);
-        json.put("size",size);
-        json.put("color",color);
+        json.put("x", x);
+        json.put("y", y);
+        json.put("size", size);
+        json.put("color", color);
         json.put("removed", removed);
-        return  json;
+        return json;
     }
 }

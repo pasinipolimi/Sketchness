@@ -150,8 +150,20 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 			},
 			bindClick: function() {
 				var self = this;
-				//[TODO] It should be screen and resolution independent, it can't work like that
+				//[TODO] Try to use modernizer to solve this issue
 				this.canvas.on("click", function (e) {
+					var o = relativePosition(e, self.canvas);
+					if ((o.y >= 130) && (o.y < 200)) {
+						setColor(CONSTANTS.PEN_COLOR);
+						setSize(CONSTANTS.PEN_SIZE);
+						self.paint("pen");
+					} else if ((o.y >= 200) && (o.y <= 270)) {
+						setColor(CONSTANTS.ERASER_COLOR);
+						setSize(CONSTANTS.ERASER_SIZE);
+						self.paint("eraser");
+					}
+				});
+				this.canvas.on("touchstart", function (e) {
 					var o = relativePosition(e, self.canvas);
 					if ((o.y >= 130) && (o.y < 200)) {
 						setColor(CONSTANTS.PEN_COLOR);
@@ -166,6 +178,7 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 			},
 			unbindClick: function() {
 				this.canvas.off("click");
+				this.canvas.off("touchstart");
 			}
 		};
 		hud.preload();
@@ -190,7 +203,9 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 				this.context.font = "10px sans-serif";
 				this.context.fillStyle = CONSTANTS.TRACKER_COLOR;
 				this.context.fillText((player.name + "").substring(0, 20), x, y - Math.round(player.size / 2) - 4);
-			}
+			},
+			oldX: 0,
+			oldY: 0
 		};
 		positions.init();
 
@@ -600,17 +615,32 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 
 		//Return the current position of the cursor within the specified element
 		var relativePosition = function(event, element) {
-			var offset = $(element).offset();
+			element=element[0];
+			var offsetX = 0, offsetY = 0;
+ 
+			// Compute the total offset
+			if (element.offsetParent !== undefined) {
+				do {
+				  offsetX += element.offsetLeft;
+				  offsetY += element.offsetTop;
+				} while ((element = element.offsetParent));
+			}
+	
 			if(!isMobile) {
 				return {
-					x: (event.pageX - offset.left),
-					y: (event.pageY - offset.top)
+					x: (event.pageX - offsetX),
+					y: (event.pageY - offsetY)
 				};
 			}
 			else {
+				//Touchend does not have the position of when we lifted our finger, so we can keep track of the last position
+				if(event.originalEvent.touches[0].length>0) {
+					positions.oldX = event.originalEvent.touches[0].pageX - offsetX;
+					positions.oldY = event.originalEvent.touches[0].pageY - offsetY;
+				}
 				return {
-					x: (event.originalEvent.touches[0].pageX - offset.left),
-					y: (event.originalEvent.touches[0].pageY - offset.top)
+					x: (positions.oldX),
+					y: (positions.oldY)
 				};
 			}
 		};

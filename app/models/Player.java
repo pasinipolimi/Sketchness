@@ -1,42 +1,33 @@
 package models;
 
+public class Player {
 
-public class Player 
-{
     private int points;
     private int warningsReceived;
 
-    public Player() 
-    {
-        points=0;
-        warningsReceived=0;
+    public Player() {
+        points = 0;
+        warningsReceived = 0;
     }
 
-    public void setPoints(int points) 
-    {
+    public void setPoints(int points) {
         this.points = points;
     }
 
     @Override
-    public String toString() 
-    {
+    public String toString() {
         return super.toString();
     }
 
-    public int getWarningsReceived() 
-    {
+    public int getWarningsReceived() {
         return warningsReceived;
     }
 
-    public int getPoints() 
-    {
+    public int getPoints() {
         return points;
     }
 
-    public void setWarningsReceived(int warningsReceived) 
-    {
+    public void setWarningsReceived(int warningsReceived) {
         this.warningsReceived = warningsReceived;
     }
-    
-    
 }
