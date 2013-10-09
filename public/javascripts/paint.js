@@ -446,10 +446,6 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 			communicator.on("move", function(e, message) {
 				positions.paint(getPlayer(message.name), message.x, message.y);
 			});
-			
-			communicator.on("loading", function(e, message) {
-				positions.paint(getPlayer(message.name), message.x, message.y);
-			});
 
 			communicator.on("task", function(e, message) {
 				game.tagging = false;
@@ -567,7 +563,7 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 
 			});
 			
-			communicator.on("starting", function(e, message) {
+			communicator.on("loading", function(e, message) {
 				write.top($.i18n.prop('matchstarting'));
 			});
 

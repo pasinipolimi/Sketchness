@@ -90,8 +90,8 @@ public class Paint extends GameRoom {
                     killActor();
                     gameStarted = false;
                     break;
-                case gameStarting:
-                    gameStarting();
+                case gameLoading:
+                    gameLoading();
                     break;
                 case gameStarted:
                     gameStarted = true;
@@ -203,10 +203,10 @@ public class Paint extends GameRoom {
     /*
      * Send a message to all player to wait, since the match is starting
      */
-    private void gameStarting() {
+    private void gameLoading() {
         for (Map.Entry<String, Painter> entry : painters.entrySet()) {
             ObjectNode roleMessage = Json.newObject();
-            roleMessage.put("type", "starting");
+            roleMessage.put("type", "loading");
             entry.getValue().channel.write(roleMessage);
         }
     }

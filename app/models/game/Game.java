@@ -304,7 +304,7 @@ public class Game extends GameRoom {
                 }
             } else {
                 GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(), "acquiring"), roomChannel));
-                GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.gameStarting));
+                GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.gameLoading));
             }
             return true;
         }
