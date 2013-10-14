@@ -39,6 +39,7 @@ public class Game extends GameRoom {
     private final Integer minGuesserPointsRemaining = Integer.parseInt(Play.application().configuration().getString("minGuesserPointsRemaining"));
     private Integer maxRound = Integer.parseInt(Play.application().configuration().getString("maxRounds"));  //Maximum number of rounds
     private Integer requiredPlayers = Integer.parseInt(Play.application().configuration().getString("requiredPlayers"));
+    private Boolean fixGroundTruth = Boolean.parseBoolean(Play.application().configuration().getString("fixGroundTruth"));
     //[TODO] Minimum tags that an image should have to avoid asking to the users for new tags
     private final Integer minimumTags = Integer.parseInt(Play.application().configuration().getString("minimumTags"));
     //Variables used to manage the rounds
@@ -291,7 +292,10 @@ public class Game extends GameRoom {
             publishLobbyEvent(GameEventType.gameStarted);
             if (taskAcquired) {
                 //Create a new session in which to store the actions of the game
-                sessionId = CMS.openSession();
+                if(!fixGroundTruth)
+                    sessionId = CMS.openSession();
+                else
+                    sessionId = 9718;
                 disconnectedPlayers = 0;
                 roundNumber = 0;
                 gameStarted = true;
@@ -435,7 +439,10 @@ public class Game extends GameRoom {
                 while (trials < 5 && !completed) {
                     try {
                         trials++;
-                        CMS.taskSetInitialization(priorityTaskHashSet, taskHashSet, roomChannel);
+                        if(!fixGroundTruth)
+                            CMS.taskSetInitialization(priorityTaskHashSet, taskHashSet, roomChannel);
+                        else
+                            CMS.fixGroundTruth(9718, priorityTaskHashSet, taskHashSet, roomChannel);
                         completed = true;
                     } catch (Exception ex) {
                         LoggerUtils.error("GAME", ex);

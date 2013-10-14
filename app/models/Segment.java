@@ -64,9 +64,12 @@ public class Segment {
             if (taskHeight > taskWidth) {
                 fixedWidth = canvasHeight * taskWidth / taskHeight;
                 fixedHeight = fixedWidth * taskHeight / taskWidth;
-            } else {
+            } else if (taskHeight < taskWidth){
                 fixedHeight = canvasWidth * taskHeight / taskWidth;
                 fixedWidth = fixedHeight * taskWidth / taskHeight;
+            } else {
+                fixedHeight = canvasHeight;
+                fixedWidth = canvasWidth * fixedHeight / canvasWidth;
             }
         }
 

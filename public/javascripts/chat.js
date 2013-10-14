@@ -30,6 +30,14 @@ require(["Communicator", "jquery", "i18n", "jscrollpane"], function(Communicator
 			animateScroll: true,
 			horizontalGutter: 10
 		});
+		
+		$("#unorderedUserList").jScrollPane({
+			showArrows: true,
+			mantainPosition: true,
+			stickToBottom: true,
+			animateScroll: true,
+			horizontalGutter: 10
+		});
 
 		communicator.on("system join quit talk talkNear talkWarning talkError", function(e, data) {
 			// Create the message element
@@ -38,7 +46,7 @@ require(["Communicator", "jquery", "i18n", "jscrollpane"], function(Communicator
 			$("p", el).text(data.message);
 			$(el).addClass(data.type);
 			if (data.user === $('#currentNickname').text()) $(el).addClass('me');
-
+			var $messages = $("#messages");
 			var paneApi = $("#messages").data('jsp');
 			paneApi.getContentPane().append(el);
 			paneApi.reinitialise();
@@ -49,14 +57,25 @@ require(["Communicator", "jquery", "i18n", "jscrollpane"], function(Communicator
 			var $list = $("#unorderedUserList");
 			// Update the members list
 			var userCounter = 0;
-			if($list.length>0)
+			if($list.selector)
 			{
-				$list.empty();
+				var paneApi = $list.data('jsp');
+				paneApi.getContentPane().empty();
 				$(data.members).each(function()
 				{
-					var el = $('<li class="avatarIcon">'+this+'</li>');
-					$list.append(el);
+					if(this!=$('#currentNickname').text()) {
+						var el = $('<div class="avatarIcon"><span></span></div>');
+						$("span", el).text(this);
+						paneApi.getContentPane().append(el);
+						paneApi.reinitialise();
+						paneApi.scrollToBottom();
+					}
 				});
+				var el = $('<div class="avatarIcon"><span></span></div>');
+				$("span", el).text($('#currentNickname').text());
+				paneApi.getContentPane().append(el);
+				paneApi.reinitialise();
+				paneApi.scrollToBottom();
 			}
 			//Deal with a custom way of handling the userlist
 			else

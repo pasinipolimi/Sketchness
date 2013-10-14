@@ -585,7 +585,7 @@ tr:hover { background-color: #8888ff }
 	height: 340px;
 }
 
-li.avatarIcon {
+div.avatarIcon {
 	list-style-type: none;
 	background: url('../images/favicon.png') no-repeat top left;
 	background-size:40px 40px;
@@ -802,6 +802,13 @@ footer {
 
 .lobbyMessages{
 	height: 330px!important;
+}
+
+#unorderedUserList{
+	height: 330px!important;
+	width: 150px!important;
+	position: absolute;
+	left: 30px;
 }
 
 #messages {

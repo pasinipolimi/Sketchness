@@ -18,6 +18,7 @@ require(["Communicator", "jquery", "popup", "jscrollpane"], function(Communicato
 			horizontalGutter: 10
 		});
 
+
 		//Popup for the game creation panel
 		var options = { width: 350, height: 350, top: 200, left: 100 };
 		$('.default_popup').popup(options);
@@ -49,9 +50,11 @@ require(["Communicator", "jquery", "popup", "jscrollpane"], function(Communicato
 				var $currentRoom = $("#roomId");
 				$currentRoom.attr('value',id);
 				//Remove the highlighting from the other rows
-				$('#gameList')
-					.children("tr")
-					.removeClass("highlight");
+				$('#gameList').children("tbody")
+							  .children(".jspContainer")
+							  .children(".jspPane")
+							  .children("tr")
+							  .removeClass("highlight");
 				//Highlight the curront row
 				$tr.addClass("highlight");
 			}

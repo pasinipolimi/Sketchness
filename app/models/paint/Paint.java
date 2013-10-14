@@ -289,6 +289,5 @@ public class Paint extends GameRoom {
 }
 
 enum JsonNodeType {
-
     segment, change, trace, roundended, move, skiptask, endsegmentation
 }

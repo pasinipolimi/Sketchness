@@ -2,7 +2,9 @@ package utils.CMS;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
@@ -115,6 +117,59 @@ public class CMS {
         String parameters = "session_id=" + sessionId + "&action_type=" + actionType + "&user_id=" + username + "&oauth_consumer_key=" + oauthConsumerKey + "&action_log=" + log;
         WS.url(request).setContentType("application/x-www-form-urlencoded").post(parameters);
         Logger.debug("[CMS] Action " + actionType + " for session " + sessionId + ": " + log);
+    }
+    
+    public static void fixGroundTruth(Integer sessionId, HashSet<ObjectNode> priorityTaskHashSet, HashSet<ObjectNode> taskHashSet, Room roomChannel) {
+        JsonReader jsonReader = new JsonReader();
+        JsonNode retrievedImages;
+        HashMap<String,ObjectNode> temporary = new HashMap<>();
+        retrievedImages = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image.json");
+         if (retrievedImages != null) {
+            //For each image
+            for (JsonNode item : retrievedImages) {
+                if (item.getElements().hasNext()) {
+                    //Save information related to the image
+                    String id = item.get("id").asText();
+                    String url = rootUrl + item.get("mediaLocator").asText();
+                    Integer width = item.get("width").asInt();
+                    Integer height = item.get("height").asInt();
+
+                    //Get all the segments that have been stored for the image
+                    JsonNode imageSegments = item.get("descriptions");
+                    HashSet<String> tags = new HashSet<>();
+                    ObjectNode guessWord = Json.newObject();
+                    guessWord.put("type", "task");
+                    guessWord.put("id", id);
+
+                    //Find the valid tags for this task.
+                    if (imageSegments != null) {
+                        tags = retrieveTags(imageSegments);
+                    }
+                    //Add one tag among the ones that have been retrieved following a particular policy
+                    guessWord.put("tag", chooseTag(tags));
+                    guessWord.put("lang", LanguagePicker.retrieveIsoCode());
+                    guessWord.put("image", url);
+                    guessWord.put("width", width);
+                    guessWord.put("height", height);
+                    temporary.put(id, guessWord);
+                }
+            }
+            JsonNode processedSession = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/session/"+sessionId+".json");
+            if(processedSession!=null) {
+                processedSession = processedSession.get("actions");
+                for (JsonNode item : processedSession) {
+                    if(item.get("type").asText().equals("segmentation")) {
+                        JsonNode segmentation = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/action/"+item.get("id").asText()+".json");
+                        if(temporary.containsKey(segmentation.get("image").asText()))
+                            temporary.remove(segmentation.get("image").asText());
+                    }
+                }
+            }
+            for (Map.Entry pairs : temporary.entrySet()) {
+                taskHashSet.add((ObjectNode)pairs.getValue());
+            }
+            sendTaskAcquired(roomChannel);
+         }
     }
 
     /**

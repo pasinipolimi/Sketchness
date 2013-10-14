@@ -26,8 +26,8 @@ public class LanguagePicker {
                 platformLang = "undefined";
                 langCode = 0;
         }
-
-        playLang = retrieved;
+        
+        setLanguage("en");
     }
 
     public static void setLanguage(String lang) {
