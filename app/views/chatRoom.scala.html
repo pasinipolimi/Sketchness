@@ -2,11 +2,13 @@
 
 @import controllers.routes.javascript._
 
+
 @main(username,room){
 	<!--TODO: BETTER INTERFACE FOR THE ERRORS, POSSIBLY AN OVERLAY-->
 	<div id="onError" class="alert-message error">
 		<p>
-			<strong>Oops! </strong><span></span>
+			<strong>Oops! </strong>
+			<span></span>
 		</p>
 	</div>
 
@@ -16,8 +18,6 @@
 		<div id="gameArea" class="span10">
 			<div id="viewport">
 				<div id="canvaswindows">
-					<!-- CANVAS USED TO STORE THE LAST DRAWING SEGMENT-->
-					<canvas id="me" width="420" height="350"></canvas>
 					<!-- CANVAS TO TRACK THE POSITION OF THE DRAWING PLAYER-->
 					<canvas id="positions" width="420" height="350"></canvas>
 					<!-- CANVAS TO STORE THE ENTIRE DRAWINGS DONE SO FAR-->
@@ -26,46 +26,63 @@
 					<canvas id="task" width="420" height="350"></canvas>
 				</div>
 			</div>
+			<button id="skipTask"></button>
+			<button id="endSegmentation"></button>
+			<input type="text" id="wordInput" placeholder="@Messages("wordInput")" />
 		</div>
 
 
 		<div id="chatPanel" class="gameRoom gameChat">
-			<div id="messages" class="jscroll scroll-pane-arrows jspScrollable">
-			</div>
+			<div id="messages" class="jscroll scroll-pane-arrows jspScrollable"></div>
 		</div>
-		<textarea id="talk" class="gameTalk"></textarea>
+		<input type="text" id="talk" class="gameTalk" placeholder="@Messages("text_area_message")" />
 
 
 		<!-- A SIMPLE CANVAS USED AS AN HUD TO DRAW TOOLS-->
 		<div id="hudArea">
-			<canvas id="hud" width="800" height="300"></canvas>
+			<form id="hud" action="javscript:void(0)">
+				<label for="tool">Tool:</label>
+				<select name="tool" id="tool">
+					<option value="pen">Pen</option>
+					<option value="eraser">Eraser</option>
+				</select>
+
+				<label for="size">Size:</label>
+				<input type="range" name="size" id="size"min="3" max="20" step="1" value="5" />
+
+				<label for="color">Color:</label>
+				<select name="color" id="color">
+					<option value="red">Red</option>
+					<option value="green">Green</option>
+					<option value="blue">Blue</option>
+				</select>
+				<!-- TODO: aggiungere i comandi per lo zoom e lo spostamento nell'img dopo aver zoommato -->
+			</form>
 		</div>
 
 		<!--MESSAGES AND SCORES FOR THE PLAYERS-->
 		<div id="topMessage"></div>
 		<div id="timeCounter"></div>
-                <div id="canvasMessage"></div>
-                <div id="scoreBaloon">
-                    <div id="score"></div>
-                </div>
-                <div id="warnTag" style="display:none"><pre id="warnPre"></pre></div>
+		<div id="canvasMessage"></div>
+		<div id="scoreBaloon">
+			<div id="score"></div>
+		</div>
+		<div id="warnTag" style="display:none">
+			<pre id="warnPre"></pre>
+		</div>
 
 		<!--HANDLING ALL THE USERS CURRENTLY CONNECTED-->
-                <div id="currentAvatar"></div>
+		<div id="currentAvatar"></div>
 		<div id="currentNickname">@username</div>
-		<span id="opponent1"></span>
-		<span id="opponent2"></span>
-		<span id="opponent3"></span>
-		<span id="opponent4"></span>
+		<ul id="opponents"></ul>
 
 		<!--WE CAN'T USE ROUTES IN STATIC JAVASCRIPT, SO WE MUST REFERENCE THEM OUTSIDE-->
 		<div id="chatWebSocket" data-ws="@routes.Sketchness.chatStream(username,room).webSocketURL()"></div>
 		<div id="paintWebSocket" data-ws="@routes.Sketchness.paintStream(username,room).webSocketURL()"></div>
 
-		<script type="text/javascript" src="/assets/javascripts/chat.js"></script>
 		<script type="text/javascript" src="/assets/javascripts/paint.js"></script>
-                
-                <script type="text/javascript" src="@routes.JavascriptController.javascriptRoutes"></script>
+
+		<script type="text/javascript" src="@routes.JavascriptController.javascriptRoutes"></script>
 
 		<!-- DISABLE THE REFRESH BUTTON-->
 		<script type="text/javascript">
@@ -76,19 +93,18 @@
 				});
 			});
 		</script>
-                
-                <form id="backForm" action="@routes.Sketchness.lobby()">
-                    <input id="username" name="username" class="input-small" type="hidden" value="@username" />
-                    <button type="submit" id="backToLobby"></button>
-                </form>
-                
 
-                <!--THIS HIDDEN DIV IS USED JUST TO PRELOAD IMAGES SO THAT THEY WON'T "FLICKER"-->
-                <div id="preloaded-images">
-                    <img src="../assets/images/UI/skipUnpressed.png" width="1" height="1" alt="skipPressed" />
-                    <img src="../assets/images/UI/skipHover.png" width="1" height="1" alt="skipHover" />
-                    <img src="../assets/images/UI/skipPressed.png" width="1" height="1" alt="skipUnpressed" />
-                    <img id="questionMark" src="../assets/images/UI/questionMark.png" rwidth="289" rheight="326" width="1" height="1" alt="questionMark" />
-                </div>
-</div>
+		<form id="backForm" action="@routes.Sketchness.lobby()">
+			<input id="username" name="username" class="input-small" type="hidden" value="@username" />
+			<button type="submit" id="backToLobby"></button>
+		</form>
+
+		<!--THIS HIDDEN DIV IS USED JUST TO PRELOAD IMAGES SO THAT THEY WON'T "FLICKER"-->
+		<div id="preloaded-images">
+			<img src="../assets/images/UI/skipUnpressed.png" width="1" height="1" alt="skipPressed" />
+			<img src="../assets/images/UI/skipHover.png" width="1" height="1" alt="skipHover" />
+			<img src="../assets/images/UI/skipPressed.png" width="1" height="1" alt="skipUnpressed" />
+			<img id="questionMark" src="../assets/images/UI/questionMark.png" rwidth="289" rheight="326" width="1" height="1" alt="questionMark" />
+		</div>
+	</div>
 }

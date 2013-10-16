@@ -1,120 +1,108 @@
 html {
-    height: 100%;
+	height: 100%;
 }
 
 html, body {
-    background-color: #eee;
+	background-color: #eee;
 }
 
 .container > footer p {
-    text-align: center; /* center align it with the container */
+	text-align: center; /* center align it with the container */
 }
 .container {
-    width: 820px; /* downsize our container to make the content feel a bit tighter and more cohesive. NOTE: this removes two full columns from the grid, meaning you only go to 14 columns and not 16. */
+	width: 820px; /* downsize our container to make the content feel a bit tighter and more cohesive.
+	NOTE: this removes two full columns from the grid, meaning you only go to 14 columns and not 16. */
 }
 
-.brand{
-	top:300;
-	left:400;
+.brand {
+	top: 300;
+	left: 400;
 }
-
 
 /* The white background content wrapper */
 .content {
-    background-color: #fff;
-    padding: 20px;
+	background-color: #fff;
+	padding: 20px;
 	position: relative;
-    margin: 0 -90px; /* negative indent the amount of the padding to maintain the grid system */
-    margin-left: auto ;
-    margin-right: auto ;
-    min-height: 10px;
+	margin: 0 -90px; /* negative indent the amount of the padding to maintain the grid system */
+	margin-left: auto ;
+	margin-right: auto ;
+	min-height: 10px;
+}
+
+.homepage, .lobbypage, .leaderboardpage {
+	background-repeat: no-repeat;
+	background-position: center;
+	margin-left: auto ;
+	margin-right: auto ;
+	position: relative;
+	height: 600px;
+	width: 800px;
 }
 
 .homepage {
-	background-image:url('../images/UI/home.png');
-	background-repeat:no-repeat;
-	background-position:center;
-	margin-left: auto ;
-    margin-right: auto ;
-	position: relative;
-	height: 600px;
-	width: 800px;
+	background-image: url('../images/UI/home.png');
 }
 
 .lobbypage {
-	background-image:url('../images/UI/lobby.png');
-	background-repeat:no-repeat;
-	background-position:center;
-	margin-left: auto ;
-    margin-right: auto ;
-	position: relative;
-	height: 600px;
-	width: 800px;
+	background-image: url('../images/UI/lobby.png');
 }
 
-
 .leaderboardpage {
-	background-image:url('../images/UI/gameover.png');
-	background-repeat:no-repeat;
-	background-position:center;
-	margin-left: auto ;
-    margin-right: auto ;
-	position: relative;
-	height: 600px;
-	width: 800px;
+	background-image: url('../images/UI/gameover.png');
 }
 
 /* Page header tweaks */
 .page-header {
-    background-color: #f5f5f5;
-    padding: 20px 20px 10px;
-    margin: -20px -20px 20px;
+	background-color: #f5f5f5;
+	padding: 20px 20px 10px;
+	margin: -20px -20px 20px;
 }
 
 /* Styles you shouldn't keep as they are for displaying this base example only */
 .content .span10,
 .content .span4 {
-    min-height: 500px;
+	min-height: 500px;
 }
 
 /* Give a quick and non-cross-browser friendly divider */
 .content .span4 {
-    padding-left: 9px;
-    margin-left: 10px;
+	padding-left: 9px;
+	margin-left: 10px;
 }
 
 .topbar .btn {
-    border: 0;
+	border: 0;
 }
 
 .topbar p {
-    color: #888;
+	color: #888;
 }
 
 
 table.gameList {
-    display: table;
-    width: 100%;
+	display: table;
+	width: 100%;
 }
 table.gameList thead, table.gameList tbody {
-    float: left;
-    width: 100%;
+	float: left;
+	width: 100%;
 }
 table.gameList tbody {
-    overflow: auto;
-    height: 300px;
+	overflow: auto;
+	height: 300px;
 }
 table.gameList tr {
-    width: 100%;
-    display: table;
-    text-align: left;
+	width: 100%;
+	display: table;
+	text-align: left;
 }
 table.gameList th, table.gameList td {
-    width: 33%;
+	width: 33%;
 }
 
 .popup_close {
-    float: right;
+	float: right;
 	top: 20px;
 	cursor: pointer;
 	right: 20px;
@@ -142,7 +130,7 @@ table.gameList th, table.gameList td {
 	left: 20px;
 }
 
-#scoreBaloon{
+#scoreBaloon {
 	background-image: url("../images/UI/scoreBaloon.png");
 	width: 80px;
 	height: 47px;
@@ -153,7 +141,7 @@ table.gameList th, table.gameList td {
 	z-index: 2;
 }
 
-#score{
+#score {
 	left: 0px;
 	top: 8px;
 	position: relative;
@@ -161,7 +149,7 @@ table.gameList th, table.gameList td {
 }
 
 
-#currentAvatar{
+#currentAvatar {
 	background-image: url("../images/UI/femaleAvatar.png");
 	width: 60px;
 	height: 60px;
@@ -170,95 +158,104 @@ table.gameList th, table.gameList td {
 	position: absolute;
 }
 
-.opponentAvatar{
-	background-image: url("../images/UI/femaleAvatar.png");
-	background-size: 30px 30px;
-	width: 30px;
-	height: 30px;
-	top: 195px;
-	left: 610px;
+#opponents {
+	top: 182px;
+	left: 600px;
 	position: absolute;
-	display: block;
+	padding: 0px;
+	margin: 0px;
 }
 
-#mainPage{
+#opponents li {
+	background-image: url("../images/UI/femaleAvatar.png");
+	background-size: 38px auto;
+	background-repeat: no-repeat;
+	background-position: center bottom;
+	width: 38px;
+	height: 45px;
+	display: block;
+	float: left;
+	margin: 0px 5px;
+}
+
+#mainPage {
 	background-image: url("../images/UI/guesser.png");
-	background-repeat:no-repeat;
-	background-position:center;
-	width:800px;
-	height:600px;
-	margin-left:auto;
-	margin-right:auto;
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 800px;
+	height: 600px;
+	margin-left: auto;
+	margin-right: auto;
 	position: relative;
 }
 
 #username {
 	background-color: transparent;
 	border-color: transparent;
-	left:312px;
-	position:absolute;
-	top:460px;
-    width: 200px;
-	height:35px;
-	font-weight:bold;
+	left: 312px;
+	position: absolute;
+	top: 460px;
+	width: 200px;
+	height: 35px;
+	font-weight: bold;
 	color: #B01AA6;
-	text-align:center;
+	text-align: center;
 }
 
 #facebook {
 	background-color: transparent;
 	background-image: url("../images/UI/facebook.png");
-	background-repeat:no-repeat;
-	background-position:center;
-	height:40px;
-	left:430px;
-	position:absolute;
-	top:535px;
-    width: 40px;
+	background-repeat: no-repeat;
+	background-position: center;
+	height: 40px;
+	left: 430px;
+	position: absolute;
+	top: 535px;
+	width: 40px;
 }
 
 #twitter {
 	background-color: transparent;
 	background-image: url("../images/UI/twitterInactive.png");
-	background-repeat:no-repeat;
-	background-position:center;
-	height:40px;
-	left:480px;
-	position:absolute;
-	top:534px;
-    width: 40px;
+	background-repeat: no-repeat;
+	background-position: center;
+	height: 40px;
+	left: 480px;
+	position: absolute;
+	top: 534px;
+	width: 40px;
 }
 
 
 #login {
 	background-color: transparent;
 	background-image: url("../images/UI/loginUnpressed.png");
-	height:66px;
-	left:330px;
-	position:absolute;
-	top:520px;
+	height: 66px;
+	left: 330px;
+	position: absolute;
+	top: 520px;
 	border-width: 0px;
-    width: 181px;
+	width: 181px;
 }
 
 #login:hover {
 	background-color: transparent;
 	background-image: url("../images/UI/loginHover.png");
-	height:66px;
-	left:330px;
-	position:absolute;
-	top:520px;
-    width: 181px;
+	height: 66px;
+	left: 330px;
+	position: absolute;
+	top: 520px;
+	width: 181px;
 }
 
 #login:active {
 	background-color: transparent;
 	background-image: url("../images/UI/loginPressed.png");
-	height:46px;
-	left:330px;
-	position:absolute;
-	top:530px;
-    width: 181px;
+	height: 46px;
+	left: 330px;
+	position: absolute;
+	top: 530px;
+	width: 181px;
 }
 
 #backToLobby {
@@ -330,7 +327,7 @@ table.gameList th, table.gameList td {
 	position: relative;
 	top: 7px;
 	left: 120px;
-	font-weight:bold;
+	font-weight: bold;
 	font-size: 20px;
 }
 
@@ -340,7 +337,7 @@ table.gameList th, table.gameList td {
 	left: 400px;
 	display: flex;
 	font-size: 20px;
-	font-weight:bold;
+	font-weight: bold;
 }
 
 #leaderboardAvatar {
@@ -421,7 +418,7 @@ table.gameList th, table.gameList td {
 	width: 200px;
 }
 
-#roomName{
+#roomName {
 	width: 200px;
 }
 
@@ -437,6 +434,7 @@ table.gameList th, table.gameList td {
 
 
 #endSegmentation {
+	display: none;
 	background-color: transparent;
 	background-image: url("../images/UI/endUnpressed.png");
 	height:66px;
@@ -444,7 +442,7 @@ table.gameList th, table.gameList td {
 	position:absolute;
 	border-width: 0px;
 	top:500px;
-    width: 181px;
+	width: 181px;
 }
 
 #endSegmentation:hover {
@@ -458,7 +456,8 @@ table.gameList th, table.gameList td {
 }
 
 #skipTask {
-	background-color: rgba(0, 0, 0, 0);
+	display: none;
+	background-color: transparent;
 	background-image: url("../images/UI/skipUnpressed.png");
 	height: 66px;
 	left: 30px;
@@ -476,6 +475,17 @@ table.gameList th, table.gameList td {
 #skipTask:active {
 	background-color: transparent;
 	background-image: url("../images/UI/skipPressed.png");
+}
+
+#wordInput {
+	display: none;
+	position: absolute;
+	top: 530px;
+	left: 235px;
+}
+
+#mainPage.sketcher #wordInput {
+	top: 470px;
 }
 
 #join {
@@ -502,18 +512,19 @@ table.gameList th, table.gameList td {
 
 
 #username:focus {
-box-shadow:-2px -2px 6px #B01AA6, -2px 2px 6px #B01AA6, 4px 2px 6px #B01AA6, 4px -2px 6px #B01AA6;
+	box-shadow: -2px -2px 6px #B01AA6, -2px 2px 6px #B01AA6, 4px 2px 6px #B01AA6, 4px -2px 6px #B01AA6;
 }
 
 #chatPanel {
-    overflow: hidden;
+	overflow: hidden;
 	position: absolute;
-	z-index:10;
-	margin-left:0px;
+	z-index: 10;
+	margin-left: 0px;
 	padding-left: 0px;
 }
 
 #warnTag {
+	display: none;
 	height: 200px !important;
 	width: 200px !important;
 	position: relative;
@@ -526,8 +537,8 @@ box-shadow:-2px -2px 6px #B01AA6, -2px 2px 6px #B01AA6, 4px 2px 6px #B01AA6, 4px
 }
 
 div.popup_cont {
-	height:350px !important;
-	width:350px !important;
+	height: 350px !important;
+	width: 350px !important;
 	position: fixed;
 	top: 25% !important;
 	left: 40% !important;
@@ -536,7 +547,7 @@ div.popup_cont {
 
 
 
-.popup_cont .popup{
+.popup_cont .popup {
 	background: rgba(0,0,0,0);
 	padding: 25px;
 	top: 50px;
@@ -545,39 +556,41 @@ div.popup_cont {
 	position: absolute;
 }
 
-.popup_content{
+.popup_content {
 	position: absolute;
-	height:200px !important;
-	width:200px !important;
+	height: 200px !important;
+	width: 200px !important;
 }
 
 .lobbyChat {
-	height:490px;
-	left:340px;
-	min-height:160px;
-	top:150px;
-	width:280px;
+	height: 490px;
+	left: 340px;
+	min-height: 160px;
+	top: 150px;
+	width: 280px;
 }
 
 .gameChat {
-	height:290px;
-	left:600px;
-	min-height:160px;
-	top:260px;
-	width:180px;
+	height: 290px;
+	left: 600px;
+	min-height: 160px;
+	top: 260px;
+	width: 180px;
 }
 
 .gameRoom {
-	left:628px;
+	left: 628px;
 }
 
 tr.highlight {
 	background-color: #8888ff;
 }
 
-tr:hover { background-color: #8888ff }
+tr:hover {
+	background-color: #8888ff
+}
 
-#gameList{
+#gameList {
 	position: absolute;
 	width: 260px;
 	top: 130px;
@@ -588,133 +601,134 @@ tr:hover { background-color: #8888ff }
 div.avatarIcon {
 	list-style-type: none;
 	background: url('../images/favicon.png') no-repeat top left;
-	background-size:40px 40px;
+	background-size: 40px 40px;
 	height: 46px;
 	width: 120px;
 	word-wrap: break-word;
 	padding-left: 40px;
 	padding-top: 10px;
 	color: black;
-	font-weight:bold;
+	font-weight: bold;
 }
 
 .userList {
 	position: absolute;
-	height:290px;
-	left:620px;
-	min-height:160px;
-	top:140px;
-	width:180px;
+	height: 290px;
+	left: 620px;
+	min-height: 160px;
+	top: 140px;
+	width: 180px;
 }
 
 #onError, #onChat {
-    display: none;
+	display: none;
 }
 
 #error {
-  position: fixed;
-  z-index: 99999;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
-  text-align: center;
-  padding-top: 10%;
+	position: fixed;
+	z-index: 99999;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0,0,0,0.5);
+	text-align: center;
+	padding-top: 10%;
 }
 
 .error {
-  padding: 1px 8px;
-  background-color: #f00;
-  color: #fff;
-  text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
-  border-radius: 8px;
-  font-size: 1.4em;
-  font-weight: bold;
+	padding: 1px 8px;
+	background-color: #f00;
+	color: #fff;
+	text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+	border-radius: 8px;
+	font-size: 1.4em;
+	font-weight: bold;
 }
 
 #viewport {
-    width: 500px;
-    height: 450px;
+	width: 500px;
+	height: 450px;
 	top: -439.5px;
 	left: 89.5px;
-    position: relative;
+	position: relative;
 }
 
 #gameMessagesSpan {
-    width: 500px;
-    height: 50px;
-    left: 89.5px;
-    background: white;
-    position: relative;
+	width: 500px;
+	height: 50px;
+	left: 89.5px;
+	background: white;
+	position: relative;
 }
 
 #positions {
-  position: absolute;
-  width: inherit;
-  height: inherit;
-  z-index: 5;
+	position: absolute;
+	width: inherit;
+	height: inherit;
+	z-index: 5;
 }
 
 #me {
-  position: absolute;
-  width: inherit;
-  height: inherit;
-  z-index: 4;
+	position: absolute;
+	width: inherit;
+	height: inherit;
+	z-index: 4;
 }
 
 #draws {
-  position: absolute;
-  width: inherit;
-  height: inherit;
-  z-index: 3;
+	position: absolute;
+	width: inherit;
+	height: inherit;
+	z-index: 3;
 }
 
 #task {
-  position: absolute;
-  width: inherit;
-  height: inherit;
-  z-index: 2;
+	position: absolute;
+	width: inherit;
+	height: inherit;
+	z-index: 2;
 }
 
-#canvaswindows{
-  position: absolute;
-  top: 580px;
-  width: 420px;
-  height: 350px;
+#canvaswindows {
+	position: absolute;
+	top: 580px;
+	width: 420px;
+	height: 350px;
 }
 
-#currentNickname{
+#currentNickname {
 	width: 110px;
 	height: 30px;
-	left:680px;
-	position:absolute;
-	top:88px;
-	text-align:center;
-	font-size:15px;
-	font-weight:bold;
+	left: 680px;
+	position: absolute;
+	top: 88px;
+	text-align: center;
+	font-size: 15px;
+	font-weight: bold;
 }
 
-#topMessage{
+#topMessage {
 	width: 380px;
 	height: 30px;
-	left:108px;
-	position:absolute;
-	top:50px;
-	text-align:center;
+	left: 108px;
+	position: absolute;
+	top: 50px;
+	text-align: center;
 }
 
-#canvasMessage{
+#canvasMessage {
+	display: none;
 	width: 380px;
 	height: 30px;
-	left:108px;
-	position:absolute;
-	top:350px;
-	text-align:center;
-	z-index:900;
+	left: 108px;
+	position: absolute;
+	top: 350px;
+	text-align: center;
+	z-index: 900;
 }
 
-#warnPre{
+#warnPre {
 	display: block;
 	padding: 9.5px;
 	margin: 0 0 10px;
@@ -733,7 +747,7 @@ div.avatarIcon {
 	position: relative;
 }
 
-#canvasPre{
+#canvasPre {
 	display: block;
 	padding: 9.5px;
 	margin: 0 0 10px;
@@ -751,56 +765,50 @@ div.avatarIcon {
 	position: relative;
 }
 
-#timeCounter{
+#timeCounter {
 	width: 200px;
 	height: 30px;
-	left:-10px;
-	position:absolute;
-	top:550px;
-	text-align:center;
-}
-
-
-#hudArea{
+	left: -10px;
 	position: absolute;
-    left: 0;
+	top: 550px;
+	text-align: center;
+}
+
+
+#hudArea {
+	position: absolute;
+	left: 0;
+	right: 0;
 	top: 0;
-	width: 800px;
-	height:300px;
+	height: 50px;
+	display: none;
 }
-
-#hud{
-	width: 800px;
-	height:300px;
-	z-index: 1;
-}
-
 
 #gameArea {
-    width: 580px;
+	width: 580px;
 }
 
 .playername {
-    position: absolute;
-    right: 20px;
-    z-index: 20;
+	position: absolute;
+	right: 20px;
+	z-index: 20;
 }
 
 #wrapper {
-    margin: 0px 20px;
+	margin: 0px 20px;
 }
 
 #main {
-    margin: 20px auto;
-    width: 500px;
+	margin: 20px auto;
+	width: 500px;
 }
 
 footer {
-    text-align: center;
-    padding: 10px 0;
+	text-align: center;
+	padding: 10px 0;
 }
 
-.lobbyMessages{
+.lobbyMessages {
 	height: 330px!important;
 }
 
@@ -812,18 +820,18 @@ footer {
 }
 
 #messages {
-    position: absolute;
+	position: absolute;
 	height: 265px;
-	top:10px;
+	top: 10px;
 	overflow-y: scroll;
 }
 
 #talk {
-    position: absolute;
-	background-color:transparent;
-	border-color:transparent;
-	z-index:11;
-	height:30px;
+	position: absolute;
+	background-color: transparent;
+	border-color: transparent;
+	z-index: 11;
+	height: 30px;
 	resize: none;
 }
 
@@ -835,58 +843,58 @@ footer {
 
 .gameTalk {
 	left: 605px;
-    width: 170px;
-	top:545px;
+	width: 170px;
+	top: 545px;
 }
 
 
 .message {
-    padding: 4px 0;
-    position: relative;
+	padding: 4px 0;
+	position: relative;
 }
 
 .message span {
-    width: 90px;
-    overflow: hidden;
-    text-align: right;
-    font-weight: bold;
-    margin-right: 5px;
-    display: inline-block;
-    vertical-align: top;
-    position: relative;
-    top: -1px;
+	width: 90px;
+	overflow: hidden;
+	text-align: right;
+	font-weight: bold;
+	margin-right: 5px;
+	display: inline-block;
+	vertical-align: top;
+	position: relative;
+	top: -1px;
 }
 
 .message p {
-    display: inline-block;
-    margin: 0;
-    width: 150px;
-word-wrap: break-word;
+	display: inline-block;
+	margin: 0;
+	width: 150px;
+	word-wrap: break-word;
 }
 
 
-.message.talkError p{
+.message.talkError p {
 	color: #FF0000;
 	font-weight: bold;
 }
 
-.message.talkWarning p{
+.message.talkWarning p {
 	color: #FE9A2E;
 	font-weight: bold;
 }
 
-.message.talkNear p{
-	color:#9FF781;
+.message.talkNear p {
+	color: #9FF781;
 	font-weight: bold;
 }
 
 div#preloaded-images {
-   position: absolute;
-   overflow: hidden;
-   left: -9999px;
-   top: -9999px;
-   height: 1px;
-   width: 1px;
+	position: absolute;
+	overflow: hidden;
+	left: -9999px;
+	top: -9999px;
+	height: 1px;
+	width: 1px;
 }
 
 
@@ -901,14 +909,13 @@ div#preloaded-images {
 
 /* Styles specific to this particular page */
 .jscroll,
-.scroll-pane-arrows
-{
+.scroll-pane-arrows {
 	width: 100%;
 	height: 200px;
 	overflow: auto;
 }
-.horizontal-only
-{
+
+.horizontal-only {
 	height: auto;
 	max-height: 200px;
 }

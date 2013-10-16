@@ -1,6 +1,11 @@
-require(["Communicator", "jquery", "popup", "jscrollpane"], function(Communicator, $) {
+require(["Communicator", "Chat", "jquery", "popup", "jscrollpane"], function(Communicator, Chat, $) {
 
 	$(function() {
+
+		var sketchness = {
+			players: [],
+			myself: $('#currentNickname').text()
+		};
 
 		// Show error message
 		var setError = function(message) {
@@ -18,24 +23,20 @@ require(["Communicator", "jquery", "popup", "jscrollpane"], function(Communicato
 			horizontalGutter: 10
 		});
 
+		$("#unorderedUserList").jScrollPane({
+			showArrows: true,
+			mantainPosition: true,
+			stickToBottom: true,
+			animateScroll: true,
+			horizontalGutter: 10
+		});
+
 
 		//Popup for the game creation panel
 		var options = { width: 350, height: 350, top: 200, left: 100 };
 		$('.default_popup').popup(options);
 
 		var chosenId = undefined;
-
-		// WebSocket
-		var communicator = new Communicator($('#lobbyWebSocket').data('ws'));
-
-		$(communicator.websocket).on({
-			close: function(evt) {
-				setError("Connection lost");
-			},
-			error: function(evt) {
-				setError(evt);
-			}
-		});
 
 		//Set the game ID when the user select a row in the
 		//game list; highlight the chosen row
@@ -50,13 +51,67 @@ require(["Communicator", "jquery", "popup", "jscrollpane"], function(Communicato
 				var $currentRoom = $("#roomId");
 				$currentRoom.attr('value',id);
 				//Remove the highlighting from the other rows
-				$('#gameList').children("tbody")
-							  .children(".jspContainer")
-							  .children(".jspPane")
-							  .children("tr")
-							  .removeClass("highlight");
+				$('#gameList')
+					.children("tr")
+					.removeClass("highlight");
 				//Highlight the curront row
 				$tr.addClass("highlight");
+			}
+		});
+
+		// WebSocket
+		var communicator = new Communicator($('#lobbyWebSocket').data('ws'));
+		$(communicator.websocket).on({
+			close: function(evt) {
+				setError("Connection lost");
+			},
+			error: function(evt) {
+				setError(evt);
+			}
+		});
+
+		var chat = new Chat($("#messages"), $("#talk"));
+		$(chat).on("send", function(e, message) {
+			communicator.send("chat", { message: message });
+		});
+
+		communicator.on({
+			chat: function(e, content) {
+				chat.message(sketchness.players[content.user].name, content.message, content.user === sketchness.myself);
+			},
+			log: function(e, content) {
+				chat.log(content.level, content.message);
+			}
+		});
+
+		var writePlayers = function(players, myself) {
+			var paneApi = $("#unorderedUserList").data('jsp');
+			paneApi.getContentPane().empty();
+
+			$.each(players, function(id, player) {
+				if(id !== myself) {
+					var el = $('<div class="avatarIcon"><span></span></li>');
+					$("span", el).text(player.name);
+					paneApi.getContentPane().append(el);
+					paneApi.reinitialise();
+					paneApi.scrollToBottom();
+				}
+			});
+		};
+
+		communicator.on({
+			join: function(e, content) {
+				sketchness.players[content.user] = {
+					id: content.user,
+					name: content.name,
+					img: content.img,
+				};
+
+				writePlayers(sketchness.players, sketchness.myself);
+			},
+			leave: function(e, content) {
+				delete sketchness.players[content.user];
+				writePlayers(sketchness.players, sketchness.myself);
 			}
 		});
 
