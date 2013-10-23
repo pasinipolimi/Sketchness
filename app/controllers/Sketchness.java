@@ -1,18 +1,16 @@
 package controllers;
 
-import models.chat.ChatFactory;
 import play.mvc.*;
 
 import org.codehaus.jackson.JsonNode;
 
 import views.html.index;
-import views.html.chatRoom;
+import views.html.gameRoom;
 import views.html.lobby;
 import views.html.leaderboard;
 
 import models.game.GameFactory;
 import models.lobby.LobbyFactory;
-import models.paint.PaintFactory;
 import play.i18n.Lang;
 import static play.mvc.Controller.flash;
 import static play.mvc.Controller.request;
@@ -36,7 +34,7 @@ public class Sketchness extends Controller {
     /**
      * Display the chat room.
      */
-    public static Result chatRoom(final String username, String roomName, Integer nPlayers) throws Exception {
+    public static Result gameRoom(final String username, String roomName, Integer nPlayers) throws Exception {
         if (LanguagePicker.retrieveIsoCode().equals("")) {
             LanguagePicker.setLanguage(Lang.preferred(request().acceptLanguages()));
         }
@@ -55,28 +53,9 @@ public class Sketchness extends Controller {
         //Force the room name to be without spaces. We cannot create actors with 
         //spaces in it.
         roomName = roomName.replaceAll(" ", "");
-        GameFactory.createGame(roomName, nPlayers);
-        return ok(chatRoom.render(username, roomName));
+        return ok(gameRoom.render(username, roomName,nPlayers));
     }
 
-    /**
-     * Handle the chat websocket.
-     */
-    public static WebSocket<JsonNode> chatStream(final String username, final String roomName) {
-        return new WebSocket<JsonNode>() {
-            // Called when the Websocket Handshake is done.
-            @Override
-            public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
-
-                // Join the chat room.
-                try {
-                    ChatFactory.createChat(username, roomName, in, out);
-                } catch (Exception ex) {
-                    LoggerUtils.error("CHATFACTORY", ex);
-                }
-            }
-        };
-    }
 
     /**
      * Handle the chat websocket.
@@ -101,13 +80,13 @@ public class Sketchness extends Controller {
      *
      * Handle the paintroom websocket
      */
-    public static WebSocket<JsonNode> paintStream(final String username, final String roomName) {
+    public static WebSocket<JsonNode> gameStream(final String username, final String roomName, final Integer players) {
 
         return new WebSocket<JsonNode>() {
             @Override
             public void onReady(In<JsonNode> in, Out<JsonNode> out) {
                 try {
-                    PaintFactory.createPaint(username, roomName, in, out);
+                    GameFactory.createGame(username, roomName, players, in, out);
                 } catch (Exception ex) {
                     LoggerUtils.error("PAINT", ex);
                 }

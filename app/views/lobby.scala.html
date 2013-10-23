@@ -29,7 +29,7 @@
 			<tbody id="gameListBody" class="jscroll scroll-pane-arrows jspScrollable"></tbody>
 		</table>
 
-		<form id="joinGame" action="@routes.Sketchness.chatRoom()">
+		<form id="joinGame" action="@routes.Sketchness.gameRoom()">
 			<input id="username" name="username" class="input-small" type="hidden" value="@username" />
 			<input id="roomId" name="room" class="input-small" type="hidden" value="" />
 			<button id="join" type="submit"></button>
@@ -44,7 +44,7 @@
 		</form>
 
 		<div id="createGamePopUp" class="alertBox" style="display:none">
-			<form action="@routes.Sketchness.chatRoom()">
+			<form action="@routes.Sketchness.gameRoom()">
 				<p style="text-align:center">
 					<strong>Room Name</strong>
 				</p>
@@ -59,7 +59,7 @@
 			</form>
 		</div>
 
-		<form  id="singlePlayerForm" action="@routes.Sketchness.chatRoom()">
+		<form  id="singlePlayerForm" action="@routes.Sketchness.gameRoom()">
 			<input id="username" name="username" class="input-small" type="hidden" value="@username" />
 			<input id="roomName" name="room" class="input-small" type="hidden" value="@username"/>
 			<input type="hidden" name="nPlayers" value="1">
@@ -67,7 +67,6 @@
 		</form>
 
 		<!--The only way to refer to websocket instances in the page-->
-		<div id="chatWebSocket" data-ws="@routes.Sketchness.chatStream(username,"lobby").webSocketURL()"></div>
 		<div id="lobbyWebSocket" data-ws="@routes.Sketchness.lobbyStream(username).webSocketURL()"></div>
 
 		<!--Logic to handle the chat and the lobby-->

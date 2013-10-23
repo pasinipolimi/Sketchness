@@ -1,4 +1,4 @@
-@(username: String, room: String)
+@(username: String, room: String, players: Integer)
 
 @import controllers.routes.javascript._
 
@@ -77,8 +77,7 @@
 		<ul id="opponents"></ul>
 
 		<!--WE CAN'T USE ROUTES IN STATIC JAVASCRIPT, SO WE MUST REFERENCE THEM OUTSIDE-->
-		<div id="chatWebSocket" data-ws="@routes.Sketchness.chatStream(username,room).webSocketURL()"></div>
-		<div id="paintWebSocket" data-ws="@routes.Sketchness.paintStream(username,room).webSocketURL()"></div>
+		<div id="paintWebSocket" data-ws="@routes.Sketchness.gameStream(username,room,players).webSocketURL()"></div>
 
 		<script type="text/javascript" src="/assets/javascripts/paint.js"></script>
 

@@ -64,6 +64,13 @@ public class GameManager implements GameManagerInterface {
     }
 
     @Override
+    public Room getRoom(String roomName) {
+        return new GameMessages.Room(roomName);
+    }
+    
+    
+
+    @Override
     public Room getLobby() {
         return lobby;
     }

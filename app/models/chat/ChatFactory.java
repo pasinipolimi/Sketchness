@@ -24,7 +24,7 @@ public class ChatFactory extends Factory {
         String result = (String) Await.result(future, Duration.create(10, SECONDS));
 
         if ("OK".equals(result)) {
-                GameBus.getInstance().subscribe(obtained, GameManager.getInstance().getLobby());
+                GameBus.getInstance().subscribe(obtained, GameManager.getInstance().getRoom(room));
         } else {
             // Cannot connect, create a Json error.
             ObjectNode error = Json.newObject();

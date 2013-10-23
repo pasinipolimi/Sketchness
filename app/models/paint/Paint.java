@@ -21,8 +21,10 @@ import utils.gamebus.GameMessages.GameEvent;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.json.JSONException;
+import play.i18n.Messages;
 import utils.LanguagePicker;
 import utils.gamebus.GameEventType;
+import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.Join;
 import utils.gamebus.GameMessages.Room;
 
@@ -137,14 +139,6 @@ public class Paint extends GameRoom {
             Painter painter = new Painter(message.getChannel());
             painter.name = username;
             painters.put(username, painter);
-
-            // Inform the current painter of the whole list of users
-            for (Map.Entry<String, Painter> entry : painters.entrySet()) {
-                ObjectNode other = (ObjectNode) entry.getValue().toJson();
-                other.put("type", "change");
-                painter.channel.write(other);
-            }
-            GameBus.getInstance().publish(new GameEvent(username, roomChannel, GameEventType.join));
             Logger.debug("[PAINT] added player " + username);
             getSender().tell("OK", this.getSelf());
         } else {
@@ -187,11 +181,6 @@ public class Paint extends GameRoom {
     private void handleQuitter(String quitter) throws InterruptedException {
         for (Map.Entry<String, Painter> entry : painters.entrySet()) {
             if (entry.getKey().equalsIgnoreCase(quitter)) {
-                ObjectNode json = Json.newObject();
-                json.put("type", "disconnect");
-                json.put("username", quitter);
-                notifyAll(json);
-
                 entry.getValue().channel.close();
                 painters.remove(quitter);
                 Logger.debug("[PAINT] " + quitter + " has disconnected.");

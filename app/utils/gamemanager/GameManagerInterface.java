@@ -16,6 +16,8 @@ public interface GameManagerInterface extends TypedActor.Receiver {
     public String addInstance(Integer maxPlayers, String roomName, ActorRef current);
 
     public void removeInstance(ActorRef toRemove);
+    
+    public Room getRoom(String roomName);
 
     @Override
     public void onReceive(Object message, ActorRef ref);
