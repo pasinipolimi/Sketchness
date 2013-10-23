@@ -3,7 +3,7 @@ require(["Communicator", "Chat", "jquery", "popup", "jscrollpane"], function(Com
 	$(function() {
 
 		var sketchness = {
-			players: [],
+			players: {},
 			myself: $('#currentNickname').text()
 		};
 
@@ -72,7 +72,7 @@ require(["Communicator", "Chat", "jquery", "popup", "jscrollpane"], function(Com
 
 		var chat = new Chat($("#messages"), $("#talk"));
 		$(chat).on("send", function(e, message) {
-			communicator.send("chat", { message: message });
+			communicator.send("chat", { user: sketchness.myself, message: message });
 		});
 
 		communicator.on({
@@ -87,16 +87,21 @@ require(["Communicator", "Chat", "jquery", "popup", "jscrollpane"], function(Com
 		var writePlayers = function(players, myself) {
 			var paneApi = $("#unorderedUserList").data('jsp');
 			paneApi.getContentPane().empty();
-
-			$.each(players, function(id, player) {
+			var el;
+			for(var id in players) {
 				if(id !== myself) {
-					var el = $('<div class="avatarIcon"><span></span></li>');
-					$("span", el).text(player.name);
+					el = $('<div class="avatarIcon"><span></span></li>');
+					$("span", el).text(players[id].name);
 					paneApi.getContentPane().append(el);
 					paneApi.reinitialise();
 					paneApi.scrollToBottom();
 				}
-			});
+			};
+			el = $('<div class="avatarIcon"><span></span></li>');
+			$("span", el).text(players[myself].name);
+			paneApi.getContentPane().append(el);
+			paneApi.reinitialise();
+			paneApi.scrollToBottom();
 		};
 
 		communicator.on({

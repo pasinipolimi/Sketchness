@@ -13,7 +13,9 @@ import org.codehaus.jackson.node.ObjectNode;
 
 import utils.gamebus.GameMessages.*;
 import utils.LanguagePicker;
+import utils.gamebus.GameBus;
 import static utils.gamebus.GameEventType.quit;
+import utils.gamebus.GameMessages;
 import utils.gamemanager.GameManager;
 
 public class Lobby extends UntypedActor {
@@ -28,6 +30,10 @@ public class Lobby extends UntypedActor {
 
     @Override
     public void onReceive(Object message) throws Exception {
+        if (message instanceof Room) {
+            this.roomChannel = ((Room) message);
+            Logger.info("[LOBBY] " + roomChannel.getRoom() + " created.");
+        }
         if (message instanceof Join) {
             handleJoin((Join) message);
         }
@@ -48,6 +54,15 @@ public class Lobby extends UntypedActor {
                     break;
             }
         }
+        if (message instanceof ObjectNode) {
+            JsonNode event=((JsonNode)message);
+            GameBus.getInstance().publish(new GameMessages.GameEvent(event, roomChannel));
+            event = event.get("message");
+            String type = event.get("type").asText();
+            switch(type) {
+                  case "leave":handleQuitter(event.get("content").get("user").asText());break;
+            }
+        }            
     }
 
     private void updateList(ObjectNode object) {

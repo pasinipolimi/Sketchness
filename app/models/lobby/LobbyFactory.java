@@ -3,6 +3,7 @@ package models.lobby;
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import models.chat.ChatFactory;
 import models.factory.Factory;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
@@ -12,23 +13,25 @@ import play.mvc.WebSocket;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.Join;
+
 
 public class LobbyFactory extends Factory {
 
-    public static synchronized void createLobby(String username, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception {
+    public static synchronized void createLobby(final String username, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception {
         final ActorRef finalRoom = create("lobby", Lobby.class);
         Future<Object> future = Patterns.ask(finalRoom, new Join(username, out), 1000);
         // Send the Join message to the room
         String result = (String) Await.result(future, Duration.create(10, SECONDS));
-
+       
         if ("OK".equals(result)) {
-
+            ChatFactory.createChat(username, "lobby", in, out);
             //Define the actions to be performed on the websockets
             in.onMessage(new F.Callback<JsonNode>() {
                 @Override
                 public void invoke(JsonNode event) {
-                    //We will not handle any incoming message from now
+                    finalRoom.tell(event, finalRoom);
                 }
             });
 
@@ -36,7 +39,7 @@ public class LobbyFactory extends Factory {
             in.onClose(new F.Callback0() {
                 @Override
                 public void invoke() {
-                    //We will not handle any incoming message from now
+                     finalRoom.tell(GameMessages.composeQuit(username), finalRoom);
                 }
             });
         } else {
@@ -47,4 +50,6 @@ public class LobbyFactory extends Factory {
             out.write(error);
         }
     }
+    
+    
 }
