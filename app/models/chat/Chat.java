@@ -48,12 +48,14 @@ public class Chat extends GameRoom {
             handleJoin((Join) message);
         } else if (message instanceof GameEvent) {
             JsonNode event = ((GameEvent) message).getJson();
-            event = event.get("message");
-            String type = event.get("type").asText();
-            switch(type) {
-                  case "chat":notifyAll(event.get("content").get("user").asText(),event.get("content").get("message").asText());break;
-                  case "leave":handleQuitter(event.get("content").get("user").asText());break;
-             }   
+            if(event!=null) {
+                event = event.get("message");
+                String type = event.get("type").asText();
+                switch(type) {
+                      case "chat":notifyAll(event.get("content").get("user").asText(),event.get("content").get("message").asText());break;
+                      case "leave":handleQuitter(event.get("content").get("user").asText());break;
+                 }   
+            }
         } 
         
         else {

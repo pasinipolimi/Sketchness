@@ -15,6 +15,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import models.Painter;
 import models.factory.GameRoom;
+import org.codehaus.jackson.JsonNode;
 import play.Play;
 import scala.concurrent.duration.Duration;
 
@@ -24,6 +25,7 @@ import utils.gamebus.GameMessages.*;
 import utils.LanguagePicker;
 import utils.LoggerUtils;
 import utils.gamebus.GameEventType;
+import utils.gamebus.GameMessages;
 import utils.gamemanager.GameManager;
 
 /**
@@ -91,45 +93,22 @@ public class Game extends GameRoom {
                 maxRound = 50;
             }
             missingPlayers = requiredPlayers;
-            newGameSetup();
+            //newGameSetup();
             Logger.info("[GAME] " + roomChannel.getRoom() + " created.");
         }
-        if (message instanceof GameEvent) {
-            GameEvent event = (GameEvent) message;
-            switch (event.getType()) {
-                case join:
-                    playerJoin(event.getMessage());
-                    publishLobbyEvent(GameEventType.gameInfo);
-                    break;
-                case quit:
-                    handleQuitter(event.getMessage());
-                    publishLobbyEvent(GameEventType.gameInfo);
-                    break;
-                case guessed:
-                    guessed(event.getMessage());
-                    break;
-                case timeExpired:
-                    playerTimeExpired(event.getMessage());
-                    break;
-                case finalTraces:
-                    CMS.closeUTask(uTaskID, CMS.segmentation(event.getObject(), sketcherPainter.name, sessionId));
-                    break;
-                case tag:
-                    taskImage.remove("tag");
-                    taskImage.put("tag", event.getMessage());
-                    sendTask(false);
-                    break;
-                case skipTask:
-                    skipTask(event.getMessage());
-                    break;
-                case taskAcquired:
-                    taskAcquired();
-                    break;
-                case getGameInfo:
-                    publishLobbyEvent(GameEventType.gameInfo);
-                    break;
-            }
+         if (message instanceof Join) {
+            playerJoin(((Join) message).getUsername());
+            //publishLobbyEvent(GameEventType.gameInfo);
         }
+        else if (message instanceof ObjectNode) {
+            JsonNode event=((JsonNode)message);
+            GameBus.getInstance().publish(new GameMessages.GameEvent(event, roomChannel));
+            event = event.get("message");
+            String type = event.get("type").asText();
+            switch(type) {
+                  case "leave":handleQuitter(event.get("content").get("user").asText());break;
+            }
+        }      
     }
 
     /*
@@ -281,11 +260,6 @@ public class Game extends GameRoom {
 
     private boolean triggerStart() throws Error {
         boolean canStart = true;
-        for (Painter painter : playersVect) {
-            if (painter.getnModulesReceived() < modules) {
-                canStart = false;
-            }
-        }
         //We need to wait for all the modules to receive the player list
         if (canStart && playersVect.size() >= requiredPlayers) {
             GameManager.getInstance().removeInstance(getSelf());
@@ -460,28 +434,14 @@ public class Game extends GameRoom {
 
     private void playerJoin(String username) throws Exception {
         Logger.debug("[GAME]: Player Joined");
-        int count = 0;
-        for (Painter painter : playersVect) {
-            if (painter.name.equalsIgnoreCase(username)) {
-                painter.setnModulesReceived(painter.getnModulesReceived() + 1);
-                count = painter.getnModulesReceived();
-                Logger.debug("[GAME]: player " + username + " counted " + count);
-                break;
-            }
-        }
-        if (count == 0) {
-            Painter painter = new Painter(username, false);
-            painter.setnModulesReceived(1);
-            //Add the new entered player, it has never been a sketcher in this game (false)
-            playersVect.add(painter);
-            publishLobbyEvent(GameEventType.join);
-            Logger.info("[GAME]: added player " + playersVect.get(playersVect.size() - 1).name);
-            //Check if we can start the game and, in such a case, start it
-        } //Wait to see if all the modules have received the login information from the players
-        else if (modules > 1 ? count > (modules - 1) : count > 1) {
-            Logger.debug("[GAME]: Check Start");
-            checkStart();
-        }
+        Painter painter = new Painter(username, false);
+        //Add the new entered player, it has never been a sketcher in this game (false)
+        playersVect.add(painter);
+        getSender().tell("OK", this.getSelf());
+        //publishLobbyEvent(GameEventType.join);
+        Logger.info("[GAME]: added player " + playersVect.get(playersVect.size() - 1).name);
+        Logger.debug("[GAME]: Check Start");
+        checkStart();
     }
 
     /**
@@ -506,8 +466,6 @@ public class Game extends GameRoom {
     private void handleQuitter(String quitter) {
         for (Painter painter : playersVect) {
             if (painter.name.equalsIgnoreCase(quitter)) {
-                //Wait for all the modules to announce that the player has disconnected
-                painter.setnModulesReceived(painter.getnModulesReceived() - 1);
                 playersVect.remove(painter);
                 disconnectedPlayers++;
                 GameBus.getInstance().publish(new GameEvent("quit", GameManager.getInstance().getLobby(), GameEventType.quit));

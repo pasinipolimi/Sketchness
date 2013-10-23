@@ -60,7 +60,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 		var chat = new Chat(elements.chatContainer, elements.chatInput);
 		$(chat).on("send", function(e, message) {
-			communicator.send("chat", { message: message });
+			communicator.send("chat", { user: sketchness.myself, message: message });
 		});
 
 		communicator.on({
