@@ -27,6 +27,7 @@ import utils.LoggerUtils;
 import utils.gamebus.GameEventType;
 import utils.gamebus.GameMessages;
 import utils.gamemanager.GameManager;
+import utils.levenshteinDistance;
 
 /**
  * A chat room is an Actor.
@@ -620,6 +621,49 @@ public class Game extends GameRoom {
             triggerStart();
         }
     }
+    
+    
+    
+    /***COPIED FROM CHAT****/
+    private void retrieveTask(ObjectNode task) {
+        currentGuess = task.get("tag").asText();
+    }
+    
+    private void handleTalk(String username, String text) {
+        // Received a Talk message
+        //If we are asking the sketcher for a tag, then save the tag
+        if (askTag && username.equals(askTagSketcher)) {
+            askTag = false;
+            GameBus.getInstance().publish(new GameEvent(text, username, roomChannel, GameEventType.tag));
+        } else if (gameStarted) {
+            //Compare the message sent with the tag in order to establish if we have a right guess
+            levenshteinDistance distanza = new levenshteinDistance();
+            if (text != null) {
+                switch (distanza.computeLevenshteinDistance(text, currentGuess)) {
+                    case 0:
+                        GameBus.getInstance().publish(new GameEvent(username, roomChannel, GameEventType.guessed));
+                        break;
+                    case 1:
+                        //notifyAll(ChatKind.talkNear, username, text);
+                        break;
+                    case 2:
+                        //notifyAll(ChatKind.talkWarning, username, text);
+                        break;
+                    default:
+                        //notifyAll(ChatKind.talkError, username, text);
+                        break;
+                }
+            }
+        }
+    }
+     private void handleAskTag(GameEvent message) {
+        askTagSketcher = message.getMessage();
+       // notifyAll(ChatKind.system, "Sketchness", Messages.get(LanguagePicker.retrieveLocale(), "asktag"));
+        askTag = true;
+    }
+    String currentGuess;
+    Boolean askTag = false;
+    String askTagSketcher;
 }
 
 enum CountdownTypes {

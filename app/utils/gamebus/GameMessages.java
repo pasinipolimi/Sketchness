@@ -106,9 +106,9 @@ public class GameMessages {
             return event;
     }
     
-    public static ObjectNode composeLogMessage(String level, String message) {
+    public static ObjectNode composeLogMessage(LogLevel level, String message) {
             ObjectNode content = Json.newObject();
-            content.put("level", level);
+            content.put("level", level.name());
             content.put("message", message);
             ObjectNode event = composeJsonMessage("log",content);
             return event;
@@ -279,5 +279,9 @@ public class GameMessages {
         public Integer getnPlayers() {
             return nPlayers;
         }
+    }
+    
+    public enum LogLevel {
+        debug,info,warning,error
     }
 }

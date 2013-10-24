@@ -1,6 +1,5 @@
 package models.chat;
 
-import play.libs.*;
 import play.libs.F.*;
 import play.i18n.Messages;
 import play.mvc.*;
@@ -13,20 +12,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import models.factory.GameRoom;
 
-import utils.*;
-import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages.*;
 import utils.LanguagePicker;
-import utils.gamebus.GameEventType;
 import utils.gamebus.GameMessages;
 
 public class Chat extends GameRoom {
 
     Room roomChannel;
-    String currentGuess;
-    Boolean gameStarted = false;
-    Boolean askTag = false;
-    String askTagSketcher;
     // Members of this room.
     ConcurrentHashMap<String, WebSocket.Out<JsonNode>> playersMap = new ConcurrentHashMap<>();
 
@@ -63,62 +55,26 @@ public class Chat extends GameRoom {
         }
     }
 
-    private void handleAskTag(GameEvent message) {
-        askTagSketcher = message.getMessage();
-       // notifyAll(ChatKind.system, "Sketchness", Messages.get(LanguagePicker.retrieveLocale(), "asktag"));
-        askTag = true;
-    }
+   
 
     private void handleJoin(Join message) {
         // Check if this username is free.
         if (playersMap.containsKey(message.getUsername())) {
             getSender().tell(Messages.get(LanguagePicker.retrieveLocale(), "usernameused"), this.getSelf());
-        } else if (!gameStarted) {
+        } else {
             playersMap.put(message.getUsername(), message.getChannel());
-            
             ObjectNode event = GameMessages.composeJoin(message.getUsername());
             getSender().tell("OK", this.getSelf());
-            notifyAllInfo(message.getUsername()+" "+Messages.get(LanguagePicker.retrieveLocale(), "join"));
+            notifySystem(LogLevel.info,message.getUsername()+" "+Messages.get(LanguagePicker.retrieveLocale(), "join"));
             notifyMemberChange(event);
             notifyMemberList(event);
             Logger.debug("[CHAT] added player " + message.getUsername());
-        } else {
-            getSender().tell(Messages.get(LanguagePicker.retrieveLocale(), "matchstarted"), this.getSelf());
         }
     }
     
     
 
-    private void handleTalk(String username, String text) {
-        // Received a Talk message
-        //If we are asking the sketcher for a tag, then save the tag
-        if (askTag && username.equals(askTagSketcher)) {
-            askTag = false;
-            GameBus.getInstance().publish(new GameEvent(text, username, roomChannel, GameEventType.tag));
-        } else if (gameStarted) {
-            //Compare the message sent with the tag in order to establish if we have a right guess
-            levenshteinDistance distanza = new levenshteinDistance();
-            if (text != null) {
-                switch (distanza.computeLevenshteinDistance(text, currentGuess)) {
-                    case 0:
-                        GameBus.getInstance().publish(new GameEvent(username, roomChannel, GameEventType.guessed));
-                        break;
-                    case 1:
-                        //notifyAll(ChatKind.talkNear, username, text);
-                        break;
-                    case 2:
-                        //notifyAll(ChatKind.talkWarning, username, text);
-                        break;
-                    default:
-                        //notifyAll(ChatKind.talkError, username, text);
-                        break;
-                }
-            }
-        } else //The players are just chatting, not playing
-        {
-            notifyAll(username, text);
-        }
-    }
+    
 
     private void handleQuitter(String quitter) throws InterruptedException {
         for (Map.Entry<String, WebSocket.Out<JsonNode>> entry : playersMap.entrySet()) {
@@ -127,19 +83,20 @@ public class Chat extends GameRoom {
                 entry.getValue().close();
                 playersMap.remove(quitter);
                 JsonNode event = GameMessages.composeQuit(quitter);
-                notifyAllInfo(quitter+" "+Messages.get(LanguagePicker.retrieveLocale(), "quit"));
+                notifySystem(LogLevel.info,quitter+" "+Messages.get(LanguagePicker.retrieveLocale(), "quit"));
                 notifyMemberChange(event);
                 Logger.debug("[CHAT] " + quitter + " has disconnected.");
             }
         }
     }
 
-    private void retrieveTask(ObjectNode task) {
-        currentGuess = task.get("tag").asText();
-    }
+    
     
     private void notifySystem(LogLevel level, String text) {
-        
+        for (WebSocket.Out<JsonNode> channel : playersMap.values()) {         
+            ObjectNode event = GameMessages.composeLogMessage(level,text);
+            channel.write(event);
+        }
     }
 
     // Send a Json event to all members
@@ -149,17 +106,7 @@ public class Chat extends GameRoom {
             channel.write(event);
         }
     }
-    
-    private void notifyAllInfo(String text) {
-        for (WebSocket.Out<JsonNode> channel : playersMap.values()) {         
-            ObjectNode event = GameMessages.composeLogMessage("info",text);
-            channel.write(event);
-        }
-    }
-   
 
-    
-    
     // Send the updated list of members to the users
     private void notifyMemberChange(JsonNode event) {
         for (WebSocket.Out<JsonNode> channel : playersMap.values()) {
@@ -180,6 +127,4 @@ public class Chat extends GameRoom {
 }
 
 
-enum LogLevel {
-    debug,info,warning,error
-}
+
