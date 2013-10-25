@@ -1,6 +1,7 @@
 package controllers;
 
 import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
+
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
