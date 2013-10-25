@@ -103,10 +103,14 @@ public class Sketchness extends Controller {
     }
 
     /**
-     * Handle the chat websocket.
+     * Handle the lobby websocket.
      */
     @Restrict(@Group(Application.USER_ROLE))
-    public static WebSocket<JsonNode> lobbyStream(final String username) {
+    public static WebSocket<JsonNode> lobbyStream() {
+
+        final User localUser = getLocalUser(session());
+        final String username = localUser.name;
+
         return new WebSocket<JsonNode>() {
             // Called when the Websocket Handshake is done.
             @Override

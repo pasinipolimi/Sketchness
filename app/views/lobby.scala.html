@@ -63,7 +63,7 @@
 
         <!--The only way to refer to websocket instances in the page-->
         <div id="chatWebSocket" data-ws="@routes.Sketchness.chatStream("lobby").webSocketURL()"></div>
-        <div id="lobbyWebSocket" data-ws="@routes.Sketchness.lobbyStream(localUser.name).webSocketURL()"></div>
+        <div id="lobbyWebSocket" data-ws="@routes.Sketchness.lobbyStream().webSocketURL()"></div>
         <!--Logic to handle the chat and the lobby-->
 	<script type="text/javascript" src="/assets/javascripts/chat.js"></script>
 	<script type="text/javascript" src="/assets/javascripts/lobby.js"></script>
