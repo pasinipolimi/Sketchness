@@ -82,7 +82,7 @@ public class Sketchness extends Controller {
      * Handle the chat websocket.
      */
     @Restrict(@Group(Application.USER_ROLE))
-    public static WebSocket<JsonNode> chatStream( final String roomName) {
+    public static WebSocket<JsonNode> chatStream(final String roomName) {
 
         final User localUser = getLocalUser(session());
         final String username = localUser.name;
@@ -127,7 +127,10 @@ public class Sketchness extends Controller {
      * Handle the paintroom websocket
      */
     @Restrict(@Group(Application.USER_ROLE))
-    public static WebSocket<JsonNode> paintStream(final String username, final String roomName) {
+    public static WebSocket<JsonNode> paintStream(final String roomName) {
+
+        final User localUser = getLocalUser(session());
+        final String username = localUser.name;
 
         return new WebSocket<JsonNode>() {
             @Override
