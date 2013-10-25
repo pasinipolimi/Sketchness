@@ -1,8 +1,8 @@
-@(username: String, room: String)
+@(localUser: models.User = null, room: String)
 
 @import controllers.routes.javascript._
 
-@main(username,room){
+@main2(Messages("playauthenticate.navigation.chatRoom"), "ChatRoom") {
 	<!--TODO: BETTER INTERFACE FOR THE ERRORS, POSSIBLY AN OVERLAY-->
 	<div id="onError" class="alert-message error">
 		<p>
@@ -52,15 +52,15 @@
 
 		<!--HANDLING ALL THE USERS CURRENTLY CONNECTED-->
                 <div id="currentAvatar"></div>
-		<div id="currentNickname">@username</div>
+		<div id="currentNickname">@localUser.name</div>
 		<span id="opponent1"></span>
 		<span id="opponent2"></span>
 		<span id="opponent3"></span>
 		<span id="opponent4"></span>
 
 		<!--WE CAN'T USE ROUTES IN STATIC JAVASCRIPT, SO WE MUST REFERENCE THEM OUTSIDE-->
-		<div id="chatWebSocket" data-ws="@routes.Sketchness.chatStream(username,room).webSocketURL()"></div>
-		<div id="paintWebSocket" data-ws="@routes.Sketchness.paintStream(username,room).webSocketURL()"></div>
+		<div id="chatWebSocket" data-ws="@routes.Sketchness.chatStream(localUser.name,room).webSocketURL()"></div>
+		<div id="paintWebSocket" data-ws="@routes.Sketchness.paintStream(localUser.name,room).webSocketURL()"></div>
 
 		<script type="text/javascript" src="/assets/javascripts/chat.js"></script>
 		<script type="text/javascript" src="/assets/javascripts/paint.js"></script>
@@ -78,7 +78,7 @@
 		</script>
                 
            <!--     <form id="backForm" action="@routes.Sketchness.lobby()">
-                    <input id="username" name="username" class="input-small" type="hidden" value="@username" />      -->
+                    <input id="username" name="username" class="input-small" type="hidden" value="@localUser.name" />      -->
                <a href="@routes.Sketchness.lobby()"><button type="submit" id="backToLobby"></button></a>
          <!--       </form>             -->
                 

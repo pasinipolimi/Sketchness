@@ -51,7 +51,11 @@ public class Sketchness extends Controller {
      * Display the chat room.
      */
     @Restrict(@Group(Application.USER_ROLE))
-    public static Result chatRoom(final String username, String roomName, Integer nPlayers) throws Exception {
+    public static Result chatRoom( String roomName, Integer nPlayers) throws Exception {
+
+        final User localUser = getLocalUser(session());
+        String username = localUser.name;
+
         if (LanguagePicker.retrieveIsoCode().equals("")) {
             LanguagePicker.setLanguage(Lang.preferred(request().acceptLanguages()));
         }
@@ -71,7 +75,7 @@ public class Sketchness extends Controller {
         //spaces in it.
         roomName = roomName.replaceAll(" ", "");
         GameFactory.createGame(roomName, nPlayers);
-        return ok(chatRoom.render(username, roomName));
+        return ok(chatRoom.render(localUser, roomName));
     }
 
     /**
