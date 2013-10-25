@@ -26,8 +26,8 @@ public class LanguagePicker {
                 platformLang = "undefined";
                 langCode = 0;
         }
-        //[TODO] HAS TO BE FIXED, NOW IT'S FIXED TO ITA
-        setLanguage("it");
+        
+        setLanguage("en");
     }
 
     public static void setLanguage(String lang) {
