@@ -56,9 +56,11 @@ public class Segment {
         //Just the width is bigger than our canvas
         if (taskWidth > canvasWidth && taskHeight <= canvasHeight) {
             fixedHeight = canvasWidth * taskHeight / taskWidth;
+            fixedWidth = fixedHeight * taskWidth / taskHeight;
         } //Just the height is bigger than our canvas
         else if (taskHeight > canvasHeight && taskWidth <= canvasWidth) {
             fixedWidth = canvasHeight * taskWidth / taskHeight;
+            fixedHeight = fixedWidth * taskHeight / taskWidth;
         } //Both the width and the height are bigger than our canvas
         else if (taskHeight > canvasHeight && taskWidth > canvasWidth) {
             if (taskHeight > taskWidth) {
