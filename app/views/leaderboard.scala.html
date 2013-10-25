@@ -9,10 +9,10 @@
                 @if(flash.containsKey("score3")){<div id="score3" class="score"><div id="leaderboardAvatar"></div><span id="name">@flash.get("name3")</span><span id="points">@flash.get("points3") points</span></div>}
                 @if(flash.containsKey("score4")){<div id="score4" class="score"><div id="leaderboardAvatar"></div><span id="name">@flash.get("name4")</span><span id="points">@flash.get("points4") points</span></div>}
             </div>
-            <form id="backForm" action="@routes.Sketchness.lobby()">
-                <button type="submit" id="tolobby"></button>
-                <input id="username" name="username" class="input-small" type="hidden" value="@username" />
-            </form>
+       <!--     <form id="backForm" action="@routes.Sketchness.lobby()">             -->
+                <a href="@routes.Sketchness.lobby()"><button type="submit" id="tolobby"></button></a>
+         <!--       <input id="username" name="username" class="input-small" type="hidden" value="@username" />
+            </form>    -->
         </div>  
         <div id="preloaded-images">
                     <img src="../assets/images/UI/lobbyUnpressed.png" width="1" height="1" alt="tolobbyPressed" />
