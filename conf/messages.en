@@ -162,6 +162,7 @@ playauthenticate.navigation.login=Log in
 playauthenticate.navigation.home=Home
 playauthenticate.navigation.restricted=Restricted page
 playauthenticate.navigation.signup=Sign up
+playauthenticate.navigation.lobby=SLobby
 
 # play-authenticate: Handler
 playauthenticate.handler.loginfirst=You need to log in first, to view ''{0}''

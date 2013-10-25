@@ -1,5 +1,10 @@
 package controllers;
 
+import be.objectify.deadbolt.java.actions.Group;
+import be.objectify.deadbolt.java.actions.Restrict;
+import com.feth.play.module.pa.PlayAuthenticate;
+import com.feth.play.module.pa.user.AuthUser;
+import models.User;
 import models.chat.ChatFactory;
 import play.mvc.*;
 
@@ -30,12 +35,22 @@ public class Sketchness extends Controller {
         if (LanguagePicker.retrieveIsoCode().equals("")) {
             LanguagePicker.setLanguage(Lang.preferred(request().acceptLanguages()));
         }
-        return ok(index.render());
+        return redirect(routes.Application.login());
+    }
+
+    /**
+     * Retrive the user from the session
+     */
+    public static User getLocalUser(final Http.Session session) {
+        final AuthUser currentAuthUser = PlayAuthenticate.getUser(session);
+        final User localUser = User.findByAuthUserIdentity(currentAuthUser);
+        return localUser;
     }
 
     /**
      * Display the chat room.
      */
+    @Restrict(@Group(Application.USER_ROLE))
     public static Result chatRoom(final String username, String roomName, Integer nPlayers) throws Exception {
         if (LanguagePicker.retrieveIsoCode().equals("")) {
             LanguagePicker.setLanguage(Lang.preferred(request().acceptLanguages()));
@@ -47,7 +62,7 @@ public class Sketchness extends Controller {
         }
         if (roomName.trim().equals("")) {
             flash("error", "Wrong room id.");
-            return redirect(routes.Sketchness.lobby(username));
+            return redirect(routes.Sketchness.lobby());
         }
         if (nPlayers < 0 || nPlayers > 4) {
             nPlayers = 3;
@@ -62,6 +77,7 @@ public class Sketchness extends Controller {
     /**
      * Handle the chat websocket.
      */
+    @Restrict(@Group(Application.USER_ROLE))
     public static WebSocket<JsonNode> chatStream(final String username, final String roomName) {
         return new WebSocket<JsonNode>() {
             // Called when the Websocket Handshake is done.
@@ -81,6 +97,7 @@ public class Sketchness extends Controller {
     /**
      * Handle the chat websocket.
      */
+    @Restrict(@Group(Application.USER_ROLE))
     public static WebSocket<JsonNode> lobbyStream(final String username) {
         return new WebSocket<JsonNode>() {
             // Called when the Websocket Handshake is done.
@@ -101,6 +118,7 @@ public class Sketchness extends Controller {
      *
      * Handle the paintroom websocket
      */
+    @Restrict(@Group(Application.USER_ROLE))
     public static WebSocket<JsonNode> paintStream(final String username, final String roomName) {
 
         return new WebSocket<JsonNode>() {
@@ -118,7 +136,11 @@ public class Sketchness extends Controller {
     /**
      * Display the lobby.
      */
-    public static Result lobby(final String username) throws Exception {
+    @Restrict(@Group(Application.USER_ROLE))
+    public static Result lobby() throws Exception {
+
+        final User localUser = getLocalUser(session());
+        String username = localUser.name;
         if (LanguagePicker.retrieveIsoCode().equals("")) {
             LanguagePicker.setLanguage(Lang.preferred(request().acceptLanguages()));
         }
@@ -128,12 +150,13 @@ public class Sketchness extends Controller {
             return redirect(routes.Sketchness.index());
         }
         GameManager.getInstance().getCurrentGames();
-        return ok(lobby.render(username, null));
+        return ok(lobby.render(localUser));
     }
 
     /**
      * Display the leaderboard page.
      */
+    @Restrict(@Group(Application.USER_ROLE))
     public static Result leaderboard(final String username, String result) throws Exception {
         result = result.substring(1);
         String[] splitted = result.split(":");
