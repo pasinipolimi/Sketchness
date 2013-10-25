@@ -6,7 +6,7 @@
 GET     /                                 controllers.Sketchness.index()
 #GET     /lobby                            controllers.Sketchness.lobby(username: String ?= null)
 #GET     /room                             controllers.Sketchness.chatRoom(username: String ?= null, room: String ?= "default", nPlayers: Integer ?= 3)
-GET     /room/chatStream                  controllers.Sketchness.chatStream(username: String ?= null,room: String ?= "default")
+#GET     /room/chatStream                  controllers.Sketchness.chatStream(username: String ?= null,room: String ?= "default")
 GET     /room/lobbyStream                 controllers.Sketchness.lobbyStream(username: String ?= null)
 GET     /room/paintStream                 controllers.Sketchness.paintStream(username: String ?= null,room: String ?= "default")
 GET     /leaderboard                      controllers.Sketchness.leaderboard(username: String ?= null, result: String ?= null)
@@ -14,6 +14,7 @@ GET     /leaderboard                      controllers.Sketchness.leaderboard(use
 #new routes
 GET     /lobby                            controllers.Sketchness.lobby
 GET     /room                             controllers.Sketchness.chatRoom(room: String ?= "default", nPlayers: Integer ?= 3)
+GET     /room/chatStream                  controllers.Sketchness.chatStream(room: String ?= "default")
 
 
 

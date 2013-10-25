@@ -82,7 +82,11 @@ public class Sketchness extends Controller {
      * Handle the chat websocket.
      */
     @Restrict(@Group(Application.USER_ROLE))
-    public static WebSocket<JsonNode> chatStream(final String username, final String roomName) {
+    public static WebSocket<JsonNode> chatStream( final String roomName) {
+
+        final User localUser = getLocalUser(session());
+        final String username = localUser.name;
+
         return new WebSocket<JsonNode>() {
             // Called when the Websocket Handshake is done.
             @Override
