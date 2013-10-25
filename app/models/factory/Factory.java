@@ -10,7 +10,7 @@ import utils.levenshteinDistance.*;
 public abstract class Factory {
 
     /**
-     * Join the default room.
+     * Join the evolutions.default room.
      */
     @SuppressWarnings("rawtypes")
     protected static ActorRef create(final String room, int maxMembers, Class module) throws Exception {
