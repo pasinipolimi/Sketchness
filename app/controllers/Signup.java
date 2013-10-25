@@ -13,10 +13,8 @@ import providers.MyUsernamePasswordAuthProvider;
 import providers.MyUsernamePasswordAuthProvider.MyIdentity;
 import providers.MyUsernamePasswordAuthUser;
 import views.html.account.signup.*;
-import views.html.signup;
 
 import com.feth.play.module.pa.PlayAuthenticate;
-import views.html.sketchness_login;
 import views.html.sketchness_signup;
 import views.html.sketchness_signupGuest;
 
