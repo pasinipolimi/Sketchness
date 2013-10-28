@@ -196,4 +196,30 @@ public class Sketchness extends Controller {
         }
         return ok(leaderboard.render(username, null));
     }
+
+
+    public static Result checkOnline() throws Exception{
+        models.IsOnline.checkOnline();
+
+        return null;
+    }
+
+
+    public static Result keepOnline(){
+
+        final User localUser = getLocalUser(session());
+        String username = localUser.name;
+        models.IsOnline.keepOnline(username);
+
+        return null;
+    }
+
+    public static Result putOffline(){
+
+        final User localUser = getLocalUser(session());
+        String username = localUser.name;
+        models.IsOnline.putOffline(username);
+
+        return null;
+    }
 }

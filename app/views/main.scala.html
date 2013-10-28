@@ -27,6 +27,8 @@
 		<script src="@routes.Assets.at("javascripts/lib/require.js")" type="text/javascript"></script>
 		<script src="@routes.Assets.at("javascripts/require-config.js")" type="text/javascript"></script>
 
+        <script src="@routes.Assets.at("js/myJavascript.js")"></script>
+
 		<!-- Adding support for Internazionalization -->
 		<script type="text/javascript">
 			require(["i18n"], function(i18n) {
@@ -39,6 +41,34 @@
 				});
 			});
 		</script>
+        <script>
+            window.onbeforeunload = bunload;
+
+            function bunload(){
+            var xhr = new XMLHttpRequest();
+
+            xhr.open("get", "@routes.Application.doLogout", true);
+
+            xhr.send(null);
+            }
+        </script>
+
+        <script>
+            window.setInterval(function(){
+
+            var xhr = new XMLHttpRequest();
+
+            xhr.open("get", "@routes.Sketchness.keepOnline", true);
+
+            xhr.send(null);
+
+            }, 1000*20);      <!-- Set interval between refreshes-->
+
+
+        </script>
+
+
+
 	</head>
 
 	<body>

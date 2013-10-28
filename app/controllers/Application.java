@@ -1,11 +1,15 @@
 package controllers;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import models.User;
 import play.Routes;
 import play.data.Form;
+import play.db.DB;
 import play.mvc.*;
 import play.mvc.Http.Session;
 import play.mvc.Result;
@@ -98,6 +102,30 @@ public class Application extends Controller {
             // signup
             return UsernamePasswordAuthProvider.handleSignup(ctx());
         }
+    }
+
+    public static Result doLogout(){
+
+        final User localUser = getLocalUser(session());
+        String username = localUser.name;
+
+        try{
+            Connection connection = DB.getConnection();
+
+            String query = "UPDATE USERS SET online = ? WHERE NAME = ? ";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setBoolean(1, false);
+            statement.setString(2, username);
+            statement.executeUpdate();
+
+        }
+        catch(SQLException ex){
+
+        }
+
+        com.feth.play.module.pa.controllers.Authenticate.logout();
+
+        return redirect(routes.Application.index());
     }
 
 

@@ -1,7 +1,13 @@
 package controllers;
 
 import java.io.File;
+
+import com.feth.play.module.pa.PlayAuthenticate;
+import com.feth.play.module.pa.user.AuthUser;
+import models.User;
 import org.codehaus.jackson.JsonNode;
+import play.db.DB;
+import play.mvc.Http;
 import play.mvc.Result;
 import static play.mvc.Results.ok;
 import play.mvc.WebSocket;

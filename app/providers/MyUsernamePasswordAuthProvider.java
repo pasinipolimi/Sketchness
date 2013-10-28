@@ -15,6 +15,7 @@ import play.data.Form;
 import play.data.validation.Constraints.Email;
 import play.data.validation.Constraints.MinLength;
 import play.data.validation.Constraints.Required;
+import play.db.DB;
 import play.i18n.Lang;
 import play.i18n.Messages;
 import play.mvc.Call;
@@ -23,9 +24,13 @@ import play.mvc.Http.Context;
 import javax.validation.constraints.AssertTrue;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.Date;
 
 import static play.data.Form.form;
 
@@ -168,6 +173,10 @@ public class MyUsernamePasswordAuthProvider
     protected com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider.LoginResult loginUser(
             final providers.MyLoginUsernamePasswordAuthUser authUser) {
         final User u = User.findByUsernamePasswordIdentity(authUser);
+
+        java.util.Date utilDate = new java.util.Date();
+        java.sql.Timestamp active = new java.sql.Timestamp(utilDate.getTime());
+
         if (u == null) {
             return LoginResult.NOT_FOUND;
         } else {
@@ -179,7 +188,36 @@ public class MyUsernamePasswordAuthProvider
                         if (authUser.checkPassword(acc.providerUserId,
                                 authUser.getPassword())) {
                             // Password was correct
+
+                            if(!u.online){
+
+                                try{
+                                    Connection connection = DB.getConnection();
+
+                                    String query = "UPDATE USERS SET ONLINE = ? WHERE ID = ? ";
+                                    PreparedStatement statement = connection.prepareStatement(query);
+                                    statement.setBoolean(1, true);
+                                    statement.setLong(2, u.id);
+                                    statement.executeUpdate();
+
+                                    String query1 = "UPDATE USERS SET LAST_ACTIVE = ? WHERE ID = ? ";
+                                    PreparedStatement statement1 = connection.prepareStatement(query1);
+                                    statement1.setTimestamp(1, active);
+                                    statement1.setLong(2, u.id);
+                                    statement1.executeUpdate();
+
+                                }
+                                catch(SQLException ex){
+                                }
+
                             return LoginResult.USER_LOGGED_IN;
+                            }
+                            else{
+
+
+
+                             //   return LoginResult.ALREADY_LOGGED;
+                            }
                         } else {
                             // if you don't return here,
                             // you would allow the user to have

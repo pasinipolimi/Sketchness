@@ -37,7 +37,9 @@ create table users (
   last_name                 varchar(255),
   nation                    varchar(255),
   gender                    boolean,
+  online                    boolean,
   last_login                timestamp,
+  last_active               timestamp,
   active                    boolean,
   email_validated           boolean,
   constraint pk_users primary key (id))

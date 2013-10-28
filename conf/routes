@@ -62,7 +62,8 @@ GET     /profile                    controllers.Application.profile
 GET     /login                      controllers.Application.login
 POST    /login                      controllers.Application.doLogin
 
-GET     /logout                     com.feth.play.module.pa.controllers.Authenticate.logout
+#GET     /logout                     com.feth.play.module.pa.controllers.Authenticate.logout
+GET     /logout                     controllers.Application.doLogout
 GET     /authenticate/:provider     com.feth.play.module.pa.controllers.Authenticate.authenticate(provider: String)
 
 GET     /signup                     controllers.Application.signup
@@ -97,3 +98,6 @@ POST    /accounts/merge             controllers.Account.doMerge
 GET     /login/password/forgot     controllers.Signup.forgotPassword(email: String ?= "")
 POST    /login/password/forgot     controllers.Signup.doForgotPassword
 
+GET     /checkOnline               controllers.Sketchness.checkOnline
+GET     /keepOnline                controllers.Sketchness.keepOnline
+GET     /putOffline                controllers.Sketchness.putOffline

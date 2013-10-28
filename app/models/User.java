@@ -52,9 +52,14 @@ public class User extends Model implements Subject {
     public String nation;
     public boolean gender;
 
+    public boolean online;
+
 
 	@Formats.DateTime(pattern = "yyyy-MM-dd HH:mm:ss")
 	public Date lastLogin;
+
+    @Formats.DateTime(pattern = "yyyy-MM-dd HH:mm:ss")
+    public Date lastActive;
 
 	public boolean active;
 

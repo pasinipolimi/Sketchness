@@ -25,3 +25,14 @@ function fillForm(){
         document.getElementById("nation").value = "None";
         document.getElementById("accept_terms").checked=true;
 }
+
+
+function checkOnline(){
+
+    var xhr = new XMLHttpRequest();
+
+    xhr.open("get", "@routes.Utilities.checkOnline", true);
+
+    xhr.send(null);
+
+}
