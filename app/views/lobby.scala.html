@@ -1,5 +1,6 @@
 @(localUser: models.User = null)
 
+
 @main2(Messages("playauthenticate.navigation.lobby"), "lobby") {
 	<!--TODO: BETTER INTERFACE FOR THE ERRORS, POSSIBLY AN OVERLAY-->
 	<div id="onError" class="alert-message error">
@@ -29,8 +30,8 @@
                 <tbody id="gameListBody" class="jscroll scroll-pane-arrows jspScrollable">
                 </tbody>
             </table> 
-            <form id="joinGame" action="@routes.Sketchness.chatRoom()">
-                            <input id="username" name="username" class="input-small" type="hidden" value="@localUser.name" />
+            <form id="joinGame" method="POST" action="@routes.Sketchness.chatRoom()">
+                      <!--      <input id="username" name="username" class="input-small" type="hidden" value="@localUser.name" />       -->
                             <input id="roomId" name="room" class="input-small" type="hidden" value="" />
                             <button id="join" type="submit"></button>
             </form>
@@ -43,9 +44,9 @@
             </form>
             
             <div id="createGamePopUp" class="alertBox" style="display:none">
-                <form  action="@routes.Sketchness.chatRoom()">
+                <form  method="POST" action="@routes.Sketchness.chatRoom()">
                     <p style="text-align:center"><strong>Room Name</strong></p>
-                    <input id="username" name="username" class="input-small" type="hidden" value="@localUser.name" />
+               <!--     <input id="username" name="username" class="input-small" type="hidden" value="@localUser.name" />       -->
                     <input id="roomName" name="room" class="input-small" type="text" />
                     <p></p>
                     <p style="text-align:center"><strong>Number of Players</strong></p>
@@ -54,8 +55,8 @@
                 </form>
             </div>
             
-            <form  id="singlePlayerForm" action="@routes.Sketchness.chatRoom()">
-                    <input id="username" name="username" class="input-small" type="hidden" value="@localUser.name" />
+            <form  id="singlePlayerForm" method="POST" action="@routes.Sketchness.chatRoom()">
+               <!--     <input id="username" name="username" class="input-small" type="hidden" value="@localUser.name" />       -->
                     <input id="roomName" name="room" class="input-small" type="hidden" value="@localUser.name"/>
                     <input type="hidden" name="nPlayers" value="1">
                     <button id="singlePlayer" type="submit"></button>

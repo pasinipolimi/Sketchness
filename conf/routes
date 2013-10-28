@@ -13,11 +13,12 @@ GET     /leaderboard                      controllers.Sketchness.leaderboard(use
 
 #new routes
 GET     /lobby                            controllers.Sketchness.lobby
-GET     /room                             controllers.Sketchness.chatRoom(room: String ?= "default", nPlayers: Integer ?= 3)
+#GET     /room                             controllers.Sketchness.chatRoom(room: String ?= "default", nPlayers: Integer ?= 3)
 GET     /room/chatStream                  controllers.Sketchness.chatStream(room: String ?= "default")
 GET     /room/paintStream                 controllers.Sketchness.paintStream(room: String ?= "default")
 GET     /room/lobbyStream                 controllers.Sketchness.lobbyStream
 
+POST     /room                             controllers.Sketchness.chatRoom
 
 GET		/renderer						  controllers.Utilities.renderer(imageID: String)
 GET		/rendererStream					  controllers.Utilities.rendererStream(imageID: String)

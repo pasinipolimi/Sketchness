@@ -10,7 +10,6 @@ import play.mvc.*;
 
 import org.codehaus.jackson.JsonNode;
 
-import views.html.index;
 import views.html.chatRoom;
 import views.html.lobby;
 import views.html.leaderboard;
@@ -20,11 +19,12 @@ import models.lobby.LobbyFactory;
 import models.paint.PaintFactory;
 import play.i18n.Lang;
 import static play.mvc.Controller.flash;
-import static play.mvc.Controller.request;
 import static play.mvc.Results.ok;
 import utils.LanguagePicker;
 import utils.LoggerUtils;
 import utils.gamemanager.GameManager;
+
+import java.util.Map;
 
 public class Sketchness extends Controller {
 
@@ -51,10 +51,24 @@ public class Sketchness extends Controller {
      * Display the chat room.
      */
     @Restrict(@Group(Application.USER_ROLE))
-    public static Result chatRoom( String roomName, Integer nPlayers) throws Exception {
+    //public static Result chatRoom( String roomName, Integer nPlayers) throws Exception {
+    public static Result chatRoom( ) throws Exception {
 
         final User localUser = getLocalUser(session());
         String username = localUser.name;
+        String numero = "3";
+
+        final Map<String, String[]> values = request().body().asFormUrlEncoded();
+        String roomName = values.get("room")[0];
+        if(values.containsKey("nPlayers")){
+        numero = values.get("nPlayers")[0];
+        }
+        Integer nPlayers = Integer.valueOf(numero);
+
+
+
+
+
 
         if (LanguagePicker.retrieveIsoCode().equals("")) {
             LanguagePicker.setLanguage(Lang.preferred(request().acceptLanguages()));
