@@ -62,6 +62,8 @@ error.maxLength=Maximum length is {0}
 error.email=Valid email required
 error.pattern=Must satisfy {0}
 error.mailExists=It is possible you already made a registration. In order to connect your account you have to login and click on "Link_Provider" button from the "Profile" menu.
+error.userLogged=This account is already logged it.
+
 ### --- play-authenticate START
 
 # play-authenticate: Initial translations
@@ -87,7 +89,7 @@ playauthenticate.change_name.success=Name has been changed succesfully
 playauthenticate.change_name.temporary=The name you chose already exists. We assigned you a temporary one.
 
 playauthenticate.password.signup.error.passwords_not_same=Passwords do not match.
-playauthenticate.password.login.unknown_user_or_pw=Unknown user or password.
+playauthenticate.password.login.unknown_user_or_pw=Unknown user or password or User already signed in.
 
 playauthenticate.password.verify_signup.subject=PlayAuthenticate: Complete your signup
 playauthenticate.password.verify_email.subject=PlayAuthenticate: Confirm your e-mail address

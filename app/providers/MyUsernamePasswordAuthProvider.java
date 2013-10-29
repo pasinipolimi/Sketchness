@@ -30,7 +30,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.Date;
 
 import static play.data.Form.form;
 
@@ -171,7 +170,7 @@ public class MyUsernamePasswordAuthProvider
 
     @Override
     protected com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider.LoginResult loginUser(
-            final providers.MyLoginUsernamePasswordAuthUser authUser) {
+            final providers.MyLoginUsernamePasswordAuthUser authUser){
         final User u = User.findByUsernamePasswordIdentity(authUser);
 
         java.util.Date utilDate = new java.util.Date();
@@ -214,9 +213,8 @@ public class MyUsernamePasswordAuthProvider
                             }
                             else{
 
+                                return LoginResult.WRONG_PASSWORD;
 
-
-                             //   return LoginResult.ALREADY_LOGGED;            TODO fix return message
                             }
                         } else {
                             // if you don't return here,

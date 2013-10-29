@@ -4,6 +4,7 @@ import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
 
 import play.Logger;
 import play.data.Form;
+import play.i18n.Messages;
 import play.libs.Akka;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -27,7 +28,7 @@ public class Login extends Controller {
                     new Runnable() {
                         @Override
                         public void run() {
-                            Logger.debug("ciao");
+                            //Logger.debug("ciao");
                             actorActive = true;
                             models.IsOnline.checkOnline();
 
