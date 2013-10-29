@@ -73,6 +73,10 @@ public class Game extends GameRoom {
     private Integer uTaskID = null;
     private ObjectNode taskImage;
     private Integer sessionId;
+    
+    String currentGuess;
+    Boolean askTag = false;
+    String askTagSketcher;
 
     public Game() {
         super(Game.class);
@@ -83,40 +87,58 @@ public class Game extends GameRoom {
      * @param message An Object representing a generic message sent to our Actor
      */
     @Override
-    public void onReceive(Object message) throws Exception {
-
-        if (message instanceof Room) {
-            this.roomChannel = ((Room) message);
-            requiredPlayers = ((Room) message).getRequiredPlayers();
-            //In the initial idea of single player, give 50 images to the 
-            //player that is segmenting
-            if (requiredPlayers == 1) {
-                maxRound = 50;
+    public void onReceive(Object message) {
+       try {
+            if (message instanceof Room) {
+                this.roomChannel = ((Room) message);
+                requiredPlayers = ((Room) message).getRequiredPlayers();
+                //In the initial idea of single player, give 50 images to the 
+                //player that is segmenting
+                if (requiredPlayers == 1) {
+                    maxRound = 50;
+                }
+                missingPlayers = requiredPlayers;
+                newGameSetup();
+                Logger.info("[GAME] " + roomChannel.getRoom() + " created.");
             }
-            missingPlayers = requiredPlayers;
-            //newGameSetup();
-            Logger.info("[GAME] " + roomChannel.getRoom() + " created.");
-        }
-         if (message instanceof Join) {
-            playerJoin(((Join) message).getUsername());
-            //publishLobbyEvent(GameEventType.gameInfo);
-        }
-        else if (message instanceof ObjectNode) {
-            JsonNode event=((JsonNode)message);
-            GameBus.getInstance().publish(new GameMessages.GameEvent(event, roomChannel));
-            event = event.get("message");
-            String type = event.get("type").asText();
-            switch(type) {
-                  case "leave":handleQuitter(event.get("content").get("user").asText());break;
+             if (message instanceof Join) {
+                playerJoin(((Join) message).getUsername());
+                publishLobbyEvent(GameEventType.matchInfo);
             }
-        }      
+            else if (message instanceof GameEvent) {
+                JsonNode event = ((GameEvent) message).getJson();
+                if(event!=null) {
+                    event = event.get("message");
+                    String type = event.get("type").asText();
+                    switch(type) {
+                        case "taskAcquired":taskAcquired();break;
+                        case "leave":handleQuitter(event);break;
+                        case "matchInfo":publishLobbyEvent(GameEventType.matchInfo);break;
+                    }
+                }
+            }
+            else if (message instanceof ObjectNode) {
+                JsonNode event=((JsonNode)message);
+                GameBus.getInstance().publish(new GameMessages.GameEvent(event, roomChannel));
+                event = event.get("message");
+                String type = event.get("type").asText();
+                switch(type) {
+                      case "leave":handleQuitter(event);break;
+                }
+            }
+       }
+       catch(Exception e) {
+          LoggerUtils.error("[GAME]", e);
+      }
     }
+    
 
     /*
      * Retrieves one of the images that has been stored to be segmented at random
      * being careful not to retrieve the same image two times for the same match.
      * <p>
      * @return The object related to the task: image + tag
+     * [TESTED]
      */
     private ObjectNode retrieveTaskImage() {
         guessObject = null;
@@ -201,14 +223,15 @@ public class Game extends GameRoom {
      * role to the players that have never played as such first
      * <p>
      * @return The object related to the task: image + tag
+     * [TESTED]
      */
     private String nextSketcher() {
         sketcherPainter = null;
         int currentPlayers = requiredPlayers - disconnectedPlayers;
         int count = 0;
         //Publish system messages to inform that a new round is starting and the roles are being chosen
-        GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(), "newround"), roomChannel));
-        GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(), "choosingroles"), roomChannel));
+        GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info, Messages.get(LanguagePicker.retrieveLocale(), "newround")),roomChannel ));
+        GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info, Messages.get(LanguagePicker.retrieveLocale(), "choosingroles")),roomChannel ));
 
         //Set all the players as GUESSERS at the beginning
         for (int i = 0; i < currentPlayers; i++) {
@@ -235,7 +258,8 @@ public class Game extends GameRoom {
             }
         }
         //Publish a system message to inform the other players on who is the sketcher
-        GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(), "thesketcheris") + " " + sketcherPainter.name, roomChannel));
+        GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info, Messages.get(LanguagePicker.retrieveLocale(), "thesketcheris")+ " " + sketcherPainter.name),roomChannel ));
+        GameBus.getInstance().publish(new GameEvent(sketcherPainter.name,roomChannel, GameEventType.nextRound));
         return sketcherPainter.name;
     }
 
@@ -245,16 +269,16 @@ public class Game extends GameRoom {
      * If not enough players are connected, inform the players with a message and
      * wait for new connections or for all the modules to receive the login of the
      * respective players
-     * <p>
+     * [TESTED]
      */
     private void checkStart() throws Exception {
         if (!triggerStart()) //Send a message to inform about the missing players
         {
             int nPlayers = playersVect.size();
             if (requiredPlayers - nPlayers > 1) {
-                GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(), "waitingfor") + " " + (requiredPlayers - nPlayers) + " " + Messages.get(LanguagePicker.retrieveLocale(), "playerstostart"), roomChannel));
+                GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info,Messages.get(LanguagePicker.retrieveLocale(), "waitingfor") + " " + (requiredPlayers - nPlayers) + " " + Messages.get(LanguagePicker.retrieveLocale(), "playerstostart")), roomChannel));
             } else if (requiredPlayers - nPlayers == 1) {
-                GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(), "waitingfor") + " " + (requiredPlayers - nPlayers) + " " + Messages.get(LanguagePicker.retrieveLocale(), "playertostart"), roomChannel));
+                GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info,Messages.get(LanguagePicker.retrieveLocale(), "waitingfor") + " " + (requiredPlayers - nPlayers) + " " + Messages.get(LanguagePicker.retrieveLocale(), "playertostart")), roomChannel));
             }
         }
     }
@@ -264,7 +288,7 @@ public class Game extends GameRoom {
         //We need to wait for all the modules to receive the player list
         if (canStart && playersVect.size() >= requiredPlayers) {
             GameManager.getInstance().removeInstance(getSelf());
-            publishLobbyEvent(GameEventType.gameStarted);
+            publishLobbyEvent(GameEventType.matchStart);
             if (taskAcquired) {
                 //Create a new session in which to store the actions of the game
                 if(!fixGroundTruth)
@@ -277,12 +301,12 @@ public class Game extends GameRoom {
                 nextRound();
                 //We start the game
                 if (sketcherPainter != null) {
-                    GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.gameStarted));
+                    GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.matchStart));
                 } else {
                     throw new Error("[GAME]: Cannot find a suitable Sketcher!");
                 }
             } else {
-                GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(), "acquiring"), roomChannel));
+                GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info, Messages.get(LanguagePicker.retrieveLocale(), "acquiring")),roomChannel ));
                 GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.gameLoading));
             }
             return true;
@@ -404,32 +428,34 @@ public class Game extends GameRoom {
         roundNumber = 0;
         gameStarted = false;
         playersVect = new CopyOnWriteArrayList<>();
+        
         Akka.system().scheduler().scheduleOnce(
                 Duration.create(1000, TimeUnit.MILLISECONDS),
                 new Runnable() {
-            @Override
-            public void run() {
-                Integer trials = 0;
-                Boolean completed = false;
-                while (trials < 5 && !completed) {
-                    try {
-                        trials++;
-                        if(!fixGroundTruth)
-                            CMS.taskSetInitialization(priorityTaskHashSet, taskHashSet, roomChannel);
-                        else
-                            CMS.fixGroundTruth(9718, priorityTaskHashSet, taskHashSet, roomChannel);
-                        completed = true;
-                    } catch (Exception ex) {
-                        LoggerUtils.error("GAME", ex);
+                    @Override
+                    public void run() {
+                        Integer trials = 0;
+                        Boolean completed = false;
+                        while (trials < 5 && !completed) {
+                            try {
+                                trials++;
+                                if(!fixGroundTruth)
+                                    CMS.taskSetInitialization(priorityTaskHashSet, taskHashSet, roomChannel);
+                                else
+                                    CMS.fixGroundTruth(9718, priorityTaskHashSet, taskHashSet, roomChannel);
+                                completed = true;
+                            } catch (Exception ex) {
+                                LoggerUtils.error("GAME", ex);
+                            }
+                        }
+                        if (trials >= 5) {
+                            killActor();
+                            throw new RuntimeException("[GAME]: Impossible to retrieve the set of image relevant for this game, aborting");
+                        }
                     }
-                }
-                if (trials >= 5) {
-                    killActor();
-                    throw new RuntimeException("[GAME]: Impossible to retrieve the set of image relevant for this game, aborting");
-                }
-            }
-        },
-                Akka.system().dispatcher());
+                },Akka.system().dispatcher()
+        );
+        
         Logger.info("[GAME] New game started");
     }
 
@@ -450,9 +476,9 @@ public class Game extends GameRoom {
      *
      * @param type the type of the event to publish: room created, room
      * destroyed, update status
+     * [TESTED]
      */
     private void publishLobbyEvent(GameEventType type) {
-        GameEvent join = new GameEvent(type.toString(), GameManager.getInstance().getLobby(), type);
         ObjectNode status = new ObjectNode(JsonNodeFactory.instance);
         //Get the hashcode related to this actoref in order to make it unique
         status.put("id", this.getSelf().hashCode());
@@ -460,11 +486,12 @@ public class Game extends GameRoom {
         status.put("currentPlayers", playersVect.size());
         status.put("maxPlayers", requiredPlayers);
         status.put("visible", playersVect.size() < requiredPlayers);
-        join.setObject(status);
+        GameEvent join = new GameEvent(GameMessages.composeGameListUpdate(status), GameManager.getInstance().getLobby());
         GameBus.getInstance().publish(join);
     }
 
-    private void handleQuitter(String quitter) {
+    private void handleQuitter(JsonNode jquitter) {
+        String quitter = jquitter.get("content").get("user").asText();
         for (Painter painter : playersVect) {
             if (painter.name.equalsIgnoreCase(quitter)) {
                 playersVect.remove(painter);
@@ -475,7 +502,7 @@ public class Game extends GameRoom {
                 {
                     gameEnded();
                 } else if (((requiredPlayers - disconnectedPlayers) <= 0) && gameStarted) {
-                    publishLobbyEvent(GameEventType.gameEnded);
+                    publishLobbyEvent(GameEventType.matchEnd);
                 }
 
             }
@@ -554,8 +581,8 @@ public class Game extends GameRoom {
         GameEvent endEvent = new GameEvent(roomChannel, GameEventType.leaderboard);
         endEvent.setObject(compileLeaderboard());
         GameBus.getInstance().publish(endEvent);
-        GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.gameEnded));
-        publishLobbyEvent(GameEventType.gameEnded);
+        GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.matchEnd));
+        publishLobbyEvent(GameEventType.matchEnd);
         killActor();
     }
 
@@ -615,6 +642,10 @@ public class Game extends GameRoom {
         }
     }
 
+    
+    /*
+     * [TESTED]
+     */
     private void taskAcquired() {
         if (!taskAcquired) {
             taskAcquired = true;
@@ -661,9 +692,7 @@ public class Game extends GameRoom {
        // notifyAll(ChatKind.system, "Sketchness", Messages.get(LanguagePicker.retrieveLocale(), "asktag"));
         askTag = true;
     }
-    String currentGuess;
-    Boolean askTag = false;
-    String askTagSketcher;
+    
 }
 
 enum CountdownTypes {

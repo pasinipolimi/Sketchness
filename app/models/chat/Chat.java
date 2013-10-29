@@ -14,6 +14,8 @@ import models.factory.GameRoom;
 
 import utils.gamebus.GameMessages.*;
 import utils.LanguagePicker;
+import utils.LoggerUtils;
+import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages;
 
 public class Chat extends GameRoom {
@@ -27,31 +29,42 @@ public class Chat extends GameRoom {
     }
 
     @Override
-    public void onReceive(Object message) throws Exception {
-
-        if (message instanceof Room) {
-            this.roomChannel = ((Room) message);
-            Logger.info("[CHAT] " + roomChannel.getRoom() + " created.");
-        }
-        if (message instanceof SystemMessage) {
-            //notifyAll(ChatKind.system, "Sketchness", ((SystemMessage) message).getMessage());
-        }
-        if (message instanceof Join) {
-            handleJoin((Join) message);
-        } else if (message instanceof GameEvent) {
-            JsonNode event = ((GameEvent) message).getJson();
-            if(event!=null) {
+    public void onReceive(Object message) {
+        try {
+            if (message instanceof Room) {
+                this.roomChannel = ((Room) message);
+                Logger.info("[CHAT] " + roomChannel.getRoom() + " created.");
+            }
+            if (message instanceof Join) {
+                handleJoin((Join) message);
+            } else if (message instanceof GameEvent) {
+                JsonNode event = ((GameEvent) message).getJson();
+                if(event!=null) {
+                    event = event.get("message");
+                    String type = event.get("type").asText();
+                    switch(type) {
+                          case "chat":notifyAll(event);break;
+                          case "log":notifySystem(event);break;
+                          case "leave":handleQuitter(event);break;
+                     }   
+                }
+            }
+            else if (message instanceof ObjectNode) {
+                JsonNode event=((JsonNode)message);
+                GameBus.getInstance().publish(new GameMessages.GameEvent(event, roomChannel));
                 event = event.get("message");
                 String type = event.get("type").asText();
                 switch(type) {
-                      case "chat":notifyAll(event.get("content").get("user").asText(),event.get("content").get("message").asText());break;
-                      case "leave":handleQuitter(event.get("content").get("user").asText());break;
-                 }   
+                      case "leave":handleQuitter(event);break;
+                }
+            }      
+
+            else {
+                unhandled(message);
             }
-        } 
-        
-        else {
-            unhandled(message);
+        }
+        catch(Exception e) {
+          LoggerUtils.error("[CHAT]", e);
         }
     }
 
@@ -76,7 +89,8 @@ public class Chat extends GameRoom {
 
     
 
-    private void handleQuitter(String quitter) throws InterruptedException {
+    private void handleQuitter(JsonNode jquitter) throws InterruptedException {
+        String quitter = jquitter.get("content").get("user").asText();
         for (Map.Entry<String, WebSocket.Out<JsonNode>> entry : playersMap.entrySet()) {
             if (entry.getKey().equalsIgnoreCase(quitter)) {
                 //Close the websocket
@@ -98,11 +112,22 @@ public class Chat extends GameRoom {
             channel.write(event);
         }
     }
+    
+    private void notifySystem(JsonNode event) {
+        LogLevel level = LogLevel.valueOf(event.get("content").get("level").asText());
+        String text = event.get("content").get("message").asText();
+        for (WebSocket.Out<JsonNode> channel : playersMap.values()) {         
+            event = GameMessages.composeLogMessage(level,text);
+            channel.write(event);
+        }
+    }
 
     // Send a Json event to all members
-    private void notifyAll(String user, String text) {
+    private void notifyAll(JsonNode event) {
+        String user = event.get("content").get("user").asText();
+        String text = event.get("content").get("message").asText();
         for (WebSocket.Out<JsonNode> channel : playersMap.values()) {         
-            ObjectNode event = GameMessages.composeChatMessage(user,text);
+            event = GameMessages.composeChatMessage(user,text);
             channel.write(event);
         }
     }

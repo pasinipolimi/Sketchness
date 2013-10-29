@@ -27,6 +27,12 @@ public class GameMessages {
             this.type = GameEventType.unknown;
             this.json = message;
         }
+        
+        public GameEvent(JsonNode message) {
+            this.channel = null;
+            this.type = GameEventType.unknown;
+            this.json = message;
+        }
 
         public GameEvent(Room channel, GameEventType type) {
             this.channel = channel;
@@ -98,11 +104,28 @@ public class GameMessages {
         return event;
     }
     
+    public static ObjectNode composeTaskAcquired() {
+        ObjectNode content = Json.newObject();
+        ObjectNode event = composeJsonMessage("taskAcquired",content);
+        return event;
+    }
+    
+    public static ObjectNode composeMatchInfo() {
+        ObjectNode content = Json.newObject();
+        ObjectNode event = composeJsonMessage("matchInfo",content);
+        return event;
+    }
+    
     public static ObjectNode composeChatMessage(String user, String text) {
             ObjectNode content = Json.newObject();
             content.put("user", user);
             content.put("message", text);
             ObjectNode event = composeJsonMessage("chat",content);
+            return event;
+    }
+    
+    public static ObjectNode composeGameListUpdate(JsonNode game) {
+            ObjectNode event = composeJsonMessage("updateList",(ObjectNode)game);
             return event;
     }
     
@@ -197,7 +220,7 @@ public class GameMessages {
         return event;
     }
     
-    public static JsonNode composeQuit(final String username) {
+    public static ObjectNode composeQuit(final String username) {
         ObjectNode content = Json.newObject();
         content.put("user", username);
         ObjectNode event = composeJsonMessage("leave",content);

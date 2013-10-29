@@ -14,6 +14,7 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import utils.gamebus.GameMessages;
+import utils.gamebus.GameMessages.GameEvent;
 import utils.gamebus.GameMessages.Join;
 
 
@@ -39,7 +40,7 @@ public class LobbyFactory extends Factory {
             in.onClose(new F.Callback0() {
                 @Override
                 public void invoke() {
-                     finalRoom.tell(GameMessages.composeQuit(username), finalRoom);
+                     finalRoom.tell(GameMessages.composeQuit(username),finalRoom);
                 }
             });
         } else {

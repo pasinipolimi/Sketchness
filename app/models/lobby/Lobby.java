@@ -13,8 +13,8 @@ import org.codehaus.jackson.node.ObjectNode;
 
 import utils.gamebus.GameMessages.*;
 import utils.LanguagePicker;
+import utils.LoggerUtils;
 import utils.gamebus.GameBus;
-import static utils.gamebus.GameEventType.quit;
 import utils.gamebus.GameMessages;
 import utils.gamemanager.GameManager;
 
@@ -29,7 +29,8 @@ public class Lobby extends UntypedActor {
     ConcurrentHashMap<String, WebSocket.Out<JsonNode>> playersMap = new ConcurrentHashMap<>();
 
     @Override
-    public void onReceive(Object message) throws Exception {
+    public void onReceive(Object message) {
+      try {
         if (message instanceof Room) {
             this.roomChannel = ((Room) message);
             Logger.info("[LOBBY] " + roomChannel.getRoom() + " created.");
@@ -38,19 +39,15 @@ public class Lobby extends UntypedActor {
             handleJoin((Join) message);
         }
         if (message instanceof GameEvent) {
-            GameEvent event = (GameEvent) message;
-            switch (event.getType()) {
-                case gameInfo:
-                    updateList(event.getObject());
+            JsonNode event = ((GameEvent) message).getJson();
+            event = event.get("message");
+            String type = event.get("type").asText();
+            switch (type) {
+                case "updateList":
+                    updateList(event.get("content"));
                     break;
-                case gameStarted:
-                    handleStartEnd();
-                    break;
-                case gameEnded:
-                    handleStartEnd();
-                    break;
-                case quit:
-                    handleQuitter(event.getMessage());
+                case "leave":
+                    handleQuitter(event);
                     break;
             }
         }
@@ -60,15 +57,18 @@ public class Lobby extends UntypedActor {
             event = event.get("message");
             String type = event.get("type").asText();
             switch(type) {
-                  case "leave":handleQuitter(event.get("content").get("user").asText());break;
+                  case "leave":handleQuitter(event);break;
             }
-        }            
+        }      
+      }
+      catch(Exception e) {
+          LoggerUtils.error("[LOBBY]", e);
+      }
     }
 
-    private void updateList(ObjectNode object) {
+    private void updateList(JsonNode object) {
         if (object != null) {
-            Logger.debug(object.toString());
-            object.put("type", "updateList");
+            object = GameMessages.composeGameListUpdate(object);
             for (WebSocket.Out<JsonNode> channel : playersMap.values()) {
                 channel.write(object);
             }
@@ -91,7 +91,8 @@ public class Lobby extends UntypedActor {
         GameManager.getInstance().getCurrentGames();
     }
 
-    private void handleQuitter(String quitter) throws InterruptedException {
+    private void handleQuitter(JsonNode jquitter) throws InterruptedException {
+        String quitter = jquitter.get("content").get("user").asText();
         for (Map.Entry<String, WebSocket.Out<JsonNode>> entry : playersMap.entrySet()) {
             if (entry.getKey().equalsIgnoreCase(quitter)) {
                 //Close the websocket

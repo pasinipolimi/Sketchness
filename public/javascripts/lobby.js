@@ -120,29 +120,29 @@ require(["Communicator", "Chat", "jquery", "popup", "jscrollpane"], function(Com
 			}
 		});
 
-		communicator.on("updateList", function(e, data) {
-			var $gameInstance = $("#" + data.id);
-			//Modify existing row
-			if($gameInstance.length > 0) {
-				//If the room is empty, it means that it has been destroyed, remove it from the list
-				if(data.currentPlayers <= 0 || data.visible == false) {
-					$gameInstance.remove();
-				} else { //Otherwise update the player count
-					var html = '';
-					html += '<td>' + data.roomName + '</td><td>' + data.currentPlayers +'/' + data.maxPlayers + '</td>';
-					$gameInstance.html(html);
+		communicator.on( "updateList", function(e, data) {
+				var $gameInstance = $("#" + data.id);
+				//Modify existing row
+				if($gameInstance.length > 0) {
+					//If the room is empty, it means that it has been destroyed, remove it from the list
+					if(data.currentPlayers <= 0 || data.visible == false) {
+						$gameInstance.remove();
+					} else { //Otherwise update the player count
+						var html = '';
+						html += '<td>' + data.roomName + '</td><td>' + data.currentPlayers +'/' + data.maxPlayers + '</td>';
+						$gameInstance.html(html);
+					}
+				} else { //Otherwise add a new game to the list
+					if(data.visible != false) {
+						var html = '';
+						html += '<tr id=' + data.id + ' name=' + data.roomName + '><td>' + data.roomName + '</td><td>' + data.currentPlayers + '/' + data.maxPlayers + '</td></tr>';
+						var paneApi = $("#gameListBody").data('jsp');
+						paneApi.getContentPane().append(html);
+						paneApi.reinitialise();
+						paneApi.scrollToBottom();
+						//$("#gameList tbody").append(html);
+					}
 				}
-			} else { //Otherwise add a new game to the list
-				if(data.visible != false) {
-					var html = '';
-					html += '<tr id=' + data.id + ' name=' + data.roomName + '><td>' + data.roomName + '</td><td>' + data.currentPlayers + '/' + data.maxPlayers + '</td></tr>';
-					var paneApi = $("#gameListBody").data('jsp');
-					paneApi.getContentPane().append(html);
-					paneApi.reinitialise();
-					paneApi.scrollToBottom();
-					//$("#gameList tbody").append(html);
-				}
-			}
 		});
 
 	});

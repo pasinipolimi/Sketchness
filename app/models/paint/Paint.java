@@ -10,8 +10,6 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
 import play.Logger;
 
-import play.libs.Json;
-
 import models.Painter;
 import models.Point;
 import models.Segment;
@@ -21,7 +19,6 @@ import utils.gamebus.GameMessages.GameEvent;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.json.JSONException;
-import play.i18n.Messages;
 import utils.LanguagePicker;
 import utils.gamebus.GameEventType;
 import utils.gamebus.GameMessages;
@@ -60,7 +57,7 @@ public class Paint extends GameRoom {
         if (message instanceof Join) {
             handleJoin((Join) message);
         }
-        if (message instanceof JsonNode) {
+        /*if (message instanceof JsonNode) {
             JsonNode json = (JsonNode) message;
             JsonNodeType type = JsonNodeType.valueOf(json.get("type").getTextValue().toLowerCase());
             switch (type) {
@@ -85,17 +82,17 @@ public class Paint extends GameRoom {
                     break;
             }
             notifyAll(json);
-        } else if (message instanceof GameEvent) {
+        } */else if (message instanceof GameEvent) {
             GameEvent event = (GameEvent) message;
             switch (event.getType()) {
-                case gameEnded:
+                case matchEnd:  //DONE
                     killActor();
                     gameStarted = false;
                     break;
-                case gameLoading:
+                case gameLoading: //DONE
                     gameLoading();
                     break;
-                case gameStarted:
+                case matchStart: //DONE
                     gameStarted = true;
                     break;
                 case showImages:
@@ -104,8 +101,8 @@ public class Paint extends GameRoom {
                 case saveTraces:
                     saveTraces();
                     break;
-                case nextRound:
-                    nextRound(event.getMessage());
+                case nextRound: //DONE
+                    nextRound(event.getMessage()); 
                     break;
                 case task:
                     sendTask(event.getMessage(), event.getObject());
@@ -130,21 +127,7 @@ public class Paint extends GameRoom {
             }
         }
     }
-
-    private void handleJoin(Join message) {
-        String username = message.getUsername();
-        if (painters.containsKey(username)) {
-            getSender().tell(play.i18n.Messages.get(LanguagePicker.retrieveLocale(), "usernameused"), this.getSelf());
-        } else if (!gameStarted) {
-            Painter painter = new Painter(message.getChannel());
-            painter.name = username;
-            painters.put(username, painter);
-            Logger.debug("[PAINT] added player " + username);
-            getSender().tell("OK", this.getSelf());
-        } else {
-            getSender().tell(play.i18n.Messages.get(LanguagePicker.retrieveLocale(), "matchstarted"), this.getSelf());
-        }
-    }
+    
 
     private void saveTraces() {
         GameEvent tracesMessage = new GameEvent(roomChannel, GameEventType.finalTraces);
@@ -189,53 +172,12 @@ public class Paint extends GameRoom {
         }
     }
 
-    /*
-     * Send a message to all player to wait, since the match is starting
-     */
-    private void gameLoading() {
-        for (Map.Entry<String, Painter> entry : painters.entrySet()) {
-            ObjectNode roleMessage = Json.newObject();
-            roleMessage.put("type", "loading");
-            entry.getValue().channel.write(roleMessage);
-        }
-    }
-
-    private void nextRound(String sketcher) {
-        //Reset the traces storage
-        traces = new ObjectNode(factory);
-        currentSegment = new Segment("rgba(255,255,255,1.0)");
-
-        //Send to the users the information about their role
-        for (Map.Entry<String, Painter> entry : painters.entrySet()) {
-            if (entry.getValue().name.equals(sketcher)) {
-                entry.getValue().role = "SKETCHER";
-                ObjectNode roleMessage = Json.newObject();
-                roleMessage.put("type", "role");
-                roleMessage.put("name", entry.getValue().name);
-                roleMessage.put("role", "SKETCHER");
-                entry.getValue().channel.write(roleMessage);
-            } else {
-                entry.getValue().role = "GUESSER";
-                ObjectNode self = Json.newObject();
-                self.put("type", "role");
-                self.put("name", entry.getValue().name);
-                self.put("role", "GUESSER");
-                entry.getValue().channel.write(self);
-            }
-        }
-    }
+    
 
     private void sendTask(String sketcher, ObjectNode task) throws Exception {
         task.remove("type");
         task.remove("role");
         task.put("type", "task");
-        //Send to the users the information about their role
-        for (Map.Entry<String, Painter> entry : painters.entrySet()) {
-            if (entry.getValue().name.equals(sketcher)) {
-                entry.getValue().channel.write(task);
-            }
-        }
-
         taskUrl = task.get("image").getTextValue();
         URL url = new URL(taskUrl);
         taskImage = ImageIO.read(url);
@@ -244,20 +186,30 @@ public class Paint extends GameRoom {
         taskUrl = task.get("id").getTextValue();
         this.sketcher = sketcher;
         guessWord = task.get("tag").getTextValue();
+        //Send to the users the information about their role
+        for (Map.Entry<String, Painter> entry : painters.entrySet()) {
+            if (entry.getValue().name.equals(sketcher)) {
+                entry.getValue().channel.write(GameMessages.composeImageInfo(task.get("id").asText(), taskUrl, taskWidth, taskHeight));
+                entry.getValue().channel.write(GameMessages.composeTask(guessWord));
+            }
+            else
+                entry.getValue().channel.write(GameMessages.composeTask(""));
+        }
     }
 
     private void sendTag(String sketcher, ObjectNode task) throws Exception {
-        task.remove("type");
-        task.put("type", "tag");
-        ObjectNode cleanedTask = new ObjectNode(factory);
-        cleanedTask.put("type", "tag");
+        taskUrl = task.get("image").getTextValue();
+        URL url = new URL(taskUrl);
+        taskImage = ImageIO.read(url);
+        taskWidth = taskImage.getWidth();
+        taskHeight = taskImage.getHeight();
+        taskUrl = task.get("id").getTextValue();    
         for (Map.Entry<String, Painter> entry : painters.entrySet()) {
             if (entry.getValue().name.equals(sketcher)) {
-                task.put("role", "SKETCHER");
-                entry.getValue().channel.write(task);
+                entry.getValue().channel.write(GameMessages.composeImageInfo(task.get("id").asText(), taskUrl, taskWidth, taskHeight));
+                entry.getValue().channel.write(GameMessages.composeTag());
             } else {
-                cleanedTask.put("role", "GUESSER");
-                entry.getValue().channel.write(cleanedTask);
+                entry.getValue().channel.write(GameMessages.composeTag());
             }
         }
     }
@@ -275,7 +227,77 @@ public class Paint extends GameRoom {
             }
         }
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /*
+     * TESTED
+     */
+    private void handleJoin(Join message) {
+        String username = message.getUsername();
+        if (painters.containsKey(username)) {
+            getSender().tell(play.i18n.Messages.get(LanguagePicker.retrieveLocale(), "usernameused"), this.getSelf());
+        } else if (!gameStarted) {
+            Painter painter = new Painter(message.getChannel());
+            painter.name = username;
+            painters.put(username, painter);
+            Logger.debug("[PAINT] added player " + username);
+            getSender().tell("OK", this.getSelf());
+        } else {
+            getSender().tell(play.i18n.Messages.get(LanguagePicker.retrieveLocale(), "matchstarted"), this.getSelf());
+        }
+    }
+
+    
+    /*
+     * Send a message to all player to wait, since the match is starting
+     * [TESTED]
+     */
+    private void gameLoading() {
+        for (Map.Entry<String, Painter> entry : painters.entrySet()) {
+            entry.getValue().channel.write(GameMessages.composeLoading());
+        }
+    }
+
+    /*
+     * [TESTED]
+     */
+    private void nextRound(String sketcher) {
+        //Reset the traces storage
+        traces = new ObjectNode(factory);
+        currentSegment = new Segment("rgba(255,255,255,1.0)");
+
+        //Send to the users the information about their role
+        for (Map.Entry<String, Painter> entry : painters.entrySet()) {
+                entry.getValue().channel.write(GameMessages.composeRoundBegin(sketcher));
+        }
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 enum JsonNodeType {
     segment, change, trace, roundended, move, skiptask, endsegmentation
