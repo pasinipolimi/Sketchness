@@ -58,6 +58,8 @@ public class IsOnline {
 
             }
 
+            connection.close();
+
         }
         catch(SQLException ex){
 
@@ -78,6 +80,8 @@ public class IsOnline {
             statement.setTimestamp(1, active);
             statement.setString(2, name);
             statement.executeUpdate();
+
+            connection.close();
         }
         catch(SQLException ex){
 
@@ -95,6 +99,8 @@ public class IsOnline {
             statement.setBoolean(1, false);
             statement.setString(2, name);
             statement.executeUpdate();
+
+            connection.close();
         }
         catch(SQLException ex){
 

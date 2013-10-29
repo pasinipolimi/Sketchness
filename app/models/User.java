@@ -65,6 +65,8 @@ public class User extends Model implements Subject {
 
 	public boolean emailValidated;
 
+    public Integer totalScore;
+
 	@ManyToMany
 	public List<SecurityRole> roles;
 
@@ -215,7 +217,7 @@ public class User extends Model implements Subject {
             }
         }
 
-
+        user.totalScore = 0;
 
 		user.save();
 		user.saveManyToManyAssociations("roles");
@@ -242,6 +244,8 @@ public class User extends Model implements Subject {
                 nickname=  nickname+ns;
             }
 
+            connection.close();
+
         }
         catch(SQLException ex){
 
@@ -262,6 +266,7 @@ public class User extends Model implements Subject {
             ResultSet rs = statement.executeQuery();
 
             if(rs.isBeforeFirst()){
+                connection.close();
                 return true;
             }
 
@@ -360,6 +365,8 @@ public class User extends Model implements Subject {
               statement.setString(1, newNick);
               statement.setString(2, utente);
               statement.executeUpdate();
+
+              connection.close();
 
               }
               catch(SQLException ex){

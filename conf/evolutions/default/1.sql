@@ -42,6 +42,7 @@ create table users (
   last_active               timestamp,
   active                    boolean,
   email_validated           boolean,
+  total_score               integer,
   constraint pk_users primary key (id))
 ;
 

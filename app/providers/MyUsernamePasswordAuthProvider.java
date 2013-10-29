@@ -205,6 +205,7 @@ public class MyUsernamePasswordAuthProvider
                                     statement1.setLong(2, u.id);
                                     statement1.executeUpdate();
 
+                                    connection.close();
                                 }
                                 catch(SQLException ex){
                                 }
