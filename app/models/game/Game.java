@@ -1,8 +1,14 @@
 package models.game;
 
+import play.db.DB;
 import play.libs.*;
 import play.libs.F.*;
 import play.i18n.Messages;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -583,6 +589,33 @@ public class Game extends GameRoom {
         GameBus.getInstance().publish(endEvent);
         GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.matchEnd));
         publishLobbyEvent(GameEventType.matchEnd);
+
+        Painter[] sorted = playersVect.toArray(new Painter[0]);
+
+        try{
+            Connection connection = DB.getConnection();
+
+            for (Painter painter : sorted) {
+
+                String query = "SELECT * FROM USERS WHERE NAME=? ";
+                String query1 = "UPDATE USERS SET TOTAL_SCORE = ? WHERE NAME = ? ";
+
+                PreparedStatement statement = connection.prepareStatement(query);
+                PreparedStatement statement1 = connection.prepareStatement(query1);
+
+                statement.setString(1, painter.name);
+                ResultSet rs = statement.executeQuery();
+
+                rs.next();
+                statement1.setInt(1, rs.getInt("TOTAL_SCORE")+painter.getPoints());
+                statement1.setString(2, painter.name);
+                statement1.executeUpdate();
+
+            }
+            connection.close();
+        }
+        catch(SQLException ex){
+        }
         killActor();
     }
 

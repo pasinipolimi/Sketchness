@@ -1,4 +1,8 @@
-@(username: String, room: String)(content: Html)
+@(title: String, nav: String = "")(content: Html)
+
+@import be.objectify.deadbolt.java.views.html._
+@import be.objectify.deadbolt.core.utils.TemplateUtils._
+
 
 <!-- CLEANED CODE-->
 <!--THIS IS THE MAIN PAGE THAT IS SERVED BY THE PLAY FRAMEWORK-->
@@ -34,6 +38,32 @@
 				});
 			});
 		</script>
+
+        <script>
+            window.onbeforeunload = bunload;
+
+            function bunload(){
+            var xhr = new XMLHttpRequest();
+
+            xhr.open("get", "@routes.Application.doLogout", true);
+
+            xhr.send(null);
+            }
+        </script>
+
+        <script>
+            window.setInterval(function(){
+
+            var xhr = new XMLHttpRequest();
+
+            xhr.open("get", "@routes.Sketchness.keepOnline", true);
+
+            xhr.send(null);
+
+            }, 1000*20);      <!-- Set interval between refreshes-->
+
+
+        </script>
 	</head>
 
 	<body>

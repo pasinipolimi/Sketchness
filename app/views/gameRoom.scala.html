@@ -1,9 +1,8 @@
-@(username: String, room: String, players: Integer)
+@(localUser: models.User = null, room: String, players: Integer)
 
 @import controllers.routes.javascript._
 
-
-@main(username,room){
+@main(Messages("playauthenticate.navigation.gameRoom"), "GameRoom") {
 	<!--TODO: BETTER INTERFACE FOR THE ERRORS, POSSIBLY AN OVERLAY-->
 	<div id="onError" class="alert-message error">
 		<p>
@@ -73,11 +72,11 @@
 
 		<!--HANDLING ALL THE USERS CURRENTLY CONNECTED-->
 		<div id="currentAvatar"></div>
-		<div id="currentNickname">@username</div>
+		<div id="currentNickname">@localUser.name</div>
 		<ul id="opponents"></ul>
 
 		<!--WE CAN'T USE ROUTES IN STATIC JAVASCRIPT, SO WE MUST REFERENCE THEM OUTSIDE-->
-		<div id="paintWebSocket" data-ws="@routes.Sketchness.gameStream(username,room,players).webSocketURL()"></div>
+		<div id="paintWebSocket" data-ws="@routes.Sketchness.gameStream(room,players).webSocketURL()"></div>
 
 		<script type="text/javascript" src="/assets/javascripts/paint.js"></script>
 
@@ -93,10 +92,10 @@
 			});
 		</script>
 
-		<form id="backForm" action="@routes.Sketchness.lobby()">
-			<input id="username" name="username" class="input-small" type="hidden" value="@username" />
-			<button type="submit" id="backToLobby"></button>
-		</form>
+	<!--	<form id="backForm" action="@routes.Sketchness.lobby()">
+			<input id="username" name="username" class="input-small" type="hidden" value="@localUser.name" />       -->
+            <a href="@routes.Sketchness.lobby()"><button type="submit" id="backToLobby"></button></a>
+	<!--	</form>     -->
 
 		<!--THIS HIDDEN DIV IS USED JUST TO PRELOAD IMAGES SO THAT THEY WON'T "FLICKER"-->
 		<div id="preloaded-images">
