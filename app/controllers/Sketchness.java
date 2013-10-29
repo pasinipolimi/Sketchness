@@ -18,8 +18,6 @@ import models.game.GameFactory;
 import models.lobby.LobbyFactory;
 import models.paint.PaintFactory;
 import play.i18n.Lang;
-import static play.mvc.Controller.flash;
-import static play.mvc.Results.ok;
 import utils.LanguagePicker;
 import utils.LoggerUtils;
 import utils.gamemanager.GameManager;
@@ -201,7 +199,7 @@ public class Sketchness extends Controller {
     public static Result checkOnline() throws Exception{
         models.IsOnline.checkOnline();
 
-        return null;
+        return ok();
     }
 
 
@@ -211,7 +209,7 @@ public class Sketchness extends Controller {
         String username = localUser.name;
         models.IsOnline.keepOnline(username);
 
-        return null;
+        return ok();
     }
 
     public static Result putOffline(){
@@ -220,6 +218,6 @@ public class Sketchness extends Controller {
         String username = localUser.name;
         models.IsOnline.putOffline(username);
 
-        return null;
+        return ok();
     }
 }

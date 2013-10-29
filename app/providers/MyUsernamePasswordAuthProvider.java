@@ -216,7 +216,7 @@ public class MyUsernamePasswordAuthProvider
 
 
 
-                             //   return LoginResult.ALREADY_LOGGED;
+                             //   return LoginResult.ALREADY_LOGGED;            TODO fix return message
                             }
                         } else {
                             // if you don't return here,
