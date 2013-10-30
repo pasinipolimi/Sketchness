@@ -5,4 +5,5 @@ Aby zweryfikować konto, użyj ten link
 @verificationUrl
 
 Pozdrawiamy,
-Cubrik-Project
+Cubrik Project Team
+http://www.cubrikproject.eu

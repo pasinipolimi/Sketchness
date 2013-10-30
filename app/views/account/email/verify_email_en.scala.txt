@@ -5,4 +5,5 @@ To verify your e-mail address, follow this link now:
 @verificationUrl
 
 Cheers,
-The Cubrik-Project
+The Cubrik Project Team
+http://www.cubrikproject.eu

@@ -5,4 +5,5 @@ Para validar su email siga el siguiente enlace:
 @verificationUrl
 
 Le saluda,
-El equipo de Cubrik.
+El equipo de Cubrik Project.
+http://www.cubrikproject.eu
