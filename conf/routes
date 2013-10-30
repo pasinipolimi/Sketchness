@@ -3,7 +3,7 @@
 # ~~~~
 
 # Home page
-GET     /                                 controllers.Sketchness.index()
+GET      /                                 controllers.Sketchness.index()
 #GET     /lobby                            controllers.Sketchness.lobby(username: String ?= null)
 #GET     /room                             controllers.Sketchness.chatRoom(username: String ?= null, room: String ?= "default", nPlayers: Integer ?= 3)
 #GET     /room/chatStream                  controllers.Sketchness.chatStream(username: String ?= null,room: String ?= "default")
@@ -41,7 +41,7 @@ GET    /javascripts/routes      controllers.JavascriptController.javascriptRoute
 
 
 ################################################
-##########Play Authenticate messages############
+##########Play Authenticate Routes############
 ################################################
 
 

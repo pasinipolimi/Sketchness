@@ -11,6 +11,7 @@ import models.User;
 import play.Routes;
 import play.data.Form;
 import play.db.DB;
+import play.i18n.Messages;
 import play.libs.Akka;
 import play.mvc.*;
 import play.mvc.Http.Session;
@@ -131,7 +132,6 @@ public class Application extends Controller {
 
         return redirect(routes.Application.index());
     }
-
 
 
     public static String formatTimestamp(final long t) {
