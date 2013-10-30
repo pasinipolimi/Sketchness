@@ -518,7 +518,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				/**
 				 * Setup of task guessing state
 				 */
-				onentertaksGuessing: function() {
+				onentertaskGuessing: function() {
 					var that = this,
 						sk = this.sketchness,
 						wordInput = this.elements.wordInput,
@@ -705,8 +705,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			write: write,
 			chat: chat,
 			painter: painter,
-			elements: elements
+			elements: elements,
+			clock: clock
 		});
 	});
-
 });
+
+
