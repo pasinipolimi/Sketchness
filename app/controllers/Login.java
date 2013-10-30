@@ -1,12 +1,16 @@
 package controllers;
 
+import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
 
+import com.feth.play.module.pa.user.AuthUser;
+import models.User;
 import play.Logger;
 import play.data.Form;
 import play.i18n.Messages;
 import play.libs.Akka;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 import providers.MyUsernamePasswordAuthProvider;
 import providers.MyUsernamePasswordAuthProvider.MyLogin;
@@ -18,6 +22,15 @@ import java.util.concurrent.TimeUnit;
 public class Login extends Controller {
 
     public static boolean actorActive = false;
+
+    /**
+     * Retrive the user from the session
+     */
+    public static User getLocalUser(final Http.Session session) {
+        final AuthUser currentAuthUser = PlayAuthenticate.getUser(session);
+        final User localUser = User.findByAuthUserIdentity(currentAuthUser);
+        return localUser;
+    }
 
     public static Result login() {
 
@@ -48,12 +61,28 @@ public class Login extends Controller {
         com.feth.play.module.pa.controllers.Authenticate.noCache(response());
         final Form<MyLogin> filledForm = MyUsernamePasswordAuthProvider.LOGIN_FORM
                 .bindFromRequest();
+        String loggedMail;
+        final User localUser = getLocalUser(session());
+
+        if(localUser != null){
+
+            loggedMail = localUser.email;
+        }
+        else{
+            loggedMail = filledForm.field("email").value();
+        }
         if (filledForm.hasErrors()) {
             // User did not fill everything properly
             return badRequest(sketchness_login.render(filledForm));
         }
         else {
-            // Everything was filled
+            //if there is already someone logged with the same browser prevent the login
+            if(!loggedMail.equals(filledForm.field("email").value())){
+                flash(Application.FLASH_ERROR_KEY,
+                        Messages.get("error.userInBrowser"));
+                return badRequest(sketchness_login.render(filledForm));
+            }
+            // Everything was filled and no other users in session
             return UsernamePasswordAuthProvider.handleLogin(ctx());
         }
     }
