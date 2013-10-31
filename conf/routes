@@ -55,7 +55,7 @@ GET     /signupGuest           controllers.Signup.doSignupGuest
 
 GET     /sket                           controllers.Application.index
 GET     /restricted                 controllers.Application.restricted
-GET     /assets/javascript/routes.js    controllers.Application.jsRoutes
+GET     /assets/javascripts/routes.js    controllers.Application.jsRoutes
 
 GET     /profile                    controllers.Application.profile
 
