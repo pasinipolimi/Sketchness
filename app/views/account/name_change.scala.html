@@ -5,23 +5,31 @@
 
 @main2(Messages("playauthenticate.change.name.title")) {
 
-<h1>@Messages("playauthenticate.change.name.title")</h1>
+<!--    <h1>@Messages("playauthenticate.change.name.title")</h1>    -->
 <p>
 
 
-        @helper.form(action = routes.Account.doChangeNickname()) {
 
+        <form action="@routes.Account.doChangeNickname()" method="POST" style="padding-top:160px;padding-left:135px">
             @if(changeForm.hasGlobalErrors) {
                 <p class="error">
                     <span class="label label-important">@changeForm.globalError.message</span>
                 </p>
             }
-            <fieldset>
-                @helper.inputText(changeForm("nickname"))
 
-            </fieldset>
-            <input type="submit" value="@Messages("playauthenticate.change.name.cta")" class="btn btn-primary">
-        }
+
+                <div id="left-form" class="div-left-form">
+                    <div id="nickname-container" class="div-input-signup">
+                        @inputText(
+                        changeForm("nickname"),
+                        'placeholder -> "Nickname"
+                        )
+                    </div>
+                </div>
+
+            <input type="submit" id="submit-ok" class="signup-submit" value="" style="margin-top:102px;margin-left:70px" >
+
+        </form>
 
 </p>
 }

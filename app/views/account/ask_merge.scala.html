@@ -9,10 +9,9 @@
 
 @main2(Messages("playauthenticate.merge.accounts.title")) {
 
-	<h1>@Messages("playauthenticate.merge.accounts.title")</h1>
+	<h1 style="padding-top:20px;padding-left:75px">@Messages("playauthenticate.link.account.title")>@Messages("playauthenticate.merge.accounts.title")</h1>
 	<p>
-	@form(routes.Account.doMerge) {
-
+    <form action="@routes.Account.doMerge" method="POST" style="padding-top:100px;padding-left:135px">
             @if(acceptForm.hasGlobalErrors) { 
                 <p class="error">
 		            <span class="label label-important">@acceptForm.globalError.message</span>
@@ -30,6 +29,6 @@
         )
            
 		<input type="submit" value="@Messages("playauthenticate.merge.accounts.ok")" class="btn btn-primary">
-	}
+	</form>
 	</p>
 }

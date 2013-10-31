@@ -9,27 +9,31 @@
 
 @main2(Messages("playauthenticate.link.account.title")) {
 
-	<h1>@Messages("playauthenticate.link.account.title")</h1>
-	<p>
-	@form(routes.Account.doLink) {
-	   
-            @if(acceptForm.hasGlobalErrors) { 
-                <p class="error">
-		            <span class="label label-important">@acceptForm.globalError.message</span>
-		        </p>
-            }
-	   
-	   @inputRadioGroup(
-            acceptForm("accept"),
-            options = Seq(
-            	"true"-> Messages("playauthenticate.link.account.true"),
-            	"false"->Messages("playauthenticate.link.account.false")
-            ),
-            '_label -> label,
-            '_showConstraints -> false
-        )
-           
-		<input type="submit" value="@Messages("playauthenticate.link.account.ok")" class="btn btn-primary"> 
-	}
-	</p>
+        
+        <h1 style="padding-top:20px;padding-left:75px">@Messages("playauthenticate.link.account.title")</h1>
+        <p>
+
+        <form action="@routes.Account.doLink" method="POST" style="padding-top:100px;padding-left:135px">
+                @if(acceptForm.hasGlobalErrors) {
+                    <p class="error">
+                        <span class="label label-important">@acceptForm.globalError.message</span>
+                    </p>
+                }
+
+               @inputRadioGroup(
+                    acceptForm("accept"),
+                    options = Seq(
+                        "true"-> Messages("playauthenticate.link.account.true"),
+                        "false"->Messages("playauthenticate.link.account.false")
+                    ),
+                    '_label -> label,
+                    '_showConstraints -> false
+                )
+
+                <input type="submit" value="@Messages("playauthenticate.link.account.ok")" class="btn btn-primary">
+
+
+        </form>
+        </p>
+
 }

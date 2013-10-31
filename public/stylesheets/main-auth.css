@@ -97,6 +97,7 @@ div#logo-container {
     padding: 3px 5px;
     margin-left: 80px;
 	margin-top: 30px;
+	width: 62%;
 	font-family: 'ITCAvantGardeGothicStdBook';
 }
 
@@ -216,6 +217,16 @@ input[type=submit]#submit-signup  {
  	margin-top:40px;
 }
 
+input[type=submit]#submit-ok  {
+	background-color: transparent;
+	background: url('../images/UI/endUnpressed.png') center no-repeat ;
+ 	height: 90px;
+ 	width: 340px;
+ 	border: none;
+ 	margin-top:40px;
+}
+
+
 /* Login style */
 
 #login-form{
@@ -242,7 +253,7 @@ input[type=submit]#submit-signup  {
 	margin-left:5px;
   	margin-top:8px;
   	padding:3px 5px;
-  	width: 100px;
+  	width: 125px;
 }
 
 /* Div password */
@@ -263,7 +274,7 @@ input[type=submit]#submit-signup  {
 	margin-left:5px;
   	margin-top:8px;
   	padding:3px 5px;
-  	width: 100px;
+  	width: 125px;
 }
 
 .play-as-guest-container{
@@ -322,4 +333,20 @@ div#preloaded-images {
    top: -9999px;
    height: 1px;
    width: 1px;
+}
+
+#ProfileContenitor{
+    width: 550px;
+    padding-left:266px;
+    padding-top:26px;
+}
+
+#ProfileImage{
+    margin-top: -25px;
+    margin-left: -30px;
+}
+
+#ProfileLink{
+    margin-top: -61px;
+    margin-left:80px;
 }
