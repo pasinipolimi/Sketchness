@@ -69,6 +69,7 @@ div#logo-container {
 	top : 0px;
 	width: 200px;
 	height:100px;
+	cursor: pointer;
 }
 
 .div-right-form {
