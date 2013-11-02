@@ -240,7 +240,7 @@ input[type=submit]#submit-ok  {
 	position: absolute;
 	height:35px ;
 	width:130px;
-	background-image:url('../images/login/username-label-normal.png');
+	background-image:url('../images/login/username.png');
 }
 
 /* Hide Label div */
@@ -251,7 +251,7 @@ input[type=submit]#submit-ok  {
 /* Center input text username in background-image*/
 .div-input-username-login #email {
 	margin-left:5px;
-  	margin-top:8px;
+  	margin-top:5px;
   	padding:3px 5px;
   	width: 125px;
 }
@@ -261,7 +261,7 @@ input[type=submit]#submit-ok  {
 	margin-left: 140px;
 	height:35px ;
 	width:130px;
-	background-image:url('../images/login/password-label-normal.png');
+	background-image:url('../images/login/password.png');
 }
 
 /* Hide Label div */
@@ -272,7 +272,7 @@ input[type=submit]#submit-ok  {
 /* Center input text password in background-image*/
 .div-input-password-login #password {
 	margin-left:5px;
-  	margin-top:8px;
+  	margin-top:5px;
   	padding:3px 5px;
   	width: 125px;
 }
@@ -281,6 +281,18 @@ input[type=submit]#submit-ok  {
 	position:absolute;
 	margin-left:470px;
   	margin-top:10px;
+	height: 68px;
+ 	width: 240px;
+	background-image:url('../images/login/guestUnpressed.png');
+}
+
+.play-as-guest-container:hover{
+	background-image:url('../images/login/guestHover.png');
+}
+
+.play-as-guest-container:active{
+	background-image:url('../images/login/guestPressed.png');
+	height: 60px;
 }
 
 .provider-container{
@@ -291,20 +303,55 @@ input[type=submit]#submit-ok  {
 
 .register-container{
 	position: absolute;
-	margin-left: 10px;
-	margin-top: 350px
+	margin-left: -64px;
+	margin-top: 370px;
+	background-color: transparent;
+	background: url('../images/login/registerUnpressed.png') center no-repeat ;
+ 	height: 90px;
+ 	width: 340px;
+ 	border: none;
+}
+
+.register-container:hover{
+	background: url('../images/login/registerHover.png') center no-repeat ;
+}
+
+.register-container:active{
+	background: url('../images/login/registerPressed.png') center no-repeat ;
+}
+
+#facebookLike {
+	width: 300px;
+	top: 530px;
+	position: absolute;
+	left: 20px;
+}
+
+#twitterFollow {
+	width: 300px;
+	top: 560px;
+	position: absolute;
+	left: 20px;
 }
 
 
 input[type=submit]#submit-login  {
 	position:absolute;
 	background-color: transparent;
-	background: url('../images/login/login-normal.png') center no-repeat ;
+	background: url('../images/login/loginUnpressed.png') center no-repeat ;
  	height: 80px;
  	width: 190px;
  	border: none;
  	margin-left: 10px;
- 	margin-top: 430px;
+ 	margin-top: 440px;
+}
+
+input[type=submit]#submit-login:hover {
+	background: url('../images/login/loginHover.png') center no-repeat ;
+}
+
+input[type=submit]#submit-login:active {
+	background: url('../images/login/loginPressed.png') center no-repeat ;
 }
 
 #login-form .help-inline{
