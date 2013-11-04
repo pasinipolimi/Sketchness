@@ -446,3 +446,53 @@ div#preloaded-images {
 	background-color: transparent;
 	background-image: url("../images/UI/backPressed.png");
 }
+
+#endInput {
+	background-color: transparent;
+	background-image: url("../images/UI/endUnpressed.png");
+	height:66px;
+	left:230px;
+	position:absolute;
+	border-width: 0px;
+
+    width: 181px;
+}
+
+#endInput:hover {
+	background-color: transparent;
+	background-image: url("../images/UI/endHover.png");
+}
+
+#endInput:active {
+	background-color: transparent;
+	background-image: url("../images/UI/endPressed.png");
+}
+
+
+div#text-contenitor-content {
+	background-image:url('../images/UI/pergamena.png');
+	background-repeat:no-repeat;
+	background-color: transparent;
+	position: relative;
+	margin-left: 160px;
+	height: 481px;
+
+}
+
+p#Profile-text{
+    padding-top:45px;
+    padding-left:50px
+}
+
+ul#ChangeNamePsw{
+    padding-top: 0px;
+    padding-left: 71px;
+    list-style-type: none;
+
+}
+
+#left-form-change {
+	position: absolute;
+	margin-left: 0px;
+	margin-top:	-83px;
+}
