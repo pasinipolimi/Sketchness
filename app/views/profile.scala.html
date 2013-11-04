@@ -16,7 +16,7 @@
                 }</i>
             }
             <br />
-            Your first name is @localUser.firstName and your last name is @localUser.lastName
+
             <br/>
             @defining(localUser.getProviders()) { providers =>
             @if(providers.size() > 0) {
@@ -35,11 +35,6 @@
             <br/>
             @currentAuth() { auth =>
             @Messages("playauthenticate.profile.logged") @_providerIcon(auth.getProvider())<br/>
-            @if(auth.expires() != -1){
-            @Messages("playauthenticate.profile.session", auth.getId(), Application.formatTimestamp(auth.expires()))
-            } else {
-            @Messages("playauthenticate.profile.session_endless", auth.getId())
-            }
             }
             <br/>
         <ul style="margin-top:20px;margin-left:110px">
