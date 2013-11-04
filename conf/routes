@@ -28,7 +28,7 @@ GET 	/retrieveTags					  controllers.Utilities.retrieveTags(imageID: String)
 
 
 
-GET		/newRenderer					  controllers.Utilities.newRenderer
+GET		/newRenderer					  controllers.Utilities.newRendererCall
 
 
 # Map static resources from the /public folder to the /assets URL path

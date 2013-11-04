@@ -14,7 +14,7 @@ import play.mvc.WebSocket;
 import utils.LoggerUtils;
 import utils.Renderer;
 import views.html.renderer;
-import views.html.newRender;
+//import views.html.newRenderer;
 
 /**
  *
@@ -65,7 +65,8 @@ public class Utilities {
         return ok(renderer.render(imageID));
     }
 
-    public static Result newRenderer(){
+    public static Result newRendererCall(){
+       // return ok(newRenderer.render());
         return ok();
     }
 
