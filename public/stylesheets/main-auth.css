@@ -403,3 +403,46 @@ div#preloaded-images {
 	background-color: #C69;
 	margin: -10px 0 0;
 }
+
+#tolobby {
+	background-color: transparent;
+	background-image: url("../images/UI/lobbyUnpressed.png");
+	height: 45px;
+	left: 600px;
+	position: absolute;
+	border-width: 0px;
+	top: 530px;
+	width: 185px;
+}
+
+#tolobby:hover {
+	background-color: transparent;
+	background-image: url("../images/UI/lobbyHover.png");
+}
+
+#tolobby:active {
+	background-color: transparent;
+	background-image: url("../images/UI/lobbyPressed.png");
+	height: 40px;
+}
+
+#back {
+	background-color: transparent;
+	background-image: url("../images/UI/backUnpressed.png");
+	height: 45px;
+	left: 600px;
+	position: absolute;
+	border-width: 0px;
+	top: 530px;
+	width: 160px;
+}
+
+#back:hover {
+	background-color: transparent;
+	background-image: url("../images/UI/backHover.png");
+}
+
+#back:active {
+	background-color: transparent;
+	background-image: url("../images/UI/backPressed.png");
+}
