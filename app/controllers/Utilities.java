@@ -14,6 +14,7 @@ import play.mvc.WebSocket;
 import utils.LoggerUtils;
 import utils.Renderer;
 import views.html.renderer;
+import views.html.newRender;
 
 /**
  *
@@ -63,6 +64,11 @@ public class Utilities {
     public static Result renderer(final String imageID) {
         return ok(renderer.render(imageID));
     }
+
+    public static Result newRenderer(){
+        return ok();
+    }
+
 
     public static WebSocket<JsonNode> rendererStream(final String imageID) {
         return new WebSocket<JsonNode>() {
