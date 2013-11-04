@@ -14,7 +14,7 @@ import play.mvc.WebSocket;
 import utils.LoggerUtils;
 import utils.Renderer;
 import views.html.renderer;
-//import views.html.newRenderer;
+import views.html.newRenderer;
 
 /**
  *
@@ -66,8 +66,8 @@ public class Utilities {
     }
 
     public static Result newRendererCall(){
-       // return ok(newRenderer.render());
-        return ok();
+        return ok(newRenderer.render());
+
     }
 
 

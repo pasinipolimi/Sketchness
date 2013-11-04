@@ -133,7 +133,6 @@ public class Application extends Controller {
         return redirect(routes.Application.index());
     }
 
-
     public static String formatTimestamp(final long t) {
         return new SimpleDateFormat("yyyy-dd-MM HH:mm:ss").format(new Date(t));
     }

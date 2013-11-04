@@ -1,8 +1,3 @@
-@(title: String, nav: String = "")(content: Html)
-
-@import be.objectify.deadbolt.java.views.html._
-@import be.objectify.deadbolt.core.utils.TemplateUtils._
-
 
 <!--
 To change this template, choose Tools | Templates
@@ -15,9 +10,9 @@ and open the template in the editor.
         <meta name="viewport" content="width=device-width">
         <title>Sketchness Stats</title>
        
-        <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/style.css">
-        <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/dropkick.css">
-        <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/blank_theme.css">
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/style.css")">
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/dropkick.css")">
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/blank_theme.css")">
 
     </head>
     <body class="cf">
@@ -115,17 +110,17 @@ and open the template in the editor.
         </div>
     </body>
     <script src="@routes.Application.jsRoutes" defer="defer"></script>
-    <script src="@routes.Assets.at(javascripts/renderer/jquery/jquery-1.10.2.min.js"></script>
-    <script src="@routes.Assets.at(javascripts/renderer/jquery/jquery.dropkick-min.js"></script>
-    <script src="@routes.Assets.at(javascripts/renderer/jquery/jAjax.js"></script>
-    <script src="@routes.Assets.at(javascripts/renderer/visualizzaImg.js"></script>
-    <script src="@routes.Assets.at(javascripts/renderer/popolaSelectionAjax.js"></script>
-    <script src="@routes.Assets.at(javascripts/renderer/visualizzaImgAjax.js"></script>
-    <script src="@routes.Assets.at(javascripts/renderer/visualizzaUTask.js"></script>
-    <script src="@routes.Assets.at(javascripts/renderer/nuovoTask.js"></script>
-    <script src="@routes.Assets.at(javascripts/renderer/nuovoUTask.js"></script>
-    <script src="@routes.Assets.at(javascripts/renderer/caricaStatistiche.js"></script>
-    <script src="@routes.Assets.at(javascripts/renderer/chiudiTask.js"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/jquery/jquery-1.10.2.min.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/jquery/jquery.dropkick-min.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/jquery/jAjax.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/visualizzaImg.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/popolaSelectionAjax.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/visualizzaImgAjax.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/visualizzaUTask.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/nuovoTask.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/nuovoUTask.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/caricaStatistiche.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/chiudiTask.js")"></script>
     <script>
         window.onload = function(){
             popolaSelectionAjax();
