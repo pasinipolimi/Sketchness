@@ -49,6 +49,7 @@ public class Game extends GameRoom {
     private Integer maxRound = Integer.parseInt(Play.application().configuration().getString("maxRounds"));  //Maximum number of rounds
     private Integer requiredPlayers = Integer.parseInt(Play.application().configuration().getString("requiredPlayers"));
     private Boolean fixGroundTruth = Boolean.parseBoolean(Play.application().configuration().getString("fixGroundTruth"));
+    private Integer groundTruthId = Integer.parseInt(Play.application().configuration().getString("groundTruthId"));
     //[TODO] Minimum tags that an image should have to avoid asking to the users for new tags
     private final Integer minimumTags = Integer.parseInt(Play.application().configuration().getString("minimumTags"));
     //Variables used to manage the rounds
@@ -97,7 +98,7 @@ public class Game extends GameRoom {
             //In the initial idea of single player, give 50 images to the 
             //player that is segmenting
             if (requiredPlayers == 1) {
-                maxRound = 50;
+                maxRound = 200;
             }
             missingPlayers = requiredPlayers;
             newGameSetup();
@@ -304,7 +305,7 @@ public class Game extends GameRoom {
                 if(!fixGroundTruth)
                     sessionId = CMS.openSession();
                 else
-                    sessionId = 9718;
+                    sessionId = groundTruthId;
                 disconnectedPlayers = 0;
                 roundNumber = 0;
                 gameStarted = true;
@@ -451,7 +452,7 @@ public class Game extends GameRoom {
                         if(!fixGroundTruth)
                             CMS.taskSetInitialization(priorityTaskHashSet, taskHashSet, roomChannel);
                         else
-                            CMS.fixGroundTruth(9718, priorityTaskHashSet, taskHashSet, roomChannel);
+                            CMS.fixGroundTruth(groundTruthId, priorityTaskHashSet, taskHashSet, roomChannel);
                         completed = true;
                     } catch (Exception ex) {
                         LoggerUtils.error("GAME", ex);

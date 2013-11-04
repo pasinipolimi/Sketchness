@@ -15,8 +15,8 @@ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time,
 			ERASER_SIZE: 25,
 			TRACKER_COLOR: 'red',
 			MIN_SEND_RATE: 50, // the min interval in ms between 2 send
-			DEFAULT_ROUND_TIME: 90,
-			DEFAULT_ASK_TIME: 20
+			DEFAULT_ROUND_TIME: 120,
+			DEFAULT_ASK_TIME: 30
 		};
 
 		// STATES
