@@ -116,9 +116,9 @@ playauthenticate.signup.name=Il tuo nome
 playauthenticate.signup.now=Registrati ora
 playauthenticate.signup.oauth=oppure registrati utilizzando uno dei seguenti Provider:
 
-playauthenticate.verify.account.title=Verifica dell'indirizzo mail richiesta
+playauthenticate.verify.account.title=Verifica l'indirizzo mail
 playauthenticate.verify.account.before=prima di impostare una password devi
-playauthenticate.verify.account.first=prima verifica il tuo indirizzo mail
+playauthenticate.verify.account.first=verificare il tuo indirizzo
 
 playauthenticate.change.password.title=Cambia la tua password qui
 playauthenticate.change.password.cta=Cambia la mia password
@@ -127,7 +127,7 @@ playauthenticate.change.name.title=Cambia il tuo nome qui
 playauthenticate.change.name.cta=Cambia il mio nome
 
 playauthenticate.merge.accounts.title=Collega gli account
-playauthenticate.merge.accounts.question=Vuoi collegare il tuo account attuale ({0}) con questo: {1}?
+playauthenticate.merge.accounts.question=Vuoi collegare il tuo account?
 playauthenticate.merge.accounts.true=Si
 playauthenticate.merge.accounts.false=No
 playauthenticate.merge.accounts.ok=OK

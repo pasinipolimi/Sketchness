@@ -9,11 +9,11 @@
 
 @main2(Messages("playauthenticate.link.account.title")) {
 
-        
-        <h1 style="padding-top:20px;padding-left:75px">@Messages("playauthenticate.link.account.title")</h1>
+    <div id="text-contenitor-content">
+       <!--  <h1 style="padding-top:20px;padding-left:75px">@Messages("playauthenticate.link.account.title")</h1>       -->
         <p>
 
-        <form action="@routes.Account.doLink" method="POST" style="padding-top:100px;padding-left:135px">
+        <form action="@routes.Account.doLink" method="POST" style="padding-top:50px;padding-left:80px">
                 @if(acceptForm.hasGlobalErrors) {
                     <p class="error">
                         <span class="label label-important">@acceptForm.globalError.message</span>
@@ -35,5 +35,12 @@
 
         </form>
         </p>
+
+    </div>
+
+
+    <div id="preloaded-images">
+        <img src="../assets/images/UI/pergamena.png" width="1" height="1" alt="pergamena" />
+    </div>
 
 }
