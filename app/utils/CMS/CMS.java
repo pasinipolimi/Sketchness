@@ -1,13 +1,26 @@
 package utils.CMS;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.node.ObjectNode;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import play.Logger;
@@ -330,6 +343,270 @@ public class CMS {
         }
         return tags;
     }
+
+    public static JSONArray retriveImageId(JsonNode jsonImages) throws JSONException{
+
+        JSONArray imageIds= new JSONArray();
+        JsonNode object;
+        JSONObject element;
+        int i=0;
+
+        while(i<jsonImages.size()){
+
+            element = new JSONObject();
+            element.remove("id");
+            object = jsonImages.get(i);
+            element.put("id", object.get("id").toString().substring(1, object.get("id").toString().length() - 1));
+            imageIds.put(i,element);
+            i++;
+        }
+        return imageIds;
+    }
+
+    public static JSONArray retriveTaskId(JsonNode jsonTask) throws JSONException{
+        JSONArray taskIds= new JSONArray();
+        JsonNode object;
+        JSONObject  element;
+        int i=0;
+
+        while(i<jsonTask.get("task").size()){
+            element = new JSONObject();
+            object = jsonTask.get("task").get(i);
+            element.put("id", object.get("id"));
+            element.put("taskType", object.get("taskType"));
+            taskIds.put(element);
+            i++;
+        }
+        return taskIds;
+    }
+
+    public static JSONArray retriveStats(JsonNode jsonImages) throws JSONException{
+        JSONArray values= new JSONArray();
+        JsonNode object;
+        JsonNode descObj;
+        JsonNode tagArr, segmentArr;
+        JSONObject element = new JSONObject();
+        int numTag=0;
+        int numSegment=0;
+        int i=0;
+
+        while(i<jsonImages.size()){
+            object = jsonImages.get(i);
+            if(object.has("descriptions")){
+                descObj=  object.get("descriptions");
+                if(descObj.has("availableTags")){
+                    tagArr = descObj.get("availableTags");
+                    numTag= numTag + tagArr.size();
+                }//if se descObject ha dei availableTags
+                if(descObj.has("segmentation")){
+                    segmentArr = descObj.get("segmentation");
+                    numSegment = numSegment + segmentArr.size();
+                }
+            }//if se c'è il campo description
+            i++;
+        }//fine while
+        element.append("numTag", numTag);
+        element.append("numSegment", numSegment);
+        values.put(element);
+
+        return values;
+    }
+
+    public static String retriveImgInfo(JsonNode jsonImages, String selected)throws JSONException{
+        JSONArray info= new JSONArray();
+        JsonReader jsonReader = new JsonReader();
+        JsonNode itemTag;
+        JsonNode object,object2, tagId;
+        JsonNode descObj;
+        JsonNode tagArr;
+        JSONObject element;
+        JSONArray tags = new JSONArray();
+        int i=0;
+        int j=0;
+        String tmpId, tmpTag;
+        JsonNode media = null;
+
+        while(i<jsonImages.size()){
+
+            object = jsonImages.get(i);
+            tmpId = object.get("id").toString();
+            tmpId = tmpId.substring(1, tmpId.length() -1);
+
+            if(tmpId.equals(selected)){
+                media = object.get("mediaLocator");
+
+
+                if(object.has("descriptions")){
+                    descObj=  object.get("descriptions");
+                    if(descObj.has("availableTags")){
+                        tagArr = descObj.get("availableTags");
+                        j=0;
+                        while(j<tagArr.size()){
+                            tagId = tagArr.get(j);
+                            tmpTag = tagId.get("id").toString();
+                            tmpTag = tmpTag.substring(1, tmpTag.length() - 1);
+                            itemTag = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/content/" + tmpTag + ".json");
+                            object2 = itemTag.get("itemAnnotations").get(0).get("value");
+                            element= new JSONObject();
+                            element.put("tag", object2);
+                            tags.put(element);
+                            j++;
+                        }//fine while
+                    }//if se descObject ha dei availableTags
+                }//if se c'è il campo description
+
+                break;
+            }
+            i++;
+        }
+
+        element= new JSONObject();
+
+        element.put("tags", tags);
+        element.put("medialocator", media);
+
+        info.put(element);
+
+
+        String result = info.toString();
+
+
+        return result;
+    }
+
+    public static String retriveTagInfo(JsonNode jsonTasks, String selected) throws JSONException{
+        JSONArray info= new JSONArray();
+        JsonNode object,object2;
+        JsonNode taskObj;
+        JSONObject element;
+        JSONArray uTasks = new JSONArray();
+        int i=0;
+        int j=0;
+        String tmpId;
+        JsonNode status = null;
+
+
+        object = jsonTasks.get("task");
+        while(i<object.size()){
+
+            object2 = object.get(i);
+            tmpId = object2.get("id").asText();
+
+
+            if(tmpId.equals(selected)){
+
+                status = object2.get("status");
+
+                if(object2.has("utask")){
+                    element= new JSONObject();
+                    element.put("utask", "full");
+                    taskObj=  object2.get("utask");
+
+                    while(j<taskObj.size()){
+                        element= new JSONObject();
+                        element.put("id", taskObj.get(j).get("id"));
+                        element.put("taskType", taskObj.get(j).get("taskType"));
+                        element.put("status", taskObj.get(j).get("status"));
+
+                        uTasks.put(element);
+
+                        j++;
+                    }
+
+                    break;
+
+                }//if se c'è il campo uTask
+                else{
+                    element= new JSONObject();
+                    element.put("utask", "empty");
+                    uTasks.put(element);
+                }
+            }
+            i++;
+        }
+
+        element= new JSONObject();
+
+        element.put("status", status);
+        element.put("uTasks", uTasks);
+
+        info.put(element);
+
+
+
+
+        String result = info.toString();
+
+        return result;
+    }
+
+
+    public static void closeTask2(String taskID) throws IOException{
+
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpPut httpPut = new HttpPut(rootUrl + "/wsmc/task/" + taskID +"/close");
+        CloseableHttpResponse response1 = httpclient.execute(httpPut);
+        HttpEntity entity1 = response1.getEntity();
+
+
+        EntityUtils.consume(entity1);
+        response1.close();
+
+
+
+    }
+
+    public static String addTask(String taskType, String selectedImg) throws IOException, JSONException{
+        String newId = new String();
+
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(rootUrl + "/wsmc/task.json");
+        List <NameValuePair> nvps = new ArrayList<NameValuePair>();
+        nvps.add(new BasicNameValuePair("taskType", taskType));
+        nvps.add(new BasicNameValuePair("image", selectedImg));
+        httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+        CloseableHttpResponse response1 = httpclient.execute(httpPost);
+
+        HttpEntity entity1 = response1.getEntity();
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(entity1.getContent()));
+        String inputLine = in.readLine();
+        JSONObject obj = new JSONObject(inputLine);
+
+        newId = obj.getString("nid");
+
+        EntityUtils.consume(entity1);
+        response1.close();
+
+        return newId;
+    }
+
+    public static String addUTask(String taskType, String selectionTask) throws IOException, JSONException{
+        String newId = new String();
+
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(rootUrl + "/wsmc/utask.json");
+        List <NameValuePair> nvps = new ArrayList<NameValuePair>();
+        nvps.add(new BasicNameValuePair("taskType", taskType));
+        nvps.add(new BasicNameValuePair("task", selectionTask));
+        httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+        CloseableHttpResponse response1 = httpclient.execute(httpPost);
+
+        HttpEntity entity1 = response1.getEntity();
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(entity1.getContent()));
+        String inputLine = in.readLine();
+        JSONObject obj = new JSONObject(inputLine);
+
+        newId = obj.getString("nid");
+
+        EntityUtils.consume(entity1);
+        response1.close();
+
+        return newId;
+    }
+
+
 
     /*
      * Returns a tag based on a particular choice policy

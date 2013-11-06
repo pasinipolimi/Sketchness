@@ -20,20 +20,21 @@ function  visualizzaUTask(){
         onComplete: function(xhr,status){
             if(xhr.readyState === 4){
                 if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
-                    var stringaTask= xhr.getResponseHeader("uTask");
-                    var aperto = xhr.getResponseHeader("aperto");
+                    var result = JSON.parse(xhr.responseText)[0];
+                    var stringaTask= result.uTasks;
+                    var aperto = result.status.substring(1, result.status.length -1);
                     
-                    if(stringaTask.length === 4){
+                    if(stringaTask[0].utask === "empty"){
                         $("#noMicrotaskLabel").show();
                     }
                     else{
                         $("#noMicrotaskLabel").hide();
-                        var uTask = JSON.parse(stringaTask);
-                        $.each(uTask, function(i,d){
+
+                        $.each(stringaTask, function(i,d){
                             var tableRow = "<tr class='tableRow'>"+
-                                                "<td>"+ d.id.toString() +"</td>"+
-                                                "<td>"+ d.taskType.toString() +"</td>"+
-                                                "<td>"+ d.status.toString() +"</td>"+
+                                                "<td>"+ d.id.substring(1,d.id.length-1) +"</td>"+
+                                                "<td>"+ d.taskType.substring(1,d.taskType.length-1) +"</td>"+
+                                                "<td>"+ d.status.substring(1,d.status.length-1) +"</td>"+
                                             "</tr>";
                             uTaskContainer.append(tableRow);
                         });

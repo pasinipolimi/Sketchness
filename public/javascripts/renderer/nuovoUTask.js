@@ -18,7 +18,7 @@ function nuovoUTask(){
             $("#creanuovoUTask").dropkick();
             if(xhr.readyState === 4){
                 if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
-                   var newTaskId = xhr.getResponseHeader("newTaskId").toString();
+                   var newTaskId = xhr.responseText;
                    alert("New micro task code is: " + newTaskId);
                    visualizzaUTask();
                 }

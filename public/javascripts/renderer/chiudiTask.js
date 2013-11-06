@@ -14,7 +14,9 @@ function chiudiTask(){
         onComplete: function(xhr,status){
             if(xhr.readyState === 4){
                 if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
-                   alert("Task closed succesfully");
+                   if(xhr.responseText === "ok"){
+                        alert("Task closed succesfully");
+                   }
                    visualizzaUTask();
                 }
                 else{

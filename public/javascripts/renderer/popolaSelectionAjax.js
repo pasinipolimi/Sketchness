@@ -7,7 +7,8 @@ function popolaSelectionAjax(){
         ,selectionTask = $("#selectionTask")
         ,option
         ,ids
-        ,tasks;
+        ,tasks
+        ,result;
     
     selection.append("<option value='' selected disabled>Select Image</option>");
     selectionTask.append("<option value='' selected disabled>Select Task</option>");
@@ -18,20 +19,24 @@ function popolaSelectionAjax(){
         onComplete: function(xhr,status){
             if(xhr.readyState === 4){
                 if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
-                    ids = JSON.parse(xhr.getResponseHeader("opzioni"));
+                    result = JSON.parse(xhr.responseText);
+                    ids = result.image[0];
                     $.each(ids, function(i,d){
-                        option=document.createElement("option");
-                        option.value = option.text = d.id.toString();
-                        selection.append(option);
+                            option=document.createElement("option");
+                            option.value = option.text = d.id;
+                            selection.append(option);
+
                     });
                     
-                    if(xhr.getResponseHeader("check") === "1"){
-                        tasks = JSON.parse(xhr.getResponseHeader("opzioniTask"));
+                    if(result.check == "true"){
+                        tasks = result.task[0];
                         $.each(tasks, function(i,d){
-                            option=document.createElement("option");
-                            option.value= d.id.toString();
-                            option.text= d.id.toString() + " ( " + d.taskType.toString() + " )";
-                            selectionTask.append(option);
+
+                                option=document.createElement("option");
+                                option.value= d.id.substring(1, d.id.length -1);
+                                option.text= d.id.substring(1, d.id.length -1) + " ( " + d.taskType.substring(1, d.taskType.length -1) + " )";
+                                selectionTask.append(option);
+
                         });
                     }
                     $('.customSelect').dropkick("refresh");

@@ -140,9 +140,12 @@ playauthenticate.link.account.ok=OK
 
 # play-authenticate: Signup folder translations
 
-playauthenticate.verify.email.title=Verifica il tuo indirizzo mail
-playauthenticate.verify.email.requirement=Prima di poter usare Sketchness, devi verificare il tuo indirizzo mail.
-playauthenticate.verify.email.cta=Una mail e' stata inviata al tuo indirizzo. Per favore clicca sul link contenuto per completare la registrazione.
+playauthenticate.verify.email.title=Verifica la tua mail
+playauthenticate.verify.email.requirement1=Prima di poter usare Sketchness,
+playauthenticate.verify.email.requirement2=devi verificare il tuo indirizzo mail.
+playauthenticate.verify.email.cta1=Una mail e' stata inviata al tuo indirizzo.
+playauthenticate.verify.email.cta2=Per favore clicca sul link contenuto
+playauthenticate.verify.email.cta3=per completare la registrazione.
 
 playauthenticate.password.reset.title=Cambia password
 playauthenticate.password.reset.cta=Cambia la mia password

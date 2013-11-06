@@ -111,6 +111,7 @@ public class Application extends Controller {
 
     public static Result doLogout(){
 
+
         final User localUser = getLocalUser(session());
         String username = localUser.name;
 

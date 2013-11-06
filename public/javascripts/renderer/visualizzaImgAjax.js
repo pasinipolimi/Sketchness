@@ -16,15 +16,16 @@ function visualizzaImgAjax(){
         onComplete: function(xhr,status){
             if(xhr.readyState === 4){
                 if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
-                    var tags = JSON.parse(xhr.getResponseHeader("listaTag"));
+                    var result = JSON.parse(xhr.responseText);
+                    var tags = result[0].tags
                     
                     if(tags.length === 0)
                         tagContainer.append("<span>No tags available</span>");
                     $.each(tags,function(i,d){
-                        tagContainer.append("<div class='listItem'>"+ d.tag.toString() +"</div>");
+                        tagContainer.append("<div class='listItem'>"+ d.tag.substring(1, d.tag.length -1) +"</div>");
                     });
                     
-                    url += xhr.getResponseHeader("medialocator");
+                    url += result[0].medialocator.substring(1, result[0].medialocator.length -1)
                     $("#immagine").attr("src",url);
                     $("#imageId").text(idselected);
                     $("#dati").show();

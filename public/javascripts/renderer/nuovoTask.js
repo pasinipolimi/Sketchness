@@ -19,7 +19,7 @@ function nuovoTask(){
         onComplete: function(xhr,status){
             if(xhr.readyState === 4){
                 if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
-                   var newTaskId = xhr.getResponseHeader("newTaskId").toString();
+                   var newTaskId = xhr.responseText;
                    alert("New task code is: " + newTaskId);
                    popolaSelectionAjax();
                 }

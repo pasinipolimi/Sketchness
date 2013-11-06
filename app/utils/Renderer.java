@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -21,12 +22,16 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import play.Logger;
 import play.Play;
 
 import play.libs.Akka;
 import play.libs.F;
 import play.libs.Json;
+import play.mvc.Http;
 import play.mvc.WebSocket;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -222,6 +227,141 @@ public class Renderer extends UntypedActor {
             getSender().tell(null, this.getSelf());
         }
     }
+
+    public static String webToolAjax()throws JSONException {
+
+
+        JsonReader jsonReader = new JsonReader();
+        JsonNode itemImage = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image.json");
+        JsonNode itemTask = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/task.json");
+        JSONArray images = new JSONArray();
+        boolean check= false;
+        if(!itemImage.isNull()){
+            images = CMS.retriveImageId(itemImage);
+        }
+        else{
+            JSONObject element = new JSONObject();
+            element.append("id", "No photos in the system");
+            images.put(element);
+        }
+        JSONArray tasks = new JSONArray();
+        if(itemTask != null){
+            tasks = CMS.retriveTaskId(itemTask);
+            check = true;
+        }
+        else{
+            JSONObject element = new JSONObject();
+            element.append("id", "No Tasks in the system");
+            element.append("taskType", "");
+            tasks.put(element);
+        }
+
+        JSONObject result = new JSONObject();
+
+        result.append("image", images);
+        result.append("task", tasks);
+        result.append("check", check);
+
+        String options = result.toString();
+
+
+        return options;
+
+    }
+
+    public static String loadStats() throws JSONException{
+
+        JsonReader jsonReader = new JsonReader();
+        JsonNode itemImage = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image.json");
+        int last;
+        String totImg = Integer.toString(itemImage.size());
+
+        JSONArray stats = CMS.retriveStats(itemImage);
+
+        String tmp = stats.getJSONObject(0).getString("numTag");
+        tmp = tmp.substring(1);
+        last = tmp.length() -1;
+        tmp = tmp.substring(0, last);
+
+        int numTag= Integer.parseInt(tmp);
+        tmp = stats.getJSONObject(0).getString("numSegment");
+        tmp =tmp.substring(1);
+        last = tmp.length() -1;
+        tmp = tmp.substring(0, last);
+        int numSegment= Integer.parseInt(tmp);
+
+        float mediaTagImg = (float) numTag/itemImage.size();
+        float mediaSegImg = (float) numSegment/itemImage.size();
+
+        String mediaTag = Float.toString(mediaTagImg);
+        String numeroSegmenti = Integer.toString(numSegment);
+        String mediaSegPerImg = Float.toString(mediaSegImg);
+
+
+
+        JSONObject result = new JSONObject();
+
+        result.append("totImg", totImg);
+        result.append("mediaTag", mediaTag);
+        result.append("numSegment", numeroSegmenti);
+        result.append("mediaSegImg", mediaSegPerImg);
+
+        String sendStats = result.toString();
+
+        return sendStats;
+    }
+
+    public static String webInfoAjax(String selection)throws JSONException{
+
+        JsonReader jsonReader = new JsonReader();
+        JsonNode itemImage = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image.json");
+
+        String info = CMS.retriveImgInfo(itemImage,selection);
+
+
+
+        return info;
+    }
+
+    public static String webInfoTask(String selection)throws JSONException{
+
+        JsonReader jsonReader = new JsonReader();
+        JsonNode itemTask = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/task.json");
+
+        String info = CMS.retriveTagInfo(itemTask,selection);
+
+
+
+        return info;
+    }
+
+    public static void closeTask(String selection) throws IOException{
+        CMS.closeTask2(selection);
+    }
+
+    public static String addTask(String taskType, String selectedImg)throws IOException, JSONException{
+
+
+
+        String info = CMS.addTask(taskType, selectedImg);
+
+
+
+        return info;
+    }
+
+    public static String addUTask(String taskType, String selectionTask)throws IOException, JSONException{
+
+
+
+        String info = CMS.addUTask(taskType, selectionTask);
+
+
+
+        return info;
+    }
+
+
 }
 
 class MaskParameters {

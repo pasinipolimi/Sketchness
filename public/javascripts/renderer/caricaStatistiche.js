@@ -8,11 +8,13 @@ function caricaStatistiche(){
     onComplete: function(xhr,status){
       if(xhr.readyState === 4){
           if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
-             var totImg = xhr.getResponseHeader("totImg");
-             var mediaTag = xhr.getResponseHeader("mediaTag");
-             var numSegment = xhr.getResponseHeader("numSegment");
-             var mediaSegmenti = xhr.getResponseHeader("mediaSegImg");
-             
+
+             var result = JSON.parse(xhr.responseText);
+             var totImg = result.totImg[0];
+             var mediaTag = result.mediaTag[0];
+             var numSegment = result.numSegment[0];
+             var mediaSegmenti = result.mediaSegImg[0];
+
              $("#statisticheSistema").show();
              $("#numeroFoto").text(totImg);
              $("#mediaTagFoto").text(Number(mediaTag).toFixed(2));
