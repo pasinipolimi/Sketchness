@@ -4,8 +4,15 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.pattern.Patterns;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
+import java.awt.image.FilteredImageSource;
+import java.awt.image.ImageFilter;
+import java.awt.image.ImageProducer;
+import java.awt.image.RGBImageFilter;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
@@ -80,7 +87,7 @@ public class Renderer extends UntypedActor {
         if (message instanceof Join) {
             start((Join) message);
         } else if (message instanceof JsonNode) {
-            aggregate(true, ((JsonNode) message).get("tag").asText());
+            aggregate(true, ((JsonNode) message).get("tag").asText(),false);
         } else if (message instanceof MaskParameters) {
             createMask(((MaskParameters) message).getId(), ((MaskParameters) message).getTag());
         }
@@ -114,7 +121,7 @@ public class Renderer extends UntypedActor {
         channel.write(availableTags);
     }
 
-    private Image aggregate(boolean networkOn, String requiredTag) throws IOException, Exception {
+    private Image aggregate(boolean networkOn, String requiredTag, boolean transparentMask) throws IOException, Exception {
         JavascriptColor[] colors = JavascriptColor.values();
         JsonReader jsonReader = new JsonReader();
         JsonNode imageSegments = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image/" + imageId + ".json");
@@ -163,12 +170,48 @@ public class Renderer extends UntypedActor {
                     toAggregateString[i] = toAggregate.get(i);
                 }
                 toReturn = ContourAggregator.simpleAggregator(toAggregateString, imWidth, imHeight);
+                if(transparentMask) {
+                    BufferedImage transparent = imageToBufferedImage(toReturn);
+                    toReturn = makeColorTransparent(transparent, Color.WHITE);
+                }
             } else if (!networkOn) {
                 Logger.error("[AGGREGATOR] Cannot retrieve mask for image " + imageId + " with tag " + requiredTag);
                 throw new Exception("[AGGREGATOR] Tag " + requiredTag + " not found for image " + imageId);
             }
         }
         return toReturn;
+    }
+    
+    private static BufferedImage imageToBufferedImage(Image image) {
+
+    	BufferedImage bufferedImage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+    	Graphics2D g2 = bufferedImage.createGraphics();
+    	g2.drawImage(image, 0, 0, null);
+    	g2.dispose();
+
+    	return bufferedImage;
+
+    }
+    
+     public static Image makeColorTransparent(BufferedImage im, final Color color) {
+    	ImageFilter filter = new RGBImageFilter() {
+
+    		// the color we are looking for... Alpha bits are set to opaque
+    		public int markerRGB = color.getRGB() | 0xFF000000;
+
+    		public final int filterRGB(int x, int y, int rgb) {
+    			if ((rgb | 0xFF000000) == markerRGB) {
+    				// Mark the alpha bits as zero - transparent
+    				return 0x00FFFFFF & rgb;
+    			} else {
+    				// nothing to do
+    				return rgb;
+    			}
+    		}
+    	};
+
+    	ImageProducer ip = new FilteredImageSource(im.getSource(), filter);
+    	return Toolkit.getDefaultToolkit().createImage(ip);
     }
 
     public static synchronized File retrieveMask(String ImageID, String tag) throws Exception {
@@ -214,9 +257,9 @@ public class Renderer extends UntypedActor {
         Logger.info("[AGGREGATOR] Retrieving aggregated mask for image " + id);
         try {
             imageId = id;
-            Image retrieved = aggregate(false, tag);
+            Image retrieved = aggregate(false, tag, true);
             if (null != retrieved) {
-                BufferedImage bufIm = (BufferedImage) retrieved;
+                BufferedImage bufIm = imageToBufferedImage(retrieved);
                 ImageIO.write((RenderedImage) bufIm, "png", new File(imageId + ".png"));
                 File toReturn = new File(imageId + ".png");
                 getSender().tell(toReturn, this.getSelf());
