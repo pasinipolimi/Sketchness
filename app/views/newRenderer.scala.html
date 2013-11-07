@@ -101,16 +101,36 @@ and open the template in the editor.
                     <button type="submit" onclick="caricaStatistiche()" title="Update Stats" id="updateStatistics">Update Stats</button>
                 </div>
             </div>
-            <hr class="separator"></hr>
+
             <div class="immagini span12">
                 <div id="img" class="left">
                     <img id="immagine" style="max-height:100%; max-width:100%" />
                 </div>
-            </div>   
+            </div>
+
+            <hr class="separator"></hr>
+            <div id="drawArea" class="span12">
+                <div id="viewport">
+				<span id="canvaswindows">
+					<canvas id="draws" width="420" height="350" style="position:absolute;z-index:3;"></canvas>
+					<!-- CANVAS USED TO SHOW THE IMAGE-->
+					<canvas id="task" width="420" height="350"></canvas>
+				</span>
+                <span id="canvasmask">
+					<canvas id="mask" width="420" height="350" style="position:absolute;z-index:3;"></canvas>
+				</span>
+                </div>
+            </div>
         </div>
+
+
+
+
+
     </body>
     <script src="@routes.Application.jsRoutes" defer="defer"></script>
     <script src="@routes.Assets.at("javascripts/renderer/jquery/jquery-1.10.2.min.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/loadMask.js")"></script>
     <script src="@routes.Assets.at("javascripts/renderer/jquery/jquery.dropkick-min.js")"></script>
     <script src="@routes.Assets.at("javascripts/renderer/jquery/jAjax.js")"></script>
     <script src="@routes.Assets.at("javascripts/renderer/visualizzaImg.js")"></script>

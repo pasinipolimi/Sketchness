@@ -83,80 +83,51 @@ public class Utilities extends Controller {
 
     public static Result webToolAjaxCall()throws JSONException {
         String result = Renderer.webToolAjax();
-
-
-
         return ok(result);
     }
 
     public static Result loadStatsCall()throws JSONException {
         String result = Renderer.loadStats();
-
-
-
-
         return ok(result);
     }
 
     public static Result webInfoAjaxCall()throws JSONException {
-
-
         String selectedImg = request().getHeader("selected");
         String result = Renderer.webInfoAjax(selectedImg);
-
-
-
         return ok(result);
     }
 
     public static Result webTaskAjaxCall()throws JSONException {
-
-
         String selectedTask = request().getHeader("selected");
         String result = Renderer.webInfoTask(selectedTask);
-
-
-
         return ok(result);
     }
 
     public static Result closeTaskCall()throws IOException {
-
-
         String selectionTask = request().getHeader("selectionTask");
         Renderer.closeTask(selectionTask);
-
         String result="ok";
-
         return ok(result);
     }
 
     public static Result addTaskCall() throws IOException, JSONException {
-
         String newId;
         String taskType = request().getHeader("taskType");
         String selectionimg = request().getHeader("selectionimg");
         newId = Renderer.addTask(taskType,selectionimg);
-
-
-
         return ok(newId);
     }
 
     public static Result addUTaskCall() throws IOException, JSONException {
-
         String newId;
         String taskType = request().getHeader("taskType");
         String selectionTask = request().getHeader("selectionTask");
         newId = Renderer.addUTask(taskType,selectionTask);
-
-
-
         return ok(newId);
     }
 
-
     public static WebSocket<JsonNode> rendererStream(final String imageID)throws JSONException {
+
         return new WebSocket<JsonNode>() {
             @Override
             public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
@@ -168,4 +139,5 @@ public class Utilities extends Controller {
             }
         };
     }
+
 }
