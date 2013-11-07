@@ -39,6 +39,7 @@ function visualizzaImgAjax(){
                     tagContainer.parent().show();
                     $("#img").hide();
                     $("#ImgAttivattiva").val(idselected);
+                    $("#mediaLocator").val(url);
                     taskImage.onload = function() {
                                                     taskContext.save();
                                                     taskContext.beginPath();

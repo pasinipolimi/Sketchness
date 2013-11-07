@@ -1,6 +1,6 @@
 var rendererGlobalVar = (function() {
 	var socket;
-	var taskImage;
+
 
     return {
 		setSocket: function(val) {
@@ -8,13 +8,7 @@ var rendererGlobalVar = (function() {
 		},
 		getSocket: function() {
             return socket;
-        },
-		setTaskImage: function(val) {
-            taskImage=val;
-        },
-		getTaskImage: function(val) {
-			return taskImage;
-		}
+        }
     };
 })();
 
@@ -22,8 +16,10 @@ var rendererGlobalVar = (function() {
 function loadMask(tag) {
 
 var selectionimg = $("#ImgAttivattiva").val();
+var mediaimg = $("#mediaLocator").val();
+var taskImage=new Image();
+taskImage.src=mediaimg;
 
-alert("working on image: "+ selectionimg + " and on tag: " +tag);
 
 
 try {
@@ -72,13 +68,14 @@ try {
         maskImage = new Image();
         maskImage.src = "/retrieveMask?imageID="+selectionimg+"&tag="+tag;
 
+
         maskImage.onload = function() {
         maskContext.save();
         maskContext.beginPath();
 
         maskCanvas.width=taskCanvas.width;
         maskCanvas.height=taskCanvas.height;
-        maskContext.drawImage(rendererGlobalVar.getTaskImage(),0,0,maskCanvas.width,maskCanvas.height);
+        maskContext.drawImage(taskImage,0,0,maskCanvas.width,maskCanvas.height);
         maskContext.drawImage(maskImage,0,0,maskCanvas.width,maskCanvas.height);
         maskContext.restore();
         };
@@ -111,13 +108,7 @@ var gameloop = (function(){
     var m = JSON.parse(e.data);
     switch(m.type)
     	{
-    	    case "task"://Send the current task (image + tag) to the player
-                                        tagging=false;
-                                        taskImage=null;
-                                        taskImage=new Image();
-                                        taskImage.src=m.image;
-                                        rendererGlobalVar.setTaskImage(taskImage);
-               break;
+
 
     		case "trace":
     							ctx.lineJoin = "round";
