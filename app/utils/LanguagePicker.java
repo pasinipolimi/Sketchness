@@ -26,7 +26,7 @@ public class LanguagePicker {
                 platformLang = "undefined";
                 langCode = 0;
         }
-        
+        //[TODO] HAS TO BE FIXED, NOW IT'S FIXED TO ITA
         setLanguage("en");
     }
 

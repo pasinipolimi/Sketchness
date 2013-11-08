@@ -17,11 +17,11 @@ object ApplicationBuild extends Build {
 		"gov.nih.imagej" % "imagej" % "1.47",
 		"net.sf.json-lib" % "json-lib" % "2.4" classifier "jdk15",
 
-
     //For play-authenticate
     "be.objectify"  %%  "deadbolt-java"     % "2.1-RC2",
     // Comment this for local development of the Play Authentication core
     "com.feth"      %%  "play-authenticate" % "0.3.4-SNAPSHOT",
+    "postgresql"    %   "postgresql"        % "9.1-901-1.jdbc4"
     "postgresql"    %   "postgresql"        % "9.1-901-1.jdbc4"
 	)
 
@@ -46,6 +46,7 @@ object ApplicationBuild extends Build {
 		Resource("popUpCSS","public/stylesheets/lib/popUp.css","https://raw.github.com/Toddish/Popup/master/assets/css/popup.css",false),
 		Resource("jScrollPane CSS", "public/stylesheets/lib/jquery.jscrollpane.css", "http://jscrollpane.kelvinluck.com/style/jquery.jscrollpane.css", false),
 		Resource("Bootstrap CSS", "public/stylesheets/lib/bootstrap.css", "https://raw.github.com/twbs/bootstrap/master/dist/css/bootstrap.css", false),
+		Resource("Bootstrap Js", "public/javascripts/lib/bootstrap.min.js","https://raw.github.com/twbs/bootstrap/master/dist/js/bootstrap.min.js",false),
 		Resource("Website Images", "public/images", "http://54.228.220.100/images.zip",true)
 	)
 
@@ -82,16 +83,16 @@ object ApplicationBuild extends Build {
 		sketchnessCleanResourcesTask,
 		resolvers += "MavenHub repository" at "http://repo1.maven.org/maven2",
 
-      //For play-authenticate
-      resolvers += Resolver.url("Objectify Play Repository (release)", url("http://schaloner.github.com/releases/"))(Resolver.ivyStylePatterns),
-      resolvers += Resolver.url("Objectify Play Repository (snapshot)", url("http://schaloner.github.com/snapshots/"))(Resolver.ivyStylePatterns),
 
-      resolvers += Resolver.url("play-easymail (release)", url("http://joscha.github.com/play-easymail/repo/releases/"))(Resolver.ivyStylePatterns),
-      resolvers += Resolver.url("play-easymail (snapshot)", url("http://joscha.github.com/play-easymail/repo/snapshots/"))(Resolver.ivyStylePatterns),
+    //For play-authenticate
+    resolvers += Resolver.url("Objectify Play Repository (release)", url("http://schaloner.github.com/releases/"))(Resolver.ivyStylePatterns),
+    resolvers += Resolver.url("Objectify Play Repository (snapshot)", url("http://schaloner.github.com/snapshots/"))(Resolver.ivyStylePatterns),
 
-      resolvers += Resolver.url("play-authenticate (release)", url("http://joscha.github.com/play-authenticate/repo/releases/"))(Resolver.ivyStylePatterns),
-      resolvers += Resolver.url("play-authenticate (snapshot)", url("http://joscha.github.com/play-authenticate/repo/snapshots/"))(Resolver.ivyStylePatterns)
+    resolvers += Resolver.url("play-easymail (release)", url("http://joscha.github.com/play-easymail/repo/releases/"))(Resolver.ivyStylePatterns),
+    resolvers += Resolver.url("play-easymail (snapshot)", url("http://joscha.github.com/play-easymail/repo/snapshots/"))(Resolver.ivyStylePatterns),
 
+    resolvers += Resolver.url("play-authenticate (release)", url("http://joscha.github.com/play-authenticate/repo/releases/"))(Resolver.ivyStylePatterns),
+    resolvers += Resolver.url("play-authenticate (snapshot)", url("http://joscha.github.com/play-authenticate/repo/snapshots/"))(Resolver.ivyStylePatterns)
   )
 
 }

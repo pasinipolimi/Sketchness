@@ -116,19 +116,7 @@ table.gameList th, table.gameList td {
 	padding: 11px 3px;
 }
 
-#facebookLike {
-	width: 300px;
-	top: 530px;
-	position: absolute;
-	left: 20px;
-}
 
-#twitterFollow {
-	width: 300px;
-	top: 560px;
-	position: absolute;
-	left: 20px;
-}
 
 #scoreBaloon {
 	background-image: url("../images/UI/scoreBaloon.png");
@@ -236,6 +224,12 @@ table.gameList th, table.gameList td {
 	top: 520px;
 	border-width: 0px;
 	width: 181px;
+}
+
+.dropdown-menu {
+	position: relative;
+	background-color: #C69;
+	margin: -10px 0 0;
 }
 
 #login:hover {

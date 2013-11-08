@@ -1,11 +1,13 @@
 package controllers;
 
-import be.objectify.deadbolt.java.actions.Group;
+import models.User;
 import be.objectify.deadbolt.java.actions.Restrict;
+import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.SubjectPresent;
+
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.user.AuthUser;
-import models.User;
+
 import play.data.Form;
 import play.data.format.Formats.NonEmpty;
 import play.data.validation.Constraints.MinLength;
@@ -15,7 +17,6 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import providers.MyUsernamePasswordAuthProvider;
 import providers.MyUsernamePasswordAuthUser;
-
 import views.html.account.*;
 
 import static play.data.Form.form;
@@ -88,7 +89,7 @@ public class Account extends Controller {
     }
 
     private static final Form<Accept> ACCEPT_FORM = form(Accept.class);
-    private static final Form<PasswordChange> PASSWORD_CHANGE_FORM = form(Account.PasswordChange.class);
+    private static final Form<Account.PasswordChange> PASSWORD_CHANGE_FORM = form(Account.PasswordChange.class);
     private static final Form<NicknameChange> NICKNAME_CHANGE_FORM = form(Account.NicknameChange.class);
 
     @SubjectPresent
@@ -134,7 +135,7 @@ public class Account extends Controller {
     @Restrict(@Group(Application.USER_ROLE))
     public static Result doChangePassword() {
         com.feth.play.module.pa.controllers.Authenticate.noCache(response());
-        final Form<PasswordChange> filledForm = PASSWORD_CHANGE_FORM
+        final Form<Account.PasswordChange> filledForm = PASSWORD_CHANGE_FORM
                 .bindFromRequest();
         if (filledForm.hasErrors()) {
             // User did not select whether to link or not link

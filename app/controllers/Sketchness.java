@@ -9,7 +9,6 @@ import play.mvc.*;
 
 import org.codehaus.jackson.JsonNode;
 
-import views.html.index;
 import views.html.gameRoom;
 import views.html.lobby;
 import views.html.leaderboard;
@@ -17,9 +16,6 @@ import views.html.leaderboard;
 import models.game.GameFactory;
 import models.lobby.LobbyFactory;
 import play.i18n.Lang;
-import static play.mvc.Controller.flash;
-import static play.mvc.Controller.request;
-import static play.mvc.Results.ok;
 import utils.LanguagePicker;
 import utils.LoggerUtils;
 import utils.gamemanager.GameManager;
@@ -65,6 +61,11 @@ public class Sketchness extends Controller {
         }
         Integer nPlayers = Integer.valueOf(numero);
 
+
+
+
+
+
         if (LanguagePicker.retrieveIsoCode().equals("")) {
             LanguagePicker.setLanguage(Lang.preferred(request().acceptLanguages()));
         }
@@ -86,15 +87,21 @@ public class Sketchness extends Controller {
         return ok(gameRoom.render(localUser, roomName,nPlayers));
     }
 
+    public static WebSocket<JsonNode> chatStream(final String roomName) {
+
+        final User localUser = getLocalUser(session());
+        final String username = localUser.name;
+
 
     /**
-     * Handle the chat websocket.
+     * Handle the lobby websocket.
      */
     @Restrict(@Group(Application.USER_ROLE))
     public static WebSocket<JsonNode> lobbyStream() {
 
         final User localUser = getLocalUser(session());
         final String username = localUser.name;
+
         return new WebSocket<JsonNode>() {
             // Called when the Websocket Handshake is done.
             @Override
@@ -166,6 +173,32 @@ public class Sketchness extends Controller {
             flash("points" + ((x / 2) + 1), splitted[x + 1]);
         }
         return ok(leaderboard.render(username, null));
+    }
+
+
+    public static Result checkOnline() throws Exception{
+        models.IsOnline.checkOnline();
+
+        return ok();
+    }
+
+
+    public static Result keepOnline(){
+
+        final User localUser = getLocalUser(session());
+        String username = localUser.name;
+        models.IsOnline.keepOnline(username);
+
+        return ok();
+    }
+
+    public static Result putOffline(){
+
+        final User localUser = getLocalUser(session());
+        String username = localUser.name;
+        models.IsOnline.putOffline(username);
+
+        return ok();
     }
 
 

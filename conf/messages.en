@@ -28,8 +28,6 @@ skiptask=has passed the round.
 notag=has not chosen what to draw.
 sketchertagging=WAITING the SKETCHER to choose the object.
 warnTag=Please insert a new tag for the image.
-wordInput=Write here the word...
-
 
 
 
@@ -65,6 +63,8 @@ error.email=Valid email required
 error.pattern=Must satisfy {0}
 error.mailExists=It is possible you already made a registration. In order to connect your account you have to login and click on "Link_Provider" button from the "Profile" menu.
 error.userLogged=This account is already logged it.
+error.userInBrowser=There is already a user logged from this browser
+error.pageNotFound= Page not found
 
 ### --- play-authenticate START
 
@@ -93,9 +93,9 @@ playauthenticate.change_name.temporary=The name you chose already exists. We ass
 playauthenticate.password.signup.error.passwords_not_same=Passwords do not match.
 playauthenticate.password.login.unknown_user_or_pw=Unknown user or password or User already signed in.
 
-playauthenticate.password.verify_signup.subject=PlayAuthenticate: Complete your signup
-playauthenticate.password.verify_email.subject=PlayAuthenticate: Confirm your e-mail address
-playauthenticate.password.reset_email.subject=PlayAuthenticate: How to reset your password
+playauthenticate.password.verify_signup.subject=Sketchness: Complete your signup
+playauthenticate.password.verify_email.subject=Sketchness: Confirm your e-mail address
+playauthenticate.password.reset_email.subject=Sketchness: How to reset your password
 
 # play-authenticate: Additional translations
 
@@ -113,7 +113,7 @@ playauthenticate.signup.name=Your name
 playauthenticate.signup.now=Sign up now
 playauthenticate.signup.oauth=or sign up using one of the following providers:
 
-playauthenticate.verify.account.title=E-mail verification required
+playauthenticate.verify.account.title=E-mail verification
 playauthenticate.verify.account.before=Before setting a password, you need to
 playauthenticate.verify.account.first=first verify your e-mail address
 
@@ -124,7 +124,7 @@ playauthenticate.change.name.title=Change your name here
 playauthenticate.change.name.cta=Change my name
 
 playauthenticate.merge.accounts.title=Merge accounts
-playauthenticate.merge.accounts.question=Do you want to merge your current account ({0}) with this account: {1}?
+playauthenticate.merge.accounts.question=Do you want to merge your accounts?
 playauthenticate.merge.accounts.true=Yes, merge these two accounts
 playauthenticate.merge.accounts.false=No, exit my current session and log in as a new user
 playauthenticate.merge.accounts.ok=OK
@@ -138,8 +138,12 @@ playauthenticate.link.account.ok=OK
 # play-authenticate: Signup folder translations
 
 playauthenticate.verify.email.title=Verify your e-mail
-playauthenticate.verify.email.requirement=Before you can use PlayAuthenticate, you first need to verify your e-mail address.
-playauthenticate.verify.email.cta=An e-mail has been sent to the registered address. Please follow the embedded link to activate your account.
+playauthenticate.verify.email.requirement1=Before you can use Sketchness,
+playauthenticate.verify.email.requirement2=you first need to verify your e-mail address.
+playauthenticate.verify.email.cta1=An e-mail has been sent to the registered address.
+playauthenticate.verify.email.cta2=Please follow the embedded
+playauthenticate.verify.email.cta3=ink to activate your account.
+
 
 playauthenticate.password.reset.title=Reset password
 playauthenticate.password.reset.cta=Reset my password
@@ -148,7 +152,7 @@ playauthenticate.password.forgot.title=Forgot password
 playauthenticate.password.forgot.cta=Send reset instructions
 
 playauthenticate.oauth.access.denied.title=OAuth access denied
-playauthenticate.oauth.access.denied.explanation=If you want to use PlayAuthenticate with OAuth, you must accept the connection.
+playauthenticate.oauth.access.denied.explanation=If you want to use Sketchness with OAuth, you must accept the connection.
 playauthenticate.oauth.access.denied.alternative=If you rather not like to do this, you can also
 playauthenticate.oauth.access.denied.alternative.cta=sign up with a username and password instead
 
@@ -167,7 +171,7 @@ playauthenticate.navigation.home=Home
 playauthenticate.navigation.restricted=Restricted page
 playauthenticate.navigation.signup=Sign up
 playauthenticate.navigation.lobby=Lobby
-playauthenticate.navigation.gameRoom=Gameroom
+playauthenticate.navigation.chatRoom=ChatRoom
 
 
 # play-authenticate: Handler

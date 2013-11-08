@@ -1,8 +1,9 @@
 package providers;
 
+import providers.MyUsernamePasswordAuthProvider.MySignup;
+
 import com.feth.play.module.pa.providers.password.UsernamePasswordAuthUser;
 import com.feth.play.module.pa.user.NameIdentity;
-import providers.MyUsernamePasswordAuthProvider.MySignup;
 
 public class MyUsernamePasswordAuthUser extends UsernamePasswordAuthUser
         implements NameIdentity {

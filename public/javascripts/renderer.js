@@ -1,6 +1,7 @@
 var rendererGlobalVar = (function() {
     var imageId; //shared variable available only inside your module
 	var socket;
+	var taskImage;
 
     return {
         setImageId: function(val) {
@@ -14,7 +15,13 @@ var rendererGlobalVar = (function() {
 		},
 		getSocket: function() {
             return socket;
-        }
+        },
+		setTaskImage: function(val) {
+            taskImage=val;
+        },
+		getTaskImage: function(val) {
+			return taskImage;
+		}
     };
 })();
 
@@ -150,6 +157,7 @@ var gameloop = (function(){
                                             taskContext.drawImage(taskImage,0,0,m.width,m.height);
                                             taskContext.restore();
                             };
+							rendererGlobalVar.setTaskImage(taskImage);
  			break;
 		
 		case "trace":
@@ -236,6 +244,7 @@ function tagSelected() {
 			y=0;
 			maskCanvas.width=taskCanvas.width;
 			maskCanvas.height=taskCanvas.height;
+			maskContext.drawImage(rendererGlobalVar.getTaskImage(),0,0,maskCanvas.width,maskCanvas.height);
 			maskContext.drawImage(maskImage,0,0,maskCanvas.width,maskCanvas.height);
 			maskContext.restore();
 		};

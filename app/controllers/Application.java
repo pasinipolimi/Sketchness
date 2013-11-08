@@ -1,30 +1,34 @@
 package controllers;
 
-import be.objectify.deadbolt.java.actions.Group;
-import be.objectify.deadbolt.java.actions.Restrict;
-import com.feth.play.module.pa.PlayAuthenticate;
-import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
-import com.feth.play.module.pa.user.AuthUser;
-import models.User;
-import play.Routes;
-import play.data.Form;
-import play.db.DB;
-import play.mvc.Controller;
-import play.mvc.Http.Session;
-import play.mvc.Result;
-import providers.MyUsernamePasswordAuthProvider;
-import providers.MyUsernamePasswordAuthProvider.MyLogin;
-import providers.MyUsernamePasswordAuthProvider.MySignup;
-import views.html.contenuto;
-import views.html.login;
-import views.html.profile;
-import views.html.signup;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
+import models.User;
+import play.Routes;
+import play.data.Form;
+import play.db.DB;
+import play.i18n.Messages;
+import play.libs.Akka;
+import play.mvc.*;
+import play.mvc.Http.Session;
+import play.mvc.Result;
+import providers.MyUsernamePasswordAuthProvider;
+import providers.MyUsernamePasswordAuthProvider.MyLogin;
+import providers.MyUsernamePasswordAuthProvider.MySignup;
+
+import scala.concurrent.ExecutionContext;
+import scala.concurrent.duration.Duration;
+import views.html.*;
+import be.objectify.deadbolt.java.actions.Group;
+import be.objectify.deadbolt.java.actions.Restrict;
+
+import com.feth.play.module.pa.PlayAuthenticate;
+import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
+import com.feth.play.module.pa.user.AuthUser;
 
 public class Application extends Controller {
 
@@ -107,6 +111,7 @@ public class Application extends Controller {
 
     public static Result doLogout(){
 
+
         final User localUser = getLocalUser(session());
         String username = localUser.name;
 
@@ -128,8 +133,6 @@ public class Application extends Controller {
 
         return redirect(routes.Application.index());
     }
-
-
 
     public static String formatTimestamp(final long t) {
         return new SimpleDateFormat("yyyy-dd-MM HH:mm:ss").format(new Date(t));

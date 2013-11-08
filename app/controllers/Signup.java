@@ -1,25 +1,38 @@
 package controllers;
 
-import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
+import com.feth.play.module.pa.user.AuthUser;
 import models.TokenAction;
 import models.TokenAction.Type;
 import models.User;
 import play.data.Form;
 import play.i18n.Messages;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 import providers.MyLoginUsernamePasswordAuthUser;
 import providers.MyUsernamePasswordAuthProvider;
 import providers.MyUsernamePasswordAuthProvider.MyIdentity;
 import providers.MyUsernamePasswordAuthUser;
 import views.html.account.signup.*;
+
+import com.feth.play.module.pa.PlayAuthenticate;
+import views.html.sketchness_login;
 import views.html.sketchness_signup;
 import views.html.sketchness_signupGuest;
 
 import static play.data.Form.form;
 
 public class Signup extends Controller {
+
+    /**
+     * Retrive the user from the session
+     */
+    public static User getLocalUser(final Http.Session session) {
+        final AuthUser currentAuthUser = PlayAuthenticate.getUser(session);
+        final User localUser = User.findByAuthUserIdentity(currentAuthUser);
+        return localUser;
+    }
 
     public static class PasswordReset extends Account.PasswordChange {
 
@@ -58,11 +71,31 @@ public class Signup extends Controller {
     public static Result doSignup() {
         com.feth.play.module.pa.controllers.Authenticate.noCache(response());
         final Form<MyUsernamePasswordAuthProvider.MySignup> filledForm = MyUsernamePasswordAuthProvider.SIGNUP_FORM.bindFromRequest();
+
+        String loggedUser;
+        String newUser = filledForm.field("name").value();
+        final User localUser = getLocalUser(session());
+
+        if(localUser != null){
+
+            loggedUser = localUser.name;
+        }
+        else{
+            loggedUser = filledForm.field("name").value();
+        }
+
         if (filledForm.hasErrors()) {
             // User did not fill everything properly
             System.out.println(filledForm.toString());
             return badRequest(sketchness_signup.render(filledForm));
         } else {
+
+            //if there is already someone logged with the same browser prevent the registration of a guest
+            if((!loggedUser.equals(newUser))&&newUser.equals("Guest")){
+                flash(Application.FLASH_ERROR_KEY,
+                        Messages.get("error.userInBrowser"));
+                return badRequest(sketchness_login.render(filledForm));
+            }
             // Everything was filled
             return UsernamePasswordAuthProvider.handleSignup(ctx());
         }

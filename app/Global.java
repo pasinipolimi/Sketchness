@@ -6,13 +6,30 @@ import controllers.routes;
 import models.SecurityRole;
 import play.Application;
 import play.GlobalSettings;
+import play.i18n.Messages;
 import play.mvc.Call;
+import play.*;
+import play.mvc.*;
+import views.html.pageNotFound;
+import providers.MyUsernamePasswordAuthProvider;
+import views.html.sketchness_login;
+
+import static play.mvc.Results.*;
+
 
 import java.util.Arrays;
 
 public class Global extends GlobalSettings {
 
-	public void onStart(Application app) {
+    @Override
+    public Result onHandlerNotFound(Http.RequestHeader request) {
+        return Results.notFound(
+                pageNotFound.render()
+        );
+    }
+
+    public void onStart(Application app) {
+
 		PlayAuthenticate.setResolver(new Resolver() {
 
 			@Override
@@ -65,12 +82,13 @@ public class Global extends GlobalSettings {
                   return routes.Signup.existsMail();
                 }
 
-
-
-
 				return super.onException(e);
 			}
-		});
+
+
+
+
+        });
 
 		initialData();
 	}

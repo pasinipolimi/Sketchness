@@ -2,8 +2,12 @@ package models;
 
 import play.db.DB;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
+import java.sql.Timestamp;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,7 +23,7 @@ public class IsOnline {
     public static void checkOnline(){
 
         Date ora;
-        Date utilDate;
+        java.util.Date utilDate;
 
         try{
             Connection connection = DB.getConnection();
@@ -64,8 +68,8 @@ public class IsOnline {
 
     public static void keepOnline(String name){
 
-        Date utilDate = new Date();
-        Timestamp active = new Timestamp(utilDate.getTime());
+        java.util.Date utilDate = new java.util.Date();
+        Timestamp active = new java.sql.Timestamp(utilDate.getTime());
 
         try{
             Connection connection = DB.getConnection();

@@ -158,8 +158,9 @@ public class MyUsernamePasswordAuthProvider
         // return SignupResult.USER_CREATED;
         // then the user gets logged in directly
         String tmp = newUser.name;
-        tmp = tmp.substring(0,5);
-
+        if(tmp.length()>4){
+            tmp = tmp.substring(0,5);
+        }
         if(tmp.equals("Guest")){
             return SignupResult.USER_CREATED;
         }
@@ -210,7 +211,7 @@ public class MyUsernamePasswordAuthProvider
                                 catch(SQLException ex){
                                 }
 
-                                return LoginResult.USER_LOGGED_IN;
+                            return LoginResult.USER_LOGGED_IN;
                             }
                             else{
 
