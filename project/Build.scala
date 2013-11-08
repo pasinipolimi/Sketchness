@@ -22,7 +22,6 @@ object ApplicationBuild extends Build {
     // Comment this for local development of the Play Authentication core
     "com.feth"      %%  "play-authenticate" % "0.3.4-SNAPSHOT",
     "postgresql"    %   "postgresql"        % "9.1-901-1.jdbc4"
-    "postgresql"    %   "postgresql"        % "9.1-901-1.jdbc4"
 	)
 
 	/** Defines a new setting key that contains the resources list */
