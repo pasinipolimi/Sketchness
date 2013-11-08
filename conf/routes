@@ -3,28 +3,25 @@
 # ~~~~
 
 # Home page
-GET      /                                 controllers.Sketchness.index()
+GET     /                                 controllers.Sketchness.index()
 #GET     /lobby                            controllers.Sketchness.lobby(username: String ?= null)
-#GET     /room                             controllers.Sketchness.chatRoom(username: String ?= null, room: String ?= "default", nPlayers: Integer ?= 3)
-#GET     /room/chatStream                  controllers.Sketchness.chatStream(username: String ?= null,room: String ?= "default")
+#GET     /room                             controllers.Sketchness.gameRoom(username: String ?= null, room: String ?= "default", nPlayers: Integer ?= 3)
 #GET     /room/lobbyStream                 controllers.Sketchness.lobbyStream(username: String ?= null)
-#GET     /room/paintStream                 controllers.Sketchness.paintStream(username: String ?= null,room: String ?= "default")
+#GET     /room/gameStream                  controllers.Sketchness.gameStream(username: String ?= null,room: String ?= "default", nPlayers: Integer ?= 3)
 GET     /leaderboard                      controllers.Sketchness.leaderboard(username: String ?= null, result: String ?= null)
 
 #new routes
 GET     /lobby                            controllers.Sketchness.lobby
-#GET     /room                             controllers.Sketchness.chatRoom(room: String ?= "default", nPlayers: Integer ?= 3)
-GET     /room/chatStream                  controllers.Sketchness.chatStream(room: String ?= "default")
-GET     /room/paintStream                 controllers.Sketchness.paintStream(room: String ?= "default")
+POST     /room                            controllers.Sketchness.gameRoom
+GET     /room/gameStream                  controllers.Sketchness.gameStream(room: String ?= "default", nPlayers: Integer ?= 3)
 GET     /room/lobbyStream                 controllers.Sketchness.lobbyStream
 
-POST     /room                             controllers.Sketchness.chatRoom
+GET     /renderer                         controllers.Utilities.renderer(imageID: String)
+GET     /rendererStream                   controllers.Utilities.rendererStream(imageID: String)
+GET     /retrieveMask                     controllers.Utilities.retrieveMask(imageID: String, tag: String)
+GET     /retrieveImages                   controllers.Utilities.retrieveImages()
+GET     /retrieveTags                     controllers.Utilities.retrieveTags(imageID: String)
 
-GET		/renderer						  controllers.Utilities.renderer(imageID: String)
-GET		/rendererStream					  controllers.Utilities.rendererStream(imageID: String)
-GET 	/retrieveMask					  controllers.Utilities.retrieveMask(imageID: String, tag: String)
-GET 	/retrieveImages					  controllers.Utilities.retrieveImages()
-GET 	/retrieveTags					  controllers.Utilities.retrieveTags(imageID: String)
 
 
 
@@ -109,6 +106,4 @@ POST    /accounts/merge             controllers.Account.doMerge
 GET     /login/password/forgot     controllers.Signup.forgotPassword(email: String ?= "")
 POST    /login/password/forgot     controllers.Signup.doForgotPassword
 
-GET     /checkOnline               controllers.Sketchness.checkOnline
 GET     /keepOnline                controllers.Sketchness.keepOnline
-GET     /putOffline                controllers.Sketchness.putOffline
