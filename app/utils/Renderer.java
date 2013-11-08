@@ -250,86 +250,95 @@ public class Renderer extends UntypedActor {
         }
     }
 
+    /**
+     * Return the list of images' ids and task' ids in the system
+     *
+     * @return          the list of images' ids and task' ids in the system
+     * @throws JSONException
+     */
     public static String webToolAjax()throws JSONException {
-
-
         JsonReader jsonReader = new JsonReader();
         JsonNode itemImage = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image.json");
         JsonNode itemTask = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/task.json");
         JSONArray images = new JSONArray();
+        JSONArray tasks = new JSONArray();
+        JSONObject element;
+        JSONObject result = new JSONObject();
         boolean check= false;
+
         if(!itemImage.isNull()){
             images = CMS.retriveImageId(itemImage);
         }
         else{
-            JSONObject element = new JSONObject();
+            element = new JSONObject();
             element.append("id", "No photos in the system");
             images.put(element);
         }
-        JSONArray tasks = new JSONArray();
         if(itemTask != null){
             tasks = CMS.retriveTaskId(itemTask);
             check = true;
         }
         else{
-            JSONObject element = new JSONObject();
+            element = new JSONObject();
             element.append("id", "No Tasks in the system");
             element.append("taskType", "");
             tasks.put(element);
         }
-
-        JSONObject result = new JSONObject();
 
         result.append("image", images);
         result.append("task", tasks);
         result.append("check", check);
-
         String options = result.toString();
-
-
         return options;
-
     }
+
+    /**
+     * Return the list of task' ids in the system (called only after
+     * a new task is added in order to refresh the list of tasks without
+     * refreshing the list of images
+     *
+     * @return              the list of task' ids in the system
+     * @throws JSONException
+     */
     public static String taskSelection()throws JSONException {
 
-
         JsonReader jsonReader = new JsonReader();
-
         JsonNode itemTask = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/task.json");
-
         boolean check= false;
-
         JSONArray tasks = new JSONArray();
+        JSONObject element;
+        JSONObject result = new JSONObject();
+
         if(itemTask != null){
             tasks = CMS.retriveTaskId(itemTask);
             check = true;
         }
         else{
-            JSONObject element = new JSONObject();
+            element = new JSONObject();
             element.append("id", "No Tasks in the system");
             element.append("taskType", "");
             tasks.put(element);
         }
 
-        JSONObject result = new JSONObject();
-
         result.append("task", tasks);
         result.append("check", check);
-
         String options = result.toString();
-
-
         return options;
-
     }
 
+    /**
+     * Load the stats of the system
+     * @return              Number of images, avg of tags per image, number of segments, avg of segments for image
+     * @throws JSONException
+     */
     public static String loadStats() throws JSONException{
 
         JsonReader jsonReader = new JsonReader();
         JsonNode itemImage = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image.json");
         int last;
-        String totImg = Integer.toString(itemImage.size());
+        JSONObject result = new JSONObject();
 
+        String totImg = Integer.toString(itemImage.size());
         JSONArray stats = CMS.retriveStats(itemImage);
 
         String tmp = stats.getJSONObject(0).getString("numTag");
@@ -351,20 +360,21 @@ public class Renderer extends UntypedActor {
         String numeroSegmenti = Integer.toString(numSegment);
         String mediaSegPerImg = Float.toString(mediaSegImg);
 
-
-
-        JSONObject result = new JSONObject();
-
         result.append("totImg", totImg);
         result.append("mediaTag", mediaTag);
         result.append("numSegment", numeroSegmenti);
         result.append("mediaSegImg", mediaSegPerImg);
-
         String sendStats = result.toString();
-
         return sendStats;
     }
 
+    /**
+     * Load more details of a particular image such as the medialocator, the tags and the number of anotations
+     *
+     * @param selection     the image that I want to analyse
+     * @return              the info that i retrived
+     * @throws JSONException
+     */
     public static String webInfoAjax(String selection)throws JSONException{
 
         JsonReader jsonReader = new JsonReader();
@@ -372,46 +382,63 @@ public class Renderer extends UntypedActor {
 
         String info = CMS.retriveImgInfo(item);
 
-
-
         return info;
     }
 
+    /**
+     * Load the list of microTask of a particular task
+     *
+     * @param selection     the task that I want to analyse
+     * @return              the info that i retrived
+     * @throws JSONException
+     */
     public static String webInfoTask(String selection)throws JSONException{
 
         JsonReader jsonReader = new JsonReader();
         JsonNode itemTask = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/task.json");
 
-        String info = CMS.retriveTagInfo(itemTask,selection);
-
-
+        String info = CMS.retriveTaskInfo(itemTask,selection);
 
         return info;
     }
 
+    /**
+     * Close a particular task
+     *
+     * @param selection     the task that i want to close
+     * @throws IOException
+     */
     public static void closeTask(String selection) throws IOException{
         CMS.closeTask2(selection);
     }
 
+    /**
+     * Add a new task to a specific image
+     *
+     * @param taskType          the type of the task that I want to add (segmentation or tagging)
+     * @param selectedImg       the image connected to the new task
+     * @return                  the id of the new task
+     * @throws IOException
+     * @throws JSONException
+     */
     public static String addTask(String taskType, String selectedImg)throws IOException, JSONException{
 
-
-
         String info = CMS.addTask(taskType, selectedImg);
-
-
-
         return info;
     }
 
+    /**
+     * Add a new microTask to a specific task
+     *
+     * @param taskType          the type of the microTask that I want to add (segmentation or tagging)
+     * @param selectionTask     the task connected to the new microTask
+     * @return                  the id of the new microTask
+     * @throws IOException
+     * @throws JSONException
+     */
     public static String addUTask(String taskType, String selectionTask)throws IOException, JSONException{
 
-
-
         String info = CMS.addUTask(taskType, selectionTask);
-
-
-
         return info;
     }
 

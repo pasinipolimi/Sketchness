@@ -344,15 +344,21 @@ public class CMS {
         return tags;
     }
 
+    /**
+     * Retrive all the images' Ids that are stored in the system
+     *
+     * @param jsonImages    JsonNode off all images
+     * @return              JSONArray with all the ids
+     * @throws JSONException
+     */
     public static JSONArray retriveImageId(JsonNode jsonImages) throws JSONException{
 
         JSONArray imageIds= new JSONArray();
         JsonNode object;
         JSONObject element;
+
         int i=0;
-
         while(i<jsonImages.size()){
-
             element = new JSONObject();
             element.remove("id");
             object = jsonImages.get(i);
@@ -363,7 +369,15 @@ public class CMS {
         return imageIds;
     }
 
+    /**
+     * Retrive all the tasks' ids that are stored in the system
+     *
+     * @param jsonTask  JsonNode off all tasks
+     * @return          JSONArray with all the ids
+     * @throws JSONException
+     */
     public static JSONArray retriveTaskId(JsonNode jsonTask) throws JSONException{
+
         JSONArray taskIds= new JSONArray();
         JsonNode object;
         JSONObject  element;
@@ -380,11 +394,19 @@ public class CMS {
         return taskIds;
     }
 
+    /**
+     * Retrive the stats of the system
+     *
+     * @param jsonImages    JsonNode off all images
+     * @return              JSONArray with number of tags and number of segmentation
+     * @throws JSONException
+     */
     public static JSONArray retriveStats(JsonNode jsonImages) throws JSONException{
+
         JSONArray values= new JSONArray();
         JsonNode object;
         JsonNode descObj;
-        JsonNode tagArr, segmentArr;
+        JsonNode tmpArr;
         JSONObject element = new JSONObject();
         int numTag=0;
         int numSegment=0;
@@ -395,12 +417,12 @@ public class CMS {
             if(object.has("descriptions")){
                 descObj=  object.get("descriptions");
                 if(descObj.has("availableTags")){
-                    tagArr = descObj.get("availableTags");
-                    numTag= numTag + tagArr.size();
+                    tmpArr = descObj.get("availableTags");
+                    numTag= numTag + tmpArr.size();
                 }//if se descObject ha dei availableTags
                 if(descObj.has("segmentation")){
-                    segmentArr = descObj.get("segmentation");
-                    numSegment = numSegment + segmentArr.size();
+                    tmpArr = descObj.get("segmentation");
+                    numSegment = numSegment + tmpArr.size();
                 }
             }//if se c'è il campo description
             i++;
@@ -408,11 +430,18 @@ public class CMS {
         element.append("numTag", numTag);
         element.append("numSegment", numSegment);
         values.put(element);
-
         return values;
     }
 
+    /**
+     * Retrive info for a specific image
+     *
+     * @param jsonImages    The specific image which I'm evalueting
+     * @return              It's tags, medialocator and number of annotation
+     * @throws JSONException
+     */
     public static String retriveImgInfo(JsonNode jsonImages)throws JSONException{
+
         JSONArray info= new JSONArray();
         JsonReader jsonReader = new JsonReader();
         JsonNode itemTag;
@@ -425,8 +454,8 @@ public class CMS {
         int j=0;
         String tmpTag;
         JsonNode media;
-        media = jsonImages.get("mediaLocator");
 
+        media = jsonImages.get("mediaLocator");
         if(jsonImages.has("descriptions")){
             descObj=  jsonImages.get("descriptions");
             if(descObj.has("availableTags")){
@@ -457,7 +486,15 @@ public class CMS {
         return result;
     }
 
-    public static String retriveTagInfo(JsonNode jsonTasks, String selected) throws JSONException{
+    /**
+     * Retrive the microTask of a particular task
+     * @param jsonTasks     JsonNode of all the Tasks
+     * @param selected      id of the task that I want
+     * @return              the status of the task (open or closed) and the information of its microtask (id, type, status)
+     * @throws JSONException
+     */
+    public static String retriveTaskInfo(JsonNode jsonTasks, String selected) throws JSONException{
+
         JSONArray info= new JSONArray();
         JsonNode object,object2;
         JsonNode taskObj;
@@ -468,36 +505,25 @@ public class CMS {
         String tmpId;
         JsonNode status = null;
 
-
         object = jsonTasks.get("task");
         while(i<object.size()){
-
             object2 = object.get(i);
             tmpId = object2.get("id").asText();
-
-
             if(tmpId.equals(selected)){
-
                 status = object2.get("status");
-
                 if(object2.has("utask")){
                     element= new JSONObject();
                     element.put("utask", "full");
                     taskObj=  object2.get("utask");
-
                     while(j<taskObj.size()){
                         element= new JSONObject();
                         element.put("id", taskObj.get(j).get("id"));
                         element.put("taskType", taskObj.get(j).get("taskType"));
                         element.put("status", taskObj.get(j).get("status"));
-
                         uTasks.put(element);
-
                         j++;
                     }
-
                     break;
-
                 }//if se c'è il campo uTask
                 else{
                     element= new JSONObject();
@@ -507,65 +533,73 @@ public class CMS {
             }
             i++;
         }
-
         element= new JSONObject();
-
         element.put("status", status);
         element.put("uTasks", uTasks);
-
         info.put(element);
-
-
-
-
         String result = info.toString();
-
         return result;
     }
 
-
+    /**
+     * Close a particulr task
+     *
+     * @param taskID        id of the task that I want to close
+     * @throws IOException
+     */
     public static void closeTask2(String taskID) throws IOException{
-
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpPut httpPut = new HttpPut(rootUrl + "/wsmc/task/" + taskID +"/close");
         CloseableHttpResponse response1 = httpclient.execute(httpPut);
+
         HttpEntity entity1 = response1.getEntity();
-
-
         EntityUtils.consume(entity1);
         response1.close();
-
-
-
     }
 
+    /**
+     * Open a new task
+     *
+     * @param taskType      The type (segmentation or tagging) of the new task that i want to open
+     * @param selectedImg   The id of the image which will be associated to the new task
+     * @return              The id of the new task
+     * @throws IOException
+     * @throws JSONException
+     */
     public static String addTask(String taskType, String selectedImg) throws IOException, JSONException{
-        String newId = new String();
+
+        String newId;
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(rootUrl + "/wsmc/task.json");
-        List <NameValuePair> nvps = new ArrayList<NameValuePair>();
+        List <NameValuePair> nvps = new ArrayList();
         nvps.add(new BasicNameValuePair("taskType", taskType));
         nvps.add(new BasicNameValuePair("image", selectedImg));
         httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+
         CloseableHttpResponse response1 = httpclient.execute(httpPost);
-
         HttpEntity entity1 = response1.getEntity();
-
         BufferedReader in = new BufferedReader(new InputStreamReader(entity1.getContent()));
         String inputLine = in.readLine();
         JSONObject obj = new JSONObject(inputLine);
-
         newId = obj.getString("nid");
-
         EntityUtils.consume(entity1);
         response1.close();
-
         return newId;
     }
 
+    /**
+     * Open a new microTask
+     *
+     * @param taskType          The type (segmentation or tagging) of the new microTask that i want to open
+     * @param selectionTask     The id of the task which will be associated to the new microTask
+     * @return                  The id of the new microTask
+     * @throws IOException
+     * @throws JSONException
+     */
     public static String addUTask(String taskType, String selectionTask) throws IOException, JSONException{
-        String newId = new String();
+
+        String newId;
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(rootUrl + "/wsmc/utask.json");
@@ -573,24 +607,17 @@ public class CMS {
         nvps.add(new BasicNameValuePair("taskType", taskType));
         nvps.add(new BasicNameValuePair("task", selectionTask));
         httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+
         CloseableHttpResponse response1 = httpclient.execute(httpPost);
-
         HttpEntity entity1 = response1.getEntity();
-
         BufferedReader in = new BufferedReader(new InputStreamReader(entity1.getContent()));
         String inputLine = in.readLine();
         JSONObject obj = new JSONObject(inputLine);
-
         newId = obj.getString("nid");
-
         EntityUtils.consume(entity1);
         response1.close();
-
         return newId;
     }
-
-
-
     /*
      * Returns a tag based on a particular choice policy
      * @return String retrieved tag following a policy
