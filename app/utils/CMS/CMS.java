@@ -425,53 +425,35 @@ public class CMS {
         int j=0;
         String tmpTag;
         JsonNode media;
+        media = jsonImages.get("mediaLocator");
 
-
-
-
-
-
-                media = jsonImages.get("mediaLocator");
-
-
-                if(jsonImages.has("descriptions")){
-                    descObj=  jsonImages.get("descriptions");
-                    if(descObj.has("availableTags")){
-                        tagArr = descObj.get("availableTags");
-
-                        while(j<tagArr.size()){
-                            tagId = tagArr.get(j);
-                            tmpTag = tagId.get("id").toString();
-                            tmpTag = tmpTag.substring(1, tmpTag.length() - 1);
-                            itemTag = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/content/" + tmpTag + ".json");
-                            object2 = itemTag.get("itemAnnotations").get(0).get("value");
-                            element= new JSONObject();
-                            element.put("tag", object2);
-                            tags.put(element);
-                            j++;
-                        }//fine while
-                    }//if se descObject ha dei availableTags
-                    if(descObj.has("segmentation")){
-                        segmentArr = descObj.get("segmentation");
-                        numSegment = numSegment + segmentArr.size();
-                    }
-                }//if se c'è il campo description
-
-
-
-
+        if(jsonImages.has("descriptions")){
+            descObj=  jsonImages.get("descriptions");
+            if(descObj.has("availableTags")){
+                tagArr = descObj.get("availableTags");
+                while(j<tagArr.size()){
+                    tagId = tagArr.get(j);
+                    tmpTag = tagId.get("id").toString();
+                    tmpTag = tmpTag.substring(1, tmpTag.length() - 1);
+                    itemTag = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/content/" + tmpTag + ".json");
+                    object2 = itemTag.get("itemAnnotations").get(0).get("value");
+                    element= new JSONObject();
+                    element.put("tag", object2);
+                    tags.put(element);
+                    j++;
+                }//fine while
+            }//if se descObject ha dei availableTags
+            if(descObj.has("segmentation")){
+                segmentArr = descObj.get("segmentation");
+                numSegment = numSegment + segmentArr.size();
+            }
+        }//if se c'è il campo description
         element= new JSONObject();
-
         element.put("tags", tags);
         element.put("medialocator", media);
         element.put("annotations", numSegment);
-
         info.put(element);
-
-
         String result = info.toString();
-
-
         return result;
     }
 
