@@ -61,11 +61,6 @@ public class Sketchness extends Controller {
         }
         Integer nPlayers = Integer.valueOf(numero);
 
-
-
-
-
-
         if (LanguagePicker.retrieveIsoCode().equals("")) {
             LanguagePicker.setLanguage(Lang.preferred(request().acceptLanguages()));
         }
@@ -81,27 +76,21 @@ public class Sketchness extends Controller {
         if (nPlayers < 0 || nPlayers > 4) {
             nPlayers = 3;
         }
-        //Force the room name to be without spaces. We cannot create actors with 
+        //Force the room name to be without spaces. We cannot create actors with
         //spaces in it.
         roomName = roomName.replaceAll(" ", "");
         return ok(gameRoom.render(localUser, roomName,nPlayers));
     }
 
-    public static WebSocket<JsonNode> chatStream(final String roomName) {
-
-        final User localUser = getLocalUser(session());
-        final String username = localUser.name;
-
 
     /**
-     * Handle the lobby websocket.
+     * Handle the chat websocket.
      */
     @Restrict(@Group(Application.USER_ROLE))
     public static WebSocket<JsonNode> lobbyStream() {
 
         final User localUser = getLocalUser(session());
         final String username = localUser.name;
-
         return new WebSocket<JsonNode>() {
             // Called when the Websocket Handshake is done.
             @Override
@@ -139,6 +128,7 @@ public class Sketchness extends Controller {
         };
     }
 
+
     /**
      * Display the lobby.
      */
@@ -175,33 +165,6 @@ public class Sketchness extends Controller {
         return ok(leaderboard.render(username, null));
     }
 
-
-    public static Result checkOnline() throws Exception{
-        models.IsOnline.checkOnline();
-
-        return ok();
-    }
-
-
-    public static Result keepOnline(){
-
-        final User localUser = getLocalUser(session());
-        String username = localUser.name;
-        models.IsOnline.keepOnline(username);
-
-        return ok();
-    }
-
-    public static Result putOffline(){
-
-        final User localUser = getLocalUser(session());
-        String username = localUser.name;
-        models.IsOnline.putOffline(username);
-
-        return ok();
-    }
-
-
     /**
      * Keep a player online
      */
@@ -213,5 +176,6 @@ public class Sketchness extends Controller {
 
         return ok();
     }
+
 
 }
