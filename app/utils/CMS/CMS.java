@@ -412,35 +412,33 @@ public class CMS {
         return values;
     }
 
-    public static String retriveImgInfo(JsonNode jsonImages, String selected)throws JSONException{
+    public static String retriveImgInfo(JsonNode jsonImages)throws JSONException{
         JSONArray info= new JSONArray();
         JsonReader jsonReader = new JsonReader();
         JsonNode itemTag;
-        JsonNode object,object2, tagId;
+        JsonNode segmentArr,object2, tagId;
         JsonNode descObj;
         JsonNode tagArr;
         JSONObject element;
         JSONArray tags = new JSONArray();
-        int i=0;
+        int numSegment=0;
         int j=0;
-        String tmpId, tmpTag;
-        JsonNode media = null;
-
-        while(i<jsonImages.size()){
-
-            object = jsonImages.get(i);
-            tmpId = object.get("id").toString();
-            tmpId = tmpId.substring(1, tmpId.length() -1);
-
-            if(tmpId.equals(selected)){
-                media = object.get("mediaLocator");
+        String tmpTag;
+        JsonNode media;
 
 
-                if(object.has("descriptions")){
-                    descObj=  object.get("descriptions");
+
+
+
+
+                media = jsonImages.get("mediaLocator");
+
+
+                if(jsonImages.has("descriptions")){
+                    descObj=  jsonImages.get("descriptions");
                     if(descObj.has("availableTags")){
                         tagArr = descObj.get("availableTags");
-                        j=0;
+
                         while(j<tagArr.size()){
                             tagId = tagArr.get(j);
                             tmpTag = tagId.get("id").toString();
@@ -453,17 +451,20 @@ public class CMS {
                             j++;
                         }//fine while
                     }//if se descObject ha dei availableTags
+                    if(descObj.has("segmentation")){
+                        segmentArr = descObj.get("segmentation");
+                        numSegment = numSegment + segmentArr.size();
+                    }
                 }//if se c'è il campo description
 
-                break;
-            }
-            i++;
-        }
+
+
 
         element= new JSONObject();
 
         element.put("tags", tags);
         element.put("medialocator", media);
+        element.put("annotations", numSegment);
 
         info.put(element);
 

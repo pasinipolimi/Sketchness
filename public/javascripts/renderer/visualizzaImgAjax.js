@@ -22,6 +22,8 @@ function visualizzaImgAjax(){
 				
                     var result = JSON.parse(xhr.responseText);
                     var tags = result[0].tags;
+                    var annotations = result[0].annotations;
+                    $("#imageAnnotations").text(annotations);
                     
                     if(tags.length === 0)
                         tagContainer.append("<span>No tags available</span>");

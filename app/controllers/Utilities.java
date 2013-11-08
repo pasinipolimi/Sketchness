@@ -86,6 +86,11 @@ public class Utilities extends Controller {
         return ok(result);
     }
 
+    public static Result taskSelectionCall()throws JSONException{
+        String result = Renderer.taskSelection();
+        return ok(result);
+    }
+
     public static Result loadStatsCall()throws JSONException {
         String result = Renderer.loadStats();
         return ok(result);

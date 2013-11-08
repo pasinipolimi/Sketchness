@@ -290,6 +290,38 @@ public class Renderer extends UntypedActor {
         return options;
 
     }
+    public static String taskSelection()throws JSONException {
+
+
+        JsonReader jsonReader = new JsonReader();
+
+        JsonNode itemTask = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/task.json");
+
+        boolean check= false;
+
+        JSONArray tasks = new JSONArray();
+        if(itemTask != null){
+            tasks = CMS.retriveTaskId(itemTask);
+            check = true;
+        }
+        else{
+            JSONObject element = new JSONObject();
+            element.append("id", "No Tasks in the system");
+            element.append("taskType", "");
+            tasks.put(element);
+        }
+
+        JSONObject result = new JSONObject();
+
+        result.append("task", tasks);
+        result.append("check", check);
+
+        String options = result.toString();
+
+
+        return options;
+
+    }
 
     public static String loadStats() throws JSONException{
 
@@ -336,9 +368,9 @@ public class Renderer extends UntypedActor {
     public static String webInfoAjax(String selection)throws JSONException{
 
         JsonReader jsonReader = new JsonReader();
-        JsonNode itemImage = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image.json");
+        JsonNode item = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image/" + selection + ".json");
 
-        String info = CMS.retriveImgInfo(itemImage,selection);
+        String info = CMS.retriveImgInfo(item);
 
 
 

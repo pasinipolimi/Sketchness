@@ -21,7 +21,7 @@ function nuovoTask(){
                 if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
                    var newTaskId = xhr.responseText;
                    alert("New task code is: " + newTaskId);
-                   popolaSelectionAjax();
+                   popolaTask();
                 }
                 else{
                     alert("Request was unsuccesfull: "+ xhr.status);
