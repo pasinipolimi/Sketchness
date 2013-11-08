@@ -1,8 +1,6 @@
 package models.game;
 
 import play.db.DB;
-import play.api.libs.concurrent.*;
-import play.db.DB;
 import play.libs.*;
 import play.libs.Akka;
 import play.libs.F.*;
@@ -619,12 +617,7 @@ public class Game extends GameRoom {
             connection.close();
         }
         catch(SQLException ex){
-            int i=0;
-            i++;
-
         }
-
-
         killActor();
     }
 
