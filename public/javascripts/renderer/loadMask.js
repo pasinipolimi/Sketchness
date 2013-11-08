@@ -24,6 +24,7 @@ taskImage.src=mediaimg;
 
 try {
 	  var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
+	  //socket = new WS($('#renderWebSocket').data('ws'));
 	  socket = new WS("ws://localhost:9000/rendererStream?imageID="+selectionimg);
 
       socket.onmessage = onSocketMessage;
@@ -32,6 +33,7 @@ try {
 		console.log( evt, this );
         connected = true;
         rendererGlobalVar.setSocket(socket);
+		drawTracesMask(taskImage,selectionimg,tag);
       };
 
       socket.onclose = function (evt) {
@@ -45,9 +47,10 @@ try {
 		console.error("Error in the connection");
 		console.error(e);
     }
+}
 
-
-    var canvas = document.getElementById("draws");
+var drawTracesMask = function(taskImage,selectionimg,tag) {
+	var canvas = document.getElementById("draws");
 	var ctx = canvas.getContext("2d");
 	var taskCanvas = document.getElementById("task");
 	var taskContext = taskCanvas.getContext("2d");
@@ -79,16 +82,9 @@ try {
         maskContext.drawImage(maskImage,0,0,maskCanvas.width,maskCanvas.height);
         maskContext.restore();
         };
-
-
-
-
-
-
-
-
-
 }
+
+
 function send (o) {
     if (!connected) return;
     socket.send(JSON.stringify(o));

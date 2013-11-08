@@ -38,7 +38,6 @@ import play.Play;
 import play.libs.Akka;
 import play.libs.F;
 import play.libs.Json;
-import play.mvc.Http;
 import play.mvc.WebSocket;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -99,26 +98,6 @@ public class Renderer extends UntypedActor {
         imageId = join.getUsername();
         channel = join.getChannel();
         getSender().tell("OK", this.getSelf());
-        JsonReader jsonReader = new JsonReader();
-        JsonNode item = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image/" + imageId + ".json");
-        String url = rootUrl + item.get("mediaLocator").asText();
-        Integer width = item.get("width").asInt();
-        Integer height = item.get("height").asInt();
-        String label = "";
-        ObjectNode guessWord = Json.newObject();
-        guessWord.put("type", "task");
-        guessWord.put("id", imageId);
-        guessWord.put("word", label);
-        guessWord.put("lang", LanguagePicker.retrieveIsoCode());
-        guessWord.put("image", url);
-        guessWord.put("width", width);
-        guessWord.put("height", height);
-        channel.write(guessWord);
-        JsonNode toAggregate = retrieveTags(imageId);
-        ObjectNode availableTags = Json.newObject();
-        availableTags.put("type", "tags");
-        availableTags.put("tags", toAggregate);
-        channel.write(availableTags);
     }
 
     private Image aggregate(boolean networkOn, String requiredTag, boolean transparentMask) throws IOException, Exception {

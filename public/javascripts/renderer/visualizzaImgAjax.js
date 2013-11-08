@@ -1,7 +1,3 @@
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 function visualizzaImgAjax(){
    var tagContainer = $(".tag.listBody")
@@ -21,6 +17,9 @@ function visualizzaImgAjax(){
         onComplete: function(xhr,status){
             if(xhr.readyState === 4){
                 if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
+				
+					
+				
                     var result = JSON.parse(xhr.responseText);
                     var tags = result[0].tags;
                     
@@ -49,6 +48,10 @@ function visualizzaImgAjax(){
                                                     canvas.height=this.height;
                                                     taskContext.drawImage(taskImage,0,0,this.width,this.height);
                                                     taskContext.restore();
+													//Clear the mask canvas
+													var maskCanvas = document.getElementById("mask");
+													var maskContext = maskCanvas.getContext("2d");
+													maskContext.clearRect(0,0,maskCanvas.width,maskCanvas.height);
                                                 };
 
                 }
