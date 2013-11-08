@@ -412,7 +412,7 @@ public class CMS {
         return values;
     }
 
-    public static String retriveImgInfo(JsonNode jsonImages, String selected)throws JSONException{
+    public static String retriveImgInfo(JsonNode jsonImages)throws JSONException{
         JSONArray info= new JSONArray();
         JsonReader jsonReader = new JsonReader();
         JsonNode itemTag;
@@ -426,18 +426,16 @@ public class CMS {
         String tmpId, tmpTag;
         JsonNode media = null;
 
-        while(i<jsonImages.size()){
-
-            object = jsonImages.get(i);
-            tmpId = object.get("id").toString();
-            tmpId = tmpId.substring(1, tmpId.length() -1);
-
-            if(tmpId.equals(selected)){
-                media = object.get("mediaLocator");
 
 
-                if(object.has("descriptions")){
-                    descObj=  object.get("descriptions");
+
+
+
+                media = jsonImages.get("mediaLocator");
+
+
+                if(jsonImages.has("descriptions")){
+                    descObj=  jsonImages.get("descriptions");
                     if(descObj.has("availableTags")){
                         tagArr = descObj.get("availableTags");
                         j=0;
@@ -455,10 +453,8 @@ public class CMS {
                     }//if se descObject ha dei availableTags
                 }//if se c'è il campo description
 
-                break;
-            }
-            i++;
-        }
+
+
 
         element= new JSONObject();
 

@@ -357,9 +357,9 @@ public class Renderer extends UntypedActor {
     public static String webInfoAjax(String selection)throws JSONException{
 
         JsonReader jsonReader = new JsonReader();
-        JsonNode itemImage = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image.json");
+        JsonNode item = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image/" + selection + ".json");
 
-        String info = CMS.retriveImgInfo(itemImage,selection);
+        String info = CMS.retriveImgInfo(item);
 
 
 
