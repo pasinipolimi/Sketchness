@@ -416,15 +416,15 @@ public class CMS {
         JSONArray info= new JSONArray();
         JsonReader jsonReader = new JsonReader();
         JsonNode itemTag;
-        JsonNode object,object2, tagId;
+        JsonNode segmentArr,object2, tagId;
         JsonNode descObj;
         JsonNode tagArr;
         JSONObject element;
         JSONArray tags = new JSONArray();
-        int i=0;
+        int numSegment=0;
         int j=0;
-        String tmpId, tmpTag;
-        JsonNode media = null;
+        String tmpTag;
+        JsonNode media;
 
 
 
@@ -438,7 +438,7 @@ public class CMS {
                     descObj=  jsonImages.get("descriptions");
                     if(descObj.has("availableTags")){
                         tagArr = descObj.get("availableTags");
-                        j=0;
+
                         while(j<tagArr.size()){
                             tagId = tagArr.get(j);
                             tmpTag = tagId.get("id").toString();
@@ -451,6 +451,10 @@ public class CMS {
                             j++;
                         }//fine while
                     }//if se descObject ha dei availableTags
+                    if(descObj.has("segmentation")){
+                        segmentArr = descObj.get("segmentation");
+                        numSegment = numSegment + segmentArr.size();
+                    }
                 }//if se c'è il campo description
 
 
@@ -460,6 +464,7 @@ public class CMS {
 
         element.put("tags", tags);
         element.put("medialocator", media);
+        element.put("annotations", numSegment);
 
         info.put(element);
 
