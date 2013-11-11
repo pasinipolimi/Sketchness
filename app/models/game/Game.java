@@ -122,6 +122,21 @@ public class Game extends GameRoom {
                         case "taskAcquired":taskAcquired();break;
                         case "leave":handleQuitter(event);break;
                         case "matchInfo":publishLobbyEvent(GameEventType.matchInfo);break;
+                        // break point between working and not
+                        case "loading": break;
+                        case "roundBegin":nextRound(); break;
+                        case "roundEnd": break;
+                        case "image": break;
+                        case "tag": break;
+                        case "skip":skipTask(event.asText()); break;                //TODO wrong argument..
+                        case "endSegmentation": break;
+                        case "score": break;
+                        case "timer": playerTimeExpired(event.asText()); break;     //TODO wrong argument.. need the name of the expired player
+                        case "guess": handleTalk(event);break;
+                        case "guessed": guessed(event.get("word").asText());break;
+                        case "changeTool": break;
+                        case "beginPath": break;
+                        case "endPath": break;
                     }
                 }
             }
@@ -366,7 +381,7 @@ public class Game extends GameRoom {
         }
     }
 
-    private void sendTask(Boolean ask) {
+    private void sendTask(Boolean ask) {        //TODO passare ai messaggi GameMessages?
         if (ask) {
             areWeAsking = true;
             GameEvent task = new GameEvent(sketcherPainter.name, roomChannel, GameEventType.askTag);
@@ -520,7 +535,7 @@ public class Game extends GameRoom {
         }
     }
 
-    private void guessed(String guesser) {
+    private void guessed(String guesser) {      //TODO vhange messages ???
         for (Painter painter : playersVect) {
             //If the current painter is the guesser, has not guessed before and it is not the sketcher, update his points
             if (painter.name.equals(guesser) && painter.guessed == false) {
@@ -656,7 +671,7 @@ public class Game extends GameRoom {
         GameBus.getInstance().publish(timeEvent);
     }
 
-    private void showImages() {
+    private void showImages() {         //TODO change messages ???
         GameEvent showImages = new GameEvent(roomChannel, GameEventType.showImages);
         ObjectNode show = Json.newObject();
         show.put("type", "showImages");
@@ -695,7 +710,9 @@ public class Game extends GameRoom {
         currentGuess = task.get("tag").asText();
     }
     
-    private void handleTalk(String username, String text) {
+    private void handleTalk(JsonNode jguess) {      //TODO good feeling! should work!
+        String text = jguess.get("content").get("word").asText();
+        String username = jguess.get("content").get("user").asText();
         // Received a Talk message
         //If we are asking the sketcher for a tag, then save the tag
         if (askTag && username.equals(askTagSketcher)) {
@@ -710,12 +727,15 @@ public class Game extends GameRoom {
                         GameBus.getInstance().publish(new GameEvent(username, roomChannel, GameEventType.guessed));
                         break;
                     case 1:
+                        GameBus.getInstance().publish(GameMessages.composeGuess(username, text, "hot"));
                         //notifyAll(ChatKind.talkNear, username, text);
                         break;
                     case 2:
+                        GameBus.getInstance().publish(GameMessages.composeGuess(username, text, "warm"));
                         //notifyAll(ChatKind.talkWarning, username, text);
                         break;
                     default:
+                        GameBus.getInstance().publish(GameMessages.composeGuess(username, text, "cold"));
                         //notifyAll(ChatKind.talkError, username, text);
                         break;
                 }

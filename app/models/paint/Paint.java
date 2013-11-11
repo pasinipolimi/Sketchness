@@ -57,7 +57,7 @@ public class Paint extends GameRoom {
         if (message instanceof Join) {
             handleJoin((Join) message);
         }
-        /*if (message instanceof JsonNode) {
+        if (message instanceof JsonNode) {
             JsonNode json = (JsonNode) message;
             JsonNodeType type = JsonNodeType.valueOf(json.get("type").getTextValue().toLowerCase());
             switch (type) {
@@ -82,7 +82,8 @@ public class Paint extends GameRoom {
                     break;
             }
             notifyAll(json);
-        } */else if (message instanceof GameEvent) {
+        }
+        else if (message instanceof GameEvent) {
             GameEvent event = (GameEvent) message;
             switch (event.getType()) {
                 case matchEnd:  //DONE

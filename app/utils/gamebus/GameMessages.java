@@ -123,7 +123,40 @@ public class GameMessages {
             ObjectNode event = composeJsonMessage("chat",content);
             return event;
     }
-    
+
+    public static ObjectNode composeMatchStart(String id, String roomName, Integer currentPlayers, Integer maxPlayers, Boolean visible) {
+        ObjectNode content = Json.newObject();
+        content.put("id", id);
+        content.put("roomName", roomName);
+        content.put("currentPlayers", currentPlayers);
+        content.put("maxPlayers", maxPlayers);
+        content.put("visible", visible);
+        ObjectNode event = composeJsonMessage("matchStart",content);
+        return event;
+    }
+
+    public static ObjectNode composeMatchEnd(String id, String roomName, Integer currentPlayers, Integer maxPlayers, Boolean visible) {
+        ObjectNode content = Json.newObject();
+        content.put("id", id);
+        content.put("roomName", roomName);
+        content.put("currentPlayers", currentPlayers);
+        content.put("maxPlayers", maxPlayers);
+        content.put("visible", visible);
+        ObjectNode event = composeJsonMessage("matchEnd",content);
+        return event;
+    }
+
+    public static ObjectNode composeMatchIfo(String id, String roomName, Integer currentPlayers, Integer maxPlayers, Boolean visible) {
+        ObjectNode content = Json.newObject();
+        content.put("id", id);
+        content.put("roomName", roomName);
+        content.put("currentPlayers", currentPlayers);
+        content.put("maxPlayers", maxPlayers);
+        content.put("visible", visible);
+        ObjectNode event = composeJsonMessage("matchInfo",content);
+        return event;
+    }
+
     public static ObjectNode composeGameListUpdate(JsonNode game) {
             ObjectNode event = composeJsonMessage("updateList",(ObjectNode)game);
             return event;
@@ -175,16 +208,50 @@ public class GameMessages {
           ObjectNode event = composeJsonMessage("image",content);
           return event;
     }
+
+    public static ObjectNode composeImage(String id,String url,Integer width, Integer height) {
+        ObjectNode content = Json.newObject();
+        content.put("id", id);
+        content.put("url", url);
+        content.put("width", width);
+        content.put("height", height);
+        ObjectNode event = composeJsonMessage("image",content);
+        return event;
+    }
     
     public static ObjectNode composeTag() {
          ObjectNode event = composeJsonMessage("tag",Json.newObject());
          return event;
+    }
+
+    public static ObjectNode composeTag(String word) {
+        ObjectNode content = Json.newObject();
+        content.put("word", word);
+        ObjectNode event = composeJsonMessage("tag",content);
+        return event;
     }
     
     public static ObjectNode composeTask(String word) {
         ObjectNode content = Json.newObject();
         content.put("word", word);
         ObjectNode event = composeJsonMessage("task",content);
+        return event;
+    }
+
+    public static ObjectNode composeTask() {
+        ObjectNode event = composeJsonMessage("task",Json.newObject());
+        return event;
+    }
+
+    public static ObjectNode composeSkip() {
+        ObjectNode event = composeJsonMessage("skip",Json.newObject());
+        return event;
+    }
+
+    public static ObjectNode composeEndSegmentation(String user) {
+        ObjectNode content = Json.newObject();
+        content.put("user", user);
+        ObjectNode event = composeJsonMessage("endSegmentation",content);
         return event;
     }
     
@@ -203,6 +270,12 @@ public class GameMessages {
         ObjectNode event = composeJsonMessage("timer",content);
         return event;
     }
+
+    public static ObjectNode composeTimer() {
+        ObjectNode content = Json.newObject();
+        ObjectNode event = composeJsonMessage("timer",content);
+        return event;
+    }
      
      public static ObjectNode composeGuess(String user, String word, String affinity) {
         ObjectNode content = Json.newObject();
@@ -212,11 +285,40 @@ public class GameMessages {
         ObjectNode event = composeJsonMessage("guess",content);
         return event;
     }
+
+    public static ObjectNode composeGuess(String word) {
+        ObjectNode content = Json.newObject();
+        content.put("word", word);
+        ObjectNode event = composeJsonMessage("guess",content);
+        return event;
+    }
      
     public static ObjectNode composeGuessed(String word) {
         ObjectNode content = Json.newObject();
         content.put("word", word);
         ObjectNode event = composeJsonMessage("guessed",content);
+        return event;
+    }
+
+    public static ObjectNode composeChangeTool(String tool, Integer size, String color) {
+        ObjectNode content = Json.newObject();
+        content.put("tool", tool);
+        content.put("size", size);
+        content.put("color", color);
+        ObjectNode event = composeJsonMessage("changeTool",content);
+        return event;
+    }
+
+    public static ObjectNode composePoint(Integer x, Integer y) {
+        ObjectNode content = Json.newObject();
+        content.put("x", x);
+        content.put("y", y);
+        ObjectNode event = composeJsonMessage("point",content);
+        return event;
+    }
+
+    public static ObjectNode composeendPath() {
+        ObjectNode event = composeJsonMessage("endPath",Json.newObject());
         return event;
     }
     

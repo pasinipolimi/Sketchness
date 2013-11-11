@@ -108,7 +108,7 @@ public class Sketchness extends Controller {
 
     /**
      *
-     * Handle the paintroom websocket
+     * Handle the gameStream websocket
      */
     @Restrict(@Group(Application.USER_ROLE))
     public static WebSocket<JsonNode> gameStream( final String roomName, final Integer players) {
