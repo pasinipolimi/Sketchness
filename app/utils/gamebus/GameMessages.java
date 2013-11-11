@@ -223,13 +223,6 @@ public class GameMessages {
          ObjectNode event = composeJsonMessage("tag",Json.newObject());
          return event;
     }
-
-    public static ObjectNode composeTag(String word) {
-        ObjectNode content = Json.newObject();
-        content.put("word", word);
-        ObjectNode event = composeJsonMessage("tag",content);
-        return event;
-    }
     
     public static ObjectNode composeTask(String word) {
         ObjectNode content = Json.newObject();
@@ -243,18 +236,6 @@ public class GameMessages {
         return event;
     }
 
-    public static ObjectNode composeSkip() {
-        ObjectNode event = composeJsonMessage("skip",Json.newObject());
-        return event;
-    }
-
-    public static ObjectNode composeEndSegmentation(String user) {
-        ObjectNode content = Json.newObject();
-        content.put("user", user);
-        ObjectNode event = composeJsonMessage("endSegmentation",content);
-        return event;
-    }
-    
     public static ObjectNode composeScore(String user, Integer score) {
         ObjectNode content = Json.newObject();
         content.put("user", user);
@@ -270,25 +251,12 @@ public class GameMessages {
         ObjectNode event = composeJsonMessage("timer",content);
         return event;
     }
-
-    public static ObjectNode composeTimer() {
-        ObjectNode content = Json.newObject();
-        ObjectNode event = composeJsonMessage("timer",content);
-        return event;
-    }
      
      public static ObjectNode composeGuess(String user, String word, String affinity) {
         ObjectNode content = Json.newObject();
         content.put("user", user);
         content.put("word", word);
         content.put("affinity", affinity);
-        ObjectNode event = composeJsonMessage("guess",content);
-        return event;
-    }
-
-    public static ObjectNode composeGuess(String word) {
-        ObjectNode content = Json.newObject();
-        content.put("word", word);
         ObjectNode event = composeJsonMessage("guess",content);
         return event;
     }

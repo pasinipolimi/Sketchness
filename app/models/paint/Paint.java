@@ -130,7 +130,7 @@ public class Paint extends GameRoom {
     }
     
 
-    private void saveTraces() {
+    private void saveTraces() {     //TODO  change messages ???
         GameEvent tracesMessage = new GameEvent(roomChannel, GameEventType.finalTraces);
         ObjectNode finalTraces = new ObjectNode(factory);
         ArrayNode filtered = currentSegment.filter(taskWidth, taskHeight, 420, 350);
