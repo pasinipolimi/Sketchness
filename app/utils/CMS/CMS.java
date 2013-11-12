@@ -348,7 +348,7 @@ public class CMS {
      * Retrive all the images' Ids that are stored in the system
      *
      * @param jsonImages    JsonNode off all images
-     * @return              JSONArray with all the ids
+     * @return              JSONArray with all the ids sorted depending on number of annotations
      * @throws JSONException
      */
     public static JSONArray retriveImageId(JsonNode jsonImages) throws JSONException{
@@ -394,10 +394,6 @@ public class CMS {
             element.put("id", obj.getId());
             imageIds.put(element);
         }
-
-
-
-
 
         return imageIds;
     }
