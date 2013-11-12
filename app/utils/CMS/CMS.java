@@ -354,20 +354,55 @@ public class CMS {
     public static JSONArray retriveImageId(JsonNode jsonImages) throws JSONException{
 
         JSONArray imageIds= new JSONArray();
+        SortObject sorting;
+        ArrayList<SortObject> tempList = new ArrayList<>();
         JsonNode object;
         JSONObject element;
+        int num = 0;
 
         int i=0;
         while(i<jsonImages.size()){
-            element = new JSONObject();
-            element.remove("id");
+            sorting = new SortObject() {};
             object = jsonImages.get(i);
-            element.put("id", object.get("id").toString().substring(1, object.get("id").toString().length() - 1));
-            imageIds.put(i,element);
+            sorting.setId(object.get("id").asText());
+            if(object.has("descriptions")){
+                num = object.get("descriptions").get("segmentation").size();
+            }
+            sorting.setNum(num);
+            tempList.add(i, sorting);
+            num = 0;
             i++;
         }
+
+        Collections.sort(tempList, new Comparator<SortObject>() {
+            @Override public int compare(SortObject o1, SortObject o2) {
+                if (o1.getNum() > o2.getNum()) {
+                    return -1;
+                } else if (o1.getNum() < o2.getNum()) {
+                    return 1;
+                }
+                return 0;
+            }
+
+        });
+
+        Iterator<SortObject> it = tempList.iterator();
+        while(it.hasNext())
+        {
+            element = new JSONObject();
+            SortObject obj = it.next();
+            element.put("id", obj.getId());
+            imageIds.put(element);
+        }
+
+
+
+
+
         return imageIds;
     }
+
+
 
     /**
      * Retrive all the tasks' ids that are stored in the system
@@ -474,7 +509,7 @@ public class CMS {
             }//if se descObject ha dei availableTags
             if(descObj.has("segmentation")){
                 segmentArr = descObj.get("segmentation");
-                numSegment = numSegment + segmentArr.size();
+                numSegment = segmentArr.size();
             }
         }//if se c'è il campo description
         element= new JSONObject();
@@ -631,4 +666,43 @@ public class CMS {
             return "";
         }
     }
+
+    public static JSONArray sort(JSONArray sorting){
+
+        int lenght = sorting.length();
+
+        return sorting;
+    }
+
+    public static void quickSort(int low, int high){
+        int i = low;
+        int j = high;
+
+        int pivot ;
+
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
