@@ -603,7 +603,7 @@ public class CMS {
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(rootUrl + "/wsmc/task.json");
-        List <NameValuePair> nvps = new ArrayList();
+        List <NameValuePair> nvps = new ArrayList<>();
         nvps.add(new BasicNameValuePair("taskType", taskType));
         nvps.add(new BasicNameValuePair("image", selectedImg));
         httpPost.setEntity(new UrlEncodedFormEntity(nvps));
@@ -634,7 +634,7 @@ public class CMS {
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(rootUrl + "/wsmc/utask.json");
-        List <NameValuePair> nvps = new ArrayList<NameValuePair>();
+        List <NameValuePair> nvps = new ArrayList<>();
         nvps.add(new BasicNameValuePair("taskType", taskType));
         nvps.add(new BasicNameValuePair("task", selectionTask));
         httpPost.setEntity(new UrlEncodedFormEntity(nvps));
@@ -662,41 +662,6 @@ public class CMS {
             return "";
         }
     }
-
-    public static JSONArray sort(JSONArray sorting){
-
-        int lenght = sorting.length();
-
-        return sorting;
-    }
-
-    public static void quickSort(int low, int high){
-        int i = low;
-        int j = high;
-
-        int pivot ;
-
-
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

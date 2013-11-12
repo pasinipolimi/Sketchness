@@ -25,7 +25,7 @@ taskImage.src=mediaimg;
 try {
 	  var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
 	  //socket = new WS($('#renderWebSocket').data('ws'));
-	  socket = new WS("ws://localhost:9000/rendererStream?imageID="+selectionimg);
+	  socket = new WS("ws://www.sketchness.com/rendererStream?imageID="+selectionimg);
 
       socket.onmessage = onSocketMessage;
 
