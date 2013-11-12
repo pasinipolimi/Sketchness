@@ -28,7 +28,7 @@ GET 	/retrieveTags					  controllers.Utilities.retrieveTags(imageID: String)
 
 
 
-GET		/newRenderer					  controllers.Utilities.newRendererCall
+GET		/admin					  controllers.Utilities.newRendererCall
 GET     /WebToolAjax                      controllers.Utilities.webToolAjaxCall
 GET     /LoadStats                        controllers.Utilities.loadStatsCall
 GET     /WebInfoAjax                      controllers.Utilities.webInfoAjaxCall
