@@ -62,9 +62,9 @@ public class ContourAggregator {
                 } else {
                     raster.setSample(x, y, 0, 0);
                 }
-                this.iMask[x * max_x + y] = (((double) voters / polygons.length) > THRESHOLD) ? 1 : 0;
+                this.iMask[x * max_y + y] = (((double) voters / polygons.length) > THRESHOLD) ? 1 : 0;
             }
-        }
+        }        
 
         for (int u = 0; u < 30; u++) {
             for (int x = 1; x < max_x - 1; x++) {
