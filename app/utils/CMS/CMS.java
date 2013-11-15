@@ -366,7 +366,12 @@ public class CMS {
             object = jsonImages.get(i);
             sorting.setId(object.get("id").asText());
             if(object.has("descriptions")){
-                num = object.get("descriptions").get("segmentation").size();
+                if(object.get("descriptions").has("segmentation")){
+                    num = object.get("descriptions").get("segmentation").size();
+                }
+                else{
+                    num = 0;
+                }
             }
             sorting.setNum(num);
             tempList.add(i, sorting);

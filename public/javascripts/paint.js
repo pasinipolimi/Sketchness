@@ -1,4 +1,4 @@
-require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time, $) {
+ require(["Communicator", "Time", "jquery", "i18n"], function(Communicator, Time, $) {
 
 	$(function() {
 

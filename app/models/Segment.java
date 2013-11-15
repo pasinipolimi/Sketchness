@@ -51,6 +51,7 @@ public class Segment {
         ArrayNode toReturn = new ArrayNode(JsonNodeFactory.instance);
         ArrayList<PositionedPoint> finalSegment = new ArrayList<>();
         ArrayList<PositionedPoint> copy = new ArrayList<>();
+/*
         int fixedWidth = taskWidth;
         int fixedHeight = taskHeight;
         //Just the width is bigger than our canvas
@@ -74,6 +75,81 @@ public class Segment {
                 fixedWidth = canvasWidth * fixedHeight / canvasWidth;
             }
         }
+        */
+
+        /*
+        The logic for image resizing is the following:
+        if there is only one size bigger than our canvas i will generate the ratio based on that size, the other one will fit for sure
+        if both sizes are smaller than our canvas I chose the bigger one, the other will fit for sure
+        if both sizes are equals to our canvas the ratio will be 1
+        if both sizes are bigger than our canvas I chose the bigger one, I generate the ratio based on that and i check if the other size fits,
+            if it does i keep that ratio, if it doesn't I use the last size I found in order to generate another ratio, now i'm sure that bot sizes will fit
+            and the final ratio will be the first ratio multiplied by the second one.
+        Once I have the ratio i need to calculate an offset (because the image is centered in the canvas)
+        the offset is the (canvas size - the image size)/2
+        this work for every scenario.
+
+        In order to find the right position of the point that i draw i have to pick the current position (which is based on the scale),
+            subtract the offset and multiply it by the ratio.
+
+
+
+         */
+
+        float ratio = 1;
+        float tmpRatio;
+        int fixedWidth;
+        int fixedHeight;
+
+        if(taskWidth > canvasWidth && taskHeight <= canvasHeight){
+            ratio = (float) taskWidth/canvasWidth;
+        }
+        else if(taskHeight > canvasHeight && taskWidth <= canvasWidth){
+            ratio = (float) taskHeight/canvasHeight;
+        }
+        else if(taskHeight < canvasHeight && taskWidth < canvasWidth){
+            if(taskHeight > taskWidth){
+                ratio = (float) taskHeight/canvasHeight;
+            }
+            else{
+                ratio = (float) taskWidth/canvasWidth;
+            }
+        }
+        else if(taskHeight > canvasHeight && taskWidth > canvasWidth){
+            if(taskHeight > taskWidth){
+                tmpRatio = (float) taskHeight/canvasHeight;
+                if(canvasWidth > taskWidth/tmpRatio){
+                    ratio = tmpRatio;
+                }
+                else{
+                    ratio = tmpRatio * ((taskWidth/tmpRatio)/canvasWidth);
+                }
+            }
+            else if(taskWidth > taskHeight){
+                tmpRatio = (float) taskWidth/canvasWidth;
+                if(canvasHeight > taskHeight/tmpRatio){
+                    ratio = tmpRatio;
+                }
+                else{
+                    ratio = tmpRatio * ((taskHeight/tmpRatio)/canvasHeight);
+                }
+            }
+            else if(taskHeight == taskWidth){
+                if(taskHeight - canvasHeight > taskWidth - canvasWidth){
+                    ratio = (float) taskHeight/canvasHeight;
+                }
+                else if(taskHeight - canvasHeight < taskWidth - canvasWidth){
+                    ratio = (float) taskWidth/canvasWidth;
+                }
+            }
+        }
+        else if(taskHeight == canvasHeight && taskWidth == canvasWidth){
+            ratio = 1;
+        }
+
+
+        fixedWidth = Math.round((canvasWidth - taskWidth/ratio)/2);
+        fixedHeight = Math.round((canvasHeight - taskHeight/ratio)/2);
 
         //Make a copy of the traces storing the orders in which the points have been saved
         for (int i = 0; i < points.size(); i++) {
@@ -109,8 +185,10 @@ public class Segment {
         ListIterator copyIt = copy.listIterator();
         while (copyIt.hasNext()) {
             Point current = ((PositionedPoint) copyIt.next()).getPoint();
-            current.setX((taskWidth * (current.getX() - ((canvasWidth - fixedWidth) / 2))) / fixedWidth);
-            current.setY((taskHeight * (current.getY() - ((canvasHeight - fixedHeight) / 2))) / fixedHeight);
+//            current.setX((taskWidth * (current.getX() - ((canvasWidth - fixedWidth) / 2))) / fixedWidth);
+  //          current.setY((taskHeight * (current.getY() - ((canvasHeight - fixedHeight) / 2))) / fixedHeight);
+            current.setX(Math.round((current.getX()-fixedWidth)*ratio));
+            current.setY(Math.round((current.getY()-fixedHeight)*ratio));
             if (!current.getColor().equals(eraser) && current.getX() >= 0 && current.getY() >= 0) {
                 toReturn.add(current.toJson());
             }

@@ -9,6 +9,8 @@ function popolaTask(){
         ,tasks
         ,result;
 
+    selectionTask.children().remove();
+
     selectionTask.append("<option value='' selected disabled>Select Task</option>");
     $('.customSelect').dropkick();
 

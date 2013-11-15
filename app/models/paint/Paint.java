@@ -155,7 +155,7 @@ public class Paint extends GameRoom {
     private void saveTraces() {
         GameEvent tracesMessage = new GameEvent(roomChannel, GameEventType.finalTraces);
         ObjectNode finalTraces = new ObjectNode(factory);
-        ArrayNode filtered = currentSegment.filter(taskWidth, taskHeight, 420, 350);        //TODO CHECK HERE
+        ArrayNode filtered = currentSegment.filter(taskWidth, taskHeight, 420, 350);
         finalTraces.put("id", taskUrl);
         finalTraces.put("label", guessWord);
         finalTraces.put("traces", filtered);
