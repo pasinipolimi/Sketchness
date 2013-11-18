@@ -2,8 +2,26 @@
 
 @main2(Messages("playauthenticate.navigation.restricted"), "restricted") {
 
-<h1>Page Not Found</h1>
-<p>
-    <a href="@routes.Sketchness.lobby()">Go back to Lobby</a>
-</p>
+
+<div id="text-contenitor-content">
+
+    <p id="Profile-text">
+        Page Not Found,<br/>
+        Go to lobby or back to login page
+    </p>
+    <a href="@routes.Application.doLogout"> <button type="submit" id="back1"></button></a>
+    <a href="@routes.Sketchness.lobby()"><button type="submit" id="tolobby1"></button></a>
+</div>
+
+<div id="preloaded-images">
+    <img src="../assets/images/UI/backUnpressed.png" width="1" height="1" alt="backPressed" />
+    <img src="../assets/images/UI/backHover.png" width="1" height="1" alt="backHover" />
+    <img src="../assets/images/UI/backPressed.png" width="1" height="1" alt="backUnpressed" />
+    <img src="../assets/images/UI/lobbyUnpressed.png" width="1" height="1" alt="tolobbyPressed" />
+    <img src="../assets/images/UI/lobbyHover.png" width="1" height="1" alt="toLobbyHover" />
+    <img src="../assets/images/UI/lobbyPressed.png" width="1" height="1" alt="toLobbyUnpressed" />
+    <img src="../assets/images/UI/pergamena.png" width="1" height="1" alt="pergamena" />
+
+
+</div>
 }

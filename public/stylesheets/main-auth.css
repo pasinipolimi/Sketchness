@@ -496,3 +496,50 @@ ul#ChangeNamePsw{
 	margin-left: 0px;
 	margin-top:	-83px;
 }
+
+#tolobby1 {
+	background-color: transparent;
+	background-image: url("../images/UI/lobbyUnpressed.png");
+	height: 45px;
+	left: 600px;
+	position: absolute;
+	margin-left: -190px;
+	margin-top: -75px;
+	border-width: 0px;
+	top: 530px;
+	width: 185px;
+}
+
+#tolobby1:hover {
+	background-color: transparent;
+	background-image: url("../images/UI/lobbyHover.png");
+}
+
+#tolobby1:active {
+	background-color: transparent;
+	background-image: url("../images/UI/lobbyPressed.png");
+	height: 40px;
+}
+
+#back1 {
+	background-color: transparent;
+	background-image: url("../images/UI/backUnpressed.png");
+	height: 45px;
+	left: 600px;
+	position: absolute;
+	margin-left: -700px;
+	margin-top: -75px;
+	border-width: 0px;
+	top: 530px;
+	width: 160px;
+}
+
+#back1:hover {
+	background-color: transparent;
+	background-image: url("../images/UI/backHover.png");
+}
+
+#back1:active {
+	background-color: transparent;
+	background-image: url("../images/UI/backPressed.png");
+}
