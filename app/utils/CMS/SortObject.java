@@ -10,6 +10,7 @@ package utils.CMS;
 public abstract class SortObject implements Comparable<SortObject> {
 
     private String id;
+    private int idU;
     private int num;
 
     public void setId(String id){
@@ -18,11 +19,17 @@ public abstract class SortObject implements Comparable<SortObject> {
     public void setNum(int num){
         this.num = num;
     }
+    public void setIdU(int idU){
+        this.idU = idU;
+    }
     public String getId(){
         return id;
     }
     public int getNum(){
         return num;
+    }
+    public int getIdU(){
+        return idU;
     }
 
     @Override

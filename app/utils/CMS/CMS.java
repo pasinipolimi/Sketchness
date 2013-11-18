@@ -654,6 +654,194 @@ public class CMS {
         response1.close();
         return newId;
     }
+
+    public static JSONArray loadFirst(JsonNode jsonImages) throws JSONException{
+        JSONArray graph= new JSONArray();
+        SortObject sorting;
+        ArrayList<SortObject> tempList = new ArrayList<>();
+        JsonNode object;
+        JSONObject element;
+        int num = 0;
+
+        int i=0;
+        while(i<jsonImages.size()){
+            sorting = new SortObject() {};
+            object = jsonImages.get(i);
+            sorting.setId(object.get("id").asText());
+            if(object.has("descriptions")){
+                if(object.get("descriptions").has("segmentation")){
+                    num = object.get("descriptions").get("segmentation").size();
+                }
+                else{
+                    num = 0;
+                }
+            }
+            sorting.setNum(num);
+            tempList.add(i, sorting);
+            num = 0;
+            i++;
+        }
+
+        Collections.sort(tempList, new Comparator<SortObject>() {
+            @Override public int compare(SortObject o1, SortObject o2) {
+                if (o1.getNum() < o2.getNum()) {
+                    return -1;
+                } else if (o1.getNum() > o2.getNum()) {
+                    return 1;
+                }
+                return 0;
+            }
+
+        });
+
+        Iterator<SortObject> it = tempList.iterator();
+        int tmp = 1;
+        int count = 0;
+
+        while(it.hasNext()){
+            SortObject obj = it.next();
+
+            if(obj.getNum() == tmp){
+                count ++;
+            }
+            else if(obj.getNum() != tmp){
+                element = new JSONObject();
+                element.put("occurence", count);
+                element.put("annotations", tmp);
+                graph.put(element);
+                do{
+                    tmp++;
+                    count = 0;
+                    if(obj.getNum() != tmp){
+                        element = new JSONObject();
+                        element.put("occurence", count);
+                        element.put("annotations", tmp);
+                        graph.put(element);
+                    }
+                }while(obj.getNum() != tmp);
+                count = 1;
+            }
+        }
+        element = new JSONObject();
+        element.put("occurence", count);
+        element.put("annotations", tmp);
+        graph.put(element);
+
+        return graph;
+    }
+
+    public static JSONArray loadSecond(JsonNode actions) throws JSONException{
+        JSONArray graph= new JSONArray();
+        SortObject sorting;
+        ArrayList<SortObject> tempList = new ArrayList<>();
+        ArrayList<SortObject> tempList2 = new ArrayList<>();
+        JsonNode object;
+        JSONObject element;
+
+        int i = 0;
+        int j = 0;
+        while(i<actions.size()){
+            object = actions.get(i);
+            if(object.get("type").asText().equals("segmentation")){
+                if(object.has("user")){
+                    if(object.get("user").has("cubrik_userid")){
+                        sorting = new SortObject() {};
+                        sorting.setIdU(object.get("user").get("cubrik_userid").asInt());
+                        tempList.add(j, sorting);
+                        j++;
+                    }
+                }
+            }
+
+            i++;
+        }
+
+        Collections.sort(tempList, new Comparator<SortObject>() {
+            @Override public int compare(SortObject o1, SortObject o2) {
+                if (o1.getIdU() < o2.getIdU()) {
+                    return -1;
+                } else if (o1.getIdU() > o2.getIdU()) {
+                    return 1;
+                }
+                return 0;
+            }
+
+        });
+
+        Iterator<SortObject> it = tempList.iterator();
+        int tmp = tempList.get(0).getIdU();
+        int count = 0;
+
+        while(it.hasNext()){
+            SortObject obj = it.next();
+
+            if(obj.getIdU() == tmp){
+                count ++;
+            }
+            else if(obj.getIdU() != tmp){
+                sorting = new SortObject() {};
+                sorting.setIdU(tmp);
+                sorting.setNum(count);
+                tempList2.add(sorting);
+                do{
+                    tmp++;
+
+                }while(obj.getIdU() != tmp);
+                count = 1;
+            }
+        }
+        sorting = new SortObject() {};
+        sorting.setIdU(tmp);
+        sorting.setNum(count);
+        tempList2.add(sorting);
+
+        Collections.sort(tempList2, new Comparator<SortObject>() {
+            @Override public int compare(SortObject o1, SortObject o2) {
+                if (o1.getNum() < o2.getNum()) {
+                    return -1;
+                } else if (o1.getNum() > o2.getNum()) {
+                    return 1;
+                }
+                return 0;
+            }
+
+        });
+
+        Iterator<SortObject> it2 = tempList2.iterator();
+        tmp = 1;
+        count = 0;
+
+        while(it2.hasNext()){
+            SortObject obj = it2.next();
+
+            if(obj.getNum() == tmp){
+                count ++;
+            }
+            else if(obj.getNum() != tmp){
+                element = new JSONObject();
+                element.put("users", count);
+                element.put("images", tmp);
+                graph.put(element);
+                do{
+                    tmp++;
+                    count = 0;
+                    if(obj.getNum() != tmp){
+                        element = new JSONObject();
+                        element.put("users", count);
+                        element.put("images", tmp);
+                        graph.put(element);
+                    }
+                }while(obj.getNum() != tmp);
+                count = 1;
+            }
+        }
+        element = new JSONObject();
+        element.put("users", count);
+        element.put("images", tmp);
+        graph.put(element);
+
+        return graph;
+    }
     /*
      * Returns a tag based on a particular choice policy
      * @return String retrieved tag following a policy

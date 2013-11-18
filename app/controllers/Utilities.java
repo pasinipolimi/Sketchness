@@ -131,6 +131,16 @@ public class Utilities extends Controller {
         return ok(newId);
     }
 
+    public static Result loadFirstGraphCall() throws JSONException{
+        String result = Renderer.loadFirstGraph();
+        return ok(result);
+    }
+
+    public static Result loadSecondGraphCall() throws JSONException{
+        String result = Renderer.loadSecondGraph();
+        return ok(result);
+    }
+
     public static WebSocket<JsonNode> rendererStream(final String imageID)throws JSONException {
 
         return new WebSocket<JsonNode>() {

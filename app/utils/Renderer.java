@@ -445,6 +445,26 @@ public class Renderer extends UntypedActor {
         return info;
     }
 
+    public static String loadFirstGraph() throws JSONException{
+
+        JsonReader jsonReader = new JsonReader();
+        JsonNode itemImage = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image.json");
+
+        JSONArray info = CMS.loadFirst(itemImage);
+        String result = info.toString();
+        return result;
+    }
+
+    public static String loadSecondGraph() throws JSONException{
+
+        JsonReader jsonReader = new JsonReader();
+        JsonNode itemAction = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/action.json");
+
+        JSONArray info = CMS.loadSecond(itemAction);
+        String result = info.toString();
+        return result;
+    }
+
 
 }
 

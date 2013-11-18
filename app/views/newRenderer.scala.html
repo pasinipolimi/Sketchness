@@ -112,6 +112,10 @@ and open the template in the editor.
 
             <hr class="separator"></hr>
             <div id="drawArea" class="span12">
+
+                <div id="chart_div1" style="width: 650px; height: 400px;"></div>
+                <div id="chart_div2" style="width: 650px; height: 400px;"></div>
+
                 <div id="viewport">
 				<span id="canvaswindows">
 					<canvas id="draws" width="420" height="350" style="position:absolute;z-index:3;"></canvas>
@@ -144,10 +148,18 @@ and open the template in the editor.
     <script src="@routes.Assets.at("javascripts/renderer/nuovoUTask.js")"></script>
     <script src="@routes.Assets.at("javascripts/renderer/caricaStatistiche.js")"></script>
     <script src="@routes.Assets.at("javascripts/renderer/chiudiTask.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/loadFirstGraph.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/loadSecondGraph.js")"></script>
+    <script src="https://www.google.com/jsapi"></script>
+    <script>
+        google.load('visualization', '1', {'packages':['corechart']});
+    </script>
     <script>
         window.onload = function(){
             popolaSelectionAjax();
             caricaStatistiche();
+            loadFirstGraph();
+            loadSecondGraph();
             var loadedImage = $("#immagine");
             loadedImage.load(function(evt){
                 $("#imageWidth").text(loadedImage[0].naturalWidth + "px");

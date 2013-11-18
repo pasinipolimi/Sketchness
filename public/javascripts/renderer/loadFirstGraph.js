@@ -1,0 +1,40 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+function loadFirstGraph(){
+  $.jAjax({
+    url: "loadFirst",
+    onComplete: function(xhr,status){
+      if(xhr.readyState === 4){
+          if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
+
+             var result = JSON.parse(xhr.responseText);
+
+                   drawChart();
+
+                   function drawChart() {
+                     var data = google.visualization.arrayToDataTable([]);
+                     data.addColumn('number', 'Number od annotations ');
+                     data.addColumn('number', 'Number of images ');
+
+                     for(var i= 0; i < result.length ; i++){
+                        data.addRow([result[i].annotations , result[i].occurence ]);
+                     }
+                             var options = {
+                               title: 'Number of images with X annotations',
+                               hAxis: {title: 'annotation number', titleTextStyle: {color: 'red'}}
+                             };
+
+                     var chart = new google.visualization.ColumnChart(document.getElementById('chart_div1'));
+                     chart.draw(data, options);
+                   }
+          }
+          else{
+              alert("Request was unsuccesfull: "+ xhr.status);
+          }
+      }
+    }
+  });
+}
+

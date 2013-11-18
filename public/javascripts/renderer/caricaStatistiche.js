@@ -15,7 +15,7 @@ function caricaStatistiche(){
              var numSegment = result.numSegment[0];
              var mediaSegmenti = result.mediaSegImg[0];
              var numberUsers = result.numberUsers[0];
-             
+
              $("#statisticheSistema").show();
              $("#numeroFoto").text(totImg);
              $("#mediaTagFoto").text(Number(mediaTag).toFixed(2));
