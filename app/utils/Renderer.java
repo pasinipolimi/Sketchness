@@ -335,10 +335,12 @@ public class Renderer extends UntypedActor {
 
         JsonReader jsonReader = new JsonReader();
         JsonNode itemImage = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image.json");
+        JsonNode itemUsers = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/cubrikuser/9.json");
         int last;
         JSONObject result = new JSONObject();
 
         String totImg = Integer.toString(itemImage.size());
+        String numUsers = Integer.toString(itemUsers.size());
         JSONArray stats = CMS.retriveStats(itemImage);
 
         String tmp = stats.getJSONObject(0).getString("numTag");
@@ -364,6 +366,7 @@ public class Renderer extends UntypedActor {
         result.append("mediaTag", mediaTag);
         result.append("numSegment", numeroSegmenti);
         result.append("mediaSegImg", mediaSegPerImg);
+        result.append("numberUsers", numUsers);
         String sendStats = result.toString();
         return sendStats;
     }
