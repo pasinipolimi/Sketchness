@@ -3,7 +3,6 @@ package utils.CMS;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.*;
 
@@ -18,7 +17,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.node.ObjectNode;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -842,6 +840,112 @@ public class CMS {
 
         return graph;
     }
+
+    public static JSONArray download1(JsonNode actions) throws JSONException{
+        JSONArray down1= new JSONArray();
+        SortObject sorting;
+        ArrayList<SortObject> tempList = new ArrayList<>();
+        ArrayList<DownObject> tempList2 = new ArrayList<>();
+        JsonNode object;
+        JSONObject element;
+
+        int i = 0;
+        int j = 0;
+        while(i<actions.size()){
+            object = actions.get(i);
+            if(object.get("type").asText().equals("segmentation")){
+                if(object.has("user")){
+                    if(object.get("user").has("cubrik_userid")){
+                        sorting = new SortObject() {};
+                        sorting.setIdU(object.get("user").get("cubrik_userid").asInt());
+                        sorting.setIdTmp(object.get("id").asInt());
+                        sorting.setImgTmp(object.get("image").asInt());
+                        tempList.add(j, sorting);
+                        j++;
+                    }
+                }
+            }
+
+            i++;
+        }
+
+        Collections.sort(tempList, new Comparator<SortObject>() {
+            @Override public int compare(SortObject o1, SortObject o2) {
+                if (o1.getIdU() < o2.getIdU()) {
+                    return -1;
+                } else if (o1.getIdU() > o2.getIdU()) {
+                    return 1;
+                }
+                return 0;
+            }
+
+        });
+
+        Iterator<SortObject> it = tempList.iterator();
+        int tmp = tempList.get(0).getIdU();
+        DownObject user;
+        StoredStatObj stat;
+        ArrayList<StoredStatObj> elements = new ArrayList<>();
+
+        while(it.hasNext()){
+            SortObject obj = it.next();
+
+            if(obj.getIdU() == tmp){
+
+                stat= new StoredStatObj(obj.getIdTmp(), obj.getImgTmp());
+                elements.add(stat);
+            }
+            else if(obj.getIdU() != tmp){
+                user = new DownObject() {};
+                user.setId(tmp);
+                user.setElement(elements);
+                tempList2.add(user);
+                do{
+                    tmp++;
+
+                }while(obj.getIdU() != tmp);
+                elements = new ArrayList<>();
+                stat= new StoredStatObj(obj.getIdTmp(), obj.getImgTmp());
+                elements.add(stat);
+            }
+        }
+        user = new DownObject() {};
+        user.setId(tmp);
+        user.setElement(elements);
+        tempList2.add(user);
+
+
+
+        Iterator<DownObject> it2 = tempList2.iterator();
+
+        JSONObject son;
+        JSONArray body;
+        JSONObject content;
+
+        while(it2.hasNext()){
+            son = new JSONObject();
+            body = new JSONArray();
+            DownObject obj = it2.next();
+            son.put("user", obj.getId());
+
+            Iterator<StoredStatObj> it3 = obj.getElement().iterator();
+
+            while(it3.hasNext()){
+                StoredStatObj obj2 = it3.next();
+                content = new JSONObject();
+                content.put("segment",obj2.getId1());
+                content.put("image",obj2.getId2());
+                body.put(content);
+            }
+            son.put("sketch",body);
+            down1.put(son);
+        }
+
+
+        return down1;
+    }
+
+
     /*
      * Returns a tag based on a particular choice policy
      * @return String retrieved tag following a policy

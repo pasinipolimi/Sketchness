@@ -13,6 +13,9 @@ public abstract class SortObject implements Comparable<SortObject> {
     private int idU;
     private int num;
 
+    private int idTmp;
+    private int imgTmp;
+
     public void setId(String id){
         this.id = id;
     }
@@ -22,6 +25,12 @@ public abstract class SortObject implements Comparable<SortObject> {
     public void setIdU(int idU){
         this.idU = idU;
     }
+    public void setIdTmp(int idTmp){
+        this.idTmp = idTmp;
+    }
+    public void setImgTmp(int imgTmp){
+        this.imgTmp = imgTmp;
+    }
     public String getId(){
         return id;
     }
@@ -30,6 +39,12 @@ public abstract class SortObject implements Comparable<SortObject> {
     }
     public int getIdU(){
         return idU;
+    }
+    public int getIdTmp(){
+        return idTmp;
+    }
+    public int getImgTmp(){
+        return imgTmp;
     }
 
     @Override

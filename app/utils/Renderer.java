@@ -465,6 +465,21 @@ public class Renderer extends UntypedActor {
         return result;
     }
 
+    public static String downloadStats1() throws JSONException{
+        JsonReader jsonReader = new JsonReader();
+        JsonNode itemAction = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/action.json");
+
+        JSONArray info = CMS.download1(itemAction);
+        String result = info.toString();
+        return result;
+    }
+
+    public static String downloadStats2() throws JSONException{
+
+        String result = null;
+        return result;
+    }
+
 
 }
 

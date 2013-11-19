@@ -141,6 +141,15 @@ public class Utilities extends Controller {
         return ok(result);
     }
 
+    public static Result downloadStats1Call() throws JSONException{
+        String result = Renderer.downloadStats1();
+        return ok(result);
+    }
+
+    public static Result downloadStats2Call() throws JSONException{
+        return ok();
+    }
+
     public static WebSocket<JsonNode> rendererStream(final String imageID)throws JSONException {
 
         return new WebSocket<JsonNode>() {

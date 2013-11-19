@@ -22,7 +22,7 @@ function loadSecondGraph(){
                         data.addRow([result[i].images , result[i].users ]);
                      }
                              var options = {
-                               title: 'Number of users who has annotated X images',
+                               title: 'Number of users that have annotated X images',
                                hAxis: {title: 'image number', titleTextStyle: {color: 'red'}}
                              };
 

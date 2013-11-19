@@ -39,6 +39,8 @@ GET     /AddUTask                         controllers.Utilities.addUTaskCall
 GET     /TaskSelection                    controllers.Utilities.taskSelectionCall
 GET     /loadFirst                        controllers.Utilities.loadFirstGraphCall
 GET     /loadSecond                       controllers.Utilities.loadSecondGraphCall
+GET     /downloadStats1                   controllers.Utilities.downloadStats1Call
+GET     /downloadStats2                   controllers.Utilities.downloadStats2Call
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
