@@ -74,12 +74,18 @@ public class IsOnline {
         try{
             Connection connection = DB.getConnection();
             String query = "UPDATE USERS SET LAST_ACTIVE = ? WHERE NAME = ? ";
+            String query1 = "UPDATE USERS SET ONLINE = ? WHERE NAME = ? ";
 
             PreparedStatement statement = connection.prepareStatement(query);
+            PreparedStatement statement1 = connection.prepareStatement(query1);
 
             statement.setTimestamp(1, active);
             statement.setString(2, name);
             statement.executeUpdate();
+
+            statement1.setBoolean(1, true);
+            statement1.setString(2, name);
+            statement1.executeUpdate();
 
             connection.close();
         }
