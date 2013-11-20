@@ -806,7 +806,7 @@ public class CMS {
         });
 
         Iterator<SortObject> it2 = tempList2.iterator();
-        tmp = 1;
+        tmp = 0;
         count = 0;
 
         while(it2.hasNext()){

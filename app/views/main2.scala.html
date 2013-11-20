@@ -48,25 +48,27 @@
     </div>
     }
     <div id="backgroundAllMain2Pages" class="backgroundimage-signup">
-        <div id="ProfileContenitor" class="btn-group">
+
             @subjectPresentOr() {
             @defining(Application.getLocalUser(session())) { user =>
-            <img id="ProfileImage" src="../assets/images/registration/nation.png"/>
-            <a id="ProfileLink" class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                <i class="icon-user"></i> @user.name
-                <span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu">
-                <li><a href="@routes.Application.profile()">@Messages("playauthenticate.navigation.profile")</a></li>
-                <li><a href="@routes.Account.link()">@Messages("playauthenticate.navigation.link_more")</a></li>
-                <li class="divider"></li>
-                <li><a href="@routes.Application.doLogout"><i class="icon-off"></i> @Messages("playauthenticate.navigation.logout")</a></li>
-            </ul>
+                <div id="ProfileContenitor" class="btn-group">
+                    <img id="ProfileImage" src="../assets/images/registration/nation.png"/>
+                    <a id="ProfileLink" class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="icon-user"></i> @user.name
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="@routes.Application.profile()">@Messages("playauthenticate.navigation.profile")</a></li>
+                        <li><a href="@routes.Account.link()">@Messages("playauthenticate.navigation.link_more")</a></li>
+                        <li class="divider"></li>
+                        <li><a href="@routes.Application.doLogout"><i class="icon-off"></i> @Messages("playauthenticate.navigation.logout")</a></li>
+                    </ul>
+                </div>
             }
             }{
             <!-- <a href="@routes.Application.login()" class="btn btn-primary btn-mini @("disabled".when(nav == "login"))">@Messages("playauthenticate.navigation.login")</a>       -->
             }
-        </div>
+
 
         @content
     </div>

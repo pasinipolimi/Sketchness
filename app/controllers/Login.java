@@ -15,6 +15,7 @@ import play.mvc.Result;
 import providers.MyUsernamePasswordAuthProvider;
 import providers.MyUsernamePasswordAuthProvider.MyLogin;
 import scala.concurrent.duration.Duration;
+import views.html.lobby;
 import views.html.sketchness_login;
 
 import java.util.concurrent.TimeUnit;
@@ -50,9 +51,18 @@ public class Login extends Controller {
             );
         }
 
+        final User localUser = getLocalUser(session());
+
+        if(localUser != null){
+
+            return ok(lobby.render(localUser));
+        }
+        else{
+            return ok(sketchness_login.render(MyUsernamePasswordAuthProvider.LOGIN_FORM));
+        }
 
 
-        return ok(sketchness_login.render(MyUsernamePasswordAuthProvider.LOGIN_FORM));
+
 
     }
 
