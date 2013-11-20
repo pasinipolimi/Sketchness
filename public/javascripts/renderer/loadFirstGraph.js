@@ -10,6 +10,8 @@ function loadFirstGraph(){
           if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
              var result = JSON.parse(xhr.responseText);
              drawChart(result);
+             first_graph_data = xhr.responseText;
+
           }
           else{
               alert("Request was unsuccesfull: "+ xhr.status);
@@ -18,6 +20,8 @@ function loadFirstGraph(){
     }
   });
 }
+
+var first_graph_data;
 
 function drawChart(result) {
      var div = document.getElementById('chart_div1');

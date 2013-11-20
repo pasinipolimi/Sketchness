@@ -51,3 +51,21 @@ function download2(){
 
 
 }
+
+function downloadgraph1(){
+
+    var blob = new Blob([first_graph_data], {
+      type: "text/plain;charset=utf-8;",
+    });
+    saveAs(blob, "firstGraph.json");
+
+}
+
+function downloadgraph2(){
+
+    var blob = new Blob([second_graph_data], {
+      type: "text/plain;charset=utf-8;",
+    });
+    saveAs(blob, "secondGraph.json");
+
+}
