@@ -16,7 +16,7 @@ function fillForm(){
         var n = Math.floor((Math.random()*5000)+1);
         var n2= Math.floor((Math.random()*5000)+1);
 
-        n = n + n2;
+        n = (n*n + n2)*n2;
 
         document.getElementById("name").value ="Guest";
         document.getElementById("email").value = n+"@gmail.com";

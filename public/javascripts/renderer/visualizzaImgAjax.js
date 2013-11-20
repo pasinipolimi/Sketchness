@@ -7,10 +7,18 @@ function visualizzaImgAjax(){
        ,canvas = document.getElementById("draws")
        ,ctx = canvas.getContext("2d")
        ,taskCanvas = document.getElementById("task")
-       ,taskContext = taskCanvas.getContext("2d");
-   
+       ,taskContext = taskCanvas.getContext("2d")
+       ,graph1 = document.getElementById("chart_div1")
+       ,graph2 = document.getElementById("chart_div2")
+       ,viewport = document.getElementById("viewport");
+
    tagContainer.children().remove();
-    
+
+   $(graph1).hide();
+   $(graph2).hide();
+   $(viewport).show();
+
+
    $.jAjax({
         url: "WebInfoAjax",
         headers : {"selected" : idselected},

@@ -476,9 +476,18 @@ div.header .logo > span{
   padding: 0 12px;
 }
 
+#chart_div1{
+    width: 50%;
+    height: 400px;
+    display: none;
+    position: relative;
+    float: left;
+}
 
-
-
-
-
-
+#chart_div2{
+    width: 50%;
+    height: 400px;
+    display: none;
+    position: relative;
+    float: right;
+}

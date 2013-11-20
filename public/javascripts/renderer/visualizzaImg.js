@@ -16,3 +16,14 @@ function visualizzaImg(){
 function updateSize(evt){
 
 }
+
+function displayGraphs(){
+    var graph1 = document.getElementById("chart_div1");
+    var graph2 = document.getElementById("chart_div2");
+    var canvas = document.getElementById("viewport");
+
+    $(canvas).hide();
+    $(graph1).show();
+    $(graph2).show();
+
+}

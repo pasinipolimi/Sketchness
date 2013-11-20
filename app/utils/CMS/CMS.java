@@ -693,7 +693,7 @@ public class CMS {
         });
 
         Iterator<SortObject> it = tempList.iterator();
-        int tmp = 1;
+        int tmp = tempList.get(0).getNum();
         int count = 0;
 
         while(it.hasNext()){
@@ -847,7 +847,6 @@ public class CMS {
         ArrayList<SortObject> tempList = new ArrayList<>();
         ArrayList<DownObject> tempList2 = new ArrayList<>();
         JsonNode object;
-        JSONObject element;
 
         int i = 0;
         int j = 0;
@@ -943,6 +942,109 @@ public class CMS {
 
 
         return down1;
+    }
+
+    public static JSONArray download2(JsonNode actions) throws JSONException{
+        JSONArray down2= new JSONArray();
+        SortObject sorting;
+        ArrayList<SortObject> tempList = new ArrayList<>();
+        ArrayList<DownObject> tempList2 = new ArrayList<>();
+        JsonNode object;
+
+        int i = 0;
+        int j = 0;
+        while(i<actions.size()){
+            object = actions.get(i);
+            if(object.get("type").asText().equals("segmentation")){
+                if(object.has("user")){
+                    if(object.get("user").has("cubrik_userid")){
+                        sorting = new SortObject() {};
+                        sorting.setIdU(object.get("user").get("cubrik_userid").asInt());
+                        sorting.setIdTmp(object.get("id").asInt());
+                        sorting.setImgTmp(object.get("image").asInt());
+                        tempList.add(j, sorting);
+                        j++;
+                    }
+                }
+            }
+
+            i++;
+        }
+
+        Collections.sort(tempList, new Comparator<SortObject>() {
+            @Override public int compare(SortObject o1, SortObject o2) {
+                if (o1.getImgTmp() < o2.getImgTmp()) {
+                    return -1;
+                } else if (o1.getImgTmp() > o2.getImgTmp()) {
+                    return 1;
+                }
+                return 0;
+            }
+
+        });
+
+        Iterator<SortObject> it = tempList.iterator();
+        int tmp = tempList.get(0).getImgTmp();
+        DownObject image;
+        StoredStatObj stat;
+        ArrayList<StoredStatObj> elements = new ArrayList<>();
+
+        while(it.hasNext()){
+            SortObject obj = it.next();
+
+            if(obj.getImgTmp() == tmp){
+
+                stat= new StoredStatObj(obj.getIdTmp(), obj.getIdU());
+                elements.add(stat);
+            }
+            else if(obj.getImgTmp() != tmp){
+                image = new DownObject() {};
+                image.setId(tmp);
+                image.setElement(elements);
+                tempList2.add(image);
+                do{
+                    tmp++;
+
+                }while(obj.getImgTmp() != tmp);
+                elements = new ArrayList<>();
+                stat= new StoredStatObj(obj.getIdTmp(), obj.getIdU());
+                elements.add(stat);
+            }
+        }
+        image = new DownObject() {};
+        image.setId(tmp);
+        image.setElement(elements);
+        tempList2.add(image);
+
+
+
+        Iterator<DownObject> it2 = tempList2.iterator();
+
+        JSONObject son;
+        JSONArray body;
+        JSONObject content;
+
+        while(it2.hasNext()){
+            son = new JSONObject();
+            body = new JSONArray();
+            DownObject obj = it2.next();
+            son.put("image", obj.getId());
+
+            Iterator<StoredStatObj> it3 = obj.getElement().iterator();
+
+            while(it3.hasNext()){
+                StoredStatObj obj2 = it3.next();
+                content = new JSONObject();
+                content.put("segment",obj2.getId1());
+                content.put("user",obj2.getId2());
+                body.put(content);
+            }
+            son.put("sketch",body);
+            down2.put(son);
+        }
+
+
+        return down2;
     }
 
 

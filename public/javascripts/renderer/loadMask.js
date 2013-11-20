@@ -20,12 +20,21 @@ var mediaimg = $("#mediaLocator").val();
 var taskImage=new Image();
 taskImage.src=mediaimg;
 
+ var graph1 = document.getElementById("chart_div1");
+ var graph2 = document.getElementById("chart_div2");
+ var canvas = document.getElementById("viewport");
+
+ $(canvas).show();
+ $(graph1).hide();
+ $(graph2).hide();
+
+
 
 
 try {
 	  var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
-	  //socket = new WS($('#renderWebSocket').data('ws'));
-	  socket = new WS("ws://www.sketchness.com/rendererStream?imageID="+selectionimg);
+	  socket = new WS("ws://localhost:9000/rendererStream?imageID="+selectionimg);
+	  //socket = new WS("ws://www.sketchness.com/rendererStream?imageID="+selectionimg);
 
       socket.onmessage = onSocketMessage;
 
@@ -73,15 +82,18 @@ var drawTracesMask = function(taskImage,selectionimg,tag) {
 
 
         maskImage.onload = function() {
-        maskContext.save();
-        maskContext.beginPath();
 
-        maskCanvas.width=taskCanvas.width;
-        maskCanvas.height=taskCanvas.height;
-        maskContext.drawImage(taskImage,0,0,maskCanvas.width,maskCanvas.height);
-        maskContext.drawImage(maskImage,0,0,maskCanvas.width,maskCanvas.height);
-        maskContext.restore();
-        };
+        if(maskImage.src.substring(maskImage.src.indexOf("=")+1,maskImage.src.indexOf("&"))==$("#ImgAttivattiva").val()){
+            maskContext.save();
+            maskContext.beginPath();
+
+            maskCanvas.width=taskCanvas.width;
+            maskCanvas.height=taskCanvas.height;
+            maskContext.drawImage(taskImage,0,0,maskCanvas.width,maskCanvas.height);
+            maskContext.drawImage(maskImage,0,0,maskCanvas.width,maskCanvas.height);
+            maskContext.restore();
+            };
+        }
 }
 
 
@@ -107,6 +119,7 @@ var gameloop = (function(){
 
 
     		case "trace":
+    		                if(m.imageId == $("#ImgAttivattiva").val()){
     							ctx.lineJoin = "round";
 
                                 ctx.beginPath();
@@ -138,6 +151,7 @@ var gameloop = (function(){
     										}
 
                                         };
+                            }
     			break;
 
 

@@ -135,6 +135,7 @@ public class Renderer extends UntypedActor {
                                     points.put("points", actualObj);
                                     points.put("type", "trace");
                                     points.put("color", c.name());
+                                    points.put("imageId", imageId);
                                     channel.write(points);
                                 }
                                 toAggregate.add(actualObj.toString());
@@ -475,8 +476,11 @@ public class Renderer extends UntypedActor {
     }
 
     public static String downloadStats2() throws JSONException{
+        JsonReader jsonReader = new JsonReader();
+        JsonNode itemAction = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/action.json");
 
-        String result = null;
+        JSONArray info = CMS.download2(itemAction);
+        String result = info.toString();
         return result;
     }
 

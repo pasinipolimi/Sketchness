@@ -242,6 +242,8 @@ public class User extends Model implements Subject {
                 n = n + n2;
                 String ns = Integer.toString(n);
                 nickname=  nickname+ns;
+
+                checkNickname(nickname);
             }
 
             connection.close();
