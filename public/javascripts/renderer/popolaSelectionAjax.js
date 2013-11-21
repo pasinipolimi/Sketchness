@@ -23,7 +23,8 @@ function popolaSelectionAjax(){
                     ids = result.image[0];
                     $.each(ids, function(i,d){
                             option=document.createElement("option");
-                            option.value = option.text = d.id;
+                            option.value = d.id+"\" onmouseover=\"imgPreview('"+d.media+"');\" onclick=\"visualizzaImgAjax('"+d.id+"');";
+                            option.text = d.id;
                             selection.append(option);
 
                     });

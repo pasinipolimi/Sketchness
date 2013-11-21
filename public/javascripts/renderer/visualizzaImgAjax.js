@@ -1,7 +1,6 @@
 
-function visualizzaImgAjax(){
+function visualizzaImgAjax(idselected){
    var tagContainer = $(".tag.listBody")
-       ,idselected = $("#selection").val()
        ,url= "http://54.228.220.100/"
        ,taskImage
        ,canvas = document.getElementById("draws")
@@ -39,7 +38,7 @@ function visualizzaImgAjax(){
                         tagContainer.append("<div class='listItem' onclick=\"loadMask('"+d.tag.substring(1, d.tag.length -1)+"')\">"+ d.tag.substring(1, d.tag.length -1) +"</div>");
                     });
                     
-                    url += result[0].medialocator.substring(1, result[0].medialocator.length -1)
+                    url += result[0].medialocator.substring(1, result[0].medialocator.length -1);
                     taskImage=new Image();
                     taskImage.src=url;
                     $("#immagine").attr("src",url);

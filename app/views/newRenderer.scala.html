@@ -30,7 +30,7 @@ and open the template in the editor.
                     <div class="panelTitle">Images</div>
                     <div class="span6">
                         <div class="intestazione">
-                            <select id="selection" class="customSelect" name="selection" onchange="visualizzaImgAjax();">
+                            <select id="selection" class="customSelect" name="selection">
                             </select>
                         </div>
                         <span id="tag"></span>
@@ -157,6 +157,7 @@ and open the template in the editor.
     <script src="@routes.Assets.at("javascripts/renderer/loadSecondGraph.js")"></script>
     <script src="@routes.Assets.at("javascripts/renderer/FileSaver.js")"></script>
     <script src="@routes.Assets.at("javascripts/renderer/download.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/imgPreview.js")"></script>
     <script src="https://www.google.com/jsapi"></script>
     <script>
         google.load('visualization', '1', {'packages':['corechart']});

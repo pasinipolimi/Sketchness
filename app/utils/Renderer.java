@@ -185,7 +185,7 @@ public class Renderer extends UntypedActor {
     				return 0x00FFFFFF & rgb;
     			} else {
     				// nothing to do
-    				return rgb;
+    				return 0xAAFFFFFF & rgb;
     			}
     		}
     	};

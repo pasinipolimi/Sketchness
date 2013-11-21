@@ -363,6 +363,7 @@ public class CMS {
             sorting = new SortObject() {};
             object = jsonImages.get(i);
             sorting.setId(object.get("id").asText());
+            sorting.setMedia(rootUrl + object.get("mediaLocator").asText());
             if(object.has("descriptions")){
                 if(object.get("descriptions").has("segmentation")){
                     num = object.get("descriptions").get("segmentation").size();
@@ -395,6 +396,7 @@ public class CMS {
             element = new JSONObject();
             SortObject obj = it.next();
             element.put("id", obj.getId());
+            element.put("media", obj.getMedia());
             imageIds.put(element);
         }
 
