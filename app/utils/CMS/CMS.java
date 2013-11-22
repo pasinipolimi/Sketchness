@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.*;
 
+import models.game.Game;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -189,18 +190,30 @@ public class CMS {
      * been already faced and so on. We will add this feature in the future.
     *
      */
-    public static void taskSetInitialization(HashSet<ObjectNode> priorityTaskHashSet, HashSet<ObjectNode> taskHashSet, Room roomChannel) throws Error {
+    public static void taskSetInitialization(HashSet<ObjectNode> priorityTaskHashSet, HashSet<ObjectNode> taskHashSet, Room roomChannel) throws Error,JSONException {
 
         JsonReader jsonReader = new JsonReader();
         JsonNode retrievedTasks = null;
-        JsonNode retrievedImages = null;
+        JsonNode retrievedImagesOrdered = null;
+
         //[TODO] Fail safe in case of not being able to retrieve the instances
         try {
             retrievedTasks = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/task.json");
-            retrievedImages = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image.json");
+            retrievedImagesOrdered = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image.json");
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("[CMS] The request to the CMS is malformed");
         }
+
+        int i = 0;
+        ArrayList<JsonNode> retrievedImages = new ArrayList<>();
+
+        while(i<retrievedImagesOrdered.size()){
+            retrievedImages.add(i,retrievedImagesOrdered.get(i));
+            i++;
+        }
+
+        Long seed = System.nanoTime();
+        Collections.shuffle(retrievedImages, new Random(seed));
 
 
         //Fill the set of task to be performed with the task that has been 

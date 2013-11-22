@@ -145,7 +145,7 @@ public class Game extends GameRoom {
         }
     }
 
-    private Integer generateRandomItem(int i, int size){
+    public Integer generateRandomItem(int i, int size){
         Integer item;
         byte trials = 0;
         do {
@@ -163,7 +163,7 @@ public class Game extends GameRoom {
 
         return item;
     }
-    private Integer generateRandomItem(int size){
+    public static Integer generateRandomItem(int size){
         Integer item;
         byte trials = 0;
         do {
