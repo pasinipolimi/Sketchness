@@ -82,6 +82,7 @@ public class Game extends GameRoom {
     private Integer uTaskID = null;
     private ObjectNode taskImage;
     private Integer sessionId;
+    private final static Integer maxSinglePlayer = Play.application().configuration().getInt("maxSinglePlayer");
 
     public Game() {
         super(Game.class);
@@ -100,7 +101,7 @@ public class Game extends GameRoom {
             //In the initial idea of single player, give 50 images to the 
             //player that is segmenting
             if (requiredPlayers == 1) {
-                maxRound = 200;
+                maxRound = maxSinglePlayer;
             }
             missingPlayers = requiredPlayers;
             newGameSetup();
@@ -199,25 +200,17 @@ public class Game extends GameRoom {
             while (it2.hasNext()) {
                 ObjectNode obj = it2.next();
                 if (i == item) {
-                    if(!usedTags.contains(obj.get("tag").asText())|| requiredPlayers == 1){
-                        usedTags.add(obj.get("tag").asText());
-                        guessObject = obj;
-                        Integer task = guessObject.get("taskid").asInt();
-                        if (usedUTasks.contains(task)) {
-                            priorityTaskHashSet.remove(guessObject);
-                            guessObject = null;
-                        } else {
-                            uTaskID = guessObject.get("utaskid").asInt();
-                            usedUTasks.add(task);
-                        }
-                        break;
+                    usedTags.add(obj.get("tag").asText());
+                    guessObject = obj;
+                    Integer task = guessObject.get("taskid").asInt();
+                    if (usedUTasks.contains(task)) {
+                        priorityTaskHashSet.remove(guessObject);
+                        guessObject = null;
+                    } else {
+                        uTaskID = guessObject.get("utaskid").asInt();
+                        usedUTasks.add(task);
                     }
-                    else{
-                        item = generateRandomItem(i, size);
-                        i=0;
-                        it2 = priorityTaskHashSet.iterator();
-                        continue;
-                    }
+                    break;
                 }
                 i = i + 1;
             }
@@ -258,6 +251,7 @@ public class Game extends GameRoom {
                             break;
                         }
                         else{
+                            taskHashSet.remove(obj);
                             size = taskHashSet.size();
                             item = generateRandomItem(i,size);
                             i= 0;
