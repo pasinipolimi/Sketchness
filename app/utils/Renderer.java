@@ -17,8 +17,14 @@ import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
+
 import static java.util.concurrent.TimeUnit.SECONDS;
 import javax.imageio.ImageIO;
 import org.codehaus.jackson.JsonFactory;
@@ -35,6 +41,7 @@ import org.json.JSONObject;
 import play.Logger;
 import play.Play;
 
+import play.db.DB;
 import play.libs.Akka;
 import play.libs.F;
 import play.libs.Json;
@@ -336,13 +343,29 @@ public class Renderer extends UntypedActor {
 
         JsonReader jsonReader = new JsonReader();
         JsonNode itemImage = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image.json");
-        JsonNode itemUsers = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/cubrikuser/9.json");
+
         int last;
         JSONObject result = new JSONObject();
 
         String totImg = Integer.toString(itemImage.size());
-        String numUsers = Integer.toString(itemUsers.size());
+        String numUsers = "0";
         JSONArray stats = CMS.retriveStats(itemImage);
+        try{
+            Connection connection = DB.getConnection();
+
+            String query = "SELECT count(*) as totalUsers FROM USERS";
+            PreparedStatement statement = connection.prepareStatement(query);
+            ResultSet rs = statement.executeQuery();
+
+            if(rs.isBeforeFirst()){
+                rs.next();
+                numUsers = Integer.toString(rs.getInt("TOTALUSERS"));
+            }
+
+            connection.close();
+        }
+        catch(SQLException ex){
+        }
 
         String tmp = stats.getJSONObject(0).getString("numTag");
         tmp = tmp.substring(1);

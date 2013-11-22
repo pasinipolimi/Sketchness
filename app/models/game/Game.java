@@ -77,6 +77,8 @@ public class Game extends GameRoom {
     //We should not assign the same uTask to the same match, keep a list of the 
     //uTasks that has been already used
     private HashSet<Integer> usedUTasks = new HashSet<>();
+    //We should not use more times the same tag
+    private HashSet<String> usedTags = new HashSet<>();
     private Integer uTaskID = null;
     private ObjectNode taskImage;
     private Integer sessionId;
@@ -142,6 +144,43 @@ public class Game extends GameRoom {
         }
     }
 
+    private Integer generateRandomItem(int i, int size){
+        Integer item;
+        byte trials = 0;
+        do {
+            try {
+                item = new Random().nextInt(size);
+            } catch (IllegalArgumentException ex) {
+                item = null;
+                Logger.error("[GAME] Failed to retrieve Task Image, retrying.");
+                trials++;
+                if (trials >= 5) {
+                    throw new Error("[GAME] Failed to retrieve Task Image, aborting");
+                }
+            }
+        } while ((item == null)||(item == i));
+
+        return item;
+    }
+    private Integer generateRandomItem(int size){
+        Integer item;
+        byte trials = 0;
+        do {
+            try {
+                item = new Random().nextInt(size);
+            } catch (IllegalArgumentException ex) {
+                item = null;
+                Logger.error("[GAME] Failed to retrieve Task Image, retrying.");
+                trials++;
+                if (trials >= 5) {
+                    throw new Error("[GAME] Failed to retrieve Task Image, aborting");
+                }
+            }
+        } while (item == null);
+
+        return item;
+    }
+
     /*
      * Retrieves one of the images that has been stored to be segmented at random
      * being careful not to retrieve the same image two times for the same match.
@@ -154,33 +193,31 @@ public class Game extends GameRoom {
         //If we have task prioritized, then use them first
         while (priorityTaskHashSet.size() > 0 && guessObject == null) {
             int size = priorityTaskHashSet.size();
-            Integer item = null;
-            byte trials = 0;
-            do {
-                try {
-                    item = new Random().nextInt(size);
-                } catch (IllegalArgumentException ex) {
-                    item = null;
-                    Logger.error("[GAME] Failed to retrieve Task Image, retrying.");
-                    trials++;
-                    if (trials >= 5) {
-                        throw new Error("[GAME] Failed to retrieve Task Image, aborting");
-                    }
-                }
-            } while (item == null);
+            Integer item = generateRandomItem(size);
             int i = 0;
-            for (ObjectNode obj : priorityTaskHashSet) {
+            Iterator<ObjectNode> it2 = priorityTaskHashSet.iterator();
+            while (it2.hasNext()) {
+                ObjectNode obj = it2.next();
                 if (i == item) {
-                    guessObject = obj;
-                    Integer task = guessObject.get("taskid").asInt();
-                    if (usedUTasks.contains(task)) {
-                        priorityTaskHashSet.remove(guessObject);
-                        guessObject = null;
-                    } else {
-                        uTaskID = guessObject.get("utaskid").asInt();
-                        usedUTasks.add(task);
+                    if(!usedTags.contains(obj.get("tag").asText())|| requiredPlayers == 1){
+                        usedTags.add(obj.get("tag").asText());
+                        guessObject = obj;
+                        Integer task = guessObject.get("taskid").asInt();
+                        if (usedUTasks.contains(task)) {
+                            priorityTaskHashSet.remove(guessObject);
+                            guessObject = null;
+                        } else {
+                            uTaskID = guessObject.get("utaskid").asInt();
+                            usedUTasks.add(task);
+                        }
+                        break;
                     }
-                    break;
+                    else{
+                        item = generateRandomItem(i, size);
+                        i=0;
+                        it2 = priorityTaskHashSet.iterator();
+                        continue;
+                    }
                 }
                 i = i + 1;
             }
@@ -211,10 +248,22 @@ public class Game extends GameRoom {
             } while (item == null);
             if (item != null) {
                 int i = 0;
-                for (ObjectNode obj : taskHashSet) {
+                Iterator<ObjectNode> it = taskHashSet.iterator();
+                while (it.hasNext()) {
+                    ObjectNode obj = it.next();
                     if (i == item) {
-                        guessObject = obj;
-                        break;
+                        if(!usedTags.contains(obj.get("tag").asText())|| requiredPlayers == 1){
+                            guessObject = obj;
+                            usedTags.add(obj.get("tag").asText());
+                            break;
+                        }
+                        else{
+                            size = taskHashSet.size();
+                            item = generateRandomItem(i,size);
+                            i= 0;
+                            it = taskHashSet.iterator();
+                            continue;
+                        }
                     }
                     i = i + 1;
                 }
