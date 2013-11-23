@@ -18,28 +18,15 @@ define(["Class", "paper", "jquery"], function(Class, paper, $) {
 			this.view = this.project.view;
 
 			this.raster = new paper.Raster({
-				position: this.view.center,
 				visible: false
 			});
 
 			var that = this;
 			this.raster.on("load", function() {
-				that.fit();
 				that.raster.setVisible(true);
-				that.view.draw();
 
 				// TODO: handle the load event externally
 				$(that).trigger("load");
-			});
-
-			this.rectangle = new paper.Path.Rectangle({
-				size: this.view.size,
-				radius: 50
-			});
-
-			this.group = new paper.Group({
-				children: [this.rectangle, this.raster],
-				clipped: true
 			});
 		},
 
@@ -54,7 +41,7 @@ define(["Class", "paper", "jquery"], function(Class, paper, $) {
 			 */
 			show: function(image, size) {
 				this.raster.setSource(image);
-				this.imgsize = new paper.Size(size);
+				this.raster.setPosition(new paper.Size(size).divide(2));
 			},
 
 			/**
@@ -63,19 +50,6 @@ define(["Class", "paper", "jquery"], function(Class, paper, $) {
 			hide: function() {
 				this.raster.setVisible(false);
 				this.view.draw();
-			},
-
-			/**
-			 * Set the size of the image to fit
-			 * the view area keeping ratio.
-			 */
-			fit: function() {
-				var bounds = new paper.Rectangle({
-					center: this.view.center,
-					size: paper.Size.min(this.view.size, this.imgsize)
-				});
-
-				this.raster.fitBounds(bounds);
 			}
 		}
 	});

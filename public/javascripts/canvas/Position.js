@@ -87,7 +87,7 @@ define(["Class", "paper"], function(Class, paper) {
 
 					this.changed = false;
 				} else {
-					var delta = this.bounds.center.subtract(position).multiply(-1);
+					var delta = this.bounds.center.subtract(position).negate();
 					this.group.translate(delta);
 					this.bounds.setCenter(position);
 				}

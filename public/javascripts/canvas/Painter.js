@@ -18,6 +18,7 @@ define(["Class", "./Image", "./Path", "./Position"], function(Class, Image, Path
 			this.image = new Image(image);
 			this.path = new Path(path);
 			this.position = new Position(position);
+			this.zoom = new Zoom([image.view, path.view, position.view]);
 		},
 
 		_proto: {
@@ -30,6 +31,7 @@ define(["Class", "./Image", "./Path", "./Position"], function(Class, Image, Path
 			 */
 			showImage: function(image, width, height) {
 				this.image.show(image, [width, height]);
+				this.zoom.setBounds([0, 0, width, height]);
 			},
 
 			/**
@@ -70,7 +72,9 @@ define(["Class", "./Image", "./Path", "./Position"], function(Class, Image, Path
 			 * Set the current position point
 			 * for position and path
 			 *
-			 * @param point :paper.Point The x y coordinates of the point
+			 * @param point :Object The position point
+			 *     @property x :Number The x coordinate
+			 *     @property y :Number The y coordinate
 			 */
 			setPoint: function(point) {
 				this.position.draw(point);
@@ -117,6 +121,46 @@ define(["Class", "./Image", "./Path", "./Position"], function(Class, Image, Path
 			 */
 			endPath: function() {
 				this.path.end();
+			},
+
+			/**
+			 * Sets the zoom of the canvases with respect to the given scale center
+			 *
+			 * @param zoom :Number The zoom value
+			 * @param center :Object The scale center
+			 *     @property x :Number The x coordinate
+			 *     @property y :Number The y coordinate
+			 */
+			zoom: function(zoom, center) {
+				this.zoom.zoom(zoom, center);
+			},
+
+			/**
+			 * Scrolls the view of the canvases of a given vector
+			 *
+			 * @param vector :Object The translation vector
+			 *     @property x :Number The x coordinate
+			 *     @property y :Number The y coordinate
+			 */
+			scroll: function(vector) {
+				this.zoom.scroll(vector);
+			},
+
+			/**
+			 * Calculates the absolute position respect to the drawings coordinates
+			 * of a given point on the surface of the canvas
+			 *
+			 * @param point :Object The point to transform
+			 *     @property x :Number The x coordinate
+			 *     @property y :Number The y coordinate
+			 *
+			 * @return :Object The transformed point
+			 *     @property x :Number The x coordinate
+			 *     @property y :Number The y coordinate
+			 */
+			absolutePoint: function(point) {
+				var res = this.zoom.absolutePoint(point)
+				return { x: res.x, y: res.y };
 			}
 		}
 	});
