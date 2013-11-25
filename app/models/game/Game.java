@@ -1,7 +1,5 @@
 package models.game;
 
-import controllers.routes;
-import play.api.libs.concurrent.*;
 import play.db.DB;
 import play.libs.*;
 import play.libs.Akka;
@@ -24,6 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import models.Painter;
 import models.factory.GameRoom;
+import org.codehaus.jackson.JsonNode;
 import play.Play;
 import scala.concurrent.duration.Duration;
 
@@ -33,7 +32,9 @@ import utils.gamebus.GameMessages.*;
 import utils.LanguagePicker;
 import utils.LoggerUtils;
 import utils.gamebus.GameEventType;
+import utils.gamebus.GameMessages;
 import utils.gamemanager.GameManager;
+import utils.levenshteinDistance;
 
 /**
  * A chat room is an Actor.
@@ -83,6 +84,10 @@ public class Game extends GameRoom {
     private ObjectNode taskImage;
     private Integer sessionId;
     private final static Integer maxSinglePlayer = Play.application().configuration().getInt("maxSinglePlayer");
+    
+    String currentGuess;
+    Boolean askTag = false;
+    String askTagSketcher;
 
     public Game() {
         super(Game.class);
@@ -93,58 +98,66 @@ public class Game extends GameRoom {
      * @param message An Object representing a generic message sent to our Actor
      */
     @Override
-    public void onReceive(Object message) throws Exception {
-
-        if (message instanceof Room) {
-            this.roomChannel = ((Room) message);
-            requiredPlayers = ((Room) message).getRequiredPlayers();
-            //In the initial idea of single player, give 50 images to the 
-            //player that is segmenting
-            if (requiredPlayers == 1) {
+    public void onReceive(Object message) {
+       try {
+            if (message instanceof Room) {
+                this.roomChannel = ((Room) message);
+                requiredPlayers = ((Room) message).getRequiredPlayers();
+                //In the initial idea of single player, give 50 images to the 
+                //player that is segmenting
+                if (requiredPlayers == 1) {
                 maxRound = maxSinglePlayer;
+                }
+                missingPlayers = requiredPlayers;
+                newGameSetup();
+                Logger.info("[GAME] " + roomChannel.getRoom() + " created.");
             }
-            missingPlayers = requiredPlayers;
-            newGameSetup();
-            Logger.info("[GAME] " + roomChannel.getRoom() + " created.");
-        }
-        if (message instanceof GameEvent) {
-            GameEvent event = (GameEvent) message;
-            switch (event.getType()) {
-                case join:
-                    playerJoin(event.getMessage());
-                    publishLobbyEvent(GameEventType.gameInfo);
-                    break;
-                case quit:
-                    handleQuitter(event.getMessage());
-                    publishLobbyEvent(GameEventType.gameInfo);
-                    break;
-                case guessed:
-                    guessed(event.getMessage());
-                    break;
-                case timeExpired:
-                    playerTimeExpired(event.getMessage());
-                    break;
-                case finalTraces:
-                    CMS.closeUTask(uTaskID, CMS.segmentation(event.getObject(), sketcherPainter.name, sessionId));
-                    break;
-                case tag:
-                    taskImage.remove("tag");
-                    taskImage.put("tag", event.getMessage());
-                    sendTask(false);
-                    break;
-                case skipTask:
-                    skipTask(event.getMessage());
-                    break;
-                case taskAcquired:
-                    taskAcquired();
-                    break;
-                case getGameInfo:
-                    publishLobbyEvent(GameEventType.gameInfo);
-                    break;
+             if (message instanceof Join) {
+                playerJoin(((Join) message).getUsername());
+                publishLobbyEvent(GameEventType.matchInfo);
             }
-        }
+            else if (message instanceof GameEvent) {
+                JsonNode event = ((GameEvent) message).getJson();
+                if(event!=null) {
+                    event = event.get("message");
+                    String type = event.get("type").asText();
+                    switch(type) {
+                        case "taskAcquired":taskAcquired();break;
+                        case "leave":handleQuitter(event);break;
+                        case "matchInfo":publishLobbyEvent(GameEventType.matchInfo);break;
+                        // break point between working and not          TODO alcuni sono inutili..
+                        case "loading": break;
+                        case "roundBegin":nextRound(); break;
+                        case "roundEnd": break;
+                        case "image": break;
+                        case "tag": break;
+                        case "skip":skipTask(event.asText()); break;                //TODO wrong argument..
+                        case "endSegmentation": break;
+                        case "score": break;
+                        case "timer": playerTimeExpired(event.asText()); break;     //TODO wrong argument.. need the name of the expired player
+                        case "guess": handleTalk(event);break;
+                        case "guessed": guessed(event.get("word").asText());break;
+                        case "changeTool": break;
+                        case "beginPath": break;
+                        case "endPath": break;
+                    }
+                }
+            }
+            else if (message instanceof ObjectNode) {
+                JsonNode event=((JsonNode)message);
+                GameBus.getInstance().publish(new GameMessages.GameEvent(event, roomChannel));
+                event = event.get("message");
+                String type = event.get("type").asText();
+                switch(type) {
+                      case "leave":handleQuitter(event);break;
+                }
+            }
+       }
+       catch(Exception e) {
+          LoggerUtils.error("[GAME]", e);
+      }
     }
-
+    
     public Integer generateRandomItem(int i, int size){
         Integer item;
         byte trials = 0;
@@ -274,14 +287,15 @@ public class Game extends GameRoom {
      * role to the players that have never played as such first
      * <p>
      * @return The object related to the task: image + tag
+     * [TESTED]
      */
     private String nextSketcher() {
         sketcherPainter = null;
         int currentPlayers = requiredPlayers - disconnectedPlayers;
         int count = 0;
         //Publish system messages to inform that a new round is starting and the roles are being chosen
-        GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(), "newround"), roomChannel));
-        GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(), "choosingroles"), roomChannel));
+        GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info, Messages.get(LanguagePicker.retrieveLocale(), "newround")),roomChannel ));
+        GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info, Messages.get(LanguagePicker.retrieveLocale(), "choosingroles")),roomChannel ));
 
         //Set all the players as GUESSERS at the beginning
         for (int i = 0; i < currentPlayers; i++) {
@@ -308,7 +322,8 @@ public class Game extends GameRoom {
             }
         }
         //Publish a system message to inform the other players on who is the sketcher
-        GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(), "thesketcheris") + " " + sketcherPainter.name, roomChannel));
+        GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info, Messages.get(LanguagePicker.retrieveLocale(), "thesketcheris")+ " " + sketcherPainter.name),roomChannel ));
+        GameBus.getInstance().publish(new GameEvent(sketcherPainter.name,roomChannel, GameEventType.nextRound));
         return sketcherPainter.name;
     }
 
@@ -318,31 +333,26 @@ public class Game extends GameRoom {
      * If not enough players are connected, inform the players with a message and
      * wait for new connections or for all the modules to receive the login of the
      * respective players
-     * <p>
+     * [TESTED]
      */
     private void checkStart() throws Exception {
         if (!triggerStart()) //Send a message to inform about the missing players
         {
             int nPlayers = playersVect.size();
             if (requiredPlayers - nPlayers > 1) {
-                GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(), "waitingfor") + " " + (requiredPlayers - nPlayers) + " " + Messages.get(LanguagePicker.retrieveLocale(), "playerstostart"), roomChannel));
+                GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info,Messages.get(LanguagePicker.retrieveLocale(), "waitingfor") + " " + (requiredPlayers - nPlayers) + " " + Messages.get(LanguagePicker.retrieveLocale(), "playerstostart")), roomChannel));
             } else if (requiredPlayers - nPlayers == 1) {
-                GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(), "waitingfor") + " " + (requiredPlayers - nPlayers) + " " + Messages.get(LanguagePicker.retrieveLocale(), "playertostart"), roomChannel));
+                GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info,Messages.get(LanguagePicker.retrieveLocale(), "waitingfor") + " " + (requiredPlayers - nPlayers) + " " + Messages.get(LanguagePicker.retrieveLocale(), "playertostart")), roomChannel));
             }
         }
     }
 
     private boolean triggerStart() throws Error {
         boolean canStart = true;
-        for (Painter painter : playersVect) {
-            if (painter.getnModulesReceived() < modules) {
-                canStart = false;
-            }
-        }
         //We need to wait for all the modules to receive the player list
         if (canStart && playersVect.size() >= requiredPlayers) {
             GameManager.getInstance().removeInstance(getSelf());
-            publishLobbyEvent(GameEventType.gameStarted);
+            publishLobbyEvent(GameEventType.matchStart);
             if (taskAcquired) {
                 //Create a new session in which to store the actions of the game
                 if(!fixGroundTruth)
@@ -355,12 +365,12 @@ public class Game extends GameRoom {
                 nextRound();
                 //We start the game
                 if (sketcherPainter != null) {
-                    GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.gameStarted));
+                    GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.matchStart));
                 } else {
                     throw new Error("[GAME]: Cannot find a suitable Sketcher!");
                 }
             } else {
-                GameBus.getInstance().publish(new SystemMessage(Messages.get(LanguagePicker.retrieveLocale(), "acquiring"), roomChannel));
+                GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info, Messages.get(LanguagePicker.retrieveLocale(), "acquiring")),roomChannel ));
                 GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.gameLoading));
             }
             return true;
@@ -412,7 +422,7 @@ public class Game extends GameRoom {
         }
     }
 
-    private void sendTask(Boolean ask) {
+    private void sendTask(Boolean ask) {        //TODO passare ai messaggi GameMessages?
         if (ask) {
             areWeAsking = true;
             GameEvent task = new GameEvent(sketcherPainter.name, roomChannel, GameEventType.askTag);
@@ -482,59 +492,47 @@ public class Game extends GameRoom {
         roundNumber = 0;
         gameStarted = false;
         playersVect = new CopyOnWriteArrayList<>();
+        
         Akka.system().scheduler().scheduleOnce(
                 Duration.create(1000, TimeUnit.MILLISECONDS),
                 new Runnable() {
-            @Override
-            public void run() {
-                Integer trials = 0;
-                Boolean completed = false;
-                while (trials < 5 && !completed) {
-                    try {
-                        trials++;
-                        if(!fixGroundTruth)
-                            CMS.taskSetInitialization(priorityTaskHashSet, taskHashSet, roomChannel);
-                        else
+                    @Override
+                    public void run() {
+                        Integer trials = 0;
+                        Boolean completed = false;
+                        while (trials < 5 && !completed) {
+                            try {
+                                trials++;
+                                if(!fixGroundTruth)
+                                    CMS.taskSetInitialization(priorityTaskHashSet, taskHashSet, roomChannel);
+                                else
                             CMS.fixGroundTruth(groundTruthId, priorityTaskHashSet, taskHashSet, roomChannel);
-                        completed = true;
-                    } catch (Exception ex) {
-                        LoggerUtils.error("GAME", ex);
+                                completed = true;
+                            } catch (Exception ex) {
+                                LoggerUtils.error("GAME", ex);
+                            }
+                        }
+                        if (trials >= 5) {
+                            killActor();
+                            throw new RuntimeException("[GAME]: Impossible to retrieve the set of image relevant for this game, aborting");
+                        }
                     }
-                }
-                if (trials >= 5) {
-                    killActor();
-                    throw new RuntimeException("[GAME]: Impossible to retrieve the set of image relevant for this game, aborting");
-                }
-            }
-        },
-                Akka.system().dispatcher());
+                },Akka.system().dispatcher()
+        );
+        
         Logger.info("[GAME] New game started");
     }
 
     private void playerJoin(String username) throws Exception {
         Logger.debug("[GAME]: Player Joined");
-        int count = 0;
-        for (Painter painter : playersVect) {
-            if (painter.name.equalsIgnoreCase(username)) {
-                painter.setnModulesReceived(painter.getnModulesReceived() + 1);
-                count = painter.getnModulesReceived();
-                Logger.debug("[GAME]: player " + username + " counted " + count);
-                break;
-            }
-        }
-        if (count == 0) {
-            Painter painter = new Painter(username, false);
-            painter.setnModulesReceived(1);
-            //Add the new entered player, it has never been a sketcher in this game (false)
-            playersVect.add(painter);
-            publishLobbyEvent(GameEventType.join);
-            Logger.info("[GAME]: added player " + playersVect.get(playersVect.size() - 1).name);
-            //Check if we can start the game and, in such a case, start it
-        } //Wait to see if all the modules have received the login information from the players
-        else if (modules > 1 ? count > (modules - 1) : count > 1) {
-            Logger.debug("[GAME]: Check Start");
-            checkStart();
-        }
+        Painter painter = new Painter(username, false);
+        //Add the new entered player, it has never been a sketcher in this game (false)
+        playersVect.add(painter);
+        getSender().tell("OK", this.getSelf());
+        //publishLobbyEvent(GameEventType.join);
+        Logger.info("[GAME]: added player " + playersVect.get(playersVect.size() - 1).name);
+        Logger.debug("[GAME]: Check Start");
+        checkStart();
     }
 
     /**
@@ -542,9 +540,9 @@ public class Game extends GameRoom {
      *
      * @param type the type of the event to publish: room created, room
      * destroyed, update status
+     * [TESTED]
      */
     private void publishLobbyEvent(GameEventType type) {
-        GameEvent join = new GameEvent(type.toString(), GameManager.getInstance().getLobby(), type);
         ObjectNode status = new ObjectNode(JsonNodeFactory.instance);
         //Get the hashcode related to this actoref in order to make it unique
         status.put("id", this.getSelf().hashCode());
@@ -552,15 +550,14 @@ public class Game extends GameRoom {
         status.put("currentPlayers", playersVect.size());
         status.put("maxPlayers", requiredPlayers);
         status.put("visible", playersVect.size() < requiredPlayers);
-        join.setObject(status);
+        GameEvent join = new GameEvent(GameMessages.composeGameListUpdate(status), GameManager.getInstance().getLobby());
         GameBus.getInstance().publish(join);
     }
 
-    private void handleQuitter(String quitter) {
+    private void handleQuitter(JsonNode jquitter) {
+        String quitter = jquitter.get("content").get("user").asText();
         for (Painter painter : playersVect) {
             if (painter.name.equalsIgnoreCase(quitter)) {
-                //Wait for all the modules to announce that the player has disconnected
-                painter.setnModulesReceived(painter.getnModulesReceived() - 1);
                 playersVect.remove(painter);
                 disconnectedPlayers++;
                 GameBus.getInstance().publish(new GameEvent("quit", GameManager.getInstance().getLobby(), GameEventType.quit));
@@ -569,7 +566,7 @@ public class Game extends GameRoom {
                 {
                     gameEnded();
                 } else if (((requiredPlayers - disconnectedPlayers) <= 0) && gameStarted) {
-                    publishLobbyEvent(GameEventType.gameEnded);
+                    publishLobbyEvent(GameEventType.matchEnd);
                 }
 
             }
@@ -579,7 +576,7 @@ public class Game extends GameRoom {
         }
     }
 
-    private void guessed(String guesser) {
+    private void guessed(String guesser) {      //TODO vhange messages ???
         for (Painter painter : playersVect) {
             //If the current painter is the guesser, has not guessed before and it is not the sketcher, update his points
             if (painter.name.equals(guesser) && painter.guessed == false) {
@@ -648,8 +645,8 @@ public class Game extends GameRoom {
         GameEvent endEvent = new GameEvent(roomChannel, GameEventType.leaderboard);
         endEvent.setObject(compileLeaderboard());
         GameBus.getInstance().publish(endEvent);
-        GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.gameEnded));
-        publishLobbyEvent(GameEventType.gameEnded);
+        GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.matchEnd));
+        publishLobbyEvent(GameEventType.matchEnd);
 
         Painter[] sorted = playersVect.toArray(new Painter[0]);
 
@@ -676,12 +673,7 @@ public class Game extends GameRoom {
             connection.close();
         }
         catch(SQLException ex){
-            int i=0;
-            i++;
-
         }
-
-
         killActor();
     }
 
@@ -720,7 +712,7 @@ public class Game extends GameRoom {
         GameBus.getInstance().publish(timeEvent);
     }
 
-    private void showImages() {
+    private void showImages() {         //TODO change messages ???
         GameEvent showImages = new GameEvent(roomChannel, GameEventType.showImages);
         ObjectNode show = Json.newObject();
         show.put("type", "showImages");
@@ -741,12 +733,62 @@ public class Game extends GameRoom {
         }
     }
 
+    
+    /*
+     * [TESTED]
+     */
     private void taskAcquired() {
         if (!taskAcquired) {
             taskAcquired = true;
             triggerStart();
         }
     }
+    
+    
+    
+    /***COPIED FROM CHAT****/
+    private void retrieveTask(ObjectNode task) {
+        currentGuess = task.get("tag").asText();
+    }
+    
+    private void handleTalk(JsonNode jguess) {      //TODO good feeling! should work!
+        String text = jguess.get("content").get("word").asText();
+        String username = jguess.get("content").get("user").asText();
+        // Received a Talk message
+        //If we are asking the sketcher for a tag, then save the tag
+        if (askTag && username.equals(askTagSketcher)) {
+            askTag = false;
+            GameBus.getInstance().publish(new GameEvent(text, username, roomChannel, GameEventType.tag));
+        } else if (gameStarted) {
+            //Compare the message sent with the tag in order to establish if we have a right guess
+            levenshteinDistance distanza = new levenshteinDistance();
+            if (text != null) {
+                switch (distanza.computeLevenshteinDistance(text, currentGuess)) {
+                    case 0:
+                        GameBus.getInstance().publish(new GameEvent(username, roomChannel, GameEventType.guessed));
+                        break;
+                    case 1:
+                        GameBus.getInstance().publish(GameMessages.composeGuess(username, text, "hot"));
+                        //notifyAll(ChatKind.talkNear, username, text);
+                        break;
+                    case 2:
+                        GameBus.getInstance().publish(GameMessages.composeGuess(username, text, "warm"));
+                        //notifyAll(ChatKind.talkWarning, username, text);
+                        break;
+                    default:
+                        GameBus.getInstance().publish(GameMessages.composeGuess(username, text, "cold"));
+                        //notifyAll(ChatKind.talkError, username, text);
+                        break;
+                }
+            }
+        }
+    }
+     private void handleAskTag(GameEvent message) {
+        askTagSketcher = message.getMessage();
+       // notifyAll(ChatKind.system, "Sketchness", Messages.get(LanguagePicker.retrieveLocale(), "asktag"));
+        askTag = true;
+    }
+    
 }
 
 enum CountdownTypes {

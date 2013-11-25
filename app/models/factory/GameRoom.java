@@ -1,7 +1,6 @@
 package models.factory;
 
 import akka.actor.ActorRef;
-import akka.actor.Kill;
 import akka.actor.PoisonPill;
 import akka.actor.UntypedActor;
 import play.Logger;

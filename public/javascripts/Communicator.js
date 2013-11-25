@@ -17,9 +17,9 @@ define(["Class","jquery"], function(Class, $) {
 
 			var $this = $(this);
 			$(this.websocket).on("message", function(event) {
-				var message = JSON.parse(event.originalEvent.data);
+				var message = JSON.parse(event.originalEvent.data).message;
 				event.type = message.type;
-				$this.trigger(event, [message]);
+				$this.trigger(event, [message.content]);
 			});
 		},
 
@@ -36,12 +36,22 @@ define(["Class","jquery"], function(Class, $) {
 			/**
 			 * Sends an object through the socket
 			 *
-			 * @param obj :Object The object to send
+			 * @param type :String The type of the message to send
+			 * @param content :Object The content of the message to send
 			 *
 			 * @return :Communicator The communicator itself for chaining
 			 */
-			send: function(obj) {
-				if(this.isConnected()) this.websocket.send(JSON.stringify(obj));
+			send: function(type, content) {
+				if(this.isConnected()) {
+					var message = {
+						message: {
+							type: type,
+							content: content
+						}
+					};
+
+					this.websocket.send(JSON.stringify(message));
+				}
 				return this;
 			},
 
@@ -72,6 +82,24 @@ define(["Class","jquery"], function(Class, $) {
 			 */
 			on: function(type, data, handler) {
 				$(this).on(type, data, handler);
+				return this;
+			},
+
+			/**
+			 * Binds an event listener for a specific message type
+			 * and the event is esecuted almost once.
+			 *
+			 * @see jQuery.fn.one For clarification of the model
+			 *
+			 * @param type :String The type of the message to listen
+			 * @param data :Object The eventual data to pass
+			 * @param handler :Function([event, message]) The callback function
+			 *        Receives as parameters the event and the message object
+			 *
+			 * @return :Communicator The communicator itself for chaining
+			 */
+			one: function(type, data, handler) {
+				$(this).one(type, data, handler);
 				return this;
 			},
 

@@ -30,7 +30,6 @@ import play.libs.WS;
 import utils.JsonReader;
 import utils.LanguagePicker;
 import utils.gamebus.GameBus;
-import utils.gamebus.GameEventType;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.Room;
 
@@ -329,7 +328,7 @@ public class CMS {
      * Inform the game that at least one task is ready and we can start the game
      */
     private static void sendTaskAcquired(Room roomChannel) {
-        GameMessages.GameEvent taskAcquired = new GameMessages.GameEvent(roomChannel, GameEventType.taskAcquired);
+        GameMessages.GameEvent taskAcquired = new GameMessages.GameEvent(GameMessages.composeTaskAcquired(),roomChannel);
         GameBus.getInstance().publish(taskAcquired);
     }
 

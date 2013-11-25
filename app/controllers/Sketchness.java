@@ -5,18 +5,16 @@ import be.objectify.deadbolt.java.actions.Restrict;
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.user.AuthUser;
 import models.User;
-import models.chat.ChatFactory;
 import play.mvc.*;
 
 import org.codehaus.jackson.JsonNode;
 
-import views.html.chatRoom;
+import views.html.gameRoom;
 import views.html.lobby;
 import views.html.leaderboard;
 
 import models.game.GameFactory;
 import models.lobby.LobbyFactory;
-import models.paint.PaintFactory;
 import play.i18n.Lang;
 import utils.LanguagePicker;
 import utils.LoggerUtils;
@@ -49,8 +47,8 @@ public class Sketchness extends Controller {
      * Display the chat room.
      */
     @Restrict(@Group(Application.USER_ROLE))
-    //public static Result chatRoom( String roomName, Integer nPlayers) throws Exception {
-    public static Result chatRoom( ) throws Exception {
+    public static Result gameRoom() throws Exception {
+
 
         final User localUser = getLocalUser(session());
         String username = localUser.name;
@@ -59,14 +57,9 @@ public class Sketchness extends Controller {
         final Map<String, String[]> values = request().body().asFormUrlEncoded();
         String roomName = values.get("room")[0];
         if(values.containsKey("nPlayers")){
-        numero = values.get("nPlayers")[0];
+            numero = values.get("nPlayers")[0];
         }
         Integer nPlayers = Integer.valueOf(numero);
-
-
-
-
-
 
         if (LanguagePicker.retrieveIsoCode().equals("")) {
             LanguagePicker.setLanguage(Lang.preferred(request().acceptLanguages()));
@@ -83,46 +76,21 @@ public class Sketchness extends Controller {
         if (nPlayers < 0 || nPlayers > 4) {
             nPlayers = 3;
         }
-        //Force the room name to be without spaces. We cannot create actors with 
+        //Force the room name to be without spaces. We cannot create actors with
         //spaces in it.
         roomName = roomName.replaceAll(" ", "");
-        GameFactory.createGame(roomName, nPlayers);
-        return ok(chatRoom.render(localUser, roomName));
+        return ok(gameRoom.render(localUser, roomName,nPlayers));
     }
+
 
     /**
      * Handle the chat websocket.
-     */
-    @Restrict(@Group(Application.USER_ROLE))
-    public static WebSocket<JsonNode> chatStream(final String roomName) {
-
-        final User localUser = getLocalUser(session());
-        final String username = localUser.name;
-
-        return new WebSocket<JsonNode>() {
-            // Called when the Websocket Handshake is done.
-            @Override
-            public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
-
-                // Join the chat room.
-                try {
-                    ChatFactory.createChat(username, roomName, in, out);
-                } catch (Exception ex) {
-                    LoggerUtils.error("CHATFACTORY", ex);
-                }
-            }
-        };
-    }
-
-    /**
-     * Handle the lobby websocket.
      */
     @Restrict(@Group(Application.USER_ROLE))
     public static WebSocket<JsonNode> lobbyStream() {
 
         final User localUser = getLocalUser(session());
         final String username = localUser.name;
-
         return new WebSocket<JsonNode>() {
             // Called when the Websocket Handshake is done.
             @Override
@@ -140,10 +108,10 @@ public class Sketchness extends Controller {
 
     /**
      *
-     * Handle the paintroom websocket
+     * Handle the gameStream websocket
      */
     @Restrict(@Group(Application.USER_ROLE))
-    public static WebSocket<JsonNode> paintStream(final String roomName) {
+    public static WebSocket<JsonNode> gameStream( final String roomName, final Integer players) {
 
         final User localUser = getLocalUser(session());
         final String username = localUser.name;
@@ -152,13 +120,14 @@ public class Sketchness extends Controller {
             @Override
             public void onReady(In<JsonNode> in, Out<JsonNode> out) {
                 try {
-                    PaintFactory.createPaint(username, roomName, in, out);
+                    GameFactory.createGame(username, roomName, players, in, out);
                 } catch (Exception ex) {
                     LoggerUtils.error("PAINT", ex);
                 }
             }
         };
     }
+
 
     /**
      * Display the lobby.
@@ -168,6 +137,7 @@ public class Sketchness extends Controller {
 
         final User localUser = getLocalUser(session());
         String username = localUser.name;
+
         if (LanguagePicker.retrieveIsoCode().equals("")) {
             LanguagePicker.setLanguage(Lang.preferred(request().acceptLanguages()));
         }
@@ -195,14 +165,9 @@ public class Sketchness extends Controller {
         return ok(leaderboard.render(username, null));
     }
 
-
-    public static Result checkOnline() throws Exception{
-        models.IsOnline.checkOnline();
-
-        return ok();
-    }
-
-
+    /**
+     * Keep a player online
+     */
     public static Result keepOnline(){
 
         final User localUser = getLocalUser(session());
@@ -212,12 +177,5 @@ public class Sketchness extends Controller {
         return ok();
     }
 
-    public static Result putOffline(){
 
-        final User localUser = getLocalUser(session());
-        String username = localUser.name;
-        models.IsOnline.putOffline(username);
-
-        return ok();
-    }
 }

@@ -3,20 +3,21 @@
 @main(username,null) {
 
 	<div class="leaderboardpage">
-            <div id="scoresArea">
-                @if(flash.containsKey("score1")){<div id="score1" class="score"><div id="leaderboardAvatar"></div><span id="name">@flash.get("name1")</span><span id="points">@flash.get("points1") points</span></div>}
-                @if(flash.containsKey("score2")){<div id="score2" class="score"><div id="leaderboardAvatar"></div><span id="name">@flash.get("name2")</span><span id="points">@flash.get("points2") points</span></div>}
-                @if(flash.containsKey("score3")){<div id="score3" class="score"><div id="leaderboardAvatar"></div><span id="name">@flash.get("name3")</span><span id="points">@flash.get("points3") points</span></div>}
-                @if(flash.containsKey("score4")){<div id="score4" class="score"><div id="leaderboardAvatar"></div><span id="name">@flash.get("name4")</span><span id="points">@flash.get("points4") points</span></div>}
-            </div>
+		<div id="scoresArea">
+			@if(flash.containsKey("score1")){<div id="score1" class="score"><div id="leaderboardAvatar"></div><span id="name">@flash.get("name1")</span><span id="points">@flash.get("points1") points</span></div>}
+			@if(flash.containsKey("score2")){<div id="score2" class="score"><div id="leaderboardAvatar"></div><span id="name">@flash.get("name2")</span><span id="points">@flash.get("points2") points</span></div>}
+			@if(flash.containsKey("score3")){<div id="score3" class="score"><div id="leaderboardAvatar"></div><span id="name">@flash.get("name3")</span><span id="points">@flash.get("points3") points</span></div>}
+			@if(flash.containsKey("score4")){<div id="score4" class="score"><div id="leaderboardAvatar"></div><span id="name">@flash.get("name4")</span><span id="points">@flash.get("points4") points</span></div>}
+		</div>
        <!--     <form id="backForm" action="@routes.Sketchness.lobby()">             -->
                 <a href="@routes.Sketchness.lobby()"><button type="submit" id="tolobby"></button></a>
          <!--       <input id="username" name="username" class="input-small" type="hidden" value="@username" />
             </form>    -->
-        </div>  
-        <div id="preloaded-images">
-                    <img src="../assets/images/UI/lobbyUnpressed.png" width="1" height="1" alt="tolobbyPressed" />
-                    <img src="../assets/images/UI/lobbyHover.png" width="1" height="1" alt="toLobbyHover" />
-                    <img src="../assets/images/UI/lobbyPressed.png" width="1" height="1" alt="toLobbyUnpressed" />
-        </div>
+
+		<div id="preloaded-images">
+			<img src="../assets/images/UI/lobbyUnpressed.png" width="1" height="1" alt="tolobbyPressed" />
+			<img src="../assets/images/UI/lobbyHover.png" width="1" height="1" alt="toLobbyHover" />
+			<img src="../assets/images/UI/lobbyPressed.png" width="1" height="1" alt="toLobbyUnpressed" />
+		</div>
+	</div>
 }

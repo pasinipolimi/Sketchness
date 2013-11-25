@@ -6,6 +6,8 @@ require.config({
 		"mousewheel": "lib/jquery.mousewheel",
 		"jscrollpane": "lib/jquery.jscrollpane",
 		"popup": "lib/popUp",
+		"paper": "lib/paper",
+		"StateMachine": "lib/state-machine"
 	},
 	shim: {
 		"jquery": {
@@ -22,6 +24,12 @@ require.config({
 		"popup": {
 			deps: ["jquery"],
 			exports: "$.fn.popup"
+		},
+		"paper": {
+			exports: "paper"
+		},
+		"StateMachine": {
+			exports: "StateMachine"
 		}
 	}
 });

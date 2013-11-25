@@ -59,9 +59,16 @@ public class GameManager implements GameManagerInterface {
     @Override
     public void getCurrentGames() {
         for (Map.Entry pairs : gameInstances.entrySet()) {
-            ((ActorRef) pairs.getValue()).tell(new GameEvent(GameEventType.getGameInfo), (ActorRef) pairs.getValue());
+            ((ActorRef) pairs.getValue()).tell(new GameEvent(GameMessages.composeMatchInfo()), (ActorRef) pairs.getValue());
         }
     }
+
+    @Override
+    public Room getRoom(String roomName) {
+        return new GameMessages.Room(roomName);
+    }
+    
+    
 
     @Override
     public Room getLobby() {
@@ -72,6 +79,5 @@ public class GameManager implements GameManagerInterface {
     public void removeInstance(ActorRef toRemove) {
         gameInstances.values().remove(toRemove);
         getCurrentGames();
-        //toRemove.tell(Kill.getInstance(), null);
     }
 }
