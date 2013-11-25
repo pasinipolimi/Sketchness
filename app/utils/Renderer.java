@@ -191,7 +191,7 @@ public class Renderer extends UntypedActor {
     				// Mark the alpha bits as zero - transparent
     				return 0x00FFFFFF & rgb;
     			} else {
-    				// nothing to do
+    				// change black transparency
     				return 0xAAFFFFFF & rgb;
     			}
     		}
@@ -469,6 +469,12 @@ public class Renderer extends UntypedActor {
         return info;
     }
 
+    /**
+     * Retrive stats needed to deploy first graph: Number of images with X annotations
+     *
+     * @return          the string with data
+     * @throws JSONException
+     */
     public static String loadFirstGraph() throws JSONException{
 
         JsonReader jsonReader = new JsonReader();
@@ -479,6 +485,12 @@ public class Renderer extends UntypedActor {
         return result;
     }
 
+    /**
+     *  Retrive stats needed to deploy first graph: Number of users that have annotated X images
+     *
+     * @return          the string with data
+     * @throws JSONException
+     */
     public static String loadSecondGraph() throws JSONException{
 
         JsonReader jsonReader = new JsonReader();
@@ -489,6 +501,12 @@ public class Renderer extends UntypedActor {
         return result;
     }
 
+    /**
+     * Generate a json file with User Data
+     *
+     * @return      the string with data
+     * @throws JSONException
+     */
     public static String downloadStats1() throws JSONException{
         JsonReader jsonReader = new JsonReader();
         JsonNode itemAction = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/action.json");
@@ -498,6 +516,12 @@ public class Renderer extends UntypedActor {
         return result;
     }
 
+    /**
+     * Generate a json file with Images Data
+     *
+     * @return      the string with data
+     * @throws JSONException
+     */
     public static String downloadStats2() throws JSONException{
         JsonReader jsonReader = new JsonReader();
         JsonNode itemAction = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/action.json");

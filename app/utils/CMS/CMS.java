@@ -192,8 +192,8 @@ public class CMS {
     public static void taskSetInitialization(HashSet<ObjectNode> priorityTaskHashSet, HashSet<ObjectNode> taskHashSet, Room roomChannel) throws Error,JSONException {
 
         JsonReader jsonReader = new JsonReader();
-        JsonNode retrievedTasks = null;
-        JsonNode retrievedImagesOrdered = null;
+        JsonNode retrievedTasks;
+        JsonNode retrievedImagesOrdered;
 
         //[TODO] Fail safe in case of not being able to retrieve the instances
         try {
