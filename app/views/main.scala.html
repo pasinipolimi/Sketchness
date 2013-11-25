@@ -51,7 +51,7 @@
 
             function bunload(){
             var xhr = new XMLHttpRequest();
-
+            xhr.setTimeout(0);
             xhr.open("get", "@routes.Application.doLogout", true);
 
             xhr.send(null);
@@ -62,7 +62,7 @@
             window.setInterval(function(){
 
             var xhr = new XMLHttpRequest();
-
+            xhr.setTimeout(0);
             xhr.open("get", "@routes.Sketchness.keepOnline", true);
 
             xhr.send(null);
