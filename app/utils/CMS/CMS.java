@@ -195,16 +195,16 @@ public class CMS {
         JsonReader jsonReader = new JsonReader();
         JsonNode retrievedTasks;
         JsonNode retrievedImagesOrdered;
-        ArrayList<JsonNode> retrievedImages = new ArrayList<>();
+        ArrayList<JsonNode> retrievedImages;
 
         //[TODO] Fail safe in case of not being able to retrieve the instances
         try {
             retrievedTasks = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/task.json");
-        //    retrievedImagesOrdered = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image.json");
+            retrievedImagesOrdered = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image.json");
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("[CMS] The request to the CMS is malformed");
         }
-/*
+
         int i = 0;
         retrievedImages = new ArrayList<>();
 
@@ -215,7 +215,7 @@ public class CMS {
 
         Long seed = System.nanoTime();
         Collections.shuffle(retrievedImages, new Random(seed));
-*/
+
 
         //Fill the set of task to be performed with the task that has been 
         //explicitly declared
@@ -287,79 +287,6 @@ public class CMS {
                 }
             }
         }
-
-
-
-        int Low = 6201;
-        int High = 6290;
-        int number = 3;
-        int idt;
-
-        for(int iterator =0; iterator < number ; iterator++){
-            idt = (int) Math.round(Math.random() * (High - Low) + Low);
-            retrievedImagesOrdered = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image/"+idt+".json");
-            retrievedImages.add(iterator,retrievedImagesOrdered);
-
-        }
-        if (retrievedImages != null) {
-            //For each image
-            for (JsonNode item : retrievedImages) {
-                if (item.getElements().hasNext()) {
-                    //Save information related to the image
-                    String id = item.get("id").asText();
-                    String url = rootUrl + item.get("mediaLocator").asText();
-                    Integer width = item.get("width").asInt();
-                    Integer height = item.get("height").asInt();
-
-                    //Get all the segments that have been stored for the image
-                    JsonNode imageSegments = item.get("descriptions");
-                    HashSet<String> tags = new HashSet<>();
-                    ObjectNode guessWord = Json.newObject();
-                    guessWord.put("type", "task");
-                    guessWord.put("id", id);
-
-                    //Find the valid tags for this task.
-                    if (imageSegments != null) {
-                        tags = retrieveTags(imageSegments);
-                    }
-                    //Add one tag among the ones that have been retrieved following a particular policy
-                    guessWord.put("tag", chooseTag(tags));
-                    guessWord.put("lang", LanguagePicker.retrieveIsoCode());
-                    guessWord.put("image", url);
-                    guessWord.put("width", width);
-                    guessWord.put("height", height);
-                    taskHashSet.add(guessWord);
-                    sendTaskAcquired(roomChannel);
-                }
-            }
-        } else {
-            throw new Error("[GAME]: Cannot retrieve the tasks from the CMS.");
-        }
-
-
-
-        try {
-            retrievedImagesOrdered = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/image.json");
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("[CMS] The request to the CMS is malformed");
-        }
-
-        int i = 0;
-        retrievedImages = new ArrayList<>();
-
-        while(i<retrievedImagesOrdered.size()){
-            retrievedImages.add(i,retrievedImagesOrdered.get(i));
-            i++;
-        }
-
-        Long seed = System.nanoTime();
-        Collections.shuffle(retrievedImages, new Random(seed));
-
-
-
-
-
-
 
         if (retrievedImages != null) {
             //For each image

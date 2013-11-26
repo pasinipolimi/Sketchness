@@ -9,6 +9,9 @@ function popolaSelectionAjax(){
         ,ids
         ,tasks
         ,result;
+
+    selection.children().remove();
+    selectionTask.children().remove();
     
     selection.append("<option value='' selected disabled>Select Image</option>");
     selectionTask.append("<option value='' selected disabled>Select Task</option>");
