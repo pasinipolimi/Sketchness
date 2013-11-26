@@ -52,14 +52,14 @@ public class Sketchness extends Controller {
 
         final User localUser = getLocalUser(session());
         String username = localUser.name;
-        String numero = "3";
+        String number = "3";
 
         final Map<String, String[]> values = request().body().asFormUrlEncoded();
         String roomName = values.get("room")[0];
         if(values.containsKey("nPlayers")){
-            numero = values.get("nPlayers")[0];
+            number = values.get("nPlayers")[0];
         }
-        Integer nPlayers = Integer.valueOf(numero);
+        Integer nPlayers = Integer.valueOf(number);
 
         if (LanguagePicker.retrieveIsoCode().equals("")) {
             LanguagePicker.setLanguage(Lang.preferred(request().acceptLanguages()));
