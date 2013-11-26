@@ -3,6 +3,9 @@
  * and open the template in the editor.
  */
 function caricaStatistiche(){
+  popolaSelectionAjax();
+  loadFirstGraph();
+  loadSecondGraph();
   $.jAjax({
     url: "LoadStats",
     onComplete: function(xhr,status){

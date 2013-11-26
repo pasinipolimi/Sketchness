@@ -1,4 +1,4 @@
-function imgPreview(url){
+function imgPreview(url, idPreview){
     var taskImage
        ,canvas = document.getElementById("draws")
        ,ctx = canvas.getContext("2d")
@@ -15,6 +15,7 @@ function imgPreview(url){
 
         taskImage=new Image();
         taskImage.src=url;
+        $("#ImgPreview").val(idPreview);
 
         taskImage.onload = function() {
                     taskContext.save();

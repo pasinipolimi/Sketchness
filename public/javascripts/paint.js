@@ -466,7 +466,12 @@
 				game.taskImage.src = message.image;
 				//Wait for the image to be loaded before drawing it to canvas to avoid errors
 				$(game.taskImage).on("load", function () {
-					task.paint(game.taskImage, message.width, message.height);
+					if(((game.role == "ROUNDCHANGE") || (game.role == "SKETCHER")||(game.guessed == true))){
+                        task.paint(game.taskImage, message.width, message.height);
+                    }
+                    else{
+                        task.clear();
+                    }
 				});
 			});
 

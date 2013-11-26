@@ -422,7 +422,7 @@ public class Renderer extends UntypedActor {
     public static String webInfoTask(String selection)throws JSONException{
 
         JsonReader jsonReader = new JsonReader();
-        JsonNode itemTask = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/task.json");
+        JsonNode itemTask = jsonReader.readJsonArrayFromUrl(rootUrl + "/wsmc/task.json"); //TODO possible speed increment, directly download need task and not all task + loacal search
 
         String info = CMS.retriveTaskInfo(itemTask,selection);
 

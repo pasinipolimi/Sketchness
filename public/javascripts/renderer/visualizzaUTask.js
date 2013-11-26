@@ -40,7 +40,8 @@ function  visualizzaUTask(){
                         });
                         
                         if(aperto === "1"){
-                            $("#closeTaskButton").show();
+                            $("#closeTaskButton").hide();   //for the review
+                        //    $("#closeTaskButton").show();
                             $("#closedTaskLabel").hide();
                         }
                         else{
