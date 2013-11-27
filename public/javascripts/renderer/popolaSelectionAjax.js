@@ -9,6 +9,9 @@ function popolaSelectionAjax(){
         ,ids
         ,tasks
         ,result;
+
+    selection.children().remove();
+    selectionTask.children().remove();
     
     selection.append("<option value='' selected disabled>Select Image</option>");
     selectionTask.append("<option value='' selected disabled>Select Task</option>");
@@ -23,7 +26,7 @@ function popolaSelectionAjax(){
                     ids = result.image[0];
                     $.each(ids, function(i,d){
                             option=document.createElement("option");
-                            option.value = d.id+"\" onmouseover=\"imgPreview('"+d.media+"');\" onclick=\"visualizzaImgAjax('"+d.id+"');";
+                            option.value = d.id+"\" onmouseover=\"imgPreview('"+d.media+"','"+d.id+"');\" onclick=\"visualizzaImgAjax('"+d.id+"');";
                             option.text = d.id;
                             selection.append(option);
 

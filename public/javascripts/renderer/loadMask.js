@@ -16,8 +16,12 @@ var rendererGlobalVar = (function() {
 function loadMask(tag) {
 
 var selectionimg = $("#ImgAttivattiva").val();
-var mediaimg = $("#mediaLocator").val();
-var taskImage=new Image();
+    ,mediaimg = $("#mediaLocator").val();
+    ,canvas = document.getElementById("draws")
+    ,ctx = canvas.getContext("2d")
+    ,taskCanvas = document.getElementById("task")
+    ,taskContext = taskCanvas.getContext("2d")
+    ,taskImage=new Image();
 taskImage.src=mediaimg;
 
  var graph1 = document.getElementById("chart_div1");
@@ -28,7 +32,22 @@ taskImage.src=mediaimg;
  $(graph1).hide();
  $(graph2).hide();
 
+ $("#ImgPreview").val($("#ImgAttivattiva").val());
 
+taskImage.onload = function() {
+             taskContext.save();
+             taskContext.beginPath();
+             taskCanvas.width=this.width;
+             taskCanvas.height=this.height;
+             canvas.width=this.width;
+             canvas.height=this.height;
+             taskContext.drawImage(taskImage,0,0,this.width,this.height);
+             taskContext.restore();
+             //Clear the mask canvas
+             var maskCanvas = document.getElementById("mask");
+             var maskContext = maskCanvas.getContext("2d");
+             maskContext.clearRect(0,0,maskCanvas.width,maskCanvas.height);
+         };
 
 
 try {
@@ -83,7 +102,7 @@ var drawTracesMask = function(taskImage,selectionimg,tag) {
 
         maskImage.onload = function() {
 
-        if(maskImage.src.substring(maskImage.src.indexOf("=")+1,maskImage.src.indexOf("&"))==$("#ImgAttivattiva").val()){
+        if((maskImage.src.substring(maskImage.src.indexOf("=")+1,maskImage.src.indexOf("&"))==$("#ImgAttivattiva").val())&& ($("#ImgPreview").val() == $("#ImgAttivattiva").val())){
             maskContext.save();
             maskContext.beginPath();
 
@@ -119,7 +138,7 @@ var gameloop = (function(){
 
 
     		case "trace":
-    		                if(m.imageId == $("#ImgAttivattiva").val()){
+    		                if((m.imageId == $("#ImgAttivattiva").val())&& (m.imageId == $("#ImgPreview").val())){
     							ctx.lineJoin = "round";
 
                                 ctx.beginPath();
