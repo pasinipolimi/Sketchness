@@ -328,7 +328,7 @@ public class CMS {
      * Inform the game that at least one task is ready and we can start the game
      */
     private static void sendTaskAcquired(Room roomChannel) {
-        GameMessages.GameEvent taskAcquired = new GameMessages.GameEvent(GameMessages.composeTaskAcquired(),roomChannel);
+        GameMessages.GameEvent taskAcquired = new GameMessages.GameEvent(GameMessages.composeTaskAcquired(),roomChannel);   //TODO ***
         GameBus.getInstance().publish(taskAcquired);
     }
 

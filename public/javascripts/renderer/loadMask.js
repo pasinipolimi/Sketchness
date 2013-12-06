@@ -15,8 +15,8 @@ var rendererGlobalVar = (function() {
 
 function loadMask(tag) {
 
-var selectionimg = $("#ImgAttivattiva").val();
-    ,mediaimg = $("#mediaLocator").val();
+var selectionimg = $("#ImgAttivattiva").val()
+    ,mediaimg = $("#mediaLocator").val()
     ,canvas = document.getElementById("draws")
     ,ctx = canvas.getContext("2d")
     ,taskCanvas = document.getElementById("task")
@@ -52,8 +52,8 @@ taskImage.onload = function() {
 
 try {
 	  var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
-	  //socket = new WS("ws://localhost:9000/rendererStream?imageID="+selectionimg);
-	  socket = new WS("ws://www.sketchness.com/rendererStream?imageID="+selectionimg);
+	  socket = new WS("ws://localhost:9000/rendererStream?imageID="+selectionimg);
+	//  socket = new WS("ws://www.sketchness.com/rendererStream?imageID="+selectionimg);
 
       socket.onmessage = onSocketMessage;
 

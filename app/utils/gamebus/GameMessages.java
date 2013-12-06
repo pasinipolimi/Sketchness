@@ -1,6 +1,7 @@
 package utils.gamebus;
 
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.ObjectNode;
 import play.libs.Json;
 import play.mvc.WebSocket;
@@ -146,6 +147,12 @@ public class GameMessages {
         return event;
     }
 
+    public static ObjectNode composeMatchEnd() {
+        ObjectNode content = Json.newObject();
+        ObjectNode event = composeJsonMessage("matchEnd",content);
+        return event;
+    }
+
     public static ObjectNode composeMatchIfo(String id, String roomName, Integer currentPlayers, Integer maxPlayers, Boolean visible) {
         ObjectNode content = Json.newObject();
         content.put("id", id);
@@ -218,10 +225,58 @@ public class GameMessages {
         ObjectNode event = composeJsonMessage("image",content);
         return event;
     }
+    public static ObjectNode composeImage(String user, String id,String url,Integer width, Integer height) {
+        ObjectNode content = Json.newObject();
+        content.put("user", user);
+        content.put("id", id);
+        content.put("url", url);
+        content.put("width", width);
+        content.put("height", height);
+        ObjectNode event = composeJsonMessage("image",content);
+        return event;
+    }
+
+    public static ObjectNode composeImage(String id,String url,Integer width, Integer height, Integer time) {
+        ObjectNode content = Json.newObject();
+        content.put("id", id);
+        content.put("url", url);
+        content.put("width", width);
+        content.put("height", height);
+        content.put("time", time);
+        ObjectNode event = composeJsonMessage("image",content);
+        return event;
+    }
     
-    public static ObjectNode composeTag() {
-         ObjectNode event = composeJsonMessage("tag",Json.newObject());
+    public static ObjectNode composeTag(String user, String id,String url,Integer width, Integer height) {
+         ObjectNode content = Json.newObject();
+         content.put("sketcher", user);
+         content.put("id", id);
+         content.put("url", url);
+         content.put("width", width);
+         content.put("height", height);
+         ObjectNode event = composeJsonMessage("tag",content);
          return event;
+    }
+    public static ObjectNode composeTag() {
+        ObjectNode event = composeJsonMessage("tag",Json.newObject());
+        return event;
+    }
+
+    public static ObjectNode composeSkip() {
+        ObjectNode event = composeJsonMessage("skipTask",Json.newObject());
+        return event;
+    }
+
+    public static ObjectNode composeTimeExpired(String player) {
+        ObjectNode content = Json.newObject();
+        content.put("player", player);
+        ObjectNode event = composeJsonMessage("timeExpired",Json.newObject());
+        return event;
+    }
+
+    public static ObjectNode composeSaveTraces() {
+        ObjectNode event = composeJsonMessage("saveTraces",Json.newObject());
+        return event;
     }
     
     public static ObjectNode composeTask(String word) {
@@ -231,8 +286,15 @@ public class GameMessages {
         return event;
     }
 
-    public static ObjectNode composeTask() {
-        ObjectNode event = composeJsonMessage("task",Json.newObject());
+    public static ObjectNode composeTask(String user, String id,String url,String word, Integer width, Integer height) {
+        ObjectNode content = Json.newObject();
+        content.put("sketcher", user);
+        content.put("id", id);
+        content.put("url", url);
+        content.put("width", width);
+        content.put("height", height);
+        content.put("word", word);
+        ObjectNode event = composeJsonMessage("task",content);
         return event;
     }
 
@@ -261,8 +323,9 @@ public class GameMessages {
         return event;
     }
      
-    public static ObjectNode composeGuessed(String word) {
+    public static ObjectNode composeGuessed(String user, String word) {
         ObjectNode content = Json.newObject();
+        content.put("user", user);
         content.put("word", word);
         ObjectNode event = composeJsonMessage("guessed",content);
         return event;
@@ -289,7 +352,22 @@ public class GameMessages {
         ObjectNode event = composeJsonMessage("endPath",Json.newObject());
         return event;
     }
-    
+
+    public static ObjectNode composeLeaderboard(ObjectNode object) {
+        ObjectNode event = composeJsonMessage("leaderboard",object);
+        return event;
+    }
+
+    public static ObjectNode composeFinalTraces(String id, String label, ArrayNode traces, ObjectNode history) {
+        ObjectNode content = Json.newObject();
+        content.put("id", id);
+        content.put("label", label);
+        content.put("traces", traces);
+        content.put("history", history);
+        ObjectNode event = composeJsonMessage("finalTraces",content);
+        return event;
+    }
+
     public static ObjectNode composeQuit(final String username) {
         ObjectNode content = Json.newObject();
         content.put("user", username);

@@ -58,87 +58,122 @@ public class Paint extends GameRoom {
             handleJoin((Join) message);
         }
         if (message instanceof JsonNode) {
-            JsonNode json = (JsonNode) message;
-            JsonNodeType type = JsonNodeType.valueOf(json.get("type").getTextValue().toLowerCase());
-            switch (type) {
-                case change:
-                    Painter painter = painters.get(json.get("name").getTextValue());
+            JsonNode event=((JsonNode)message);
+            GameBus.getInstance().publish(new GameMessages.GameEvent(event, roomChannel));  //TODO ***
+            event = event.get("message");
+            String type = event.get("type").asText();
+            switch(type) {
+                case "change":
+                    Painter painter = painters.get(event.get("content").get("name").getTextValue());
                     if (painter != null) {
-                        painter.updateFromJson(json);
+                        painter.updateFromJson(event.get("content"));
                     }
-                    ;
                     break;
-                case roundended:
-                    GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel, GameEventType.timeExpired));
+                case "roundended":
+        //            GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel, GameEventType.timeExpired));
+                    notifyAll(event.get("content"));
                     break;
-                case trace:
-                    addTrace(json);
+                case "trace":
+                    addTrace(event.get("content"));
                     break;
-                case skiptask:
-                    GameBus.getInstance().publish(new GameEvent(json.get("timerObject").getTextValue(), roomChannel, GameEventType.skipTask));
+                case "skip":
+        //            GameBus.getInstance().publish(new GameEvent(json.get("timerObject").getTextValue(), roomChannel, GameEventType.skipTask));
+                    GameBus.getInstance().publish(new GameEvent(GameMessages.composeSkip(), roomChannel));
                     break;
-                case endsegmentation:
-                    GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel, GameEventType.guessed));
+                case "endsegmentation":
+           //         GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel, GameEventType.guessed));
+                    saveTraces();
+                    break;
+                case "changeTool":
+                    break;
+                case "beginPath":
+                    break;
+                case "point":
+                    break;
+                case "endPath":
                     break;
             }
-            notifyAll(json);
+            notifyAll(event.get("content"));
         }
         else if (message instanceof GameEvent) {
-            GameEvent event = (GameEvent) message;
-            switch (event.getType()) {
-                case matchEnd:  //DONE
+        //    GameEvent event = (GameEvent) message;
+            JsonNode event = ((GameEvent) message).getJson();
+            event = event.get("message");
+            String type = event.get("type").asText();
+      //      switch (event.getType()) {
+            switch (type) {
+                case "matchEnd":
                     killActor();
                     gameStarted = false;
                     break;
-                case gameLoading: //DONE
+                case "loading":
                     gameLoading();
                     break;
-                case matchStart: //DONE
+                case "roundBegin":
                     gameStarted = true;
+                    roundBegin(event.get("content"));
                     break;
-                case showImages:
-                    notifyAll(event.getObject());
+                case "showImages":
+                    notifyAll(event.get("content"));
                     break;
-                case saveTraces:
+                case "saveTraces":
                     saveTraces();
                     break;
-                case nextRound: //DONE
-                    nextRound(event.getMessage()); 
+                case "nextRound": //DONE
+                    //              nextRound(event.getMessage());
+                    nextRound(event.get("content").get("user").asText());
                     break;
-                case task:
-                    sendTask(event.getMessage(), event.getObject());
+                case "task":
+       //             sendTask(event.getMessage(), event.getObject());
+                    sendTask(event.get("content"));
                     break;
-                case askTag:
-                    sendTag(event.getMessage(), event.getObject());
+                case "skiptask":
+                    GameBus.getInstance().publish(new GameEvent(GameMessages.composeSkip(), roomChannel));
                     break;
-                case points:
-                    notifySingle(event.getMessage(), event.getObject());
+                case "tag":
+                    //            sendTag(event.getMessage(), event.getObject());
+                    sendTag(event.get("content"));
                     break;
-                case guessedObject:
-                    notifySingle(event.getMessage(), event.getObject());
+                case "points":
+                    //            notifySingle(event.getMessage(), event.getObject());
+                    notifySingle(event.get("content"));
                     break;
-                case timerChange:
-                    notifyAll(event.getObject());
+                case "guessed":
+                    //             notifySingle(event.getMessage(), event.getObject());
+                    notifyAll(event.get("content"));
                     break;
-                case leaderboard:
-                    notifyAll(event.getObject());
+                case "timerChange":
+                    //             notifyAll(event.getObject());
+                    notifyAll(event.get("content"));
                     break;
-                case quit:
-                    handleQuitter(event.getMessage());
+                case "leaderboard":
+                    //            notifyAll(event.getObject());
+                    notifyAll(event.get("content"));
+                    break;
+                case "leave":
+                    //           handleQuitter(event.getMessage());
+                    handleQuitter(event.get("content").get("user").asText());
             }
         }
     }
-    
 
-    private void saveTraces() {     //TODO  change messages ???
-        GameEvent tracesMessage = new GameEvent(roomChannel, GameEventType.finalTraces);
-        ObjectNode finalTraces = new ObjectNode(factory);
+    private void roundBegin(JsonNode json){
+        String sketcher = json.get("sketcher").asText();
+        for (Map.Entry<String, Painter> entry : painters.entrySet()) {
+            entry.getValue().channel.write(GameMessages.composeRoundBegin(sketcher));
+        }
+    }
+
+    private void saveTraces() {
+    //    GameEvent tracesMessage = new GameEvent(roomChannel, GameEventType.finalTraces);
+   //     ObjectNode finalTraces = new ObjectNode(factory);
         ArrayNode filtered = currentSegment.filter(taskWidth, taskHeight, 420, 350);
-        finalTraces.put("id", taskUrl);
-        finalTraces.put("label", guessWord);
-        finalTraces.put("traces", filtered);
-        finalTraces.put("history", traces);
-        tracesMessage.setObject(finalTraces);
+   //     finalTraces.put("id", taskUrl);
+   //     finalTraces.put("label", guessWord);
+   //     finalTraces.put("traces", filtered);
+   //     finalTraces.put("history", traces);
+  //      tracesMessage.setObject(finalTraces);
+        GameEvent tracesMessage = new GameEvent(GameMessages.composeFinalTraces(taskUrl,guessWord,filtered,traces),roomChannel);
         GameBus.getInstance().publish(tracesMessage);
     }
 
@@ -168,18 +203,21 @@ public class Paint extends GameRoom {
                 entry.getValue().channel.close();
                 painters.remove(quitter);
                 Logger.debug("[PAINT] " + quitter + " has disconnected.");
-                GameBus.getInstance().publish(new GameEvent(quitter, roomChannel, GameEventType.quit));
+      //          GameBus.getInstance().publish(new GameEvent(quitter, roomChannel, GameEventType.quit));
+                GameBus.getInstance().publish(new GameEvent(GameMessages.composeQuit(quitter), roomChannel));
             }
         }
     }
 
     
-
-    private void sendTask(String sketcher, ObjectNode task) throws Exception {
-        task.remove("type");
-        task.remove("role");
-        task.put("type", "task");
-        taskUrl = task.get("image").getTextValue();
+/*
+//    private void sendTask(String sketcher, ObjectNode task) throws Exception {
+    private void sendTask(JsonNode task) throws Exception {
+//        task.remove("type");
+//        task.remove("role");
+//        task.put("type", "task");
+        String sketcher = task.get("sketcher").asText();
+        taskUrl = task.get("url").getTextValue();
         URL url = new URL(taskUrl);
         taskImage = ImageIO.read(url);
         taskWidth = taskImage.getWidth();
@@ -190,16 +228,30 @@ public class Paint extends GameRoom {
         //Send to the users the information about their role
         for (Map.Entry<String, Painter> entry : painters.entrySet()) {
             if (entry.getValue().name.equals(sketcher)) {
-                entry.getValue().channel.write(GameMessages.composeImageInfo(task.get("id").asText(), taskUrl, taskWidth, taskHeight));
                 entry.getValue().channel.write(GameMessages.composeTask(guessWord));
+                entry.getValue().channel.write(GameMessages.composeImageInfo(task.get("id").asText(), taskUrl, taskWidth, taskHeight));
             }
             else
                 entry.getValue().channel.write(GameMessages.composeTask(""));
         }
     }
-
-    private void sendTag(String sketcher, ObjectNode task) throws Exception {
-        taskUrl = task.get("image").getTextValue();
+    */
+    private void sendTask(JsonNode task) throws Exception {
+        taskUrl = task.get("url").asText();
+        taskWidth = task.get("width").asInt();
+        taskHeight = task.get("height").asInt();
+        guessWord = task.get("word").asText();
+        //Send to the users the information about their role
+        for (Map.Entry<String, Painter> entry : painters.entrySet()) {
+            entry.getValue().channel.write(GameMessages.composeTask(guessWord));
+            entry.getValue().channel.write(GameMessages.composeImage(task.get("id").asText(), taskUrl, taskWidth, taskHeight));
+        }
+    }
+    /*
+  //  private void sendTag(String sketcher, ObjectNode task) throws Exception {
+    private void sendTag(JsonNode task) throws Exception {
+        String sketcher = task.get("sketcher").asText();
+        taskUrl = task.get("url").getTextValue();
         URL url = new URL(taskUrl);
         taskImage = ImageIO.read(url);
         taskWidth = taskImage.getWidth();
@@ -207,11 +259,21 @@ public class Paint extends GameRoom {
         taskUrl = task.get("id").getTextValue();    
         for (Map.Entry<String, Painter> entry : painters.entrySet()) {
             if (entry.getValue().name.equals(sketcher)) {
-                entry.getValue().channel.write(GameMessages.composeImageInfo(task.get("id").asText(), taskUrl, taskWidth, taskHeight));
                 entry.getValue().channel.write(GameMessages.composeTag());
+                entry.getValue().channel.write(GameMessages.composeImageInfo(task.get("id").asText(), taskUrl, taskWidth, taskHeight));
             } else {
                 entry.getValue().channel.write(GameMessages.composeTag());
             }
+        }
+    }
+    */
+    private void sendTag(JsonNode task) throws Exception {
+        taskUrl = task.get("url").asText();
+        taskWidth = task.get("width").asInt();
+        taskHeight = task.get("height").asInt();
+        for (Map.Entry<String, Painter> entry : painters.entrySet()) {
+            entry.getValue().channel.write(GameMessages.composeTag());
+            entry.getValue().channel.write(GameMessages.composeImage(task.get("id").asText(), taskUrl, taskWidth, taskHeight));
         }
     }
 
@@ -222,6 +284,15 @@ public class Paint extends GameRoom {
     }
 
     private void notifySingle(String username, JsonNode json) {
+        for (Painter painter : painters.values()) {
+            if (painter.name.equalsIgnoreCase(username)) {
+                painter.channel.write(json);
+            }
+        }
+    }
+
+    private void notifySingle(JsonNode json) {
+        String username = json.get("user").asText();
         for (Painter painter : painters.values()) {
             if (painter.name.equalsIgnoreCase(username)) {
                 painter.channel.write(json);
@@ -301,5 +372,5 @@ public class Paint extends GameRoom {
 
 
 enum JsonNodeType {
-    segment, change, trace, roundended, move, skiptask, endsegmentation
+    segment, change, trace, roundended, move, skiptask, endsegmentation, changeTool, beginPath, point, endPath
 }

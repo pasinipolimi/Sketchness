@@ -46,6 +46,7 @@ public class Chat extends GameRoom {
                           case "chat":notifyAll(event);break;
                           case "log":notifySystem(event);break;
                           case "leave":handleQuitter(event);break;
+                          case "matchEnd": killActor();break;
                      }   
                 }
             }
@@ -55,7 +56,7 @@ public class Chat extends GameRoom {
                 event = event.get("message");
                 String type = event.get("type").asText();
                 switch(type) {
-                      case "leave":handleQuitter(event);break;
+                      case "leave": handleQuitter(event);break;
                 }
             }      
 

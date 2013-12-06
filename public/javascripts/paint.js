@@ -229,7 +229,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * message to the server
 				 */
 				timeUp: function() {
-					this.communicator.send("timer", {});
+					this.communicator.send("timer", {user: sketchness.myself});
 				},
 
 				/**
@@ -256,6 +256,13 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						beginRound: function(e, content) {
 							that.beginRound(content.sketcher);
 						},
+						leave: function(e, content) {
+                            delete sk.players[content.user];
+                            write.players(sk.players);
+                        },
+                        leaderboard: function(e, content) {
+                            that.quit(content);
+                        },
 						task: function(e, content) {
 							that.task(content.word);
 						}
@@ -298,7 +305,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					this.painter.hideImage();
 
-					this.communicator.off("image beginRound task");
+					this.communicator.off("image beginRound leave leaderboard task");
 					elements.skip.off("click");
 					elements.wordInput.off("keypress");
 				},
@@ -321,6 +328,13 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						beginRound: function(e, content) {
 							that.beginRound(content.sketcher);
 						},
+						leave: function(e, content) {
+                            delete sk.players[content.user];
+                            write.players(sk.players);
+                        },
+                        leaderboard: function(e, content) {
+                            that.quit(content);
+                        },
 						task: function() {
 							that.task();
 						}
@@ -339,7 +353,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					this.painter.hideImage();
 
-					this.communicator.off("beginRound task");
+					this.communicator.off("beginRound leave leaderboard task");
 				},
 
 				/**
@@ -358,7 +372,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				onentertaskDrawing: function() {
 					var elements = this.elements;
 					elements.main.addClass("sketcher");
-					this.write.top($.i18n.prop("draw"), this.word);
+					this.write.top($.i18n.prop("draw"), this.sketchness.word);
 					elements.skip.show();
 					elements.hudArea.show();
 					this.chat.disable();
@@ -388,6 +402,13 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 								that.write.score(sk.players[content.user].score);
 							}
 						},
+						leave: function(e, content) {
+                            delete sk.players[content.user];
+                            write.players(sk.players);
+                        },
+                        leaderboard: function(e, content) {
+                            that.quit(content);
+                        },
 						roundEnd: function(e, content) {
 							that.endRound(content.word);
 						}
@@ -512,7 +533,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.painter.hidePosition();
 					this.painter.hidePath();
 
-					this.communicator.off("image timer guess guessed score roundEnd");
+					this.communicator.off("image timer guess guessed score leave leaderboard roundEnd");
 				},
 
 				/**
@@ -536,6 +557,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							event.preventDefault();
 
 							that.communicator.send("guess", {
+							    user: sk.myself,
 								word: $(this).val()
 							});
 
@@ -563,12 +585,14 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							that.chat.guess(sk.players[content.user].name, content.word, content.affinity, content.user == sk.myself);
 						},
 						guessed: function(e, content) {
-							sk.word = content.word;
-							that.write.top($.i18n.prop('guessed'), sk.word);
-							wordInput.hide().off("keypress");
-							this.one("image", function(e, content) {
-								painter.showImage(content.url, content.width, content.height);
-							});
+						    if(sk.myself == content.user){
+                                sk.word = content.word;
+                                that.write.top($.i18n.prop('guessed'), sk.word);
+                                wordInput.hide().off("keypress");
+                                this.one("image", function(e, content) {
+                                    painter.showImage(content.url, content.width, content.height);
+                                });
+							}
 						},
 						score: function(e, content) {
 							sk.players[content.user].score += content.score;
@@ -577,6 +601,13 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 								that.write.score(sk.players[content.user].score);
 							}
 						},
+						leave: function(e, content) {
+                            delete sk.players[content.user];
+                            write.players(sk.players);
+                        },
+                        leaderboard: function(e, content) {
+                            that.quit(content);
+                        },
 						roundEnd: function(e, content) {
 							that.endRound(content.word);
 						}
@@ -597,7 +628,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.painter.hidePosition();
 					this.painter.hidePath();
 
-					this.communicator.off("timer change beginPath point endPath guess guessed score roundEnd");
+					this.communicator.off("timer change beginPath point endPath guess guessed score leave leaderboard roundEnd");
 				},
 
 				/**
@@ -614,7 +645,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * Setup of image viewing state
 				 */
 				onenterimageViewing: function() {
-					this.write.top($.i18n.prop('solution'), this.word);
+					this.write.top($.i18n.prop('solution'), this.sketchness.word);
 
 					this.clock.setCountdown("solution", this.constants.solutionTime * Time.second, Time.second, write.time, this.timeUp.bind(this));
 
@@ -627,6 +658,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						beginRound: function(e, content) {
 							that.beginRound(content.sketcher);
 						},
+						leave: function(e, content) {
+                            delete sk.players[content.user];
+                            write.players(sk.players);
+                        },
 						leaderboard: function(e, content) {
 							that.quit(content);
 						}
@@ -644,7 +679,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					this.painter.hideImage();
 
-					this.communicator.off("image beginRound leaderboard");
+					this.communicator.off("image beginRound leave leaderboard");
 				},
 
 				/**

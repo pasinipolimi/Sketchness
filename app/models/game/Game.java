@@ -114,7 +114,7 @@ public class Game extends GameRoom {
             }
              if (message instanceof Join) {
                 playerJoin(((Join) message).getUsername());
-                publishLobbyEvent(GameEventType.matchInfo);
+                publishLobbyEvent();     //publishLobbyEvent(GameEventType.matchEnd);
             }
             else if (message instanceof GameEvent) {
                 JsonNode event = ((GameEvent) message).getJson();
@@ -122,34 +122,25 @@ public class Game extends GameRoom {
                     event = event.get("message");
                     String type = event.get("type").asText();
                     switch(type) {
-                        case "taskAcquired":taskAcquired();break;
-                        case "leave":handleQuitter(event);break;
-                        case "matchInfo":publishLobbyEvent(GameEventType.matchInfo);break;
-                        // break point between working and not          TODO alcuni sono inutili..
-                        case "loading": break;
-                        case "roundBegin":nextRound(); break;
-                        case "roundEnd": break;
-                        case "image": break;
-                        case "tag": break;
-                        case "skip":skipTask(event.asText()); break;                //TODO wrong argument..
-                        case "endSegmentation": break;
-                        case "score": break;
-                        case "timer": playerTimeExpired(event.asText()); break;     //TODO wrong argument.. need the name of the expired player
-                        case "guess": handleTalk(event);break;
+                        case "taskAcquired": taskAcquired();break;
+                        case "leave": handleQuitter(event);break;
+                        case "matchInfo": publishLobbyEvent();break;      //publishLobbyEvent(GameEventType.matchEnd);
+                        // break point between working and not Tested
+                        case "skip": skipTask(); break;
                         case "guessed": guessed(event.get("word").asText());break;
-                        case "changeTool": break;
-                        case "beginPath": break;
-                        case "endPath": break;
+                        case "timer": playerTimeExpired(event.get("user").asText()); break;
+                        case "guess": handleTalk(event);break;
+                        case "tag": tagReceived(event.get("content").get("word").asText());break;
                     }
                 }
             }
             else if (message instanceof ObjectNode) {
                 JsonNode event=((JsonNode)message);
-                GameBus.getInstance().publish(new GameMessages.GameEvent(event, roomChannel));
+                GameBus.getInstance().publish(new GameMessages.GameEvent(event, roomChannel));  //TODO ***
                 event = event.get("message");
                 String type = event.get("type").asText();
                 switch(type) {
-                      case "leave":handleQuitter(event);break;
+                      case "leave": handleQuitter(event);break;
                 }
             }
        }
@@ -225,33 +216,16 @@ public class Game extends GameRoom {
                     }
                     break;
                 }
-                i = i + 1;
+                i++;
             }
             if (guessObject != null) {
                 priorityTaskHashSet.remove(guessObject);
             }
         }
         if (guessObject == null) {
-            int size;
-            Integer item = null;
-            byte trials = 0;
-            do {
-                try {
-                    size = taskHashSet.size();
-                    if (size > 0) {
-                        item = new Random().nextInt(size);
-                    } else {
-                        break;
-                    }
-                } catch (IllegalArgumentException ex) {
-                    item = null;
-                    Logger.error("[GAME] Failed to retrieve Task Image, retrying. Exception: " + ex);
-                    trials++;
-                    if (trials >= 5) {
-                        throw new Error("[GAME] Failed to retrieve Task Image, aborting");
-                    }
-                }
-            } while (item == null);
+            int size= taskHashSet.size();
+            Integer item;
+            item = generateRandomItem(size);
             if (item != null) {
                 int i = 0;
                 Iterator<ObjectNode> it = taskHashSet.iterator();
@@ -305,7 +279,7 @@ public class Game extends GameRoom {
         //Keep searching for a new sketcher
         while (sketcherPainter == null) {
             //If all the players have been sketcher at least one time, reset their status
-            if (count > currentPlayers) {
+            if (count == currentPlayers) {
                 for (int i = 0; i < currentPlayers; i++) {
                     playersVect.get(i).hasBeenSketcher = false;
                 }
@@ -317,13 +291,14 @@ public class Game extends GameRoom {
                     sketcherPainter = playersVect.get(index);
                     sketcherPainter.role = "SKETCHER";
                     sketcherPainter.hasBeenSketcher = true;
+                    count++;
                 }
-                count++;
             }
         }
         //Publish a system message to inform the other players on who is the sketcher
         GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info, Messages.get(LanguagePicker.retrieveLocale(), "thesketcheris")+ " " + sketcherPainter.name),roomChannel ));
-        GameBus.getInstance().publish(new GameEvent(sketcherPainter.name,roomChannel, GameEventType.nextRound));
+        //GameBus.getInstance().publish(new GameEvent(sketcherPainter.name,roomChannel, GameEventType.nextRound));
+        GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundBegin(sketcherPainter.name), roomChannel));
         return sketcherPainter.name;
     }
 
@@ -352,7 +327,7 @@ public class Game extends GameRoom {
         //We need to wait for all the modules to receive the player list
         if (canStart && playersVect.size() >= requiredPlayers) {
             GameManager.getInstance().removeInstance(getSelf());
-            publishLobbyEvent(GameEventType.matchStart);
+            publishLobbyEvent();            //publishLobbyEvent(GameEventType.matchStart);
             if (taskAcquired) {
                 //Create a new session in which to store the actions of the game
                 if(!fixGroundTruth)
@@ -365,13 +340,15 @@ public class Game extends GameRoom {
                 nextRound();
                 //We start the game
                 if (sketcherPainter != null) {
-                    GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.matchStart));
-                } else {
-                    throw new Error("[GAME]: Cannot find a suitable Sketcher!");
+           //         GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.matchStart));
+           //         GameBus.getInstance().publish(new GameEvent(GameMessages.composeBegin(sketcherPainter.name),roomChannel));
+                    } else {
+                    throw new Error("[GAME] Cannot find a suitable Sketcher!");
                 }
             } else {
                 GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info, Messages.get(LanguagePicker.retrieveLocale(), "acquiring")),roomChannel ));
-                GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.gameLoading));
+           //     GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.gameLoading));
+                GameBus.getInstance().publish(new GameEvent(GameMessages.composeLoading(),roomChannel));
             }
             return true;
         }
@@ -422,19 +399,42 @@ public class Game extends GameRoom {
         }
     }
 
-    private void sendTask(Boolean ask) {        //TODO passare ai messaggi GameMessages?
+    private void sendTask(Boolean ask) {
+        String id = guessObject.get("id").asText();
+        String medialocator = guessObject.get("image").asText();
+        int width = guessObject.get("width").asInt();
+        int height = guessObject.get("height").asInt();
+        String word = guessObject.get("tag").asText();
         if (ask) {
             areWeAsking = true;
-            GameEvent task = new GameEvent(sketcherPainter.name, roomChannel, GameEventType.askTag);
-            task.setObject(taskImage);
+        //    GameEvent task = new GameEvent(sketcherPainter.name, roomChannel, GameEventType.askTag);
+        //    task.setObject(taskImage);
+            GameEvent task = new GameEvent(GameMessages.composeTag(sketcherPainter.name,id,medialocator,width,height), roomChannel);
             GameBus.getInstance().publish(task);
         } else {
             areWeAsking = false;
-            GameBus.getInstance().publish(new GameEvent(sketcherPainter.name, roomChannel, GameEventType.nextRound));
-            GameEvent task = new GameEvent(sketcherPainter.name, roomChannel, GameEventType.task);
-            task.setObject(taskImage);
+     //       GameBus.getInstance().publish(new GameEvent(sketcherPainter.name, roomChannel, GameEventType.nextRound));
+            GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundBegin(sketcherPainter.name),roomChannel));
+      //      GameEvent task = new GameEvent(sketcherPainter.name, roomChannel, GameEventType.task);
+      //      task.setObject(taskImage);
+            GameEvent task = new GameEvent(GameMessages.composeTask(sketcherPainter.name,id,medialocator,word, width, height), roomChannel);
             GameBus.getInstance().publish(task);
         }
+    }
+
+    /**
+     * when sketcher enter the new tag I would have to call sendTask(false) but I don't have to send a RoundBegin message.
+     * I created a new function sendTask2 which is working for the purpose.
+     */
+    private void sendTask2() {
+        String id = guessObject.get("id").asText();
+        String medialocator = guessObject.get("image").asText();
+        int width = guessObject.get("width").asInt();
+        int height = guessObject.get("height").asInt();
+        String word = guessObject.get("tag").asText();
+        areWeAsking = false;
+        GameEvent task = new GameEvent(GameMessages.composeTask(sketcherPainter.name,id,medialocator,word, width, height), roomChannel);
+        GameBus.getInstance().publish(task);
     }
 
     /*
@@ -467,15 +467,18 @@ public class Game extends GameRoom {
                     missingPlayers = requiredPlayers;
                     //If at least one player has guessed, it means that the drawn contour is a good one
                     if (guessedWord) {
-                        GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.saveTraces));
+            //            GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.saveTraces));
+                        GameBus.getInstance().publish(new GameEvent(GameMessages.composeSaveTraces(), roomChannel));
                     }
                 } //If the solution has been given or a tag has not been chosen, start a new round
                 else {
                     if (areWeAsking) {
-                        GameBus.getInstance().publish(new SystemMessage(sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "notag"), roomChannel));
+            //            GameBus.getInstance().publish(new SystemMessage(sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "notag"), roomChannel));
+                        GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info,sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "notag")), roomChannel));
                     }
                     areWeAsking = false;
                     //Start a new round
+                    GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText()), roomChannel));
                     nextRound();
                     shownImages = false;
                     missingPlayers = requiredPlayers;
@@ -506,7 +509,7 @@ public class Game extends GameRoom {
                                 if(!fixGroundTruth)
                                     CMS.taskSetInitialization(priorityTaskHashSet, taskHashSet, roomChannel);
                                 else
-                            CMS.fixGroundTruth(groundTruthId, priorityTaskHashSet, taskHashSet, roomChannel);
+                                    CMS.fixGroundTruth(groundTruthId, priorityTaskHashSet, taskHashSet, roomChannel);
                                 completed = true;
                             } catch (Exception ex) {
                                 LoggerUtils.error("GAME", ex);
@@ -514,7 +517,7 @@ public class Game extends GameRoom {
                         }
                         if (trials >= 5) {
                             killActor();
-                            throw new RuntimeException("[GAME]: Impossible to retrieve the set of image relevant for this game, aborting");
+                            throw new RuntimeException("[GAME] Impossible to retrieve the set of image relevant for this game, aborting");
                         }
                     }
                 },Akka.system().dispatcher()
@@ -524,25 +527,28 @@ public class Game extends GameRoom {
     }
 
     private void playerJoin(String username) throws Exception {
-        Logger.debug("[GAME]: Player Joined");
+        Logger.debug("[GAME] Player Joined");
         Painter painter = new Painter(username, false);
         //Add the new entered player, it has never been a sketcher in this game (false)
         playersVect.add(painter);
         getSender().tell("OK", this.getSelf());
         //publishLobbyEvent(GameEventType.join);
-        Logger.info("[GAME]: added player " + playersVect.get(playersVect.size() - 1).name);
-        Logger.debug("[GAME]: Check Start");
+        publishLobbyEvent();
+        Logger.info("[GAME] added player " + playersVect.get(playersVect.size() - 1).name);
+        Logger.debug("[GAME] Check Start");
         checkStart();
     }
 
     /**
      * Function used to update the status of the lobby room
      *
-     * @param type the type of the event to publish: room created, room
+     *
      * destroyed, update status
-     * [TESTED]
+     *
      */
-    private void publishLobbyEvent(GameEventType type) {
+    //@param type the type of the event to publish: room created, room
+
+    private void publishLobbyEvent() {        //private void publishLobbyEvent(GameEventType type) {
         ObjectNode status = new ObjectNode(JsonNodeFactory.instance);
         //Get the hashcode related to this actoref in order to make it unique
         status.put("id", this.getSelf().hashCode());
@@ -560,13 +566,14 @@ public class Game extends GameRoom {
             if (painter.name.equalsIgnoreCase(quitter)) {
                 playersVect.remove(painter);
                 disconnectedPlayers++;
-                GameBus.getInstance().publish(new GameEvent("quit", GameManager.getInstance().getLobby(), GameEventType.quit));
+              //  GameBus.getInstance().publish(new GameEvent("quit", GameManager.getInstance().getLobby(), GameEventType.quit));
+                GameBus.getInstance().publish(new GameEvent(GameMessages.composeQuit(quitter), GameManager.getInstance().getLobby()));
                 //End the game if there's just one player or less
                 if (((requiredPlayers - disconnectedPlayers) == 1) && gameStarted) //Restart the game
                 {
                     gameEnded();
                 } else if (((requiredPlayers - disconnectedPlayers) <= 0) && gameStarted) {
-                    publishLobbyEvent(GameEventType.matchEnd);
+                    publishLobbyEvent();      //publishLobbyEvent(GameEventType.matchEnd);
                 }
 
             }
@@ -576,7 +583,7 @@ public class Game extends GameRoom {
         }
     }
 
-    private void guessed(String guesser) {      //TODO vhange messages ???
+    private void guessed(String guesser) {
         for (Painter painter : playersVect) {
             //If the current painter is the guesser, has not guessed before and it is not the sketcher, update his points
             if (painter.name.equals(guesser) && painter.guessed == false) {
@@ -585,17 +592,23 @@ public class Game extends GameRoom {
                 painter.setCorrectGuess();
 
                 //Send the updated information to the other modules
-                ObjectNode guesserJson = Json.newObject();
-                guesserJson.put("type", "points");
-                guesserJson.put("name", guesser);
-                guesserJson.put("points", guesserPointsRemaining);
-                GameEvent eventGuesser = new GameEvent(guesser, roomChannel, GameEventType.points);
-                eventGuesser.setObject(guesserJson);
+       //         ObjectNode guesserJson = Json.newObject();
+       //         guesserJson.put("type", "points");
+       //         guesserJson.put("name", guesser);
+       //         guesserJson.put("points", guesserPointsRemaining);
+       //         GameEvent eventGuesser = new GameEvent(guesser, roomChannel, GameEventType.points);
+       //         eventGuesser.setObject(guesserJson);
+                GameEvent eventGuesser = new GameEvent(GameMessages.composeScore(guesser, guesserPointsRemaining),roomChannel);
                 GameBus.getInstance().publish(eventGuesser);
 
                 //Send also the image to be shown
-                eventGuesser = new GameEvent(guesser, roomChannel, GameEventType.guessedObject);
-                eventGuesser.setObject(guessObject);
+       //         eventGuesser = new GameEvent(guesser, roomChannel, GameEventType.guessedObject);
+       //         eventGuesser.setObject(guessObject);
+                String id = guessObject.get("id").asText();
+                String medialocator = guessObject.get("image").asText();
+                int width = guessObject.get("width").asInt();
+                int height = guessObject.get("height").asInt();
+                eventGuesser = new GameEvent(GameMessages.composeImage(guesser,id,medialocator,width,height), roomChannel);
                 GameBus.getInstance().publish(eventGuesser);
 
                 if (guesserPointsRemaining > minGuesserPointsRemaining) {
@@ -604,12 +617,13 @@ public class Game extends GameRoom {
                     sketcherPainter.setPoints(sketcherPainter.getPoints() + sketcherPointsRemaining);
 
                     //Send the updated information to the other modules
-                    ObjectNode sketcherJson = Json.newObject();
-                    sketcherJson.put("type", "points");
-                    sketcherJson.put("name", sketcherPainter.name);
-                    sketcherJson.put("points", sketcherPointsRemaining);
-                    GameEvent eventSketcher = new GameEvent(sketcherPainter.name, roomChannel, GameEventType.points);
-                    eventSketcher.setObject(sketcherJson);
+          //          ObjectNode sketcherJson = Json.newObject();
+          //          sketcherJson.put("type", "points");
+          //          sketcherJson.put("name", sketcherPainter.name);
+          //          sketcherJson.put("points", sketcherPointsRemaining);
+          //          GameEvent eventSketcher = new GameEvent(sketcherPainter.name, roomChannel, GameEventType.points);
+          //          eventSketcher.setObject(sketcherJson);
+                    GameEvent eventSketcher = new GameEvent(GameMessages.composeScore(sketcherPainter.name, sketcherPointsRemaining));
                     GameBus.getInstance().publish(eventSketcher);
                 }
                 if (guesserPointsRemaining >= minGuesserPointsRemaining) {
@@ -618,20 +632,24 @@ public class Game extends GameRoom {
             }
             if (!guessedWord) {
                 //Send the time change once just a player has guessed
-                GameEvent timeEvent = new GameEvent(roomChannel, GameEventType.timerChange);
+      //          GameEvent timeEvent = new GameEvent(roomChannel, GameEventType.timerChange);
+                GameEvent timeEvent;
                 //If we are in single player mode, don't wait
                 if (requiredPlayers == 1) {
-                    timeEvent.setObject(timerChange(0, CountdownTypes.round));
+           //         timeEvent.setObject(timerChange(0, CountdownTypes.round));
+                    timeEvent = new GameEvent(GameMessages.composeTimer(0),roomChannel);
                 } else {
-                    timeEvent.setObject(timerChange(remainingTimeOnGuess, CountdownTypes.round));
+           //         timeEvent.setObject(timerChange(remainingTimeOnGuess, CountdownTypes.round));
+                    timeEvent = new GameEvent(GameMessages.composeTimer(remainingTimeOnGuess),roomChannel);
                 }
                 GameBus.getInstance().publish(timeEvent);
             }
         }
         if (numberGuessed == (playersVect.size() - 1)) {
             //Send the message to change the time for everyone to end the round
-            GameEvent timeEvent = new GameEvent(roomChannel, GameEventType.timerChange);
-            timeEvent.setObject(timerChange(remainingTimeOnAllGuess, CountdownTypes.round));
+     //       GameEvent timeEvent = new GameEvent(roomChannel, GameEventType.timerChange);
+     //       timeEvent.setObject(timerChange(remainingTimeOnAllGuess, CountdownTypes.round));
+            GameEvent timeEvent = new GameEvent(GameMessages.composeTimer(remainingTimeOnAllGuess),roomChannel);
             GameBus.getInstance().publish(timeEvent);
         }
         guessedWord = true;
@@ -642,11 +660,12 @@ public class Game extends GameRoom {
         if (sessionId != null) {
             CMS.closeSession(sessionId);
         }
-        GameEvent endEvent = new GameEvent(roomChannel, GameEventType.leaderboard);
-        endEvent.setObject(compileLeaderboard());
+  //      GameEvent endEvent = new GameEvent(roomChannel, GameEventType.leaderboard);
+  //      endEvent.setObject(compileLeaderboard());
+        GameEvent endEvent = new GameEvent(GameMessages.composeLeaderboard(compileLeaderboard()),roomChannel);
         GameBus.getInstance().publish(endEvent);
-        GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.matchEnd));
-        publishLobbyEvent(GameEventType.matchEnd);
+  //      GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.matchEnd));
+        publishLobbyEvent();      //publishLobbyEvent(GameEventType.matchEnd);
 
         Painter[] sorted = playersVect.toArray(new Painter[0]);
 
@@ -674,6 +693,8 @@ public class Game extends GameRoom {
         }
         catch(SQLException ex){
         }
+        GameEvent endEvent2 = new GameEvent(GameMessages.composeMatchEnd(),roomChannel);
+        GameBus.getInstance().publish(endEvent2);
         killActor();
     }
 
@@ -704,33 +725,50 @@ public class Game extends GameRoom {
         return timeChange;
     }
 
-    private void skipTask(String kind) {
+    private void skipTask() {        //private void skipTask(String kind) {
         CMS.postAction(sessionId, "skiptask", sketcherPainter.name, "");
-        GameBus.getInstance().publish(new SystemMessage(sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "skiptask"), roomChannel));
-        GameEvent timeEvent = new GameEvent(roomChannel, GameEventType.timerChange);
-        timeEvent.setObject(timerChange(0, CountdownTypes.valueOf(kind)));
-        GameBus.getInstance().publish(timeEvent);
+   //     GameBus.getInstance().publish(new SystemMessage(sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "skiptask"), roomChannel));
+        GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info,sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "skiptask")), roomChannel));
+    //    GameEvent timeEvent = new GameEvent(roomChannel, GameEventType.timerChange);
+    //    timeEvent.setObject(timerChange(0, CountdownTypes.valueOf(kind)));
+        GameEvent timeEvent = new GameEvent(GameMessages.composeTimer(0),roomChannel);  //todo ??
+        GameBus.getInstance().publish(timeEvent);                                       //todo ??
+        GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText()), roomChannel));
+        nextRound();
     }
 
-    private void showImages() {         //TODO change messages ???
-        GameEvent showImages = new GameEvent(roomChannel, GameEventType.showImages);
-        ObjectNode show = Json.newObject();
-        show.put("type", "showImages");
+    private void showImages() {
+//        GameEvent showImages = new GameEvent(roomChannel, GameEventType.showImages);
+//        ObjectNode show = Json.newObject();
+//        show.put("type", "showImages");
         //If we are in single player mode, don't show the images again
        /*if(requiredPlayers==1)
          show.put("seconds",0);
          else*/
-        show.put("seconds", 5);
-        showImages.setObject(show);
+//        show.put("seconds", 5);
+//        showImages.setObject(show);
+        String id = guessObject.get("id").asText();
+        String medialocator = guessObject.get("image").asText();
+        int width = guessObject.get("width").asInt();
+        int height = guessObject.get("height").asInt();
+        GameEvent showImages = new GameEvent(GameMessages.composeImage(id,medialocator,width,height, 5),roomChannel);
         GameBus.getInstance().publish(showImages);
         //Send also the image to be shown
         for (Painter painter : playersVect) {
             if (!painter.role.equals("SKETCHER") && painter.guessed == false) {
-                GameEvent eventGuesser = new GameEvent(painter.name, roomChannel, GameEventType.guessedObject);
-                eventGuesser.setObject(guessObject);
+          //      GameEvent eventGuesser = new GameEvent(painter.name, roomChannel, GameEventType.guessedObject);
+          //      eventGuesser.setObject(guessObject);
+                GameEvent eventGuesser = new GameEvent(GameMessages.composeImage(painter.name, id,medialocator,width,height),roomChannel);
                 GameBus.getInstance().publish(eventGuesser);
             }
         }
+    }
+
+
+    private void tagReceived(String word){
+        taskImage.remove("tag");
+        taskImage.put("tag", word);
+        sendTask2();
     }
 
     
@@ -751,21 +789,22 @@ public class Game extends GameRoom {
         currentGuess = task.get("tag").asText();
     }
     
-    private void handleTalk(JsonNode jguess) {      //TODO good feeling! should work!
+    private void handleTalk(JsonNode jguess) {
         String text = jguess.get("content").get("word").asText();
         String username = jguess.get("content").get("user").asText();
         // Received a Talk message
         //If we are asking the sketcher for a tag, then save the tag
         if (askTag && username.equals(askTagSketcher)) {
             askTag = false;
-            GameBus.getInstance().publish(new GameEvent(text, username, roomChannel, GameEventType.tag));
+            //GameBus.getInstance().publish(new GameEvent(text, username, roomChannel, GameEventType.tag));
         } else if (gameStarted) {
             //Compare the message sent with the tag in order to establish if we have a right guess
-            levenshteinDistance distanza = new levenshteinDistance();
+            levenshteinDistance distance = new levenshteinDistance();
             if (text != null) {
-                switch (distanza.computeLevenshteinDistance(text, currentGuess)) {
+                switch (distance.computeLevenshteinDistance(text, currentGuess)) {
                     case 0:
-                        GameBus.getInstance().publish(new GameEvent(username, roomChannel, GameEventType.guessed));
+                        //GameBus.getInstance().publish(new GameEvent(username, roomChannel, GameEventType.guessed));
+                        GameBus.getInstance().publish(new GameEvent(GameMessages.composeGuessed(username, text), roomChannel));
                         break;
                     case 1:
                         GameBus.getInstance().publish(GameMessages.composeGuess(username, text, "hot"));
