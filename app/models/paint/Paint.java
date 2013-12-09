@@ -85,10 +85,12 @@ public class Paint extends GameRoom {
                     saveTraces();
                     break;
                 case "changeTool":
+                    notifyAll(event.get("content"));
                     break;
                 case "beginPath":
                     break;
                 case "point":
+                    notifyAll(event.get("content"));
                     break;
                 case "endPath":
                     break;
@@ -153,6 +155,12 @@ public class Paint extends GameRoom {
                 case "leave":
                     //           handleQuitter(event.getMessage());
                     handleQuitter(event.get("content").get("user").asText());
+                case "changeTool":
+                    notifyAll(event.get("content"));
+                    break;
+                case "point":
+                    notifyAll(event.get("content"));
+                    break;
             }
         }
     }
