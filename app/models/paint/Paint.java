@@ -88,11 +88,13 @@ public class Paint extends GameRoom {
                     notifyAll(event.get("content"));
                     break;
                 case "beginPath":
+                    notifyAll(event.get("content"));
                     break;
                 case "point":
                     notifyAll(event.get("content"));
                     break;
                 case "endPath":
+                    notifyAll(event.get("content"));
                     break;
             }
             notifyAll(event.get("content"));
@@ -144,7 +146,7 @@ public class Paint extends GameRoom {
                     //             notifySingle(event.getMessage(), event.getObject());
                     notifyAll(event.get("content"));
                     break;
-                case "timerChange":
+                case "timer":
                     //             notifyAll(event.getObject());
                     notifyAll(event.get("content"));
                     break;
@@ -158,7 +160,13 @@ public class Paint extends GameRoom {
                 case "changeTool":
                     notifyAll(event.get("content"));
                     break;
+                case "beginPath":
+                    notifyAll(event.get("content"));
+                    break;
                 case "point":
+                    notifyAll(event.get("content"));
+                    break;
+                case "endPath":
                     notifyAll(event.get("content"));
                     break;
             }

@@ -731,8 +731,8 @@ public class Game extends GameRoom {
         GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info,sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "skiptask")), roomChannel));
     //    GameEvent timeEvent = new GameEvent(roomChannel, GameEventType.timerChange);
     //    timeEvent.setObject(timerChange(0, CountdownTypes.valueOf(kind)));
-        GameEvent timeEvent = new GameEvent(GameMessages.composeTimer(0),roomChannel);  //todo ??
-        GameBus.getInstance().publish(timeEvent);                                       //todo ??
+        GameEvent timeEvent = new GameEvent(GameMessages.composeTimer(0),roomChannel);
+        GameBus.getInstance().publish(timeEvent);
         GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText()), roomChannel));
         nextRound();
     }
