@@ -205,6 +205,16 @@ public class GameMessages {
           ObjectNode event = composeJsonMessage("roundEnd",content);
           return event;
     }
+    public static ObjectNode composeRoundEnd(String word, String id,String url,Integer width, Integer height) {
+        ObjectNode content = Json.newObject();
+        content.put("word", word);
+        content.put("id", id);
+        content.put("url", url);
+        content.put("width", width);
+        content.put("height", height);
+        ObjectNode event = composeJsonMessage("roundEnd",content);
+        return event;
+    }
     
     public static ObjectNode composeImageInfo(String id,String url,Integer width, Integer height) {
           ObjectNode content = Json.newObject();
@@ -254,7 +264,7 @@ public class GameMessages {
          content.put("url", url);
          content.put("width", width);
          content.put("height", height);
-         ObjectNode event = composeJsonMessage("tag",content);
+         ObjectNode event = composeJsonMessage("tagS",content);
          return event;
     }
     public static ObjectNode composeTag() {

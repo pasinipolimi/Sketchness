@@ -130,13 +130,14 @@ public class Game extends GameRoom {
                         case "guessed": guessed(event.get("word").asText());break;
                         case "timer": playerTimeExpired(event.get("user").asText()); break;
                         case "guess": handleTalk(event);break;
-                        case "tag": tagReceived(event.get("content").get("word").asText());break;
+                        case "tag":
+                            tagReceived(event.get("content").get("word").asText());break;
                     }
                 }
             }
             else if (message instanceof ObjectNode) {
                 JsonNode event=((JsonNode)message);
-                GameBus.getInstance().publish(new GameMessages.GameEvent(event, roomChannel));  //TODO ***
+                GameBus.getInstance().publish(new GameMessages.GameEvent(event, roomChannel));
                 event = event.get("message");
                 String type = event.get("type").asText();
                 switch(type) {
@@ -731,9 +732,13 @@ public class Game extends GameRoom {
         GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info,sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "skiptask")), roomChannel));
     //    GameEvent timeEvent = new GameEvent(roomChannel, GameEventType.timerChange);
     //    timeEvent.setObject(timerChange(0, CountdownTypes.valueOf(kind)));
-        GameEvent timeEvent = new GameEvent(GameMessages.composeTimer(0),roomChannel);
-        GameBus.getInstance().publish(timeEvent);
-        GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText()), roomChannel));
+    //    GameEvent timeEvent = new GameEvent(GameMessages.composeTimer(0),roomChannel);
+     //   GameBus.getInstance().publish(timeEvent);
+        String id = guessObject.get("id").asText();
+        String medialocator = guessObject.get("image").asText();
+        int width = guessObject.get("width").asInt();
+        int height = guessObject.get("height").asInt();
+        GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText(),id,medialocator,width,height), roomChannel));
         nextRound();
     }
 
