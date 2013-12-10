@@ -190,8 +190,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							that.tag();
 						},
 						task: function(e, content) {
-						    sketchness.word = content.word || null;
-							that.task();
+							that.task(content.word);
 						}
 					});
 				},
@@ -363,7 +362,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 *
 				 * @param word :String The word to draw
 				 */
-				ontask: function(evt, from, to, word) {
+				onbeforetask: function(evt, from, to, word) {
 					this.sketchness.word = word || null;
 				},
 
@@ -411,7 +410,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
                             that.quit(content);
                         },
 						roundEnd: function(e, content) {
-							that.endRound(content.word);
+						    sketchness.word = content.word;
+							that.endRound();
 						}
 					});
 
@@ -638,7 +638,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 *
 				 * @param word :String The solution word
 				 */
-				onendRound: function(event, from, to, word) {
+				onbeforeendRound: function(event, from, to, word) {
 					this.sketchness.word = word;
 				},
 
@@ -689,7 +689,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 *
 				 * @param scores :String The scores
 				 */
-				onquit: function(event, from, to, scores) {
+				onbeforequit: function(event, from, to, scores) {
 					this.scores = scores;
 				},
 

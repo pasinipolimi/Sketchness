@@ -83,15 +83,6 @@ public class Paint extends GameRoom {
                 case "changeTool":
                     notifyAll(event.get("content"));
                     break;
-                case "beginPath":
-                    notifyAll(event.get("content"));
-                    break;
-                case "point":
-                    notifyAll(event.get("content"));
-                    break;
-                case "endPath":
-                    notifyAll(event.get("content"));
-                    break;
             }
             notifyAll(event.get("content"));
         }
@@ -162,19 +153,27 @@ public class Paint extends GameRoom {
                 case "endPath":
                     sendEnd(event.get("content"));
                     break;
-                case "roundEnd":
+                case "roundEndS":
                     //            GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel, GameEventType.timeExpired));
-                    notifyAll(event.get("content"));
+                    roundEnd(event.get("content"));
                     break;
             }
         }
     }
 
+    private void roundEnd(JsonNode json){
+        String word = json.get("word").asText();
+        notifyAll(GameMessages.composeRoundEnd(word));
+        String id = json.get("id").asText();
+        String medialocator = json.get("url").asText();
+        int width = json.get("width").asInt();
+        int height = json.get("height").asInt();
+        notifyAll(GameMessages.composeImage(id,medialocator,width,height));
+    }
+
     private void roundBegin(JsonNode json){
         String sketcher = json.get("sketcher").asText();
-        for (Map.Entry<String, Painter> entry : painters.entrySet()) {
-            entry.getValue().channel.write(GameMessages.composeRoundBegin(sketcher));
-        }
+        notifyAll(GameMessages.composeRoundBegin(sketcher));
     }
 
     private void saveTraces() {

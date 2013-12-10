@@ -128,10 +128,9 @@ public class Game extends GameRoom {
                         // break point between working and not Tested
                         case "skip": skipTask(); break;
                         case "guessed": guessed(event.get("word").asText());break;
-                        case "timer": playerTimeExpired(event.get("user").asText()); break;
+             //           case "timer": playerTimeExpired(event.get("user").asText()); break;
                         case "guess": handleTalk(event);break;
-                        case "tag":
-                            tagReceived(event.get("content").get("word").asText());break;
+                        case "tag": tagReceived(event.get("content").get("word").asText());break;
                     }
                 }
             }
@@ -292,8 +291,8 @@ public class Game extends GameRoom {
                     sketcherPainter = playersVect.get(index);
                     sketcherPainter.role = "SKETCHER";
                     sketcherPainter.hasBeenSketcher = true;
-                    count++;
                 }
+                count++;
             }
         }
         //Publish a system message to inform the other players on who is the sketcher
@@ -732,12 +731,12 @@ public class Game extends GameRoom {
         GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info,sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "skiptask")), roomChannel));
     //    GameEvent timeEvent = new GameEvent(roomChannel, GameEventType.timerChange);
     //    timeEvent.setObject(timerChange(0, CountdownTypes.valueOf(kind)));
-    //    GameEvent timeEvent = new GameEvent(GameMessages.composeTimer(0),roomChannel);
-     //   GameBus.getInstance().publish(timeEvent);
-        String id = guessObject.get("id").asText();
-        String medialocator = guessObject.get("image").asText();
-        int width = guessObject.get("width").asInt();
-        int height = guessObject.get("height").asInt();
+        GameEvent timeEvent = new GameEvent(GameMessages.composeTimer(0),roomChannel);
+        GameBus.getInstance().publish(timeEvent);
+        String id = taskImage.get("id").asText();
+        String medialocator = taskImage.get("image").asText();
+        int width = taskImage.get("width").asInt();
+        int height = taskImage.get("height").asInt();
         GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText(),id,medialocator,width,height), roomChannel));
         nextRound();
     }
@@ -752,12 +751,14 @@ public class Game extends GameRoom {
          else*/
 //        show.put("seconds", 5);
 //        showImages.setObject(show);
-        String id = guessObject.get("id").asText();
-        String medialocator = guessObject.get("image").asText();
-        int width = guessObject.get("width").asInt();
-        int height = guessObject.get("height").asInt();
-        GameEvent showImages = new GameEvent(GameMessages.composeImage(id,medialocator,width,height, 5),roomChannel);
+        String id = taskImage.get("id").asText();
+        String medialocator = taskImage.get("image").asText();
+        int width = taskImage.get("width").asInt();
+        int height = taskImage.get("height").asInt();
+        GameEvent showImages = new GameEvent(GameMessages.composeImage(id,medialocator,width,height),roomChannel);
         GameBus.getInstance().publish(showImages);
+        GameEvent timeEvent = new GameEvent(GameMessages.composeTimer(5),roomChannel);
+        GameBus.getInstance().publish(timeEvent);
         //Send also the image to be shown
         for (Painter painter : playersVect) {
             if (!painter.role.equals("SKETCHER") && painter.guessed == false) {
