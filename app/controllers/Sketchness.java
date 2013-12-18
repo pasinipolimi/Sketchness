@@ -128,7 +128,6 @@ public class Sketchness extends Controller {
         };
     }
 
-
     /**
      * Display the lobby.
      */

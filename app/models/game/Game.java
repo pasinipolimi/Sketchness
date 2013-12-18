@@ -414,7 +414,7 @@ public class Game extends GameRoom {
         } else {
             areWeAsking = false;
      //       GameBus.getInstance().publish(new GameEvent(sketcherPainter.name, roomChannel, GameEventType.nextRound));
-            GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundBegin(sketcherPainter.name),roomChannel));
+      //      GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundBegin(sketcherPainter.name),roomChannel));
       //      GameEvent task = new GameEvent(sketcherPainter.name, roomChannel, GameEventType.task);
       //      task.setObject(taskImage);
             GameEvent task = new GameEvent(GameMessages.composeTask(sketcherPainter.name,id,medialocator,word, width, height), roomChannel);

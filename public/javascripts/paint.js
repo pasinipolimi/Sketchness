@@ -452,7 +452,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							} while ((element = element.offsetParent));
 						}
 
-						if(!isMobile) {
+						if(!sketchness.isMobile) {
 							return {
 								x: (event.pageX - offsetX),
 								y: (event.pageY - offsetY)

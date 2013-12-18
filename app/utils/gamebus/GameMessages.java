@@ -358,6 +358,11 @@ public class GameMessages {
         return event;
     }
 
+    public static ObjectNode composeBeginPath() {
+        ObjectNode event = composeJsonMessage("beginPath",Json.newObject());
+        return event;
+    }
+
     public static ObjectNode composeendPath() {
         ObjectNode event = composeJsonMessage("endPath",Json.newObject());
         return event;

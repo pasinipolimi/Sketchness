@@ -142,13 +142,13 @@ public class Paint extends GameRoom {
                     //           handleQuitter(event.getMessage());
                     handleQuitter(event.get("content").get("user").asText());
                 case "changeTool":
-                    notifyAll(event.get("content"));
+                    changeTool(event.get("content"));
                     break;
                 case "beginPath":
-                    notifyAll(event.get("content"));
+                    beginPath();
                     break;
                 case "point":
-                    notifyAll(event.get("content"));
+                    point(event.get("content"));
                     break;
                 case "endPath":
                     sendEnd(event.get("content"));
@@ -303,6 +303,31 @@ public class Paint extends GameRoom {
         }
     }
 
+    private void changeTool(JsonNode task) throws Exception {
+        String tool = task.get("tool").asText();
+        int size = task.get("size").asInt();
+        String color = task.get("color").asText();
+
+        notifyAll(GameMessages.composeChangeTool(tool, size, color));
+
+    }
+
+    private void point(JsonNode task) throws Exception {
+
+        int x = task.get("x").asInt();
+        int y = task.get("y").asInt();
+
+        notifyAll(GameMessages.composePoint(x, y));
+
+    }
+
+    private void beginPath() throws Exception {
+
+
+        notifyAll(GameMessages.composeBeginPath());
+
+    }
+
     private void notifyAll(JsonNode json) {
         for (Painter painter : painters.values()) {
             painter.channel.write(json);
@@ -374,9 +399,9 @@ public class Paint extends GameRoom {
         currentSegment = new Segment("rgba(255,255,255,1.0)");
 
         //Send to the users the information about their role
-        for (Map.Entry<String, Painter> entry : painters.entrySet()) {
-                entry.getValue().channel.write(GameMessages.composeRoundBegin(sketcher));
-        }
+
+               notifyAll(GameMessages.composeRoundBegin(sketcher));
+
     }
 }
 
