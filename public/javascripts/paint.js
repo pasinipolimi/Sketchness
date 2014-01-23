@@ -376,7 +376,8 @@
 
 		//***************************TAKING CARE OF THE LINE STROKES*****************************/
 		(function() {
-			$('#mainPage').append("<button id=\"skipTask\"></button><button id=\"endSegmentation\"></button>");
+			//$('#mainPage').append("<button id=\"skipTask\"></button><button id=\"endSegmentation\"></button>");
+			$('#mainPage').append("<button id=\"endSegmentation\"></button>");
 			skipButton = $('#skipTask');
 			endSegmentation = $('#endSegmentation');
 			skipButton.hide();
