@@ -395,6 +395,10 @@ public class CMS {
 				// Save information related to the image
 				String id = item.get("id").asText();
 				
+				if(!ilioCollection.contains(id)){
+					//the image is part of the collection
+					continue;				
+				}
 				
 				String url = rootUrl + item.get("mediaLocator").asText();
 				Integer width = item.get("width").asInt();
@@ -413,13 +417,7 @@ public class CMS {
 				if (imageSegments != null) {
 					tags = retrieveTags(imageSegments);
 				}
-				System.out.println(id+" "+tags+" "+url);
-				
 
-				if(!ilioCollection.contains(id)){
-					//the image is part of the collection
-					continue;				
-				}
 				
 				// Add one tag among the ones that have been retrieved following
 				// a particular policy
