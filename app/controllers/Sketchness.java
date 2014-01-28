@@ -41,8 +41,7 @@ public class Sketchness extends Controller {
      */
     public static User getLocalUser(final Http.Session session) {
         final AuthUser currentAuthUser = PlayAuthenticate.getUser(session);
-        final User localUser = User.findByAuthUserIdentity(currentAuthUser);
-        return localUser;
+        return User.findByAuthUserIdentity(currentAuthUser);
     }
 
     /**
@@ -102,7 +101,7 @@ public class Sketchness extends Controller {
         return new WebSocket<JsonNode>() {
             // Called when the Websocket Handshake is done.
             @Override
-            public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
+            public void onReady(final WebSocket.In<JsonNode> in, final WebSocket.Out<JsonNode> out) {
 
                 // Join the chat room.
                 try {
@@ -126,7 +125,7 @@ public class Sketchness extends Controller {
         return new WebSocket<JsonNode>() {
             // Called when the Websocket Handshake is done.
             @Override
-            public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
+            public void onReady(final WebSocket.In<JsonNode> in, final WebSocket.Out<JsonNode> out) {
 
                 // Join the chat room.
                 try {
@@ -167,7 +166,7 @@ public class Sketchness extends Controller {
     public static Result lobby() throws Exception {
 
         final User localUser = getLocalUser(session());
-        String username = localUser.name;
+        final String username = localUser.name;
         if (LanguagePicker.retrieveIsoCode().equals("")) {
             LanguagePicker.setLanguage(Lang.preferred(request().acceptLanguages()));
         }
