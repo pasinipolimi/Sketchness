@@ -843,6 +843,8 @@ public class Game extends GameRoom {
 			}
 		} catch (final SQLException ex) {
 
+			Logger.error("Unable to get a DB connection.");
+
 		} finally {
 			try {
 				if (connection != null)
