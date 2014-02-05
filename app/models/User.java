@@ -1,25 +1,43 @@
 package models;
 
-import be.objectify.deadbolt.core.models.Permission;
-import be.objectify.deadbolt.core.models.Role;
-import be.objectify.deadbolt.core.models.Subject;
-import com.avaje.ebean.Ebean;
-import com.avaje.ebean.ExpressionList;
-import com.avaje.ebean.validation.Email;
-import com.feth.play.module.pa.providers.password.UsernamePasswordAuthUser;
-import com.feth.play.module.pa.user.*;
-import models.TokenAction.Type;
-import play.data.format.Formats;
-import play.db.DB;
-import play.db.ebean.Model;
-import providers.MyUsernamePasswordAuthUser;
-
-import javax.persistence.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
+import models.TokenAction.Type;
+import play.Logger;
+import play.data.format.Formats;
+import play.db.DB;
+import play.db.ebean.Model;
+import providers.MyUsernamePasswordAuthUser;
+import be.objectify.deadbolt.core.models.Permission;
+import be.objectify.deadbolt.core.models.Role;
+import be.objectify.deadbolt.core.models.Subject;
+
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.ExpressionList;
+import com.avaje.ebean.validation.Email;
+import com.feth.play.module.pa.providers.password.UsernamePasswordAuthUser;
+import com.feth.play.module.pa.user.AuthUser;
+import com.feth.play.module.pa.user.AuthUserIdentity;
+import com.feth.play.module.pa.user.EmailIdentity;
+import com.feth.play.module.pa.user.FirstLastNameIdentity;
+import com.feth.play.module.pa.user.NameIdentity;
 
 /**
  * Initial version based on work by Steve Chaloner (steve@objectify.be) for
@@ -39,7 +57,7 @@ public class User extends Model implements Subject {
 	@Email
 	// if you make this unique, keep in mind that users *must* merge/link their
 	// accounts then on signup with additional providers
-	//@Column(unique = true)
+	// @Column(unique = true)
 	public String email;
 
 	public String name;
@@ -48,24 +66,22 @@ public class User extends Model implements Subject {
 
 	public String lastName;
 
+	public String nation;
+	public boolean gender;
 
-    public String nation;
-    public boolean gender;
-
-    public boolean online;
-
+	public boolean online;
 
 	@Formats.DateTime(pattern = "yyyy-MM-dd HH:mm:ss")
 	public Date lastLogin;
 
-    @Formats.DateTime(pattern = "yyyy-MM-dd HH:mm:ss")
-    public Date lastActive;
+	@Formats.DateTime(pattern = "yyyy-MM-dd HH:mm:ss")
+	public Date lastActive;
 
 	public boolean active;
 
 	public boolean emailValidated;
 
-    public Integer totalScore;
+	public Integer totalScore;
 
 	@ManyToMany
 	public List<SecurityRole> roles;
@@ -80,8 +96,7 @@ public class User extends Model implements Subject {
 			Long.class, User.class);
 
 	@Override
-	public String getIdentifier()
-	{
+	public String getIdentifier() {
 		return Long.toString(id);
 	}
 
@@ -162,13 +177,12 @@ public class User extends Model implements Subject {
 			// Remember, even when getting them from FB & Co., emails should be
 			// verified within the application as a security breach there might
 			// break your security as well!
-            user.email = identity.getEmail();
+			user.email = identity.getEmail();
 
+			if (user.checkMail(identity.getEmail())) {
 
-            if(user.checkMail(identity.getEmail())){
-
-                return user;
-            }
+				return user;
+			}
 
 			user.emailValidated = false;
 		}
@@ -177,47 +191,44 @@ public class User extends Model implements Subject {
 			final NameIdentity identity = (NameIdentity) authUser;
 			final String name = identity.getName();
 			if (name != null) {
-                user.name = user.checkNickname(name);
+				user.name = user.checkNickname(name);
 			}
 		}
-		
+
 		if (authUser instanceof FirstLastNameIdentity) {
-		  final FirstLastNameIdentity identity = (FirstLastNameIdentity) authUser;
-		  final String firstName = identity.getFirstName();
-		  final String lastName = identity.getLastName();
-		  if (firstName != null) {
-		    user.firstName = firstName;
-		  }
-		  if (lastName != null) {
-		    user.lastName = lastName;
-		  }
+			final FirstLastNameIdentity identity = (FirstLastNameIdentity) authUser;
+			final String firstName = identity.getFirstName();
+			final String lastName = identity.getLastName();
+			if (firstName != null) {
+				user.firstName = firstName;
+			}
+			if (lastName != null) {
+				user.lastName = lastName;
+			}
 		}
 
-        if (authUser instanceof MyUsernamePasswordAuthUser){
+		if (authUser instanceof MyUsernamePasswordAuthUser) {
 
-            final MyUsernamePasswordAuthUser identity = (MyUsernamePasswordAuthUser) authUser;
-            user.email = identity.getEmail();
-            user.emailValidated = false;
-            user.name = identity.getName();
+			final MyUsernamePasswordAuthUser identity = (MyUsernamePasswordAuthUser) authUser;
+			user.email = identity.getEmail();
+			user.emailValidated = false;
+			user.name = identity.getName();
 
+			final String old = user.name;
 
-            String old = user.name;
+			user.name = user.checkNickname(old);
 
-            user.name = user.checkNickname(old);
+			user.gender = identity.getGender();
+			user.nation = identity.getNation();
 
+			if (old.equals("Guest")) {
 
+				user.emailValidated = true;
 
-            user.gender = identity.getGender();
-            user.nation = identity.getNation();
+			}
+		}
 
-            if(old.equals("Guest")){
-
-                user.emailValidated = true;
-
-            }
-        }
-
-        user.totalScore = 0;
+		user.totalScore = 0;
 
 		user.save();
 		user.saveManyToManyAssociations("roles");
@@ -225,61 +236,87 @@ public class User extends Model implements Subject {
 		return user;
 	}
 
-    public String checkNickname(String nickname){
+	public String checkNickname(String nickname) {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet rs = null;
+		try {
+			connection = DB.getConnection();
 
-        try{
-            Connection connection = DB.getConnection();
+			final String query = "SELECT * FROM USERS WHERE NAME=? ";
+			statement = connection.prepareStatement(query);
+			statement.setString(1, nickname);
+			rs = statement.executeQuery();
 
-            String query = "SELECT * FROM USERS WHERE NAME=? ";
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, nickname);
-            ResultSet rs = statement.executeQuery();
+			if (rs.isBeforeFirst()) {
+				final Random randomGeneretor = new Random();
+				int n = randomGeneretor.nextInt(5000);
+				final int n2 = randomGeneretor.nextInt(5000);
+				n = n + n2;
+				final String ns = Integer.toString(n);
+				nickname = nickname + ns;
 
-            if(rs.isBeforeFirst()){
-                Random randomGeneretor = new Random();
-                int n = randomGeneretor.nextInt(5000);
-                int n2 = randomGeneretor.nextInt(5000);
-                n = n + n2;
-                String ns = Integer.toString(n);
-                nickname=  nickname+ns;
+				checkNickname(nickname);
+			}
 
-                checkNickname(nickname);
-            }
+		} catch (final SQLException ex) {
+			// FIXME!!! se non sono riuscito a verificare il nickname devo fare
+			// qualcosa!!!!!
+			Logger.error("Unable to verify nickname: " + nickname, ex);
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (statement != null)
+					statement.close();
 
-            connection.close();
+				if (connection != null)
+					connection.close();
+			} catch (final SQLException e) {
+				play.Logger.error("Unable to close a SQL connection.");
+			}
 
-        }
-        catch(SQLException ex){
+		}
 
-        }
+		return nickname;
+	}
 
+	public boolean checkMail(final String email) {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet rs = null;
+		try {
+			connection = DB.getConnection();
 
-        return nickname;
-    }
+			final String query = "SELECT * FROM USERS WHERE EMAIL=? ";
+			statement = connection.prepareStatement(query);
+			statement.setString(1, email);
+			rs = statement.executeQuery();
 
-    public boolean checkMail(String email){
+			if (rs.isBeforeFirst()) {
+				return true;
+			}
 
-        try{
-            Connection connection = DB.getConnection();
+		} catch (final SQLException ex) {
+			// ciao
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (statement != null)
+					statement.close();
 
-            String query = "SELECT * FROM USERS WHERE EMAIL=? ";
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setString(1, email);
-            ResultSet rs = statement.executeQuery();
+				if (connection != null)
+					connection.close();
+			} catch (final SQLException e) {
+				play.Logger.error("Unable to close a SQL connection.");
+			}
+		}
 
-            if(rs.isBeforeFirst()){
-                connection.close();
-                return true;
-            }
-
-        }
-        catch(SQLException ex){
-
-        }
-
-
-        return false;
-    }
+		return false;
+	}
 
 	public static void merge(final AuthUser oldUser, final AuthUser newUser) {
 		User.findByAuthUserIdentity(oldUser).merge(
@@ -343,39 +380,49 @@ public class User extends Model implements Subject {
 		a.save();
 	}
 
-    public void changeNickname(final UsernamePasswordAuthUser authUser,String newNick) {
+	public void changeNickname(final UsernamePasswordAuthUser authUser,
+			String newNick) {
 
-              LinkedAccount a = this.getAccountByProvider(authUser.getProvider());
+		LinkedAccount a = this.getAccountByProvider(authUser.getProvider());
 
-              if (a == null) {
+		if (a == null) {
 
-                    a = LinkedAccount.create(authUser);
-                    a.user = this;
+			a = LinkedAccount.create(authUser);
+			a.user = this;
 
-              }
+		}
 
-              Long tempo = a.user.id;
-              String utente = Long.toString(tempo);
+		final Long tempo = a.user.id;
+		final String utente = Long.toString(tempo);
 
-              newNick = checkNickname(newNick);
+		newNick = checkNickname(newNick);
 
-              try{
-              Connection connection = DB.getConnection();
+		Connection connection = null;
+		PreparedStatement statement = null;
+		try {
+			connection = DB.getConnection();
 
-              String query = "UPDATE USERS SET NAME = ? WHERE ID = ? ";
-              PreparedStatement statement = connection.prepareStatement(query);
-              statement.setString(1, newNick);
-              statement.setString(2, utente);
-              statement.executeUpdate();
+			final String query = "UPDATE USERS SET NAME = ? WHERE ID = ? ";
+			statement = connection.prepareStatement(query);
+			statement.setString(1, newNick);
+			statement.setString(2, utente);
+			statement.executeUpdate();
 
-              connection.close();
+		} catch (final SQLException ex) {
+		} finally {
+			try {
+				if (statement != null)
+					statement.close();
 
-              }
-              catch(SQLException ex){
+				if (connection != null)
+					connection.close();
+			} catch (final SQLException e) {
+				play.Logger.error("Unable to close a SQL connection.");
+			}
 
-              }
+		}
 
-    }
+	}
 
 	public void resetPassword(final UsernamePasswordAuthUser authUser,
 			final boolean create) {

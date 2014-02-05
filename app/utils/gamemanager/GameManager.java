@@ -33,9 +33,7 @@ public class GameManager implements GameManagerInterface {
     public static GameManagerInterface getInstance() {
         if (instance == null) {
             synchronized (GameManager.class) {
-                if (instance == null) {
                     instance = TypedActor.get(Akka.system()).typedActorOf(new TypedProps<>(GameManagerInterface.class, GameManager.class));
-                }
             }
         }
         return instance;

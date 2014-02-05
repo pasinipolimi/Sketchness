@@ -1,34 +1,30 @@
+import java.util.Arrays;
+
+import models.SecurityRole;
+import play.Application;
+import play.GlobalSettings;
+import play.mvc.Call;
+import play.mvc.Http;
+import play.mvc.Result;
+import play.mvc.Results;
+import views.html.pageNotFound;
+
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.PlayAuthenticate.Resolver;
 import com.feth.play.module.pa.exceptions.AccessDeniedException;
 import com.feth.play.module.pa.exceptions.AuthException;
+
 import controllers.routes;
-import models.SecurityRole;
-import play.Application;
-import play.GlobalSettings;
-import play.i18n.Messages;
-import play.mvc.Call;
-import play.*;
-import play.mvc.*;
-import views.html.pageNotFound;
-import providers.MyUsernamePasswordAuthProvider;
-import views.html.sketchness_login;
-
-import static play.mvc.Results.*;
-
-
-import java.util.Arrays;
 
 public class Global extends GlobalSettings {
 
-    @Override
-    public Result onHandlerNotFound(Http.RequestHeader request) {
-        return Results.notFound(
-                pageNotFound.render()
-        );
-    }
+	@Override
+	public Result onHandlerNotFound(final Http.RequestHeader request) {
+		return Results.notFound(pageNotFound.render());
+	}
 
-    public void onStart(Application app) {
+	@Override
+	public void onStart(final Application app) {
 
 		PlayAuthenticate.setResolver(new Resolver() {
 
@@ -53,7 +49,8 @@ public class Global extends GlobalSettings {
 			@Override
 			public Call auth(final String provider) {
 				// You can provide your own authentication implementation,
-				// however the evolutions.default should be sufficient for most cases
+				// however the evolutions.default should be sufficient for most
+				// cases
 				return com.feth.play.module.pa.controllers.routes.Authenticate
 						.authenticate(provider);
 			}
@@ -78,17 +75,14 @@ public class Global extends GlobalSettings {
 
 				// more custom problem handling here...
 
-                if(e.getMessage().equals("Could not sign you up")){
-                  return routes.Signup.existsMail();
-                }
+				if (e.getMessage().equals("Could not sign you up")) {
+					return routes.Signup.existsMail();
+				}
 
 				return super.onException(e);
 			}
 
-
-
-
-        });
+		});
 
 		initialData();
 	}
