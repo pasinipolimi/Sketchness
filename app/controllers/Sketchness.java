@@ -81,7 +81,7 @@ public class Sketchness extends Controller {
         return ok(gameRoom.render(localUser, roomName,nPlayers));
     }
 
-            public void onReady(final WebSocket.In<JsonNode> in, final WebSocket.Out<JsonNode> out) {
+       //     public void onReady(final WebSocket.In<JsonNode> in, final WebSocket.Out<JsonNode> out) {
 
     /**
      * Handle the chat websocket.
@@ -178,3 +178,5 @@ public class Sketchness extends Controller {
 
 
 }
+
+//}

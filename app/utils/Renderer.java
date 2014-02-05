@@ -294,7 +294,6 @@ public class Renderer extends UntypedActor {
 	 */
 	public static String webToolAjax() throws JSONException {
 		final JsonReader jsonReader = new JsonReader();
-        String options;
 		final JsonNode itemImage = jsonReader.readJsonArrayFromUrl(rootUrl
 				+ "/wsmc/image.json");
 		final JsonNode itemTask = jsonReader.readJsonArrayFromUrl(rootUrl
