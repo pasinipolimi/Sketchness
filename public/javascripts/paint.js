@@ -557,7 +557,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						if (event.which === 13) {
 							event.preventDefault();
 
-							that.communicator.send("guess", {
+							that.communicator.send("guessAttempt", {
 							    user: sk.myself,
 								word: $(this).val()
 							});

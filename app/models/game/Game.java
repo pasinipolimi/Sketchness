@@ -114,7 +114,7 @@ public class Game extends GameRoom {
             }
              if (message instanceof Join) {
                 playerJoin(((Join) message).getUsername());
-                publishLobbyEvent();     //publishLobbyEvent(GameEventType.matchEnd);
+          //      publishLobbyEvent();     //publishLobbyEvent(GameEventType.matchEnd);
             }
             else if (message instanceof GameEvent) {
                 JsonNode event = ((GameEvent) message).getJson();
@@ -129,7 +129,7 @@ public class Game extends GameRoom {
                         case "skip": skipTask(); break;
                         case "guessed": guessed(event.get("word").asText());break;
              //           case "timer": playerTimeExpired(event.get("user").asText()); break;
-                        case "guess": handleTalk(event);break;
+                        case "guessAttempt": handleTalk(event);break;
                         case "tag": tagReceived(event.get("content").get("word").asText());break;
                     }
                 }
@@ -145,7 +145,7 @@ public class Game extends GameRoom {
             }
        }
        catch(Exception e) {
-          LoggerUtils.error("[GAME]", e);
+          LoggerUtils.error("[GAME]:", e);
       }
     }
     
@@ -327,7 +327,7 @@ public class Game extends GameRoom {
         //We need to wait for all the modules to receive the player list
         if (canStart && playersVect.size() >= requiredPlayers) {
             GameManager.getInstance().removeInstance(getSelf());
-            publishLobbyEvent();            //publishLobbyEvent(GameEventType.matchStart);
+    //        publishLobbyEvent();            //publishLobbyEvent(GameEventType.matchStart);
             if (taskAcquired) {
                 //Create a new session in which to store the actions of the game
                 if(!fixGroundTruth)
@@ -386,6 +386,7 @@ public class Game extends GameRoom {
                     sendTask(true);
                 } else //We have already a tag that has been provided, use that one
                 {
+                    currentGuess= label;
                     sendTask(false);
                 }
             } //We have no more things to do
@@ -557,19 +558,20 @@ public class Game extends GameRoom {
         status.put("maxPlayers", requiredPlayers);
         status.put("visible", playersVect.size() < requiredPlayers);
         GameEvent join = new GameEvent(GameMessages.composeGameListUpdate(status), GameManager.getInstance().getLobby());
+        Logger.info("[GAME] room - " + roomChannel.getRoom() + " current players - "+ playersVect.size() + " max players - "+ requiredPlayers);
         GameBus.getInstance().publish(join);
     }
 
     private void handleQuitter(JsonNode jquitter) {
-        String quitter = jquitter.get("content").get("user").asText();
-        for (Painter painter : playersVect) {
+        final String quitter = jquitter.get("content").get("user").asText();
+        for (final Painter painter : playersVect) {
             if (painter.name.equalsIgnoreCase(quitter)) {
                 playersVect.remove(painter);
                 disconnectedPlayers++;
               //  GameBus.getInstance().publish(new GameEvent("quit", GameManager.getInstance().getLobby(), GameEventType.quit));
                 GameBus.getInstance().publish(new GameEvent(GameMessages.composeQuit(quitter), GameManager.getInstance().getLobby()));
                 //End the game if there's just one player or less
-                if (((requiredPlayers - disconnectedPlayers) == 1) && gameStarted) //Restart the game
+                if (((requiredPlayers - disconnectedPlayers) == 1) && gameStarted)
                 {
                     gameEnded();
                 } else if (((requiredPlayers - disconnectedPlayers) <= 0) && gameStarted) {
@@ -665,7 +667,7 @@ public class Game extends GameRoom {
         GameEvent endEvent = new GameEvent(GameMessages.composeLeaderboard(compileLeaderboard()),roomChannel);
         GameBus.getInstance().publish(endEvent);
   //      GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.matchEnd));
-        publishLobbyEvent();      //publishLobbyEvent(GameEventType.matchEnd);
+  //      publishLobbyEvent();      //publishLobbyEvent(GameEventType.matchEnd);
 
         Painter[] sorted = playersVect.toArray(new Painter[0]);
         Connection connection = null;
@@ -799,6 +801,7 @@ public class Game extends GameRoom {
     private void tagReceived(String word){
         taskImage.remove("tag");
         taskImage.put("tag", word);
+        currentGuess= word;
         sendTask2();
     }
 
@@ -838,16 +841,13 @@ public class Game extends GameRoom {
                         GameBus.getInstance().publish(new GameEvent(GameMessages.composeGuessed(username, text), roomChannel));
                         break;
                     case 1:
-                        GameBus.getInstance().publish(GameMessages.composeGuess(username, text, "hot"));
-                        //notifyAll(ChatKind.talkNear, username, text);
+                        GameBus.getInstance().publish(new GameMessages.GameEvent(GameMessages.composeGuess(username, text, "hot"),roomChannel));
                         break;
                     case 2:
-                        GameBus.getInstance().publish(GameMessages.composeGuess(username, text, "warm"));
-                        //notifyAll(ChatKind.talkWarning, username, text);
+                        GameBus.getInstance().publish(new GameMessages.GameEvent(GameMessages.composeGuess(username, text, "warm"),roomChannel));
                         break;
                     default:
-                        GameBus.getInstance().publish(GameMessages.composeGuess(username, text, "cold"));
-                        //notifyAll(ChatKind.talkError, username, text);
+                        GameBus.getInstance().publish(new GameMessages.GameEvent(GameMessages.composeGuess(username, text, "cold"),roomChannel));
                         break;
                 }
             }

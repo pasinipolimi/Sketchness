@@ -57,7 +57,7 @@ public class Paint extends GameRoom {
         if (message instanceof Join) {
             handleJoin((Join) message);
         }
-        if (message instanceof JsonNode) {
+ /*       if (message instanceof JsonNode) {
             JsonNode event=((JsonNode)message);
             GameBus.getInstance().publish(new GameMessages.GameEvent(event, roomChannel));  //TODO ***
             event = event.get("message");
@@ -86,7 +86,7 @@ public class Paint extends GameRoom {
             }
             notifyAll(event.get("content"));
         }
-        else if (message instanceof GameEvent) {
+        else */ if (message instanceof GameEvent) {
         //    GameEvent event = (GameEvent) message;
             JsonNode event = ((GameEvent) message).getJson();
             event = event.get("message");
@@ -128,7 +128,7 @@ public class Paint extends GameRoom {
                     break;
                 case "guessed":
                     //             notifySingle(event.getMessage(), event.getObject());
-                    notifyAll(event.get("content"));
+                    notifyGuessed(event.get("content"));
                     break;
                 case "timer":
                     //             notifyAll(event.getObject());
@@ -137,6 +137,9 @@ public class Paint extends GameRoom {
                 case "leaderboard":
                     //            notifyAll(event.getObject());
                     notifyAll(event.get("content"));
+                    break;
+                case "guess":
+                    notifyGuess(event.get("content"));
                     break;
                 case "leave":
                     //           handleQuitter(event.getMessage());
@@ -310,6 +313,21 @@ public class Paint extends GameRoom {
 
         notifyAll(GameMessages.composeChangeTool(tool, size, color));
 
+    }
+
+    private void notifyGuess(JsonNode guess)throws Exception{
+        String usr = guess.get("user").asText();
+        String word = guess.get("word").asText();
+        String affinity = guess.get("affinity").asText();
+
+        notifyAll(GameMessages.composeGuess(usr, word, affinity));
+    }
+
+    private void notifyGuessed(JsonNode guess)throws Exception{
+        String usr = guess.get("user").asText();
+        String word = guess.get("word").asText();
+
+        notifyAll(GameMessages.composeGuessed(usr, word));
     }
 
     private void point(JsonNode task) throws Exception {

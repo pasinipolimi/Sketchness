@@ -425,12 +425,12 @@ public class CMS {
 			if (item.getElements().hasNext()) {
 				// Save information related to the image
 				final String id = item.get("id").asText();
-
+/*  TODO Gestione collezione
 				if (!ilioCollection.contains(id)) {
 					// the image is part of the collection
 					continue;
 				}
-
+*/
 				final String url = rootUrl + item.get("mediaLocator").asText();
 				final Integer width = item.get("width").asInt();
 				final Integer height = item.get("height").asInt();
@@ -465,9 +465,12 @@ public class CMS {
 	 * Inform the game that at least one task is ready and we can start the game
 	 */
 	private static void sendTaskAcquired(final Room roomChannel) {
+        /*
 		final GameMessages.GameEvent taskAcquired = new GameMessages.GameEvent(
 				roomChannel, GameEventType.taskAcquired);
 		GameBus.getInstance().publish(taskAcquired);
+		*/
+        GameBus.getInstance().publish(new GameMessages.GameEvent(GameMessages.composeTaskAcquired(),roomChannel));
 	}
 
 	public static HashSet<String> retrieveTags(JsonNode imageSegments) {
@@ -754,7 +757,7 @@ public class CMS {
 	}
 
 	/**
-	 * Close a particulr task
+	 * Close a particular task
 	 * 
 	 * @param taskID
 	 *            id of the task that I want to close
