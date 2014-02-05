@@ -689,6 +689,8 @@ public class Game extends GameRoom {
                 statement1.executeUpdate();
 
             }
+			Logger.error("Unable to get a DB connection.");
+
             connection.close();
         }
         catch(SQLException ex){

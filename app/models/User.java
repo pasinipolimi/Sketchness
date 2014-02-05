@@ -179,10 +179,13 @@ public class User extends Model implements Subject {
 			// break your security as well!
 			user.email = identity.getEmail();
 
-			if (user.checkMail(identity.getEmail())) {
-
-				return user;
-			}
+			// secondo me inutile e genera un NPE dopo... se sono in signup ho
+			// fatto la verifica dell esistenza della mail prima e se sono in
+			// login pure
+			// if (user.checkMail(identity.getEmail())) {
+			//
+			// return user;
+			// }
 
 			user.emailValidated = false;
 		}
@@ -283,6 +286,7 @@ public class User extends Model implements Subject {
 	}
 
 	public boolean checkMail(final String email) {
+		Boolean mailExists = false;
 		Connection connection = null;
 		PreparedStatement statement = null;
 		ResultSet rs = null;
@@ -295,11 +299,11 @@ public class User extends Model implements Subject {
 			rs = statement.executeQuery();
 
 			if (rs.isBeforeFirst()) {
-				return true;
+				mailExists = true;
 			}
 
 		} catch (final SQLException ex) {
-			// ciao
+			Logger.error("Unable to check the email: " + email, ex);
 		} finally {
 			try {
 				if (rs != null) {
@@ -315,7 +319,7 @@ public class User extends Model implements Subject {
 			}
 		}
 
-		return false;
+		return mailExists;
 	}
 
 	public static void merge(final AuthUser oldUser, final AuthUser newUser) {
