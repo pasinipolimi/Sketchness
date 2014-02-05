@@ -668,32 +668,55 @@ public class Game extends GameRoom {
         publishLobbyEvent();      //publishLobbyEvent(GameEventType.matchEnd);
 
         Painter[] sorted = playersVect.toArray(new Painter[0]);
+        Connection connection = null;
+        PreparedStatement statement = null;
+        PreparedStatement statement1 = null;
+        ResultSet rs = null;
 
-        try{
-            Connection connection = DB.getConnection();
+        try {
+            connection = DB.getConnection();
 
-            for (Painter painter : sorted) {
+            for (final Painter painter : sorted) {
+                try {
+                    final String query = "SELECT * FROM USERS WHERE NAME=? ";
+                    final String query1 = "UPDATE USERS SET TOTAL_SCORE = ? WHERE NAME = ? ";
 
-                String query = "SELECT * FROM USERS WHERE NAME=? ";
-                String query1 = "UPDATE USERS SET TOTAL_SCORE = ? WHERE NAME = ? ";
+                    statement = connection.prepareStatement(query);
+                    statement1 = connection.prepareStatement(query1);
 
-                PreparedStatement statement = connection.prepareStatement(query);
-                PreparedStatement statement1 = connection.prepareStatement(query1);
+                    statement.setString(1, painter.name);
+                    rs = statement.executeQuery();
 
-                statement.setString(1, painter.name);
-                ResultSet rs = statement.executeQuery();
-
-                rs.next();
-                statement1.setInt(1, rs.getInt("TOTAL_SCORE")+painter.getPoints());
-                statement1.setString(2, painter.name);
-                statement1.executeUpdate();
+                    rs.next();
+                    statement1.setInt(1,
+                            rs.getInt("TOTAL_SCORE") + painter.getPoints());
+                    statement1.setString(2, painter.name);
+                    statement1.executeUpdate();
+                } catch (final SQLException ex) {
+                    play.Logger.error("Unable to update total score for user: "
+                            + painter.name, ex);
+                } finally {
+                    if (rs != null) {
+                        rs.close();
+                    }
+                    if (statement != null)
+                        statement.close();
+                    if (statement1 != null)
+                        statement1.close();
+                }
 
             }
-			Logger.error("Unable to get a DB connection.");
+        } catch (final SQLException ex) {
 
-            connection.close();
-        }
-        catch(SQLException ex){
+            Logger.error("Unable to get a DB connection.");
+
+        } finally {
+            try {
+                if (connection != null)
+                    connection.close();
+            } catch (final SQLException e) {
+                play.Logger.error("Unable to close a SQL connection.");
+            }
         }
         GameEvent endEvent2 = new GameEvent(GameMessages.composeMatchEnd(),roomChannel);
         GameBus.getInstance().publish(endEvent2);

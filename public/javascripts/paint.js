@@ -244,7 +244,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.skip.show();
 					elements.wordInput.show();
 					this.chat.disable();
-
+    //uncomment when timer will work
 	//				this.clock.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time, this.timeUp.bind(this));
 
 					var that = this;
@@ -319,7 +319,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					var question = this.elements.questionMark;
 					this.painter.showImage(question.attr("src"), question.attr("rwidth"), question.attr("rheight"));
-
+    //uncomment when timer will work
 	//				this.clock.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time, this.timeUp.bind(this));
 
 					var that = this;
@@ -410,7 +410,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
                             that.quit(content);
                         },
 						roundEnd: function(e, content) {
-						    sketchness.word = content.word;
+						    sk.word = content.word;
 							that.endRound();
 						}
 					});
@@ -452,7 +452,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							} while ((element = element.offsetParent));
 						}
 
-						if(!sketchness.isMobile) {
+						if(!sk.isMobile) {
 							return {
 								x: (event.pageX - offsetX),
 								y: (event.pageY - offsetY)
@@ -548,7 +548,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					this.write.top($.i18n.prop('guess'));
 					wordInput.show();
-
+        //uncomment when timer will work
 		//			this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time, this.timeUp.bind(this));
 
 					painter.setName(sk.players[sk.sketcher].name);
