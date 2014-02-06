@@ -4,11 +4,11 @@
 
 @main(Messages("playauthenticate.navigation.chatRoom"), "ChatRoom") {
 	<!--TODO: BETTER INTERFACE FOR THE ERRORS, POSSIBLY AN OVERLAY-->
-	<div id="onError" class="alert-message error">
+	<!--  <div id="onError" class="alert-message error">
 		<p>
 			<strong>Oops! </strong><span></span>
 		</p>
-	</div>
+	</div> -->
 
 	<div id="mainPage">
 
@@ -77,10 +77,10 @@
 			});
 		</script>
                 
-           <!--     <form id="backForm" action="@routes.Sketchness.lobby()">
-                    <input id="username" name="username" class="input-small" type="hidden" value="@localUser.name" />      -->
-              <!--  <a href="@routes.Sketchness.lobby()"><button type="submit" id="backToLobby"></button></a> -->
-         <!--       </form>             -->
+                <form id="backForm" action="@routes.Sketchness.lobby()">
+                    <input id="username" name="username" class="input-small" type="hidden" value="@localUser.name" />     
+                <a href="@routes.Sketchness.lobby()"><button type="submit" id="backToLobby"></button></a> 
+               </form>            
                 
 
                 <!--THIS HIDDEN DIV IS USED JUST TO PRELOAD IMAGES SO THAT THEY WON'T "FLICKER"-->
