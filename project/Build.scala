@@ -44,7 +44,7 @@ object ApplicationBuild extends Build {
 		Resource("jScrollPane CSS", "public/stylesheets/lib/jquery.jscrollpane.css", "http://jscrollpane.kelvinluck.com/style/jquery.jscrollpane.css", false),
 		Resource("Bootstrap CSS", "public/stylesheets/lib/bootstrap.css", "https://raw.github.com/twbs/bootstrap/master/dist/css/bootstrap.css", false),
 		Resource("Bootstrap Js", "public/javascripts/lib/bootstrap.min.js","https://raw.github.com/twbs/bootstrap/master/dist/js/bootstrap.min.js",false),
-		Resource("Website Images", "public/images", "http://54.228.220.100/images.zip",true)
+		Resource("Website Images", "public/images", "http://54.228.220.100/spritesheets.zip",true)
     )
 
     /** Defines a new task key for retrieving all the resources

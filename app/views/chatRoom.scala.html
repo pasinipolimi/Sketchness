@@ -77,18 +77,10 @@
 			});
 		</script>
                 
-                <form id="backForm" action="@routes.Sketchness.lobby()">
-                    <input id="username" name="username" class="input-small" type="hidden" value="@localUser.name" />     
-                <a href="@routes.Sketchness.lobby()"><button type="submit" id="backToLobby"></button></a> 
-               </form>            
-                
+        <form id="backForm" action="@routes.Sketchness.lobby()">
+            <input id="username" name="username" class="input-small" type="hidden" value="@localUser.name" />      
+			<a href="@routes.Sketchness.lobby()"><button type="submit" id="backToLobby"></button></a> 
+        </form>          
 
-                <!--THIS HIDDEN DIV IS USED JUST TO PRELOAD IMAGES SO THAT THEY WON'T "FLICKER"-->
-                <div id="preloaded-images">
-                    <img src="../assets/images/UI/skipUnpressed.png" width="1" height="1" alt="skipPressed" />
-                    <img src="../assets/images/UI/skipHover.png" width="1" height="1" alt="skipHover" />
-                    <img src="../assets/images/UI/skipPressed.png" width="1" height="1" alt="skipUnpressed" />
-                    <img id="questionMark" src="../assets/images/UI/questionMark.png" rwidth="289" rheight="326" width="1" height="1" alt="questionMark" />
-                </div>
 </div>
 }
