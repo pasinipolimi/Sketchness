@@ -96,7 +96,9 @@ public class Signup extends Controller {
 			// loggedUser = newUser;
 			// }
 
-			// if there is already someone logged with the same browser prevent
+			// TOFIX, il nome non è guest!!!!
+			// if there is already someone logged
+			// with the same browser prevent
 			// the registration of a guest
 			if ((localUser != null) && newUser.equals("Guest")) {
 				Logger.debug("Unable to signup guest user, someone is already logged in: "
