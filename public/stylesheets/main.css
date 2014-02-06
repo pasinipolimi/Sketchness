@@ -42,9 +42,9 @@ html, body {
 }
 
 .lobbypage {
-	background-image:url('../images/UI/lobby.png');
-	background-repeat:no-repeat;
-	background-position:center;
+	/*lobby*/
+	top:0px;left:0px;
+	width:800px;height:600px;background: url("../images/UI/lobby/lobby.png") no-repeat -0px -0px;
 	margin-left: auto ;
     margin-right: auto ;
 	position: relative;
@@ -131,9 +131,8 @@ table.gameList th, table.gameList td {
 
 
 #scoreBaloon{
-	background-image: url("../images/UI/scoreBaloon.png");
-	width: 80px;
-	height: 47px;
+	/*scoreBaloon*/
+	width:74px;height:47px;background: url("../images/UI/game/game.png") no-repeat -182px -1245px;
 	left: 635px;
 	position: absolute;
 	top: 50px;
@@ -170,9 +169,8 @@ table.gameList th, table.gameList td {
 }
 
 #mainPage{
-	background-image: url("../images/UI/guesser.png");
-	background-repeat:no-repeat;
-	background-position:center;
+	top:0px;left:0px;
+	width:800px;height:600px;background: url("../images/UI/game/game.png") no-repeat -0px -0px;
 	width:800px;
 	height:600px;
 	margin-left:auto;
@@ -256,68 +254,61 @@ table.gameList th, table.gameList td {
 }
 
 #backToLobby {
-	background-color: transparent;
-	background-image: url("../images/UI/backUnpressed.png");
-	height: 45px;
+	/*backUnpressed*/
+	width:160px;height:51px;background: url("../images/UI/lobby/lobby.png") no-repeat -800px -51px;
 	left: 420px;
 	position: absolute;
 	border-width: 0px;
 	top: 530px;
-	width: 160px;
 }
 
 #backToLobby:hover {
-	background-color: transparent;
-	background-image: url("../images/UI/backHover.png");
+	/*backHover*/
+	width:160px;height:51px;background: url("../images/UI/lobby/lobby.png") no-repeat -800px -0px;
 }
 
 #backToLobby:active {
-	background-color: transparent;
-	background-image: url("../images/UI/backPressed.png");
+	/*backPressed*/
+	width:140px;height:39px;background: url("../images/UI/lobby/lobby.png") no-repeat -799px -762px;
 }
 
 #back {
-	background-color: transparent;
-	background-image: url("../images/UI/backUnpressed.png");
-	height: 45px;
+	/*backUnpressed*/
+	width:160px;height:51px;background: url("../images/UI/lobby/lobby.png") no-repeat -800px -51px;
 	left: 600px;
 	position: absolute;
 	border-width: 0px;
 	top: 530px;
-	width: 160px;
 }
 
 #back:hover {
-	background-color: transparent;
-	background-image: url("../images/UI/backHover.png");
+	/*backHover*/
+	width:160px;height:51px;background: url("../images/UI/lobby/lobby.png") no-repeat -800px -0px;
 }
 
 #back:active {
-	background-color: transparent;
-	background-image: url("../images/UI/backPressed.png");
+	/*backPressed*/
+	width:140px;height:39px;background: url("../images/UI/lobby/lobby.png") no-repeat -799px -762px;
 }
 
 
 #tolobby {
-	background-color: transparent;
-	background-image: url("../images/UI/lobbyUnpressed.png");
-	height: 45px;
+	top:0px;left:0px;
+	width:189px;height:50px;background: url("../images/UI/lobby/lobby.png") no-repeat -773px -805px;
 	left: 600px;
 	position: absolute;
 	border-width: 0px;
 	top: 530px;
-	width: 185px;
 }
 
 #tolobby:hover {
-	background-color: transparent;
-	background-image: url("../images/UI/lobbyHover.png");
+	top:0px;left:0px;
+	width:190px;height:50px;background: url("../images/UI/lobby/lobby.png") no-repeat -655px -600px;
 }
 
 #tolobby:active {
-	background-color: transparent;
-	background-image: url("../images/UI/lobbyPressed.png");
-	height: 40px;
+	top:0px;left:5px;
+	width:157px;height:42px;background: url("../images/UI/lobby/lobby.png") no-repeat -605px -805px;
 }
 
 #name {
@@ -362,8 +353,9 @@ table.gameList th, table.gameList td {
 }
 
 #createGame {
-	background-color: transparent;
-	background-image: url("../images/UI/createUnpressed.png");
+	/*createUnpressed*/
+	top:0px;left:0px;
+	width:199px;height:60px;background: url("../images/UI/lobby/lobby.png") no-repeat -574px -847px;
 	height: 60px;
 	left: 10px;
 	position: absolute;
@@ -373,19 +365,20 @@ table.gameList th, table.gameList td {
 }
 
 #createGame:hover {
-	background-color: transparent;
-	background-image: url("../images/UI/createHover.png");
+	/*createHover*/
+	width:199px;height:60px;background: url("../images/UI/lobby/lobby.png") no-repeat -574px -907px;
 }
 
 #createGame:active {
-	background-color: transparent;
-	background-image: url("../images/UI/createPressed.png");
+	/*createPressed*/
+	width:184px;height:51px;background: url("../images/UI/lobby/lobby.png") no-repeat -773px -855px;
 }
 
 
 #singlePlayer {
-	background-color: rgba(0, 0, 0, 0);
-	background-image: url("../images/UI/singleUnpressed.png");
+	/*singleUnpressed*/
+	top:0px;left:0px;
+	width:261px;height:82px;background: url("../images/UI/lobby/lobby.png") no-repeat -344px -765px;
 	height: 80px;
 	left: 540px;
 	position: absolute;
@@ -395,18 +388,20 @@ table.gameList th, table.gameList td {
 }
 
 #singlePlayer:hover {
-	background-color: transparent;
-	background-image: url("../images/UI/singleHover.png");
+	/*singleHover*/
+	width:261px;height:82px;background: url("../images/UI/lobby/lobby.png") no-repeat -344px -683px;
 }
 
 #singlePlayer:active {
-	background-color: transparent;
-	background-image: url("../images/UI/singlePressed.png");
+	/*singlePressed*/
+	width:230px;height:82px;background: url("../images/UI/lobby/lobby.png") no-repeat -344px -847px;
+	left: 570px;
 }
 
 #createGamePopUp {
-	background-color: rgba(0, 0, 0, 0);
-	background-image: url("../images/UI/createUnpressed.png");
+	/*createUnpressed*/
+	top:0px;left:0px;
+	width:199px;height:60px;background: url("../images/UI/lobby/lobby.png") no-repeat -574px -847px;
 	height: 60px;
 	left: 0px;
 	position: relative;
@@ -420,40 +415,37 @@ table.gameList th, table.gameList td {
 }
 
 #createGamePopUp:hover {
-	background-color: transparent;
-	background-image: url("../images/UI/createHover.png");
+	/*createHover*/
+	width:199px;height:60px;background: url("../images/UI/lobby/lobby.png") no-repeat -574px -907px;
 }
 
 #createGamePopUp:active {
-	background-color: transparent;
-	background-image: url("../images/UI/createPressed.png");
+	/*createPressed*/
+	width:184px;height:51px;background: url("../images/UI/lobby/lobby.png") no-repeat -773px -855px;
 }
 
 
 #endSegmentation {
-	background-color: transparent;
-	background-image: url("../images/UI/endUnpressed.png");
-	height:66px;
+	width:182px;height:69px;background: url("../images/UI/game/game.png") no-repeat -0px -1329px;
 	left:230px;
 	position:absolute;
 	border-width: 0px;
 	top:500px;
-    width: 181px;
 }
 
 #endSegmentation:hover {
-	background-color: transparent;
-	background-image: url("../images/UI/endHover.png");
+	/*endHover*/
+	width:182px;height:69px;background: url("../images/UI/game/game.png") no-repeat -0px -1200px;
 }
 
 #endSegmentation:active {
-	background-color: transparent;
-	background-image: url("../images/UI/endPressed.png");
+	/*endPressed*/
+	width:182px;height:60px;background: url("../images/UI/game/game.png") no-repeat -0px -1269px;
 }
 
 #skipTask {
-	background-color: rgba(0, 0, 0, 0);
-	background-image: url("../images/UI/skipUnpressed.png");
+	/*skipUnpressed*/
+	width:126px;height:51px;background: url("../images/UI/game/game.png") no-repeat -126px -1398px;
 	height: 66px;
 	left: 30px;
 	position: absolute;
@@ -463,18 +455,19 @@ table.gameList th, table.gameList td {
 }
 
 #skipTask:hover {
-	background-color: transparent;
-	background-image: url("../images/UI/skipHover.png");
+	/*skipHover*/
+	width:126px;height:51px;background: url("../images/UI/game/game.png") no-repeat -0px -1398px;
 }
 
 #skipTask:active {
-	background-color: transparent;
-	background-image: url("../images/UI/skipPressed.png");
+	/*skipPressed*/
+	width:116px;height:45px;background: url("../images/UI/game/game.png") no-repeat -182px -1200px;
 }
 
 #join {
-	background-color: transparent;
-	background-image: url("../images/UI/joinUnpressed.png");
+	/*joinUnpressed*/
+	top:0px;left:0px;
+	width:194px;height:61px;background: url("../images/UI/lobby/lobby.png") no-repeat -605px -683px;
 	height: 66px;
 	left: 10px;
 	position: absolute;
@@ -484,13 +477,15 @@ table.gameList th, table.gameList td {
 }
 
 #join:hover {
-	background-color: transparent;
-	background-image: url("../images/UI/joinHover.png");
+	/*joinHover*/
+	width:194px;height:61px;background: url("../images/UI/lobby/lobby.png") no-repeat -605px -744px;
+	border-width: 0px;
 }
 
 #join:active {
-	background-color: transparent;
-	background-image: url("../images/UI/joinPressed.png");
+	/*joinPressed*/
+	width:192px;height:49px;background: url("../images/UI/lobby/lobby.png") no-repeat -344px -929px;
+	border-width: 0px;
 }
 
 
@@ -513,7 +508,8 @@ box-shadow:-2px -2px 6px #B01AA6, -2px 2px 6px #B01AA6, 4px 2px 6px #B01AA6, 4px
 	position: relative;
 	top: -170px;
 	left: 590px;
-	background-image: url("../images/UI/alertBox.png");
+	top:1px;left:3px;
+	width:344px;height:342px;background: url("../images/UI/lobby/lobby.png") no-repeat -0px -600px;
 	z-index: 900;
 	background-repeat: no-repeat;
 	background-size: contain;
@@ -525,7 +521,7 @@ div.popup_cont {
 	position: fixed;
 	top: 25% !important;
 	left: 40% !important;
-	background-image: url("../images/UI/alertBox.png");
+	width:344px;height:342px;background: url("../images/UI/lobby/lobby.png") no-repeat -0px -600px;
 }
 
 
@@ -885,11 +881,14 @@ div#preloaded-images {
 
 
 #mainPage.sketcher {
-	background-image: url("../images/UI/sketcher.png");
+	top:0px;left:0px;
+	width:800px;height:600px;background: url("../images/UI/game/game.png") no-repeat -0px -600px;
 }
 
 #mainPage.guesser {
-	background-image: url("../images/UI/guesser.png");
+	/*guesser*/
+	top:0px;left:0px;
+	width:800px;height:600px;background: url("../images/UI/game/game.png") no-repeat -0px -0px;
 }
 
 
