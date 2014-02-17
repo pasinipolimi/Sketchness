@@ -18,6 +18,10 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
     outline : 0;
 }
 
+/*To remove blue borders around buttons*/
+button:focus {outline:0;}
+input:focus {outline:0;}
+
 .container > footer p {
     text-align: center; /* center align it with the container */
 }
@@ -240,9 +244,9 @@ table.gameList th, table.gameList td {
 }
 
 .dropdown-menu {
-	position: relative;
-	background-color: #C69;
-	margin: -10px 0 0;
+    position: relative;
+    background-color: #C69;
+    margin: -70px 90px 0px;
 }
 
 #login:hover {
