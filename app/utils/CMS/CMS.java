@@ -56,7 +56,7 @@ public class CMS {
 			.getString("cmsUrl");
 	private final static String oauthConsumerKey = Play.application()
 			.configuration().getString("oauthConsumerKey");
-	private final static Set<String> ilioCollection = new HashSet<String>(
+	private final static Set<String> ilioCollection1 = new HashSet<String>(
 			Arrays.asList("6210", "6224", "6225", "6226", "6234", "6237",
 					"6240", "6243", "6254", "6257", "6263", "6269", "6274",
 					"6276", "6282", "6283", "6287", "6292", "7619", "7620",
@@ -427,7 +427,7 @@ public class CMS {
 				final String id = item.get("id").asText();
 
 				if (!ilioCollection.contains(id)) {
-					// the image is part of the collection
+					// the image is not part of the collection
 					continue;
 				}
 
@@ -502,6 +502,22 @@ public class CMS {
 			}
 		}
 		return tags;
+	}
+
+	/**
+	 * Returns all the items of a selected collection
+	 * 
+	 * @param collectonId
+	 * @return
+	 */
+	public static HashSet<String> getCollection(final String collectonId) {
+
+		final HashSet<String> photos = new HashSet<>();
+		final JsonReader jsonReader = new JsonReader();
+		final JsonNode retrieved = jsonReader.readJsonArrayFromUrl(rootUrl
+				+ "/wsmc/content/" + collectonId + ".json");
+		// (retrieved.get("name").asText().equals("tag")
+		return photos;
 	}
 
 	/**

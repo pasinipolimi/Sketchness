@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import models.User;
+import play.Logger;
 import play.Routes;
 import play.data.Form;
 import play.db.DB;
@@ -56,6 +57,7 @@ public class Application extends Controller {
 	}
 
 	public static Result login() {
+		Logger.debug("Requested login form");
 		return ok(login.render(MyUsernamePasswordAuthProvider.LOGIN_FORM));
 	}
 
@@ -63,8 +65,10 @@ public class Application extends Controller {
 		com.feth.play.module.pa.controllers.Authenticate.noCache(response());
 		final Form<MyLogin> filledForm = MyUsernamePasswordAuthProvider.LOGIN_FORM
 				.bindFromRequest();
+		Logger.debug("Requested login, filled form: " + filledForm);
 		if (filledForm.hasErrors()) {
 			// User did not fill everything properly
+			Logger.debug("The login form has errors: " + filledForm);
 			return badRequest(login.render(filledForm));
 		} else {
 			// Everything was filled
@@ -73,6 +77,7 @@ public class Application extends Controller {
 	}
 
 	public static Result signup() {
+		Logger.debug("Requested signin form");
 		return ok(signup.render(MyUsernamePasswordAuthProvider.SIGNUP_FORM));
 	}
 
@@ -84,11 +89,13 @@ public class Application extends Controller {
 	}
 
 	public static Result doSignup() {
+		Logger.debug("Doing signup...");
 		com.feth.play.module.pa.controllers.Authenticate.noCache(response());
 		final Form<MySignup> filledForm = MyUsernamePasswordAuthProvider.SIGNUP_FORM
 				.bindFromRequest();
 		if (filledForm.hasErrors()) {
 			// User did not fill everything properly
+			Logger.debug("The signup form has errors: " + filledForm);
 			return badRequest(signup.render(filledForm));
 		} else {
 			// Everything was filled
@@ -103,6 +110,7 @@ public class Application extends Controller {
 		final User localUser = getLocalUser(session());
 
 		if (localUser != null) {
+			Logger.debug("Doing logout for user: " + localUser.name);
 
 			final String username = localUser.name;
 
@@ -111,17 +119,17 @@ public class Application extends Controller {
 
 			try {
 				connection = DB.getConnection();
-
+				Logger.debug("Updating user status on DB: " + username);
 				final String query = "UPDATE USERS SET online = ? WHERE NAME = ? ";
 				statement = connection.prepareStatement(query);
 				statement.setBoolean(1, false);
 				statement.setString(2, username);
 				statement.executeUpdate();
+				Logger.debug("Updated user status on DB: " + username);
 				com.feth.play.module.pa.controllers.Authenticate.logout();
 
 			} catch (final SQLException ex) {
 				play.Logger.error("Unable to logout user: " + username, ex);
-				// TOFIX??
 				return play.mvc.Results.internalServerError();
 			} finally {
 				try {
@@ -139,6 +147,8 @@ public class Application extends Controller {
 			}
 
 		}
+
+		Logger.debug("Tried to logout but no user logged in");
 
 		return redirect(routes.Application.index());
 	}

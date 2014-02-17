@@ -3,6 +3,7 @@ import java.util.Arrays;
 import models.SecurityRole;
 import play.Application;
 import play.GlobalSettings;
+import play.Logger;
 import play.mvc.Call;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -25,6 +26,7 @@ public class Global extends GlobalSettings {
 
 	@Override
 	public void onStart(final Application app) {
+		Logger.info("Starting application...");
 
 		PlayAuthenticate.setResolver(new Resolver() {
 

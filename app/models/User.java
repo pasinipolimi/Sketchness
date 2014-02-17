@@ -162,6 +162,7 @@ public class User extends Model implements Subject {
 	}
 
 	public static User create(final AuthUser authUser) {
+		Logger.debug("Creating a new user...");
 		final User user = new User();
 		user.roles = Collections.singletonList(SecurityRole
 				.findByRoleName(controllers.Application.USER_ROLE));
@@ -173,6 +174,7 @@ public class User extends Model implements Subject {
 				.create(authUser));
 
 		if (authUser instanceof EmailIdentity) {
+			Logger.debug("Teh user created is an EmailIdentity, setting the new email...");
 			final EmailIdentity identity = (EmailIdentity) authUser;
 			// Remember, even when getting them from FB & Co., emails should be
 			// verified within the application as a security breach there might
@@ -232,7 +234,7 @@ public class User extends Model implements Subject {
 		}
 
 		user.totalScore = 0;
-
+		Logger.debug("saving the new user...");
 		user.save();
 		user.saveManyToManyAssociations("roles");
 		// user.saveManyToManyAssociations("permissions");
@@ -240,6 +242,8 @@ public class User extends Model implements Subject {
 	}
 
 	public String checkNickname(String nickname) {
+		Logger.debug("Checking if the nickname is already been used: "
+				+ nickname);
 		Connection connection = null;
 		PreparedStatement statement = null;
 		ResultSet rs = null;
@@ -252,13 +256,18 @@ public class User extends Model implements Subject {
 			rs = statement.executeQuery();
 
 			if (rs.isBeforeFirst()) {
+				// a user already exists with the same nickname, changing the
+				// new nickname
+
+				Logger.debug("a user already exists with the same nickname, changing the new nickname: "
+						+ nickname);
 				final Random randomGeneretor = new Random();
 				int n = randomGeneretor.nextInt(5000);
 				final int n2 = randomGeneretor.nextInt(5000);
 				n = n + n2;
 				final String ns = Integer.toString(n);
 				nickname = nickname + ns;
-
+				Logger.debug("New Nickname: " + nickname);
 				checkNickname(nickname);
 			}
 
@@ -286,6 +295,8 @@ public class User extends Model implements Subject {
 	}
 
 	public boolean checkMail(final String email) {
+		Logger.debug("Checking if the mail already exists: " + email);
+
 		Boolean mailExists = false;
 		Connection connection = null;
 		PreparedStatement statement = null;
@@ -299,6 +310,8 @@ public class User extends Model implements Subject {
 			rs = statement.executeQuery();
 
 			if (rs.isBeforeFirst()) {
+				Logger.debug("a user has already been registered with the email: "
+						+ email);
 				mailExists = true;
 			}
 
@@ -362,7 +375,7 @@ public class User extends Model implements Subject {
 	}
 
 	public static void verify(final User unverified) {
-		// You might want to wrap this into a transaction
+		// TOFIX You might want to wrap this into a transaction
 		unverified.emailValidated = true;
 		unverified.save();
 		TokenAction.deleteByUser(unverified, Type.EMAIL_VERIFICATION);
@@ -385,7 +398,7 @@ public class User extends Model implements Subject {
 	}
 
 	public void changeNickname(final UsernamePasswordAuthUser authUser,
-			String newNick) {
+			String newNick) throws Exception {
 
 		LinkedAccount a = this.getAccountByProvider(authUser.getProvider());
 
@@ -413,6 +426,8 @@ public class User extends Model implements Subject {
 			statement.executeUpdate();
 
 		} catch (final SQLException ex) {
+			Logger.error("Unable to change nickname for user: " + utente);
+			throw new Exception("Unable to change nickname for user: " + utente);
 		} finally {
 			try {
 				if (statement != null)

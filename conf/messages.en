@@ -88,6 +88,7 @@ playauthenticate.change_password.error.passwords_not_same=Passwords do not match
 playauthenticate.change_password.success=Password has been changed successfully.
 
 playauthenticate.change_name.success=Name has been changed succesfully
+playauthenticate.change_name.error=Unable to change nickname
 playauthenticate.change_name.temporary=The name you chose already exists. We assigned you a temporary one.
 
 playauthenticate.password.signup.error.passwords_not_same=Passwords do not match.
