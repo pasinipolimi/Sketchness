@@ -30,7 +30,6 @@ input:focus {outline:0;}
 
 input {
 	font-weight: bold;
-
 }
 
 @font-face {
@@ -92,7 +91,7 @@ div#logo-container {
 .div-input-signup {
 	background-color: transparent;
 	background-repeat:no-repeat;
-	margin-left: 80px;
+	margin-left: -150px;
 	margin-top: 0px;
 	width: 350px;
 	height:100px;
@@ -432,6 +431,21 @@ div#preloaded-images {
 	width:157px;height:42px;background: url("../images/UI/lobby/lobby.png") no-repeat -605px -805px;
 }
 
+#tolobbyprofile {
+	top:500px;left:530px;
+	width:189px;height:50px;background: url("../images/UI/lobby/lobby.png") no-repeat -773px -805px;
+	position: absolute;
+	border-width: 0px;
+}
+
+#tolobbyprofile:hover {
+	width:190px;height:50px;background: url("../images/UI/lobby/lobby.png") no-repeat -655px -600px;
+}
+
+#tolobbyprofile:active {
+	width:157px;height:42px;background: url("../images/UI/lobby/lobby.png") no-repeat -605px -805px;
+}
+
 #back {
 	/*backUnpressed*/
 	top:0px;left:0px;
@@ -452,6 +466,16 @@ div#preloaded-images {
 	width:140px;height:39px;background: url("../images/UI/lobby/lobby.png") no-repeat -799px -762px;
 }
 
+#endInput.signup-submit {
+    top: 0px;
+    background: url('../images/UI/game/game.png') no-repeat scroll 0px -1329px transparent;
+    height: 66px;
+    left: -150px;
+    position: relative;
+    border-width: 0px;
+    width: 181px;
+}
+
 #endInput {
 	/*endUnpressed*/
 	top:0px;left:0px;
@@ -460,7 +484,6 @@ div#preloaded-images {
 	left:230px;
 	position:absolute;
 	border-width: 0px;
-
     width: 181px;
 }
 
@@ -474,15 +497,26 @@ div#preloaded-images {
 	width:182px;height:60px;background: url("../images/UI/game/game.png") no-repeat -0px -1269px;
 }
 
+#endInput.signup-submit :hover {
+	/*endHover*/
+	width:182px;height:69px;background: url("../images/UI/game/game.png") no-repeat -0px -1200px;
+}
+
+
+
+#endInput.signup-submit :active {
+	/*endPressed*/
+	width:182px;height:60px;background: url("../images/UI/game/game.png") no-repeat -0px -1269px;
+}
 
 div#text-contenitor-content {
 	background-image:url('../images/UI/pergamena.png');
 	background-repeat:no-repeat;
 	background-color: transparent;
 	position: relative;
-	margin-left: 160px;
+	margin-left: -90px;
 	height: 481px;
-
+	width: 500px;
 }
 
 p#Profile-text{
