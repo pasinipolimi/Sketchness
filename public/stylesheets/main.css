@@ -6,6 +6,18 @@ html, body {
     background-color: #eee;
 }
 
+/*To remove Twitter Bootstrap blue borders*/
+a:focus, a:active, 
+button::-moz-focus-inner,
+input[type="reset"]::-moz-focus-inner,
+input[type="button"]::-moz-focus-inner,
+input[type="submit"]::-moz-focus-inner,
+select::-moz-focus-inner,
+input[type="file"] > input[type="button"]::-moz-focus-inner {
+    border: 0;
+    outline : 0;
+}
+
 .container > footer p {
     text-align: center; /* center align it with the container */
 }
@@ -293,21 +305,17 @@ table.gameList th, table.gameList td {
 
 
 #tolobby {
-	top:0px;left:0px;
+	top:530px;left:600px;
 	width:189px;height:50px;background: url("../images/UI/lobby/lobby.png") no-repeat -773px -805px;
-	left: 600px;
 	position: absolute;
 	border-width: 0px;
-	top: 530px;
 }
 
 #tolobby:hover {
-	top:0px;left:0px;
 	width:190px;height:50px;background: url("../images/UI/lobby/lobby.png") no-repeat -655px -600px;
 }
 
 #tolobby:active {
-	top:0px;left:5px;
 	width:157px;height:42px;background: url("../images/UI/lobby/lobby.png") no-repeat -605px -805px;
 }
 
