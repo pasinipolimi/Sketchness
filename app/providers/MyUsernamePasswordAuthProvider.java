@@ -21,6 +21,7 @@ import play.Application;
 import play.Logger;
 import play.data.Form;
 import play.data.validation.Constraints.Email;
+import play.data.validation.Constraints.MaxLength;
 import play.data.validation.Constraints.MinLength;
 import play.data.validation.Constraints.Required;
 import play.db.DB;
@@ -104,6 +105,7 @@ public class MyUsernamePasswordAuthProvider
 		public String repeatPassword;
 
 		@Required
+		@MaxLength(10)
 		public String name;
 
 		@Required
