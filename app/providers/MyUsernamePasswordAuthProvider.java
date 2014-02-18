@@ -23,6 +23,7 @@ import play.data.Form;
 import play.data.validation.Constraints.Email;
 import play.data.validation.Constraints.MaxLength;
 import play.data.validation.Constraints.MinLength;
+import play.data.validation.Constraints.Pattern;
 import play.data.validation.Constraints.Required;
 import play.db.DB;
 import play.i18n.Lang;
@@ -106,6 +107,7 @@ public class MyUsernamePasswordAuthProvider
 
 		@Required
 		@MaxLength(10)
+		@Pattern("^[A-Za-z0-9]+$")
 		public String name;
 
 		@Required
