@@ -1,5 +1,6 @@
 package models.game;
 
+import akka.actor.Cancellable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,6 +11,7 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import models.Painter;
 import models.factory.GameRoom;
@@ -603,7 +605,16 @@ public class Game extends GameRoom {
 		roundNumber = 0;
 		gameStarted = false;
 		playersVect = new CopyOnWriteArrayList<>();
-		Akka.system()
+                CMS.cancelThread(roomChannel.getRoom());
+                while(CMS.getThread(roomChannel.getRoom())) {
+                    try {
+                        //Waiting for thread cancellation
+                        Thread.sleep(500);
+                    } catch (InterruptedException ex) {
+                        Logger.error("Errore nell'attesa di terminazione del thread");
+                    }
+                }
+		Cancellable init = Akka.system()
 				.scheduler()
 				.scheduleOnce(Duration.create(1000, TimeUnit.MILLISECONDS),
 						new Runnable() {
@@ -634,6 +645,7 @@ public class Game extends GameRoom {
 								}
 							}
 						}, Akka.system().dispatcher());
+                CMS.addInitializationThread(roomChannel.getRoom(), init);
 		Logger.info("[GAME] New game started");
 	}
 

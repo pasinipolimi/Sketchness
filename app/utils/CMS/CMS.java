@@ -1,5 +1,6 @@
 package utils.CMS;
 
+import akka.actor.Cancellable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -34,11 +37,14 @@ import org.json.JSONObject;
 
 import play.Logger;
 import play.Play;
+import play.libs.Akka;
 import play.libs.F;
 import play.libs.Json;
 import play.libs.WS;
+import scala.concurrent.duration.Duration;
 import utils.JsonReader;
 import utils.LanguagePicker;
+import utils.LoggerUtils;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameEventType;
 import utils.gamebus.GameMessages;
@@ -72,6 +78,8 @@ public class CMS {
 					"7696", "7697", "7698", "7699", "7700", "7701", "7702",
 					"7703", "7704", "7705", "7706", "7708", "7709", "7711",
 					"7712", "7713", "7714"));
+        private static HashMap<String,Cancellable> runningThreads = new HashMap<String, Cancellable>();
+        private static HashMap<String,Boolean> sentAcquired = new HashMap<String, Boolean>();
 
 	public static void closeUTask(final Integer uTaskID, final Integer actionId) {
 		if (uTaskID != null) {
@@ -266,6 +274,43 @@ public class CMS {
 			sendTaskAcquired(roomChannel);
 		}
 	}
+        
+        
+        public static void addInitializationThread(String roomName,Cancellable thread) {
+            runningThreads.put(roomName, thread);
+        }
+        
+        public static boolean getThread(String roomName) {
+            if(runningThreads.containsKey(roomName))
+                return true;
+            else
+                return false;
+        }
+        
+        public static void cancelThread(final String roomName) {
+            final Cancellable thread = runningThreads.get(roomName);
+            if(thread!=null) {
+                thread.cancel();
+                Akka.system()
+				.scheduler()
+				.scheduleOnce(Duration.create(1000, TimeUnit.MILLISECONDS),
+						new Runnable() {
+							@Override
+							public void run() {
+								while(!thread.isCancelled()) {
+                                                                    try {
+                                                                       Thread.sleep(100);
+                                                                    } catch (InterruptedException ex) {
+                                                                        Logger.error("Errore nell'attesa di terminazione del thread");
+                                                                    }
+                                                                }
+                                                                runningThreads.remove(roomName);
+                                                                sentAcquired.remove(roomName);
+							}
+						}, Akka.system().dispatcher());
+                }
+            
+        }
 
 	/**
 	 * Retrieving data from the CMS [TODO] Right now we are not retrieving based
@@ -465,9 +510,12 @@ public class CMS {
 	 * Inform the game that at least one task is ready and we can start the game
 	 */
 	private static void sendTaskAcquired(final Room roomChannel) {
-		final GameMessages.GameEvent taskAcquired = new GameMessages.GameEvent(
-				roomChannel, GameEventType.taskAcquired);
-		GameBus.getInstance().publish(taskAcquired);
+                if(!sentAcquired.containsKey(roomChannel.getRoom())) {
+                    sentAcquired.put(roomChannel.getRoom(), Boolean.TRUE);
+                    final GameMessages.GameEvent taskAcquired = new GameMessages.GameEvent(
+                                    roomChannel, GameEventType.taskAcquired);
+                    GameBus.getInstance().publish(taskAcquired);
+                }
 	}
 
 	public static HashSet<String> retrieveTags(JsonNode imageSegments) {
