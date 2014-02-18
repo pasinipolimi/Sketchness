@@ -125,22 +125,27 @@ div#logo-container {
 
 div#nickname-container {
 	width:310px;height:78px;background: url("../images/registration/registration.png") no-repeat -334px -600px;
+	margin-left: 50px;
 }
 
 div#email-container {
 	width:312px;height:80px;background: url("../images/registration/registration.png") no-repeat -0px -738px;
+	margin-left: 50px;
 }
 
 div#password-container {
 	width:311px;height:83px;background: url("../images/registration/registration.png") no-repeat -311px -818px;
+	margin-left: 50px;
 }
 
 div#repeated-password-container {
 	width:311px;height:81px;background: url("../images/registration/registration.png") no-repeat -323px -688px;
+	margin-left: 50px;
 }
 
 div#nation-container {
 	width:311px;height:83px;background: url("../images/registration/registration.png") no-repeat -0px -818px;
+	margin-left: 50px;
 }
 
 
@@ -517,6 +522,17 @@ div#text-contenitor-content {
 	margin-left: -90px;
 	height: 481px;
 	width: 500px;
+}
+
+div#unverified-scroll {
+	background-image: url('../images/UI/pergamena.png');
+	background-repeat: no-repeat;
+	background-color: transparent;
+	position: absolute;
+	margin-left: 150px;
+	margin-top: 70px;
+	width: 500px;
+	height: 379px;
 }
 
 p#Profile-text{
