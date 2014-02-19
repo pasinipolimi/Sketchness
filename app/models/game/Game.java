@@ -610,8 +610,9 @@ public class Game extends GameRoom {
                     try {
                         //Waiting for thread cancellation
                         Thread.sleep(500);
-                    } catch (InterruptedException ex) {
-                        Logger.error("Errore nell'attesa di terminazione del thread");
+                        Logger.info("Waiting thread termination...");
+                    } catch (Exception ex) {
+                        Logger.error("Error while waiting thread termination");
                     }
                 }
 		Cancellable init = Akka.system()

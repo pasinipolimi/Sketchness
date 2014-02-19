@@ -79,7 +79,6 @@ public class CMS {
 					"7703", "7704", "7705", "7706", "7708", "7709", "7711",
 					"7712", "7713", "7714"));
         private static HashMap<String,Cancellable> runningThreads = new HashMap<String, Cancellable>();
-        private static HashMap<String,Boolean> sentAcquired = new HashMap<String, Boolean>();
 
 	public static void closeUTask(final Integer uTaskID, final Integer actionId) {
 		if (uTaskID != null) {
@@ -220,6 +219,7 @@ public class CMS {
 		final HashMap<String, ObjectNode> temporary = new HashMap<>();
 		retrievedImages = jsonReader.readJsonArrayFromUrl(rootUrl
 				+ "/wsmc/image.json");
+                boolean taskSent=false;
 		if (retrievedImages != null) {
 			// For each image
 			for (final JsonNode item : retrievedImages) {
@@ -271,7 +271,10 @@ public class CMS {
 			for (final Map.Entry pairs : temporary.entrySet()) {
 				taskHashSet.add((ObjectNode) pairs.getValue());
 			}
-			sendTaskAcquired(roomChannel);
+			if(!taskSent) {
+                             taskSent=true;
+                             sendTaskAcquired(roomChannel);
+                        }
 		}
 	}
         
@@ -300,12 +303,12 @@ public class CMS {
 								while(!thread.isCancelled()) {
                                                                     try {
                                                                        Thread.sleep(100);
-                                                                    } catch (InterruptedException ex) {
-                                                                        Logger.error("Errore nell'attesa di terminazione del thread");
+                                                                    } catch (Exception ex) {
+                                                                        Logger.error("Error in waiting the thread termination\n"+ex);
                                                                     }
                                                                 }
                                                                 runningThreads.remove(roomName);
-                                                                sentAcquired.remove(roomName);
+                                                                Logger.info("Thread cancelled and removed.");
 							}
 						}, Akka.system().dispatcher());
                 }
@@ -327,6 +330,7 @@ public class CMS {
 		JsonNode retrievedTasks;
 		JsonNode retrievedImagesOrdered;
 		ArrayList<JsonNode> retrievedImages;
+                boolean taskSent = false;
 
 		// [TODO] Fail safe in case of not being able to retrieve the instances
 		try {
@@ -415,7 +419,10 @@ public class CMS {
 													utask.get("id").asInt());
 											guessWord.put("taskid", taskId);
 											priorityTaskHashSet.add(guessWord);
-											sendTaskAcquired(roomChannel);
+                                                                                        if(!taskSent) {
+                                                                                            taskSent=true;
+                                                                                            sendTaskAcquired(roomChannel);
+                                                                                        }
 											break;
 										case "segmentation":
 											HashSet<String> tags;
@@ -446,7 +453,10 @@ public class CMS {
 												guessWord.put("taskid", taskId);
 												priorityTaskHashSet
 														.add(guessWord);
-												sendTaskAcquired(roomChannel);
+												if(!taskSent) {
+                                                                                                    taskSent=true;
+                                                                                                    sendTaskAcquired(roomChannel);
+                                                                                                }
 											}
 											break;
 										}
@@ -500,7 +510,10 @@ public class CMS {
 				guessWord.put("width", width);
 				guessWord.put("height", height);
 				taskHashSet.add(guessWord);
-				sendTaskAcquired(roomChannel);
+                                if(!taskSent) {
+                                    taskSent=true;
+                                    sendTaskAcquired(roomChannel);
+                                }
 			}
 		}
 
@@ -510,12 +523,9 @@ public class CMS {
 	 * Inform the game that at least one task is ready and we can start the game
 	 */
 	private static void sendTaskAcquired(final Room roomChannel) {
-                if(!sentAcquired.containsKey(roomChannel.getRoom())) {
-                    sentAcquired.put(roomChannel.getRoom(), Boolean.TRUE);
                     final GameMessages.GameEvent taskAcquired = new GameMessages.GameEvent(
                                     roomChannel, GameEventType.taskAcquired);
                     GameBus.getInstance().publish(taskAcquired);
-                }
 	}
 
 	public static HashSet<String> retrieveTags(JsonNode imageSegments) {
