@@ -21,7 +21,9 @@ import play.Application;
 import play.Logger;
 import play.data.Form;
 import play.data.validation.Constraints.Email;
+import play.data.validation.Constraints.MaxLength;
 import play.data.validation.Constraints.MinLength;
+import play.data.validation.Constraints.Pattern;
 import play.data.validation.Constraints.Required;
 import play.db.DB;
 import play.i18n.Lang;
@@ -104,6 +106,8 @@ public class MyUsernamePasswordAuthProvider
 		public String repeatPassword;
 
 		@Required
+		@MaxLength(10)
+		@Pattern("^[A-Za-z0-9]+$")
 		public String name;
 
 		@Required
@@ -145,18 +149,27 @@ public class MyUsernamePasswordAuthProvider
 	@Override
 	protected com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider.SignupResult signupUser(
 			final MyUsernamePasswordAuthUser user) {
+		Logger.debug("Verify authentication for signup");
 		final User u = User.findByUsernamePasswordIdentity(user);
 		if (u != null) {
 			if (u.emailValidated) {
 				// This user exists, has its email validated and is active
+				Logger.debug("The user " + user.getName()
+						+ " exists, has its email validated and is active");
 				return SignupResult.USER_EXISTS;
 			} else {
 				// this user exists, is active but has not yet validated its
 				// email
+				Logger.debug("The user "
+						+ user.getName()
+						+ " exists, is active but has not yet validated its email");
 				return SignupResult.USER_EXISTS_UNVERIFIED;
 			}
 		}
 		// The user either does not exist or is inactive - create a new one
+
+		Logger.debug("The user " + user.getName()
+				+ " either does not exist or is inactive - create a new one");
 
 		final User newUser = User.create(user);
 		// Usually the email should be verified before allowing login, however
@@ -457,7 +470,7 @@ public class MyUsernamePasswordAuthProvider
 
 	public void sendVerifyEmailMailingAfterSignup(final User user,
 			final Context ctx) {
-
+		Logger.debug("Sending verify mail to: " + user.email);
 		final String subject = getVerifyEmailMailingSubjectAfterSignup(user,
 				ctx);
 		final String token = generateVerificationRecord(user);

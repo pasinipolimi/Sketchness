@@ -3,25 +3,26 @@
 
 @main(Messages("playauthenticate.navigation.lobby"), "lobby") {
 	<!--TODO: BETTER INTERFACE FOR THE ERRORS, POSSIBLY AN OVERLAY-->
-	<div id="onError" class="alert-message error">
+	<!--  <div id="onError" class="alert-message error">
 		<p>
 			<strong>Oops! </strong>
 			<span></span>
 		</p>
-	</div>
+	</div> -->
         <div id="currentNickname">@localUser.name</div>
 	<div class="lobbypage">
 
 
         <div id="ProfileContenitor" class="btn-group">
-            <img id="ProfileImage" src="../assets/images/registration/nation.png"/>
+            <div id="ProfileImage"/>
             <a id="ProfileLink" class="btn dropdown-toggle" data-toggle="dropdown" href="#">
                 <i class="icon-user"></i> @localUser.name
                 <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">
                 <li><a href="@routes.Application.profile()">@Messages("playauthenticate.navigation.profile")</a></li>
-                <li><a href="@routes.Account.link()">@Messages("playauthenticate.navigation.link_more")</a></li>
+				<!--Profile linking disabled in this version-->
+                <!--<li><a href="@routes.Account.link()">@Messages("playauthenticate.navigation.link_more")</a></li>-->
                 <li class="divider"></li>
                 <li><a href="@routes.Application.doLogout"><i class="icon-off"></i> @Messages("playauthenticate.navigation.logout")</a></li>
             </ul>
@@ -92,20 +93,6 @@
         <div id="lobbyWebSocket" data-ws="@routes.Sketchness.lobbyStream().webSocketURL()"></div>
 		<!--Logic to handle the chat and the lobby-->
 		<script type="text/javascript" src="/assets/javascripts/lobby.js"></script>
-	</div>
+    </div>
 
-	<div id="preloaded-images">
-		<img src="../assets/images/UI/joinUnpressed.png" width="1" height="1" alt="joinPressed" />
-		<img src="../assets/images/UI/joinHover.png" width="1" height="1" alt="joinHover" />
-		<img src="../assets/images/UI/joinPressed.png" width="1" height="1" alt="joinUnpressed" />
-		<img src="../assets/images/UI/backUnpressed.png" width="1" height="1" alt="backPressed" />
-		<img src="../assets/images/UI/backHover.png" width="1" height="1" alt="backHover" />
-		<img src="../assets/images/UI/backPressed.png" width="1" height="1" alt="backUnpressed" />
-		<img src="../assets/images/UI/createUnpressed.png" width="1" height="1" alt="createGamePressed" />
-		<img src="../assets/images/UI/createHover.png" width="1" height="1" alt="createGameHover" />
-		<img src="../assets/images/UI/createPressed.png" width="1" height="1" alt="createGameUnpressed" />
-		<img src="../assets/images/UI/singleUnpressed.png" width="1" height="1" alt="singlePressed" />
-		<img src="../assets/images/UI/singleHover.png" width="1" height="1" alt="singleHover" />
-		<img src="../assets/images/UI/singlePressed.png" width="1" height="1" alt="singleUnpressed" />
-	</div>
 }

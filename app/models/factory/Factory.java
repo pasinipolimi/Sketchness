@@ -16,7 +16,8 @@ public abstract class Factory {
 	protected static ActorRef create(final String room, final int maxMembers,
 			final Class module) throws Exception {
 		ActorRef newRoom;
-		final String roomID = module.getSimpleName() + "_" + room;
+		final String roomID = module.getSimpleName() + "_" + room.replaceAll("[^\\w\\s]","");
+			
 		// Try to see if we have already registered this actor in the system, if
 		// it is the case return the reference
 		newRoom = Akka.system().actorFor("akka://application/user/" + roomID);
@@ -35,7 +36,7 @@ public abstract class Factory {
 	protected static ActorRef create(final String room, final Class module)
 			throws Exception {
 		ActorRef newRoom;
-		final String roomID = module.getSimpleName() + "_" + room;
+		final String roomID = module.getSimpleName() + "_" + room.replaceAll("[^\\w\\s]","");
 		// Try to see if we have already registered this actor in the system, if
 		// it is the case return the reference
 		newRoom = Akka.system().actorFor("akka://application/user/" + roomID);

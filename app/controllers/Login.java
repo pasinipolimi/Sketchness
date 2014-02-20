@@ -3,6 +3,7 @@ package controllers;
 import java.util.concurrent.TimeUnit;
 
 import models.User;
+import play.Logger;
 import play.data.Form;
 import play.i18n.Messages;
 import play.libs.Akka;
@@ -33,6 +34,7 @@ public class Login extends Controller {
 	}
 
 	public static Result login() {
+		Logger.debug("Requested login form");
 
 		if (!actorActive) {
 			Akka.system()
@@ -53,9 +55,10 @@ public class Login extends Controller {
 		final User localUser = getLocalUser(session());
 
 		if (localUser != null) {
-
+			Logger.debug("User already logged in, enter in the lobby");
 			return ok(lobby.render(localUser));
 		} else {
+			Logger.debug("User is not already logged in, enter in the login form page");
 			return ok(sketchness_login
 					.render(MyUsernamePasswordAuthProvider.LOGIN_FORM));
 		}
@@ -63,30 +66,28 @@ public class Login extends Controller {
 	}
 
 	public static Result doLogin() {
+		Logger.debug("Performing login");
 		com.feth.play.module.pa.controllers.Authenticate.noCache(response());
 		final Form<MyLogin> filledForm = MyUsernamePasswordAuthProvider.LOGIN_FORM
 				.bindFromRequest();
-		String loggedMail;
+
 		final User localUser = getLocalUser(session());
 
-		if (localUser != null) {
-
-			loggedMail = localUser.email;
-		} else {
-			loggedMail = filledForm.field("email").value();
-		}
 		if (filledForm.hasErrors()) {
 			// User did not fill everything properly
+			Logger.debug("User did not fill everything properly in the login form");
 			return badRequest(sketchness_login.render(filledForm));
 		} else {
 			// if there is already someone logged with the same browser prevent
 			// the login
-			if (!loggedMail.equals(filledForm.field("email").value())) {
+			if (localUser != null) {
+				Logger.debug("There is already someone logged with the same browser prevent the login, return error");
 				flash(Application.FLASH_ERROR_KEY,
 						Messages.get("error.userInBrowser"));
 				return badRequest(sketchness_login.render(filledForm));
 			}
 			// Everything was filled and no other users in session
+			Logger.debug("The login form was filled properly, handling login..");
 			return UsernamePasswordAuthProvider.handleLogin(ctx());
 		}
 	}

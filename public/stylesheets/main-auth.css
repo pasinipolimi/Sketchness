@@ -7,6 +7,22 @@ html, body {
     font-family: 'ITCAvantGardeGothicStdBook';
 }
 
+/*To remove Twitter Bootstrap blue borders*/
+a:focus, a:active, 
+button::-moz-focus-inner,
+input[type="reset"]::-moz-focus-inner,
+input[type="button"]::-moz-focus-inner,
+input[type="submit"]::-moz-focus-inner,
+select::-moz-focus-inner,
+input[type="file"] > input[type="button"]::-moz-focus-inner {
+    border: 0;
+    outline : 0;
+}
+
+/*To remove blue borders around buttons*/
+button:focus {outline:0;}
+input:focus {outline:0;}
+
 .brand{
 	top:300;
 	left:400;
@@ -14,7 +30,6 @@ html, body {
 
 input {
 	font-weight: bold;
-
 }
 
 @font-face {
@@ -39,9 +54,7 @@ input {
 }
 
 .backgroundimage-signup {
-	background-image:url('../images/registration/signup-background.jpg');
-	background-repeat:no-repeat;
-	background-position:center;
+	width:800px;height:600px;background: url("../images/registration/registration.png") no-repeat -0px -0px;
 	margin-left: auto ;
     margin-right: auto ;
 	position: relative;
@@ -49,26 +62,19 @@ input {
 	width: 800px;
 }
 
-.backgroundimage-login {
-	background-image:url('../images/login/background-login.png');
-	background-repeat:no-repeat;
-	background-position:center;
-	margin-left: auto ;
-    margin-right: auto ;
+.backgroundimage-login{
+	width:800px;height:600px;
+	background: url("../images/login/login.png") no-repeat -0px -0px;
 	position: relative;
-	height: 600px;
-	width: 800px;
 }
 
 div#logo-container {
 	background-color: transparent;
-	background-image:url('../images/registration/sketchness.png');
+	width:184px;height:82px;background: url("../images/registration/registration.png") no-repeat -622px -769px;
 	background-repeat:no-repeat;
 	position: relative;
 	left: 0px;
 	top : 0px;
-	width: 200px;
-	height:100px;
 	cursor: pointer;
 }
 
@@ -85,7 +91,7 @@ div#logo-container {
 .div-input-signup {
 	background-color: transparent;
 	background-repeat:no-repeat;
-	margin-left: 80px;
+	margin-left: -150px;
 	margin-top: 0px;
 	width: 350px;
 	height:100px;
@@ -108,9 +114,8 @@ div#logo-container {
 .div-terms{
 	background-color: transparent;
 	background-repeat:no-repeat;
-	background-image:url('../images/registration/terms.png');
+	width:323px;height:50px;background: url("../images/registration/registration.png") no-repeat -0px -688px;
 	margin-top: 30px;
-	height: 50px;
 }
 
 
@@ -119,23 +124,28 @@ div#logo-container {
 }
 
 div#nickname-container {
-	background-image:url('../images/registration/nickname.png');
+	width:310px;height:78px;background: url("../images/registration/registration.png") no-repeat -334px -600px;
+	margin-left: 50px;
 }
 
 div#email-container {
-	background-image:url('../images/registration/email.png');
+	width:312px;height:80px;background: url("../images/registration/registration.png") no-repeat -0px -738px;
+	margin-left: 50px;
 }
 
 div#password-container {
-	background-image:url('../images/registration/password.png');
+	width:311px;height:83px;background: url("../images/registration/registration.png") no-repeat -311px -818px;
+	margin-left: 50px;
 }
 
 div#repeated-password-container {
-	background-image:url('../images/registration/retypeemail.png');
+	width:311px;height:81px;background: url("../images/registration/registration.png") no-repeat -323px -688px;
+	margin-left: 50px;
 }
 
 div#nation-container {
-	background-image:url('../images/registration/nation.png');
+	width:311px;height:83px;background: url("../images/registration/registration.png") no-repeat -0px -818px;
+	margin-left: 50px;
 }
 
 
@@ -193,27 +203,27 @@ input[type="radio"] + label{
 
 
 input[type=radio]#gender_true + label{
-  background: url(../images/registration/male1.png) center no-repeat;
+  top:2px;left:0px;
+  width:110px;height:108px;background: url("../images/registration/registration.png") no-repeat -800px -110px;
 }
 
 input[type=radio]#gender_true:checked  + label {
-  background: url(../images/registration/male-checked.png) center no-repeat;
+  width:119px;height:114px;background: url("../images/registration/registration.png") no-repeat -765px -600px;
 }
 
 input[type=radio]#gender_false + label{
-  background: url(../images/registration/female1.png) center no-repeat;
+  width:110px;height:110px;background: url("../images/registration/registration.png") no-repeat -800px -0px;
 }
 
 input[type=radio]#gender_false:checked  + label {
-  background: url(../images/registration/female-checked.png) center no-repeat;
+  width:121px;height:116px;background: url("../images/registration/registration.png") no-repeat -644px -600px;
 }
 
 
 input[type=submit]#submit-signup  {
 	background-color: transparent;
-	background: url('../images/registration/register.png') center no-repeat ;
- 	height: 90px;
- 	width: 340px;
+	top:6px;left:0px;
+	width:334px;height:88px;background: url("../images/registration/registration.png") no-repeat -0px -600px;
  	border: none;
  	margin-top:40px;
 }
@@ -239,9 +249,9 @@ input[type=submit]#submit-ok  {
 /* Div username */
 .div-input-username-login{
 	position: absolute;
-	height:35px ;
-	width:130px;
-	background-image:url('../images/login/username.png');
+	height:33px ;
+	width:133px;
+	background:url("../images/login/login.png") no-repeat -486px -601px;
 }
 
 /* Hide Label div */
@@ -260,9 +270,9 @@ input[type=submit]#submit-ok  {
 /* Div password */
 .div-input-password-login{
 	margin-left: 140px;
-	height:35px ;
-	width:130px;
-	background-image:url('../images/login/password.png');
+	width: 133px;
+	height: 31px;
+	background:url("../images/login/login.png") no-repeat 0 -804px;
 }
 
 /* Hide Label div */
@@ -279,21 +289,22 @@ input[type=submit]#submit-ok  {
 }
 
 .play-as-guest-container{
-	position:absolute;
-	margin-left:470px;
-  	margin-top:10px;
-	height: 68px;
- 	width: 240px;
-	background-image:url('../images/login/guestUnpressed.png');
+	top:0px;left:0px;
+	width:246px;height:68px;background: url("../images/login/login.png") no-repeat -0px -736px;
+	position: absolute;
+	margin-left: 470px;
+	margin-top: 10px;
 }
 
+
 .play-as-guest-container:hover{
-	background-image:url('../images/login/guestHover.png');
+	top:0px;left:0px;
+	width:246px;height:68px;background: url("../images/login/login.png") no-repeat -0px -600px;
 }
 
 .play-as-guest-container:active{
-	background-image:url('../images/login/guestPressed.png');
-	height: 60px;
+	top:4px;left:4px;
+	width:241px;height:48px;background: url("../images/login/login.png") no-repeat -246px -600px;
 }
 
 .provider-container{
@@ -303,22 +314,20 @@ input[type=submit]#submit-ok  {
 }
 
 .register-container{
+	top:0px;left:0px;
+	width:182px;height:69px;background: url("../images/login/login.png") no-repeat -614px -714px;
 	position: absolute;
-	margin-left: -64px;
+	margin-left: 10px;
 	margin-top: 370px;
-	background-color: transparent;
-	background: url('../images/login/registerUnpressed.png') center no-repeat ;
- 	height: 90px;
- 	width: 340px;
- 	border: none;
+	border: none;
 }
-
 .register-container:hover{
-	background: url('../images/login/registerHover.png') center no-repeat ;
+	top:0px;left:0px;
+	background: url("../images/login/login.png") no-repeat -432px -714px;
 }
-
 .register-container:active{
-	background: url('../images/login/registerPressed.png') center no-repeat ;
+	top:0px;left:0px;
+	background: url("../images/login/login.png") no-repeat -246px -780px;
 }
 
 #facebookLike {
@@ -336,23 +345,26 @@ input[type=submit]#submit-ok  {
 }
 
 
-input[type=submit]#submit-login  {
-	position:absolute;
-	background-color: transparent;
-	background: url('../images/login/loginUnpressed.png') center no-repeat ;
- 	height: 80px;
- 	width: 190px;
- 	border: none;
- 	margin-left: 10px;
- 	margin-top: 440px;
+input[type="submit"]#submit-login{
+	top:0px;left:0px;
+	background: url("../images/login/login.png") no-repeat -246px -648px;
+	position: absolute;
+	width:186px;
+	height:66px;
+	border: none;
+	margin-left: 10px;
+	margin-top: 440px;
 }
 
-input[type=submit]#submit-login:hover {
-	background: url('../images/login/loginHover.png') center no-repeat ;
+input[type="submit"]#submit-login:hover{
+	top:0px;left:0px;
+	background: url("../images/login/login.png") no-repeat -246px -714px;
 }
 
-input[type=submit]#submit-login:active {
-	background: url('../images/login/loginPressed.png') center no-repeat ;
+input[type="submit"]#submit-login:active{
+	top:4px;left:4px;
+	width:181px;height:46px;
+	background: url("../images/login/login.png") no-repeat -428px -783px;
 }
 
 #login-form .help-inline{
@@ -390,94 +402,137 @@ div#preloaded-images {
 }
 
 #ProfileImage{
+	/*profileImage*//*nation*/
+	top:3px;left:3px;
+	width:311px;height:83px;background: url("../images/UI/lobby/lobby.png") no-repeat -344px -600px;
     margin-top: -25px;
     margin-left: -30px;
+	border-width: 0px;
 }
 
-#ProfileLink{
-    margin-top: -61px;
-    margin-left:80px;
+#ProfileLink {
+	margin-top: 20px;
+	margin-left: 125px;
 }
 
 .dropdown-menu {
-	position: relative;
-	background-color: #C69;
-	margin: -10px 0 0;
+    position: relative;
+    background-color: #C69;
+    margin: -70px 90px 0px;
 }
 
 #tolobby {
-	background-color: transparent;
-	background-image: url("../images/UI/lobbyUnpressed.png");
-	height: 45px;
-	left: 600px;
+	top:600px;left:530px;
+	width:189px;height:50px;background: url("../images/UI/lobby/lobby.png") no-repeat -773px -805px;
 	position: absolute;
 	border-width: 0px;
-	top: 530px;
-	width: 185px;
 }
 
 #tolobby:hover {
-	background-color: transparent;
-	background-image: url("../images/UI/lobbyHover.png");
+	width:190px;height:50px;background: url("../images/UI/lobby/lobby.png") no-repeat -655px -600px;
 }
 
 #tolobby:active {
-	background-color: transparent;
-	background-image: url("../images/UI/lobbyPressed.png");
-	height: 40px;
+	width:157px;height:42px;background: url("../images/UI/lobby/lobby.png") no-repeat -605px -805px;
+}
+
+#tolobbyprofile {
+	top:500px;left:530px;
+	width:189px;height:50px;background: url("../images/UI/lobby/lobby.png") no-repeat -773px -805px;
+	position: absolute;
+	border-width: 0px;
+}
+
+#tolobbyprofile:hover {
+	width:190px;height:50px;background: url("../images/UI/lobby/lobby.png") no-repeat -655px -600px;
+}
+
+#tolobbyprofile:active {
+	width:157px;height:42px;background: url("../images/UI/lobby/lobby.png") no-repeat -605px -805px;
 }
 
 #back {
-	background-color: transparent;
-	background-image: url("../images/UI/backUnpressed.png");
-	height: 45px;
+	/*backUnpressed*/
+	top:0px;left:0px;
+	width:160px;height:51px;background: url("../images/UI/lobby/lobby.png") no-repeat -800px -51px;
 	left: 600px;
 	position: absolute;
 	border-width: 0px;
 	top: 530px;
-	width: 160px;
 }
 
 #back:hover {
-	background-color: transparent;
-	background-image: url("../images/UI/backHover.png");
+	/*backHover*/
+	width:160px;height:51px;background: url("../images/UI/lobby/lobby.png") no-repeat -800px -0px;
 }
 
 #back:active {
-	background-color: transparent;
-	background-image: url("../images/UI/backPressed.png");
+	/*backPressed*/
+	width:140px;height:39px;background: url("../images/UI/lobby/lobby.png") no-repeat -799px -762px;
+}
+
+#endInput.signup-submit {
+    top: 0px;
+    background: url('../images/UI/game/game.png') no-repeat scroll 0px -1329px transparent;
+    height: 66px;
+    left: -150px;
+    position: relative;
+    border-width: 0px;
+    width: 181px;
 }
 
 #endInput {
-	background-color: transparent;
-	background-image: url("../images/UI/endUnpressed.png");
+	/*endUnpressed*/
+	top:0px;left:0px;
+	width:182px;height:69px;background: url("../images/UI/game/game.png") no-repeat -0px -1329px;
 	height:66px;
 	left:230px;
 	position:absolute;
 	border-width: 0px;
-
     width: 181px;
 }
 
 #endInput:hover {
-	background-color: transparent;
-	background-image: url("../images/UI/endHover.png");
+	/*endHover*/
+	width:182px;height:69px;background: url("../images/UI/game/game.png") no-repeat -0px -1200px;
 }
 
 #endInput:active {
-	background-color: transparent;
-	background-image: url("../images/UI/endPressed.png");
+	/*endPressed*/
+	width:182px;height:60px;background: url("../images/UI/game/game.png") no-repeat -0px -1269px;
 }
 
+#endInput.signup-submit :hover {
+	/*endHover*/
+	width:182px;height:69px;background: url("../images/UI/game/game.png") no-repeat -0px -1200px;
+}
+
+
+
+#endInput.signup-submit :active {
+	/*endPressed*/
+	width:182px;height:60px;background: url("../images/UI/game/game.png") no-repeat -0px -1269px;
+}
 
 div#text-contenitor-content {
 	background-image:url('../images/UI/pergamena.png');
 	background-repeat:no-repeat;
 	background-color: transparent;
 	position: relative;
-	margin-left: 160px;
+	margin-left: -90px;
 	height: 481px;
+	width: 500px;
+}
 
+div#unverified-scroll {
+	background-image: url('../images/UI/pergamena.png');
+	background-repeat: no-repeat;
+	background-color: transparent;
+	position: absolute;
+	margin-left: 150px;
+	margin-top: 70px;
+	width: 500px;
+	height: 379px;
 }
 
 p#Profile-text{
@@ -523,24 +578,22 @@ ul#ChangeNamePsw{
 }
 
 #back1 {
-	background-color: transparent;
-	background-image: url("../images/UI/backUnpressed.png");
-	height: 45px;
+	/*backUnpressed*/
+	width:160px;height:51px;background: url("../images/UI/lobby/lobby.png") no-repeat -800px -51px;
 	left: 600px;
 	position: absolute;
 	margin-left: -700px;
 	margin-top: -75px;
 	border-width: 0px;
 	top: 530px;
-	width: 160px;
 }
 
 #back1:hover {
-	background-color: transparent;
-	background-image: url("../images/UI/backHover.png");
+	/*backHover*/
+	width:160px;height:51px;background: url("../images/UI/lobby/lobby.png") no-repeat -800px -0px;
 }
 
 #back1:active {
-	background-color: transparent;
-	background-image: url("../images/UI/backPressed.png");
+	/*backPressed*/
+	width:140px;height:39px;background: url("../images/UI/lobby/lobby.png") no-repeat -799px -762px;
 }
