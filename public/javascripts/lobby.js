@@ -1,6 +1,10 @@
-require(["Communicator", "Chat", "jquery", "popup", "jscrollpane"], function(Communicator, Chat, $) {
+require(["Communicator", "Chat", "jquery", "popup", "jscrollpane", "howler"], function(Communicator, Chat, $) {
 
 	$(function() {
+	
+		var login_sound = new Howl({
+			urls: ['assets/sounds/effects/login_ring.ogg']
+		});
 
 		var sketchness = {
 			players: {},
@@ -113,6 +117,7 @@ require(["Communicator", "Chat", "jquery", "popup", "jscrollpane"], function(Com
 				};
 
 				writePlayers(sketchness.players, sketchness.myself);
+				login_sound.play();
 			},
 			leave: function(e, content) {
 				delete sketchness.players[content.user];

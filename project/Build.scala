@@ -33,6 +33,7 @@ object ApplicationBuild extends Build {
 		// Add here the required resources
 		// Resource(name: String, path :String, url :String = null, zipped :Boolean = true)
 		Resource("Lib Folder", "lib"),
+		Resource("Audio Folder", "public/sounds"),
 		Resource("RequireJS", "public/javascripts/lib/require.js", "http://requirejs.org/docs/release/2.1.8/minified/require.js", false),
 		Resource("PaperJS", "public/javascripts/lib/paper.js", "https://raw.github.com/paperjs/paper.js/v0.9.9/dist/paper-full.js", false),
 		Resource("JS State Machine", "public/javascripts/lib/state-machine.js", "https://raw.github.com/jakesgordon/javascript-state-machine/master/state-machine.js", false),
@@ -46,7 +47,10 @@ object ApplicationBuild extends Build {
 		Resource("jScrollPane CSS", "public/stylesheets/lib/jquery.jscrollpane.css", "http://jscrollpane.kelvinluck.com/style/jquery.jscrollpane.css", false),
 		Resource("Bootstrap CSS", "public/stylesheets/lib/bootstrap.css", "https://raw.github.com/twbs/bootstrap/master/dist/css/bootstrap.css", false),
 		Resource("Bootstrap Js", "public/javascripts/lib/bootstrap.min.js","https://raw.github.com/twbs/bootstrap/master/dist/js/bootstrap.min.js",false),
-		Resource("Website Images", "public/images", "http://54.228.220.100/spritesheets.zip",true)
+		Resource("Howler Js", "public/javascripts/lib/howler.min.js","https://raw.github.com/goldfire/howler.js/master/howler.min.js",false),
+		//Zipped files with assets: images and sounds
+		Resource("Website Images", "public/images", "http://54.228.220.100/spritesheets.zip",true),
+		Resource("Website Sound Effects", "public/sounds/effects", "http://54.228.220.100/effects.zip",true)
 	)
 
 	/** Defines a new task key for retrieving all the resources

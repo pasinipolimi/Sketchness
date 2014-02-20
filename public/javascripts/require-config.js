@@ -7,6 +7,7 @@ require.config({
 		"jscrollpane": "lib/jquery.jscrollpane",
 		"popup": "lib/popUp",
 		"paper": "lib/paper",
+		"howler": "lib/howler.min",
 		"StateMachine": "lib/state-machine"
 	},
 	shim: {

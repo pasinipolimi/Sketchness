@@ -26,6 +26,8 @@ dist
 /public/images
 /public/javascripts/lib
 /public/stylesheets/lib
+/public/sounds/effects
+/public/sounds/music
 
 # Results of the execution
 /results
