@@ -151,7 +151,7 @@ public class Paint extends GameRoom {
                     notifyPoint(event.get("content"));
                     break;
                 case "endPath":
-                    sendEnd(event.get("content"));
+                    notifyEndPath(event.get("content"));
                     break;
                 case "roundEndS":
                     //            GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel, GameEventType.timeExpired));
@@ -260,17 +260,8 @@ public class Paint extends GameRoom {
         }
     }
 
-    private void sendEnd(JsonNode task) throws Exception {
-        String taskWord = task.get("url").asText();
-        taskUrl = task.get("url").asText();
-        taskWidth = task.get("width").asInt();
-        taskHeight = task.get("height").asInt();
-        guessWord = task.get("word").asText();
-        //Send to the users the information about their role
-        for (Map.Entry<String, Painter> entry : painters.entrySet()) {
-            entry.getValue().channel.write(GameMessages.composeRoundEnd(taskWord));
-            entry.getValue().channel.write(GameMessages.composeImage(task.get("id").asText(), taskUrl, taskWidth, taskHeight));
-        }
+    private void notifyEndPath(JsonNode task) throws Exception {
+        notifyAll(GameMessages.composeEndPath());
     }
 
     /*
