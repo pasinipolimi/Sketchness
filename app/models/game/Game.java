@@ -90,6 +90,7 @@ public class Game extends GameRoom {
     String currentGuess;
     Boolean askTag = false;
     String askTagSketcher;
+    Boolean loadingAlreadySent = false;
 
     public Game() {
         super(Game.class);
@@ -325,12 +326,18 @@ public class Game extends GameRoom {
     }
 
     private boolean triggerStart() throws Error {
-        boolean canStart = true;
         //We need to wait for all the modules to receive the player list
-        if (canStart && playersVect.size() >= requiredPlayers) {
+        if (playersVect.size() >= requiredPlayers) {
             GameManager.getInstance().removeInstance(getSelf());
     //        publishLobbyEvent();            //publishLobbyEvent(GameEventType.matchStart);
             if (taskAcquired) {
+                    if(loadingAlreadySent){
+                        GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info, Messages.get(LanguagePicker.retrieveLocale(), "acquiring")),roomChannel ));
+                        GameBus.getInstance().publish(new GameEvent(GameMessages.composeLoading(),roomChannel));
+                        loadingAlreadySent = false;
+                    }
+
+
                 //Create a new session in which to store the actions of the game
                 if(!fixGroundTruth)
                     sessionId = CMS.openSession();
@@ -348,9 +355,11 @@ public class Game extends GameRoom {
                     throw new Error("[GAME] Cannot find a suitable Sketcher!");
                 }
             } else {
+                loadingAlreadySent = true;
                 GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info, Messages.get(LanguagePicker.retrieveLocale(), "acquiring")),roomChannel ));
            //     GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.gameLoading));
                 GameBus.getInstance().publish(new GameEvent(GameMessages.composeLoading(),roomChannel));
+
             }
             return true;
         }

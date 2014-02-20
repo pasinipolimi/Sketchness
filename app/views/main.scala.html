@@ -48,24 +48,32 @@
 		</script>
         <script>
             window.onbeforeunload = bunload;
-
             function bunload(){
-            var xhr = new XMLHttpRequest();
-            xhr.setTimeout(0);
-            xhr.open("get", "@routes.Application.doLogout", true);
-
-            xhr.send(null);
-            }
+                $.ajax({
+                        url: "@routes.Application.doLogout",
+                        type: "GET",
+                        timeout: 0,
+                        success:function(){
+                        },
+                        error:function(jqXHR) {
+                            console.log("doLogout failed with status:  "+ jqXHR.status + ", error: "+ jqXHR.statusText);
+                        }
+                    });
+	        }
         </script>
 
         <script>
             window.setInterval(function(){
-
-            var xhr = new XMLHttpRequest();
-            xhr.setTimeout(0);
-            xhr.open("get", "@routes.Sketchness.keepOnline", true);
-
-            xhr.send(null);
+            $.ajax({
+	                url: "@routes.Sketchness.keepOnline",
+	                type: "GET",
+	                timeout: 0,
+	                success:function(){
+	                },
+	                error:function(jqXHR) {
+                        console.log("keepOnline failed with status:  "+ jqXHR.status + ", error: "+ jqXHR.statusText);
+	                }
+	            });
 
             }, 1000*20);      <!-- Set interval between refreshes-->
 

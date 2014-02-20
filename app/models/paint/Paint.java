@@ -122,9 +122,9 @@ public class Paint extends GameRoom {
                     //            sendTag(event.getMessage(), event.getObject());
                     sendTag(event.get("content"));
                     break;
-                case "points":
+                case "score":
                     //            notifySingle(event.getMessage(), event.getObject());
-                    notifySingle(event.get("content"));
+                    notifyScore(event.get("content"));
                     break;
                 case "guessed":
                     //             notifySingle(event.getMessage(), event.getObject());
@@ -132,11 +132,11 @@ public class Paint extends GameRoom {
                     break;
                 case "timer":
                     //             notifyAll(event.getObject());
-                    notifyAll(event.get("content"));
+                    notifyTimer(event.get("content"));
                     break;
                 case "leaderboard":
                     //            notifyAll(event.getObject());
-                    notifyAll(event.get("content"));
+                    notifyLeaderboard(event.get("content"));
                     break;
                 case "guess":
                     notifyGuess(event.get("content"));
@@ -337,6 +337,27 @@ public class Paint extends GameRoom {
 
         notifyAll(GameMessages.composePoint(x, y));
 
+    }
+
+    private void notifyImages(JsonNode task) throws Exception{
+        String id = task.get("id").asText();
+        String medialocator = task.get("url").asText();
+        int width = task.get("width").asInt();
+        int height = task.get("height").asInt();
+        notifyAll(GameMessages.composeImage(id,medialocator,width,height));
+    }
+
+    private void notifyTimer(JsonNode task) throws Exception {
+        //TODO
+    }
+
+    private void notifyLeaderboard(JsonNode task) throws Exception {
+        //TODO
+
+    }
+
+    private void notifyScore(JsonNode task) throws Exception{
+        //TODO
     }
 
     private void beginPath() throws Exception {
