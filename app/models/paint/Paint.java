@@ -104,9 +104,6 @@ public class Paint extends GameRoom {
                     gameStarted = true;
                     roundBegin(event.get("content"));
                     break;
-                case "showImages":
-                    notifyAll(event.get("content"));
-                    break;
                 case "saveTraces":
                     saveTraces();
                     break;
@@ -151,7 +148,7 @@ public class Paint extends GameRoom {
                     beginPath();
                     break;
                 case "point":
-                    point(event.get("content"));
+                    notifyPoint(event.get("content"));
                     break;
                 case "endPath":
                     sendEnd(event.get("content"));
@@ -330,21 +327,13 @@ public class Paint extends GameRoom {
         notifyAll(GameMessages.composeGuessed(usr, word));
     }
 
-    private void point(JsonNode task) throws Exception {
+    private void notifyPoint(JsonNode task) throws Exception {
 
         int x = task.get("x").asInt();
         int y = task.get("y").asInt();
 
         notifyAll(GameMessages.composePoint(x, y));
 
-    }
-
-    private void notifyImages(JsonNode task) throws Exception{
-        String id = task.get("id").asText();
-        String medialocator = task.get("url").asText();
-        int width = task.get("width").asInt();
-        int height = task.get("height").asInt();
-        notifyAll(GameMessages.composeImage(id,medialocator,width,height));
     }
 
     private void notifyTimer(JsonNode task) throws Exception {
@@ -361,10 +350,7 @@ public class Paint extends GameRoom {
     }
 
     private void beginPath() throws Exception {
-
-
         notifyAll(GameMessages.composeBeginPath());
-
     }
 
     private void notifyAll(JsonNode json) {

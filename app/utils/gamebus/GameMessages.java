@@ -363,7 +363,7 @@ public class GameMessages {
         return event;
     }
 
-    public static ObjectNode composeendPath() {
+    public static ObjectNode composeEndPath() {
         ObjectNode event = composeJsonMessage("endPath",Json.newObject());
         return event;
     }
