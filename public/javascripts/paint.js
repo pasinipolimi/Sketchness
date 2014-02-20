@@ -473,8 +473,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					var setPoint = function(event) {
 						var point = relativePosition(event, elements.viewport);
 
-						if (point != null && point.x > 0 && point.x < elements.viewport.width() &&
-							point.y > 0 && point.y < elements.viewport.height()) {
+						if (point != null && point.x > 0 && point.x < elements.viewport.width() && point.y > 0) {
+							//point.y > 0 && point.y < elements.viewport.height()) {
 
 							painter.setPoint(point);
 							that.communicator.send("point", point);
@@ -485,7 +485,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						if(!started) {
 							that.communicator.send("beginPath", {});
 							painter.beginPath();
-
+							started=true;
 							setPoint(e);
 						}
 					});
@@ -498,7 +498,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					$(document).on((sk.isMobile ? "touchend" : "mouseup"), function(e) {
 						if(started) {
 							setPoint(e);
-
+							started=false;
 							that.communicator.send("endPath", {});
 							painter.endPath();
 						}

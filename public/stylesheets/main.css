@@ -762,6 +762,7 @@ div.avatarIcon {
 	top: 20px;
 	left: 40px;
 	position: relative;
+	background: url('../images/UI/lobby/lobby.png') no-repeat scroll 0px -600px transparent;
 }
 
 #canvasPre {
