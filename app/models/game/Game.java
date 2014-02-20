@@ -331,10 +331,10 @@ public class Game extends GameRoom {
             GameManager.getInstance().removeInstance(getSelf());
     //        publishLobbyEvent();            //publishLobbyEvent(GameEventType.matchStart);
             if (taskAcquired) {
-                    if(loadingAlreadySent){
+                    if(!loadingAlreadySent){
                         GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info, Messages.get(LanguagePicker.retrieveLocale(), "acquiring")),roomChannel ));
                         GameBus.getInstance().publish(new GameEvent(GameMessages.composeLoading(),roomChannel));
-                        loadingAlreadySent = false;
+                        loadingAlreadySent = true;
                     }
 
 
