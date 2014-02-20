@@ -18,7 +18,7 @@ import play.mvc.WebSocket;
 import utils.LanguagePicker;
 import utils.LoggerUtils;
 import utils.gamemanager.GameManager;
-import views.html.chatRoom;
+import views.html.gameRoom;
 import views.html.leaderboard;
 import views.html.lobby;
 import be.objectify.deadbolt.java.actions.Group;
@@ -59,7 +59,7 @@ public class Sketchness extends Controller {
 		final String username = localUser.name;
 		Logger.debug("Opening the chatroom for user: " + username);
 
-		String numero = "3";
+		String number = "3";
 
 		final Map<String, String[]> values = request().body()
 				.asFormUrlEncoded();
@@ -92,8 +92,6 @@ public class Sketchness extends Controller {
         return ok(gameRoom.render(localUser, roomName,nPlayers));
 	}
 
-       //     public void onReady(final WebSocket.In<JsonNode> in, final WebSocket.Out<JsonNode> out) {
-					final WebSocket.Out<JsonNode> out) {
 
 	/**
      * Handle the chat websocket.

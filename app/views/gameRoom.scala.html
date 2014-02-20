@@ -4,12 +4,11 @@
 
 @main(Messages("playauthenticate.navigation.gameRoom"), "GameRoom") {
 	<!--TODO: BETTER INTERFACE FOR THE ERRORS, POSSIBLY AN OVERLAY-->
-	<div id="onError" class="alert-message error">
+	<!--  <div id="onError" class="alert-message error">
 		<p>
-			<strong>Oops! </strong>
-			<span></span>
+			<strong>Oops! </strong><span></span>
 		</p>
-	</div>
+	</div> -->
 
 	<div id="mainPage">
 
@@ -17,6 +16,8 @@
 		<div id="gameArea" class="span10">
 			<div id="viewport">
 				<div id="canvaswindows">
+					<!-- CANVAS USED TO STORE THE LAST DRAWING SEGMENT-->
+					<canvas id="me" width="420" height="350"></canvas>
 					<!-- CANVAS TO TRACK THE POSITION OF THE DRAWING PLAYER-->
 					<canvas id="positions" width="420" height="350"></canvas>
 					<!-- CANVAS TO STORE THE ENTIRE DRAWINGS DONE SO FAR-->
@@ -32,9 +33,10 @@
 
 
 		<div id="chatPanel" class="gameRoom gameChat">
-			<div id="messages" class="jscroll scroll-pane-arrows jspScrollable"></div>
+			<div id="messages" class="jscroll scroll-pane-arrows jspScrollable">
+			</div>
 		</div>
-		<input type="text" id="talk" class="gameTalk" placeholder="@Messages("text_area_message")" />
+		<input type="text" id="talk" class="gameTalk" placeholder="@Messages("text_area_message")"/>
 
 
 		<!-- A SIMPLE CANVAS USED AS AN HUD TO DRAW TOOLS-->
@@ -56,22 +58,20 @@
 					<option value="blue">Blue</option>
 				</select>
 				<!-- TODO: aggiungere i comandi per lo zoom e lo spostamento nell'img dopo aver zoommato -->
-			</form>
-		</div>
+		    </form>
+	    </div>
 
 		<!--MESSAGES AND SCORES FOR THE PLAYERS-->
 		<div id="topMessage"></div>
 		<div id="timeCounter"></div>
-		<div id="canvasMessage"></div>
-		<div id="scoreBaloon">
-			<div id="score"></div>
-		</div>
-		<div id="warnTag" style="display:none">
-			<pre id="warnPre"></pre>
-		</div>
+        <div id="canvasMessage"></div>
+        <div id="scoreBaloon">
+            <div id="score"></div>
+        </div>
+        <div id="warnTag" style="display:none"><pre id="warnPre"></pre></div>
 
 		<!--HANDLING ALL THE USERS CURRENTLY CONNECTED-->
-		<div id="currentAvatar"></div>
+        <div id="currentAvatar"></div>
 		<div id="currentNickname">@localUser.name</div>
 		<ul id="opponents"></ul>
 
@@ -79,8 +79,8 @@
 		<div id="paintWebSocket" data-ws="@routes.Sketchness.gameStream(room,players).webSocketURL()"></div>
 
 		<script type="text/javascript" src="/assets/javascripts/paint.js"></script>
-
-		<script type="text/javascript" src="@routes.JavascriptController.javascriptRoutes"></script>
+                
+        <script type="text/javascript" src="@routes.JavascriptController.javascriptRoutes"></script>
 
 		<!-- DISABLE THE REFRESH BUTTON-->
 		<script type="text/javascript">
@@ -91,18 +91,12 @@
 				});
 			});
 		</script>
-
-	<!--	<form id="backForm" action="@routes.Sketchness.lobby()">
-			<input id="username" name="username" class="input-small" type="hidden" value="@localUser.name" />       -->
-            <a href="@routes.Sketchness.lobby()"><button type="submit" id="backToLobby"></button></a>
-	<!--	</form>     -->
-
-		<!--THIS HIDDEN DIV IS USED JUST TO PRELOAD IMAGES SO THAT THEY WON'T "FLICKER"-->
-		<div id="preloaded-images">
-			<img src="../assets/images/UI/skipUnpressed.png" width="1" height="1" alt="skipPressed" />
-			<img src="../assets/images/UI/skipHover.png" width="1" height="1" alt="skipHover" />
-			<img src="../assets/images/UI/skipPressed.png" width="1" height="1" alt="skipUnpressed" />
-			<img id="questionMark" src="../assets/images/UI/questionMark.png" rwidth="289" rheight="326" width="1" height="1" alt="questionMark" />
-		</div>
-	</div>
+        
+		<!-- BACK BUTTON IN THE GAME
+			<form id="backForm" action="@routes.Sketchness.lobby()">
+				<input id="username" name="username" class="input-small" type="hidden" value="@localUser.name" />      
+				<a href="@routes.Sketchness.lobby()"><button type="submit" id="backToLobby"></button></a> 
+			</form>          
+		-->
+</div>
 }

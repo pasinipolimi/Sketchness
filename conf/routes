@@ -4,10 +4,6 @@
 
 # Home page
 GET     /                                 controllers.Sketchness.index()
-#GET     /lobby                            controllers.Sketchness.lobby(username: String ?= null)
-#GET     /room                             controllers.Sketchness.gameRoom(username: String ?= null, room: String ?= "default", nPlayers: Integer ?= 3)
-#GET     /room/lobbyStream                 controllers.Sketchness.lobbyStream(username: String ?= null)
-#GET     /room/gameStream                  controllers.Sketchness.gameStream(username: String ?= null,room: String ?= "default", nPlayers: Integer ?= 3)
 GET     /leaderboard                      controllers.Sketchness.leaderboard(username: String ?= null, result: String ?= null)
 
 #new routes
@@ -65,23 +61,21 @@ GET     /signup                controllers.Signup.signup
 POST    /signup                controllers.Signup.doSignup
 GET     /signupGuest           controllers.Signup.doSignupGuest
 
-GET     /sket                           controllers.Application.index
+GET     /sket                       controllers.Application.index
 GET     /restricted                 controllers.Application.restricted
-GET     /assets/javascripts/routes.js    controllers.Application.jsRoutes
 
 GET     /profile                    controllers.Application.profile
 
 GET     /login                      controllers.Application.login
 POST    /login                      controllers.Application.doLogin
 
-#GET     /logout                     com.feth.play.module.pa.controllers.Authenticate.logout
 GET     /logout                     controllers.Application.doLogout
 GET     /authenticate/:provider     com.feth.play.module.pa.controllers.Authenticate.authenticate(provider: String)
 
 GET     /signup                     controllers.Application.signup
 POST    /signup                     controllers.Application.doSignup
 
-GET     /accounts/unverified        controllers.Signup.unverified
+GET     /accounts/unverified        	   controllers.Signup.unverified
 GET     /authenticate/:provider/denied     controllers.Signup.oAuthDenied(provider: String)
 
 GET     /accounts/verify/:token     controllers.Signup.verify(token: String)
