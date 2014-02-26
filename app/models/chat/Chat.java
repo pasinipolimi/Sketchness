@@ -90,7 +90,7 @@ public class Chat extends GameRoom {
 					handleQuitter(event.getMessage());
 					break;
 				default:
-					Logger.debug("Ignored action...");
+					// Logger.debug("Ignored action...");
 					break;
 				}
 			}

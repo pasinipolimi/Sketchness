@@ -129,6 +129,7 @@ public class CMS {
 		final JsonNode image = jsonReader.readJsonArrayFromUrl(rootUrl
 				+ "/wsmc/image/" + id + ".json");
 		final JsonNode imageSegments = image.get("descriptions");
+		Logger.debug("Chiamao la retrievetask io annotator");
 		final HashSet<String> available = retrieveTags(imageSegments);
 		// If the tag is not present in the list of the available tags, add it
 		// to
@@ -281,37 +282,27 @@ public class CMS {
 		final JsonReader jsonReader = new JsonReader();
 		JsonNode retrievedTasks;
 		JsonNode retrievedImagesOrdered;
-		ArrayList<JsonNode> retrievedImages;
 
 		// [TODO] Fail safe in case of not being able to retrieve the instances
 		try {
+			Logger.debug("Requested task list to CMS");
 			retrievedTasks = jsonReader.readJsonArrayFromUrl(rootUrl
 					+ "/wsmc/task.json");
-			retrievedImagesOrdered = jsonReader.readJsonArrayFromUrl(rootUrl
-					+ "/wsmc/image.json");
+			Logger.debug("Requested task list to CMS end");
 		} catch (final IllegalArgumentException e) {
 			throw new RuntimeException(
 					"[CMS] The request to the CMS is malformed");
 		}
 
-		int i = 0;
-		retrievedImages = new ArrayList<>();
-
-		while (i < retrievedImagesOrdered.size()) {
-			retrievedImages.add(i, retrievedImagesOrdered.get(i));
-			i++;
-		}
-
-		final Long seed = System.nanoTime();
-		Collections.shuffle(retrievedImages, new Random(seed));
-
 		// Fill the set of task to be performed with the task that has been
 		// explicitly declared
 
 		if (retrievedTasks != null) {
+			Logger.debug("qui non ci entra");
 			retrievedTasks = retrievedTasks.get("task");
 			for (JsonNode item : retrievedTasks) {
 				if (item.getElements().hasNext()) {
+					Logger.debug("qui non ci entra 2");
 					// If the task is still open
 					if (item.get("status").asInt() == 1) {
 						final String taskId = item.get("id").getTextValue();
@@ -379,6 +370,7 @@ public class CMS {
 											final JsonNode imageSegments = image
 													.get("descriptions");
 											if (imageSegments != null) {
+												Logger.debug("Chiamao la retrievetask io cms task");
 												tags = retrieveTags(imageSegments);
 												guessWord.put("tag",
 														chooseTag(tags));
@@ -418,8 +410,31 @@ public class CMS {
 			}
 		}
 
-		// FIXME
+		ArrayList<JsonNode> retrievedImages;
 
+		// [TODO] Fail safe in case of not being able to retrieve the instances
+		try {
+			Logger.debug("Requested image list to CMS");
+			retrievedImagesOrdered = jsonReader.readJsonArrayFromUrl(rootUrl
+					+ "/wsmc/image.json");
+			Logger.debug("Requested image list to CMS end");
+		} catch (final IllegalArgumentException e) {
+			throw new RuntimeException(
+					"[CMS] The request to the CMS is malformed");
+		}
+
+		int i = 0;
+		retrievedImages = new ArrayList<>();
+
+		while (i < retrievedImagesOrdered.size()) {
+			retrievedImages.add(i, retrievedImagesOrdered.get(i));
+			i++;
+		}
+		Logger.debug("aggiunte le immagini");
+		final Long seed = System.nanoTime();
+		Collections.shuffle(retrievedImages, new Random(seed));
+
+		Logger.debug("mescolate le immagini");
 		// For each image
 		for (final JsonNode item : retrievedImages) {
 			if (item.getElements().hasNext()) {
@@ -430,6 +445,7 @@ public class CMS {
 					// the image is not part of the collection
 					continue;
 				}
+				Logger.debug("Analizzo immmagine: " + id);
 
 				final String url = rootUrl + item.get("mediaLocator").asText();
 				final Integer width = item.get("width").asInt();
@@ -444,7 +460,10 @@ public class CMS {
 
 				// Find the valid tags for this task.
 				if (imageSegments != null) {
+					Logger.debug("recupero i tag " + id);
+					Logger.debug(id + " segments");
 					tags = retrieveTags(imageSegments);
+					Logger.debug("recupero i tag end " + id);
 				}
 
 				// Add one tag among the ones that have been retrieved following
@@ -455,9 +474,11 @@ public class CMS {
 				guessWord.put("width", width);
 				guessWord.put("height", height);
 				taskHashSet.add(guessWord);
+				Logger.debug("adding new image and send task aquired " + id);
 				sendTaskAcquired(roomChannel);
 			}
 		}
+		Logger.debug("Task init from CMS end");
 
 	}
 
@@ -467,10 +488,12 @@ public class CMS {
 	private static void sendTaskAcquired(final Room roomChannel) {
 		final GameMessages.GameEvent taskAcquired = new GameMessages.GameEvent(
 				roomChannel, GameEventType.taskAcquired);
+		Logger.debug("CMS sends task aquired... ");
 		GameBus.getInstance().publish(taskAcquired);
 	}
 
 	public static HashSet<String> retrieveTags(JsonNode imageSegments) {
+
 		final JsonReader jsonReader = new JsonReader();
 		final HashSet<String> tags = new HashSet<>();
 		imageSegments = imageSegments.get("availableTags");
@@ -479,11 +502,15 @@ public class CMS {
 				for (final JsonNode segment : imageSegments) {
 					// Retrieve the content descriptor
 					if (null != segment) {
+						Logger.debug("send request to retrieve tags "
+								+ segment.get("id").getTextValue());
 						JsonNode retrieved = jsonReader
 								.readJsonArrayFromUrl(rootUrl
 										+ "/wsmc/content/"
 										+ segment.get("id").getTextValue()
 										+ ".json");
+						Logger.debug("send request to retrieve tags end "
+								+ segment.get("id").getTextValue());
 						retrieved = retrieved.get("itemAnnotations").get(0);
 						// If the annotation is a tag and is in the same
 						// language as the one defined in the system, add the

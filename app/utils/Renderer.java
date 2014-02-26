@@ -257,6 +257,7 @@ public class Renderer extends UntypedActor {
 		final ArrayNode result = new ArrayNode(JsonNodeFactory.instance);
 		HashSet<String> tags;
 		if (image != null) {
+			Logger.debug("Chiamao la retrievetask io render");
 			tags = CMS.retrieveTags(image);
 		} else {
 			tags = new HashSet<>();

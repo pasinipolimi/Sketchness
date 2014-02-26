@@ -162,7 +162,7 @@ public class Game extends GameRoom {
 			}
 			missingPlayers = requiredPlayers;
 			newGameSetup();
-			Logger.info("[GAME] " + roomChannel.getRoom() + " created.");
+			Logger.debug("[GAME] " + roomChannel.getRoom() + " created.");
 		}
 		if (message instanceof GameEvent) {
 			final GameEvent event = (GameEvent) message;
@@ -194,6 +194,7 @@ public class Game extends GameRoom {
 				skipTask(event.getMessage());
 				break;
 			case taskAcquired:
+				Logger.debug("Task aquired...");
 				taskAcquired();
 				break;
 			case getGameInfo:
@@ -424,6 +425,7 @@ public class Game extends GameRoom {
 	}
 
 	private boolean triggerStart() throws Error {
+		Logger.debug("Triggering start...");
 		boolean canStart = true;
 		for (final Painter painter : playersVect) {
 			if (painter.getnModulesReceived() < modules) {
@@ -614,6 +616,8 @@ public class Game extends GameRoom {
 								while (trials < 5 && !completed) {
 									try {
 										trials++;
+										Logger.debug("Trying to initialize the task, attempt num: "
+												+ trials);
 										if (!fixGroundTruth)
 											CMS.taskSetInitialization(
 													priorityTaskHashSet,
