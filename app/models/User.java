@@ -294,7 +294,7 @@ public class User extends Model implements Subject {
 		return nickname;
 	}
 
-	public boolean checkMail(final String email) {
+	public static boolean checkMail(final String email) {
 		Logger.debug("Checking if the mail already exists: " + email);
 
 		Boolean mailExists = false;

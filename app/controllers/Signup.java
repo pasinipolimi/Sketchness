@@ -108,6 +108,13 @@ public class Signup extends Controller {
 				return badRequest(sketchness_login.render(filledForm));
 			}
 
+            if(User.checkMail(filledForm.field("email").value())){
+                Logger.debug("Email already registered: "
+                        + filledForm.field("email").value());
+                flash(Application.FLASH_ERROR_KEY,
+                        Messages.get("error.mailExists"));
+                return badRequest(sketchness_signup.render(filledForm));
+            }
 			// Everything was filled
 			return UsernamePasswordAuthProvider.handleSignup(ctx());
 		}
