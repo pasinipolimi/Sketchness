@@ -68,7 +68,6 @@ error.mailExists=E' probabile che tu ti sia già registrato. Per connettere il t
 error.userLogged=Questo utente è attualmente loggato.
 error.userInBrowser=C'è già un utente connesso su questo browser
 error.pageNotFound= Pagina non trovata
-error.mailExists= Mail gia' utilizzata, esegui il login con il tuo precedente account
 
 ### --- play-authenticate START
 

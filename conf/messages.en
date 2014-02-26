@@ -65,7 +65,6 @@ error.mailExists=It is possible you already made a registration. In order to con
 error.userLogged=This account is already logged it.
 error.userInBrowser=There is already a user logged from this browser
 error.pageNotFound= Page not found
-error.mailExists= Mail already used, do login with your previous account
 
 ### --- play-authenticate START
 
