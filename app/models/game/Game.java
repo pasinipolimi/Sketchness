@@ -227,10 +227,14 @@ public class Game extends GameRoom {
         }
         if (guessObject == null) {
             int size= taskHashSet.size();
+            //TODO se gli elementi fino ad ora caricati hanno tutti tag già usati crasha
             Integer item;
+            int startingsize = size;
             item = generateRandomItem(size);
+            HashSet<ObjectNode> tmptaskHashSet = new HashSet<>();
             if (item != null) {
                 int i = 0;
+                int iter = 0;
                 Iterator<ObjectNode> it = taskHashSet.iterator();
                 while (it.hasNext()) {
                     ObjectNode obj = it.next();
@@ -240,7 +244,15 @@ public class Game extends GameRoom {
                             usedTags.add(obj.get("tag").asText());
                             break;
                         }
+                        else if(iter == startingsize){                          //fix per il todo poco sopra, se ho scorso tutta la lista allora estraggo il primo elemento della lista temporane (anche se un tag già usato almeno non mi interrompo)
+                            Iterator<ObjectNode> tmpIt = tmptaskHashSet.iterator(); //TODO NON ANCORA TESTATO
+                            if(tmpIt.hasNext()){
+                                guessObject = tmpIt.next();
+                            }
+                        }
                         else{
+                            tmptaskHashSet.add(obj);
+                            iter++;
                             taskHashSet.remove(obj);
                             size = taskHashSet.size();
                             item = generateRandomItem(i,size);
