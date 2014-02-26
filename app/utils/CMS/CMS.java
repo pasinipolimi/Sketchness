@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -34,15 +35,18 @@ import org.json.JSONObject;
 
 import play.Logger;
 import play.Play;
+import play.libs.Akka;
 import play.libs.F;
 import play.libs.Json;
 import play.libs.WS;
+import scala.concurrent.duration.Duration;
 import utils.JsonReader;
 import utils.LanguagePicker;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameEventType;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.Room;
+import akka.actor.Cancellable;
 
 /**
  * Wrapper for the CMS API
@@ -72,6 +76,7 @@ public class CMS {
 					"7696", "7697", "7698", "7699", "7700", "7701", "7702",
 					"7703", "7704", "7705", "7706", "7708", "7709", "7711",
 					"7712", "7713", "7714"));
+	private static HashMap<String, Cancellable> runningThreads = new HashMap<String, Cancellable>();
 
 	public static void closeUTask(final Integer uTaskID, final Integer actionId) {
 		if (uTaskID != null) {
@@ -213,6 +218,7 @@ public class CMS {
 		final HashMap<String, ObjectNode> temporary = new HashMap<>();
 		retrievedImages = jsonReader.readJsonArrayFromUrl(rootUrl
 				+ "/wsmc/image.json");
+		boolean taskSent = false;
 		if (retrievedImages != null) {
 			// For each image
 			for (final JsonNode item : retrievedImages) {
@@ -264,8 +270,49 @@ public class CMS {
 			for (final Map.Entry pairs : temporary.entrySet()) {
 				taskHashSet.add((ObjectNode) pairs.getValue());
 			}
-			sendTaskAcquired(roomChannel);
+			if (!taskSent) {
+				taskSent = true;
+				sendTaskAcquired(roomChannel);
+			}
 		}
+	}
+
+	public static void addInitializationThread(final String roomName,
+			final Cancellable thread) {
+		runningThreads.put(roomName, thread);
+	}
+
+	public static boolean getThread(final String roomName) {
+		if (runningThreads.containsKey(roomName))
+			return true;
+		else
+			return false;
+	}
+
+	public static void cancelThread(final String roomName) {
+		final Cancellable thread = runningThreads.get(roomName);
+		if (thread != null) {
+			thread.cancel();
+			Akka.system()
+					.scheduler()
+					.scheduleOnce(Duration.create(1000, TimeUnit.MILLISECONDS),
+							new Runnable() {
+								@Override
+								public void run() {
+									while (!thread.isCancelled()) {
+										try {
+											Thread.sleep(100);
+										} catch (final Exception ex) {
+											Logger.error("Error in waiting the thread termination\n"
+													+ ex);
+										}
+									}
+									runningThreads.remove(roomName);
+									Logger.info("Thread cancelled and removed.");
+								}
+							}, Akka.system().dispatcher());
+		}
+
 	}
 
 	/**
@@ -282,6 +329,8 @@ public class CMS {
 		final JsonReader jsonReader = new JsonReader();
 		JsonNode retrievedTasks;
 		JsonNode retrievedImagesOrdered;
+
+		boolean taskSent = false;
 
 		// [TODO] Fail safe in case of not being able to retrieve the instances
 		try {
@@ -361,7 +410,10 @@ public class CMS {
 													utask.get("id").asInt());
 											guessWord.put("taskid", taskId);
 											priorityTaskHashSet.add(guessWord);
-											sendTaskAcquired(roomChannel);
+											if (!taskSent) {
+												taskSent = true;
+												sendTaskAcquired(roomChannel);
+											}
 											break;
 										case "segmentation":
 											HashSet<String> tags;
@@ -393,7 +445,10 @@ public class CMS {
 												guessWord.put("taskid", taskId);
 												priorityTaskHashSet
 														.add(guessWord);
-												sendTaskAcquired(roomChannel);
+												if (!taskSent) {
+													taskSent = true;
+													sendTaskAcquired(roomChannel);
+												}
 											}
 											break;
 										}
@@ -474,8 +529,13 @@ public class CMS {
 				guessWord.put("width", width);
 				guessWord.put("height", height);
 				taskHashSet.add(guessWord);
-				Logger.debug("adding new image and send task aquired " + id);
-				sendTaskAcquired(roomChannel);
+
+				if (!taskSent) {
+					taskSent = true;
+					Logger.debug("adding new image and send task aquired " + id);
+					sendTaskAcquired(roomChannel);
+				}
+
 			}
 		}
 		Logger.debug("Task init from CMS end");
@@ -486,10 +546,12 @@ public class CMS {
 	 * Inform the game that at least one task is ready and we can start the game
 	 */
 	private static void sendTaskAcquired(final Room roomChannel) {
+
+		Logger.debug("CMS sends task aquired... ");
 		final GameMessages.GameEvent taskAcquired = new GameMessages.GameEvent(
 				roomChannel, GameEventType.taskAcquired);
-		Logger.debug("CMS sends task aquired... ");
 		GameBus.getInstance().publish(taskAcquired);
+
 	}
 
 	public static HashSet<String> retrieveTags(JsonNode imageSegments) {
