@@ -347,11 +347,9 @@ public class CMS {
 		// explicitly declared
 
 		if (retrievedTasks != null) {
-			Logger.debug("qui non ci entra");
 			retrievedTasks = retrievedTasks.get("task");
 			for (JsonNode item : retrievedTasks) {
 				if (item.getElements().hasNext()) {
-					Logger.debug("qui non ci entra 2");
 					// If the task is still open
 					if (item.get("status").asInt() == 1) {
 						final String taskId = item.get("id").getTextValue();
@@ -471,7 +469,7 @@ public class CMS {
 		try {
 			Logger.debug("Requested image list to CMS");
 			retrievedImagesOrdered = jsonReader.readJsonArrayFromUrl(rootUrl
-					+ "/wsmc/image.json");
+					+ "/wsmc/image/light.json");
 			Logger.debug("Requested image list to CMS end");
 		} catch (final IllegalArgumentException e) {
 			throw new RuntimeException(
@@ -485,11 +483,9 @@ public class CMS {
 			retrievedImages.add(i, retrievedImagesOrdered.get(i));
 			i++;
 		}
-		Logger.debug("aggiunte le immagini");
 		final Long seed = System.nanoTime();
 		Collections.shuffle(retrievedImages, new Random(seed));
 
-		Logger.debug("mescolate le immagini");
 		// For each image
 		for (final JsonNode item : retrievedImages) {
 			if (item.getElements().hasNext()) {
@@ -500,7 +496,6 @@ public class CMS {
 					// the image is not part of the collection
 					continue;
 				}
-				Logger.debug("Analizzo immmagine: " + id);
 
 				final String url = rootUrl + item.get("mediaLocator").asText();
 				final Integer width = item.get("width").asInt();
@@ -515,10 +510,7 @@ public class CMS {
 
 				// Find the valid tags for this task.
 				if (imageSegments != null) {
-					Logger.debug("recupero i tag " + id);
-					Logger.debug(id + " segments");
 					tags = retrieveTags(imageSegments);
-					Logger.debug("recupero i tag end " + id);
 				}
 
 				// Add one tag among the ones that have been retrieved following
@@ -532,7 +524,7 @@ public class CMS {
 
 				if (!taskSent) {
 					taskSent = true;
-					Logger.debug("adding new image and send task aquired " + id);
+					Logger.debug("Adding new image and send task aquired " + id);
 					sendTaskAcquired(roomChannel);
 				}
 
@@ -564,15 +556,15 @@ public class CMS {
 				for (final JsonNode segment : imageSegments) {
 					// Retrieve the content descriptor
 					if (null != segment) {
-						Logger.debug("send request to retrieve tags "
-								+ segment.get("id").getTextValue());
+						// Logger.debug("send request to retrieve tags "
+						// + segment.get("id").getTextValue());
 						JsonNode retrieved = jsonReader
 								.readJsonArrayFromUrl(rootUrl
 										+ "/wsmc/content/"
 										+ segment.get("id").getTextValue()
 										+ ".json");
-						Logger.debug("send request to retrieve tags end "
-								+ segment.get("id").getTextValue());
+						// Logger.debug("send request to retrieve tags end "
+						// + segment.get("id").getTextValue());
 						retrieved = retrieved.get("itemAnnotations").get(0);
 						// If the annotation is a tag and is in the same
 						// language as the one defined in the system, add the
