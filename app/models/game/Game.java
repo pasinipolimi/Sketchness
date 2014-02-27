@@ -921,10 +921,11 @@ public class Game extends GameRoom {
 		final ObjectNode show = Json.newObject();
 		show.put("type", "showImages");
 		// If we are in single player mode, don't show the images again
-		/*
-		 * if(requiredPlayers==1) show.put("seconds",0); else
-		 */
-		show.put("seconds", 5);
+		
+		if(requiredPlayers==1) 
+                    show.put("seconds",0); 
+                else
+                    show.put("seconds", 5);
 		showImages.setObject(show);
 		GameBus.getInstance().publish(showImages);
 		// Send also the image to be shown
