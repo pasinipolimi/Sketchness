@@ -377,7 +377,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.hudArea.show();
 					this.chat.disable();
 
-	//				this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time, this.timeUp.bind(this));
+					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time, this.timeUp.bind(this));
 
 					var that = this,
 						painter = this.painter,

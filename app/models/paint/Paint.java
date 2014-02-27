@@ -48,7 +48,8 @@ public class Paint extends GameRoom {
 
     //Manage the messages
     @Override
-    public void onReceive(Object message) throws Exception {
+    public void onReceive(Object message) {
+      try {
         //We are initializing the room 
         if (message instanceof Room) {
             this.roomChannel = ((Room) message);
@@ -159,6 +160,10 @@ public class Paint extends GameRoom {
                     break;
             }
         }
+      }
+      catch(Exception ex) {
+          Logger.error(ex.toString());
+      }
     }
 
     private void roundEnd(JsonNode json){
