@@ -245,7 +245,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.wordInput.show();
 					this.chat.disable();
     //uncomment when timer will work
-					this.clock.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time, this.timeUp.bind(this));
+					this.clock.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
 
 					var that = this;
 
@@ -320,7 +320,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					var question = this.elements.questionMark;
 					this.painter.showImage(question.attr("src"), question.attr("rwidth"), question.attr("rheight"));
     //uncomment when timer will work
-	//				this.clock.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time, this.timeUp.bind(this));
+					this.clock.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
 
 					var that = this;
 
@@ -377,7 +377,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.hudArea.show();
 					this.chat.disable();
 
-					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time, this.timeUp.bind(this));
+					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
 
 					var that = this,
 						painter = this.painter,
@@ -549,7 +549,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.write.top($.i18n.prop('guess'));
 					wordInput.show();
         //uncomment when timer will work
-		//			this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time, this.timeUp.bind(this));
+					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
 
 					painter.setName(sk.players[sk.sketcher].name);
 
@@ -648,7 +648,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				onenterimageViewing: function() {
 					this.write.top($.i18n.prop('solution'), this.sketchness.word);
 
-	//				this.clock.setCountdown("solution", this.constants.solutionTime * Time.second, Time.second, write.time, this.timeUp.bind(this));
+					this.clock.setCountdown("solution", this.constants.solutionTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
 
 					var that = this;
 
