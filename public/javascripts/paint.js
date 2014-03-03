@@ -245,7 +245,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.wordInput.show();
 					this.chat.disable();
     //uncomment when timer will work
-	//				this.clock.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time, this.timeUp.bind(this));
+					this.clock.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time, this.timeUp.bind(this));
 
 					var that = this;
 
