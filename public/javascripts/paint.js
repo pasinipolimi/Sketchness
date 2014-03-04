@@ -42,7 +42,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			tool: $("#tool"),
 			size: $("#size"),
 			color: $("#color"),
-			viewport: $("#viewport"),
+			viewport: $("#canvaswindows"),
 			task: $("#task"),
 			draws: $("#draws"),
 			positions: $("#positions")
@@ -74,6 +74,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			}
 		});
 
+		//var painter = new Painter(elements.task[0], elements.draws[0], elements.positions[0]);
 		var painter = new Painter(elements.task[0], elements.draws[0], elements.positions[0]);
 
 		/**
@@ -473,8 +474,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					var setPoint = function(event) {
 						var point = relativePosition(event, elements.viewport);
 
-						if (point != null && point.x > 0 && point.x < elements.viewport.width() && point.y > 0) {
-							//point.y > 0 && point.y < elements.viewport.height()) {
+						if (point != null && point.x > 0 && point.x < elements.viewport.width() && point.y > 0 && point.y < elements.viewport.height()) {
 
 							painter.setPoint(point);
 							that.communicator.send("point", point);
