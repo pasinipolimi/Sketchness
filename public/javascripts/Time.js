@@ -1,7 +1,7 @@
 define(["Class","Countdown"], function(Class, Countdown){
 
 	/**
-	 * The handler of time infos and timed events
+	 * The handler of time info and timed events
 	 * (All times are measured in milliseconds)
 	 */
 	return new Class({

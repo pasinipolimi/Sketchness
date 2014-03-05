@@ -940,3 +940,18 @@ div#preloaded-images {
 	height: auto;
 	max-height: 200px;
 }
+
+.cold{
+    color: #FF0000;
+    font-weight: bold;
+}
+
+.warm{
+    color: #FE9A2E;
+    font-weight: bold;
+}
+
+.hot{
+    color: #9FF781;
+    font-weight: bold;
+}

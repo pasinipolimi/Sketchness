@@ -128,12 +128,15 @@ public class Game extends GameRoom {
                         case "taskAcquired": taskAcquired();break;
                         case "leave": handleQuitter(event);break;
                         case "matchInfo": publishLobbyEvent();break;      //publishLobbyEvent(GameEventType.matchEnd);
-                        // break point between working and not Tested
+                        // break point between tested and not Tested
                         case "skip": skipTask(); break;
-                        case "guessed": guessed(event.get("word").asText());break;
-             //           case "timer": playerTimeExpired(event.get("user").asText()); break;
+                        case "guessed": guessed(event.get("content").get("user").asText());break;
                         case "guessAttempt": handleTalk(event);break;
                         case "tag": tagReceived(event.get("content").get("word").asText());break;
+                        // break point between working and doing
+                        case "timer":
+                            playerTimeExpired(event.get("content").get("user").asText());
+                            break;
                     }
                 }
             }
@@ -227,11 +230,10 @@ public class Game extends GameRoom {
         }
         if (guessObject == null) {
             int size= taskHashSet.size();
-            //TODO se gli elementi fino ad ora caricati hanno tutti tag già usati crasha
             Integer item;
-            int startingsize = size;
+            int startingSize = size;
             item = generateRandomItem(size);
-            HashSet<ObjectNode> tmptaskHashSet = new HashSet<>();
+            HashSet<ObjectNode> tmpTaskHashSet = new HashSet<>();
             if (item != null) {
                 int i = 0;
                 int iter = 0;
@@ -244,14 +246,14 @@ public class Game extends GameRoom {
                             usedTags.add(obj.get("tag").asText());
                             break;
                         }
-                        else if(iter == startingsize){                          //fix per il todo poco sopra, se ho scorso tutta la lista allora estraggo il primo elemento della lista temporane (anche se un tag già usato almeno non mi interrompo)
-                            Iterator<ObjectNode> tmpIt = tmptaskHashSet.iterator(); //TODO NON ANCORA TESTATO
+                        else if(iter == startingSize){
+                            Iterator<ObjectNode> tmpIt = tmpTaskHashSet.iterator();
                             if(tmpIt.hasNext()){
                                 guessObject = tmpIt.next();
                             }
                         }
                         else{
-                            tmptaskHashSet.add(obj);
+                            tmpTaskHashSet.add(obj);
                             iter++;
                             taskHashSet.remove(obj);
                             size = taskHashSet.size();
@@ -446,21 +448,6 @@ public class Game extends GameRoom {
         }
     }
 
-    /**
-     * when sketcher enter the new tag I would have to call sendTask(false) but I don't have to send a RoundBegin message.
-     * I created a new function sendTask2 which is working for the purpose.
-     */
-    private void sendTask2() {
-        String id = guessObject.get("id").asText();
-        String medialocator = guessObject.get("image").asText();
-        int width = guessObject.get("width").asInt();
-        int height = guessObject.get("height").asInt();
-        String word = guessObject.get("tag").asText();
-        areWeAsking = false;
-        GameEvent task = new GameEvent(GameMessages.composeTask(sketcherPainter.name,id,medialocator,word, width, height), roomChannel);
-        GameBus.getInstance().publish(task);
-    }
-
     /*
      * Check if the timer for all the players has expired, show the solution for the current
      * round and start a new one
@@ -486,14 +473,26 @@ public class Game extends GameRoom {
             if ((missingPlayers - disconnectedPlayers) == 0) {
                 //Before calling the new round, show the solution to all the players and end the round
                 if (shownImages == false && areWeAsking == false) {
-                    showImages();
-                    shownImages = true;
-                    missingPlayers = requiredPlayers;
+                 //   showImages();
+                 //   shownImages = true;
+                  //  missingPlayers = requiredPlayers;
                     //If at least one player has guessed, it means that the drawn contour is a good one
                     if (guessedWord) {
             //            GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.saveTraces));
                         GameBus.getInstance().publish(new GameEvent(GameMessages.composeSaveTraces(), roomChannel));
                     }
+
+                                areWeAsking = false;
+                                //Start a new round
+                                String id = taskImage.get("id").asText();
+                                String medialocator = taskImage.get("image").asText();
+                                int width = taskImage.get("width").asInt();
+                                int height = taskImage.get("height").asInt();
+                                GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText(),id,medialocator,width,height), roomChannel));
+                                nextRound();
+                                shownImages = false;
+                                missingPlayers = requiredPlayers;
+
                 } //If the solution has been given or a tag has not been chosen, start a new round
                 else {
                     if (areWeAsking) {
@@ -502,7 +501,11 @@ public class Game extends GameRoom {
                     }
                     areWeAsking = false;
                     //Start a new round
-                    GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText()), roomChannel));
+                    String id = taskImage.get("id").asText();
+                    String medialocator = taskImage.get("image").asText();
+                    int width = taskImage.get("width").asInt();
+                    int height = taskImage.get("height").asInt();
+                    GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText(), id, medialocator, width, height), roomChannel));
                     nextRound();
                     shownImages = false;
                     missingPlayers = requiredPlayers;
@@ -619,6 +622,11 @@ public class Game extends GameRoom {
     }
 
     private void guessed(String guesser) {
+
+        String id;
+        String medialocator;
+        int width;
+        int height;
         for (Painter painter : playersVect) {
             //If the current painter is the guesser, has not guessed before and it is not the sketcher, update his points
             if (painter.name.equals(guesser) && painter.guessed == false) {
@@ -639,10 +647,10 @@ public class Game extends GameRoom {
                 //Send also the image to be shown
        //         eventGuesser = new GameEvent(guesser, roomChannel, GameEventType.guessedObject);
        //         eventGuesser.setObject(guessObject);
-                String id = guessObject.get("id").asText();
-                String medialocator = guessObject.get("image").asText();
-                int width = guessObject.get("width").asInt();
-                int height = guessObject.get("height").asInt();
+                id = guessObject.get("id").asText();
+                medialocator = guessObject.get("image").asText();
+                width = guessObject.get("width").asInt();
+                height = guessObject.get("height").asInt();
                 eventGuesser = new GameEvent(GameMessages.composeImage(guesser,id,medialocator,width,height), roomChannel);
                 GameBus.getInstance().publish(eventGuesser);
 
@@ -686,6 +694,15 @@ public class Game extends GameRoom {
      //       timeEvent.setObject(timerChange(remainingTimeOnAllGuess, CountdownTypes.round));
             GameEvent timeEvent = new GameEvent(GameMessages.composeTimer(remainingTimeOnAllGuess),roomChannel);
             GameBus.getInstance().publish(timeEvent);
+
+            id = taskImage.get("id").asText();
+            medialocator = taskImage.get("image").asText();
+            width = taskImage.get("width").asInt();
+            height = taskImage.get("height").asInt();
+            GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText(),id,medialocator,width,height), roomChannel));
+            nextRound();
+
+
         }
         guessedWord = true;
     }
@@ -835,7 +852,7 @@ public class Game extends GameRoom {
         taskImage.remove("tag");
         taskImage.put("tag", word);
         currentGuess= word;
-        sendTask2();
+        sendTask(false);
     }
 
     
@@ -855,7 +872,11 @@ public class Game extends GameRoom {
     private void retrieveTask(ObjectNode task) {
         currentGuess = task.get("tag").asText();
     }
-    
+
+    /**
+     * [works][not tested]
+     * @param jguess
+     */
     private void handleTalk(JsonNode jguess) {
         String text = jguess.get("content").get("word").asText();
         String username = jguess.get("content").get("user").asText();

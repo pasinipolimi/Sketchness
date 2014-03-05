@@ -60,7 +60,7 @@ public class Paint extends GameRoom {
         }
  /*       if (message instanceof JsonNode) {
             JsonNode event=((JsonNode)message);
-            GameBus.getInstance().publish(new GameMessages.GameEvent(event, roomChannel));  //TODO ***
+            GameBus.getInstance().publish(new GameMessages.GameEvent(event, roomChannel));
             event = event.get("message");
             String type = event.get("type").asText();
             switch(type) {
@@ -152,7 +152,7 @@ public class Paint extends GameRoom {
                     notifyPoint(event.get("content"));
                     break;
                 case "endPath":
-                    notifyEndPath(event.get("content"));
+                    notifyEndPath();
                     break;
                 case "roundEndS":
                     //            GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel, GameEventType.timeExpired));
@@ -265,7 +265,7 @@ public class Paint extends GameRoom {
         }
     }
 
-    private void notifyEndPath(JsonNode task) throws Exception {
+    private void notifyEndPath() throws Exception {
         notifyAll(GameMessages.composeEndPath());
     }
 
@@ -400,7 +400,6 @@ public class Paint extends GameRoom {
         }
     }
 
-    
     /*
      * Send a message to all player to wait, since the match is starting
      * [TESTED]
@@ -418,11 +417,8 @@ public class Paint extends GameRoom {
         //Reset the traces storage
         traces = new ObjectNode(factory);
         currentSegment = new Segment("rgba(255,255,255,1.0)");
-
         //Send to the users the information about their role
-
-               notifyAll(GameMessages.composeRoundBegin(sketcher));
-
+        notifyAll(GameMessages.composeRoundBegin(sketcher));
     }
 }
 

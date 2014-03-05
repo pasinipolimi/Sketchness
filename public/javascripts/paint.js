@@ -320,7 +320,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					var question = this.elements.questionMark;
 					this.painter.showImage(question.attr("src"), question.attr("rwidth"), question.attr("rheight"));
-    //uncomment when timer will work
+
 					this.clock.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
 
 					var that = this;
@@ -548,7 +548,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					this.write.top($.i18n.prop('guess'));
 					wordInput.show();
-        //uncomment when timer will work
+
 					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
 
 					painter.setName(sk.players[sk.sketcher].name);
@@ -590,7 +590,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
                                 sk.word = content.word;
                                 that.write.top($.i18n.prop('guessed'), sk.word);
                                 wordInput.hide().off("keypress");
-                                this.one("image", function(e, content) {
+                                this.one("image", function(e, content) {        //TODO non dovrebbe essere this.on?
                                     painter.showImage(content.url, content.width, content.height);
                                 });
 							}
