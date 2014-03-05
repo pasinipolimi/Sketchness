@@ -622,7 +622,6 @@ public class Game extends GameRoom {
     }
 
     private void guessed(String guesser) {
-
         String id;
         String medialocator;
         int width;

@@ -128,7 +128,7 @@ public class Paint extends GameRoom {
                     //             notifySingle(event.getMessage(), event.getObject());
                     notifyGuessed(event.get("content"));
                     break;
-                case "timer":
+                case "timerS":
                     //             notifyAll(event.getObject());
                     notifyTimer(event.get("content"));
                     break;
@@ -333,7 +333,8 @@ public class Paint extends GameRoom {
     }
 
     private void notifyTimer(JsonNode task) throws Exception {
-        //TODO
+        int time = task.get("time").asInt();
+        notifyAll(GameMessages.composeTimerForClient(time));
     }
 
     private void notifyLeaderboard(JsonNode task) throws Exception {
@@ -342,7 +343,9 @@ public class Paint extends GameRoom {
     }
 
     private void notifyScore(JsonNode task) throws Exception{
-        //TODO
+        String user = task.get("user").asText();
+        int score = task.get("score").asInt();
+        notifyAll(GameMessages.composeScore(user,score));
     }
 
     private void beginPath() throws Exception {

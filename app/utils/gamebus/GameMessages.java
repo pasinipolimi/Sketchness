@@ -321,6 +321,13 @@ public class GameMessages {
      public static ObjectNode composeTimer(Integer time) {
         ObjectNode content = Json.newObject();
         content.put("time", time);
+        ObjectNode event = composeJsonMessage("timerS",content);
+        return event;
+    }
+
+    public static ObjectNode composeTimerForClient(Integer time) {
+        ObjectNode content = Json.newObject();
+        content.put("time", time);
         ObjectNode event = composeJsonMessage("timer",content);
         return event;
     }
