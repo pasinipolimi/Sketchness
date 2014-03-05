@@ -246,7 +246,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.wordInput.show();
 					this.chat.disable();
     //uncomment when timer will work
-					this.clock.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
+					this.clock.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time.bind(this.write), this.clockUp.bind(this));
 
 					var that = this;
 
@@ -321,7 +321,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					var question = this.elements.questionMark;
 					this.painter.showImage(question.attr("src"), question.attr("rwidth"), question.attr("rheight"));
 
-					this.clock.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
+					this.clock.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time.bind(this.write), this.clockUp.bind(this));
 
 					var that = this;
 
@@ -378,7 +378,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.hudArea.show();
 					this.chat.disable();
 
-					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
+					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time.bind(this.write), this.clockUp.bind(this));
 
 					var that = this,
 						painter = this.painter,
@@ -391,7 +391,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							painter.showImage(content.url, content.width, content.height);
 						},
 						timer: function(e, content) {
-							that.time.changeCountdown("task", content.time * Time.second);
+							that.clock.changeCountdown("task", content.time * Time.second);
 						},
 						guess: function(e, content) {
 							that.chat.guess(sk.players[content.user].name, content.word, content.affinity, content.user == sk.myself);
@@ -549,7 +549,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.write.top($.i18n.prop('guess'));
 					wordInput.show();
 
-					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
+					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time.bind(this.write), this.clockUp.bind(this));
 
 					painter.setName(sk.players[sk.sketcher].name);
 
@@ -568,7 +568,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					this.communicator.on({
 						timer: function(e, content) {
-							that.time.changeCountdown("task", content.time * Time.second);
+							that.clock.changeCountdown("task", content.time * Time.second);
 						},
 						changeTool: function(e, tool) {
 							painter.setTool(tool);
@@ -590,7 +590,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
                                 sk.word = content.word;
                                 that.write.top($.i18n.prop('guessed'), sk.word);
                                 wordInput.hide().off("keypress");
-                                this.one("image", function(e, content) {        //TODO non dovrebbe essere this.on?
+                                this.one("image", function(e, content) {
                                     painter.showImage(content.url, content.width, content.height);
                                 });
 							}
@@ -648,7 +648,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				onenterimageViewing: function() {
 					this.write.top($.i18n.prop('solution'), this.sketchness.word);
 
-					this.clock.setCountdown("solution", this.constants.solutionTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
+					this.clock.setCountdown("solution", this.constants.solutionTime * Time.second, Time.second, this.write.time.bind(this.write), this.clockUp.bind(this));
 
 					var that = this;
 
