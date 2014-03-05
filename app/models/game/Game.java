@@ -666,7 +666,7 @@ public class Game extends GameRoom {
           //          sketcherJson.put("points", sketcherPointsRemaining);
           //          GameEvent eventSketcher = new GameEvent(sketcherPainter.name, roomChannel, GameEventType.points);
           //          eventSketcher.setObject(sketcherJson);
-                    GameEvent eventSketcher = new GameEvent(GameMessages.composeScore(sketcherPainter.name, sketcherPointsRemaining));
+                    GameEvent eventSketcher = new GameEvent(GameMessages.composeScore(sketcherPainter.name, sketcherPointsRemaining),roomChannel);
                     GameBus.getInstance().publish(eventSketcher);
                 }
                 if (guesserPointsRemaining >= minGuesserPointsRemaining) {
