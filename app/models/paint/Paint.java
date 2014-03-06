@@ -90,75 +90,83 @@ public class Paint extends GameRoom {
         else */ if (message instanceof GameEvent) {
         //    GameEvent event = (GameEvent) message;
             JsonNode event = ((GameEvent) message).getJson();
-            event = event.get("message");
-            String type = event.get("type").asText();
-      //      switch (event.getType()) {
-            switch (type) {
-                case "matchEnd":
-                    killActor();
-                    gameStarted = false;
-                    break;
-                case "loading":
-                    gameLoading();
-                    break;
-                case "roundBegin":
-                    gameStarted = true;
-                    roundBegin(event.get("content"));
-                    break;
-                case "saveTraces":
-                    saveTraces();
-                    break;
-                case "nextRound": //DONE
-                    //              nextRound(event.getMessage());
-                    nextRound(event.get("content").get("user").asText());
-                    break;
-                case "task":
-       //             sendTask(event.getMessage(), event.getObject());
-                    sendTask(event.get("content"));
-                    break;
-                case "tagS":
-                    //            sendTag(event.getMessage(), event.getObject());
-                    sendTag(event.get("content"));
-                    break;
-                case "score":
-                    //            notifySingle(event.getMessage(), event.getObject());
-                    notifyScore(event.get("content"));
-                    break;
-                case "guessed":
-                    //             notifySingle(event.getMessage(), event.getObject());
-                    notifyGuessed(event.get("content"));
-                    break;
-                case "timerS":
-                    //             notifyAll(event.getObject());
-                    notifyTimer(event.get("content"));
-                    break;
-                case "leaderboard":
-                    //            notifyAll(event.getObject());
-                    notifyLeaderboard(event.get("content"));
-                    break;
-                case "guess":
-                    notifyGuess(event.get("content"));
-                    break;
-                case "leave":
-                    //           handleQuitter(event.getMessage());
-                    handleQuitter(event.get("content").get("user").asText());
-                case "changeTool":
-                    changeTool(event.get("content"));
-                    break;
-                case "beginPath":
-                    beginPath();
-                    break;
-                case "point":
-                    notifyPoint(event.get("content"));
-                    break;
-                case "endPath":
-                    notifyEndPath();
-                    break;
-                case "roundEndS":
-                    //            GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel, GameEventType.timeExpired));
-                    roundEnd(event.get("content"));
-                    break;
+            if(event!=null) {
+                event = event.get("message");
+                if(event!=null) {
+                    String type = event.get("type").asText();
+              //      switch (event.getType()) {
+                    if(type!=null) {
+                        switch (type) {
+                            case "matchEnd":
+                                killActor();
+                                gameStarted = false;
+                                break;
+                            case "loading":
+                                gameLoading();
+                                break;
+                            case "roundBegin":
+                                gameStarted = true;
+                                roundBegin(event.get("content"));
+                                break;
+                            case "saveTraces":
+                                saveTraces();
+                                break;
+                            case "nextRound": //DONE
+                                //              nextRound(event.getMessage());
+                                nextRound(event.get("content").get("user").asText());
+                                break;
+                            case "task":
+                   //             sendTask(event.getMessage(), event.getObject());
+                                sendTask(event.get("content"));
+                                break;
+                            case "tagS":
+                                //            sendTag(event.getMessage(), event.getObject());
+                                sendTag(event.get("content"));
+                                break;
+                            case "score":
+                                //            notifySingle(event.getMessage(), event.getObject());
+                                notifyScore(event.get("content"));
+                                break;
+                            case "guessed":
+                                //             notifySingle(event.getMessage(), event.getObject());
+                                notifyGuessed(event.get("content"));
+                                break;
+                            case "timerS":
+                                //             notifyAll(event.getObject());
+                                notifyTimer(event.get("content"));
+                                break;
+                            case "leaderboard":
+                                //            notifyAll(event.getObject());
+                                notifyLeaderboard(event.get("content"));
+                                break;
+                            case "guess":
+                                notifyGuess(event.get("content"));
+                                break;
+                            case "leave":
+                                //           handleQuitter(event.getMessage());
+                                handleQuitter(event.get("content").get("user").asText());
+                            case "changeTool":
+                                changeTool(event.get("content"));
+                                break;
+                            case "beginPath":
+                                beginPath();
+                                break;
+                            case "point":
+                                notifyPoint(event.get("content"));
+                                break;
+                            case "endPath":
+                                notifyEndPath();
+                                break;
+                            case "roundEndS":
+                                //            GameBus.getInstance().publish(new GameEvent(json.get("player").getTextValue(), roomChannel, GameEventType.timeExpired));
+                                roundEnd(event.get("content"));
+                                break;
+                        }
+                    }
+                }
             }
+            else
+                Logger.error("Received null message");
         }
       }
       catch(Exception ex) {
