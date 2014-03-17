@@ -480,19 +480,22 @@ public class Game extends GameRoom {
             //            GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.saveTraces));
                         GameBus.getInstance().publish(new GameEvent(GameMessages.composeSaveTraces(), roomChannel));
                     }
-
-                                areWeAsking = false;
-                                //Start a new round
-                                String id = taskImage.get("id").asText();
-                                String medialocator = taskImage.get("image").asText();
-                                int width = taskImage.get("width").asInt();
-                                int height = taskImage.get("height").asInt();
-                                GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText(),id,medialocator,width,height), roomChannel));
-                                nextRound();
-                                shownImages = false;
-                                missingPlayers = requiredPlayers;
+                    
+                    areWeAsking = false;
+                    //Start a new round
+                    String id = taskImage.get("id").asText();
+                    String medialocator = taskImage.get("image").asText();
+                    int width = taskImage.get("width").asInt();
+                    int height = taskImage.get("height").asInt();
+                    GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText(),id,medialocator,width,height), roomChannel));
+                    shownImages = true;
+                    missingPlayers = requiredPlayers;
 
                 } //If the solution has been given or a tag has not been chosen, start a new round
+                else if(shownImages) {
+                    shownImages=false;
+                    nextRound();
+                }
                 else {
                     if (areWeAsking) {
             //            GameBus.getInstance().publish(new SystemMessage(sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "notag"), roomChannel));
@@ -803,13 +806,7 @@ public class Game extends GameRoom {
         GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info,sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "skiptask")), roomChannel));
     //    GameEvent timeEvent = new GameEvent(roomChannel, GameEventType.timerChange);
     //    timeEvent.setObject(timerChange(0, CountdownTypes.valueOf(kind)));
-        GameEvent timeEvent = new GameEvent(GameMessages.composeTimer(0),roomChannel);
-        GameBus.getInstance().publish(timeEvent);
-        String id = taskImage.get("id").asText();
-        String medialocator = taskImage.get("image").asText();
-        int width = taskImage.get("width").asInt();
-        int height = taskImage.get("height").asInt();
-        GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText(),id,medialocator,width,height), roomChannel));
+        //GameEvent timeEvent = new GameEvent(GameMessages.composeTimer(0),roomChannel);
         nextRound();
     }
 

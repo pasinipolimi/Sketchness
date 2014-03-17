@@ -15,8 +15,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 		};
 
 		var constants = {
-			tagTime: 30,
-			taskTime: 90,
+			tagTime: 10,
+			taskTime: 15,
 			solutionTime: 5
 		};
 
@@ -244,6 +244,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.nextRound();
 					this.communicator.send("timer", {user: sketchness.myself});
 				},
+				
 
 				/**
 				 * Setup of tag insertion state
@@ -282,6 +283,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					});
 
 					elements.skip.one("click", function() {
+						that.skipRound();
 						that.communicator.send("skip", {});
 					});
 
@@ -424,11 +426,12 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
                         },
 						roundEnd: function(e, content) {
 						    sk.word = content.word;
-							that.endRound();
+							that.endRound(content.word);
 						}
 					});
 
 					elements.skip.on("click", function() {
+						that.skipRound();
 						that.communicator.send("skip", {});
 					});
 
@@ -738,6 +741,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				{ name: "beSketcher", from: ["loading", "waitRole", "tagInsertion", "tagWait"], to: "Sketcher" },
 				{ name: "beGuesser", from: ["loading", "waitRole", "tagInsertion", "tagWait"], to: "Guesser" },
 				{ name: "nextRound", from: ["imageViewing"], to: "waitRole"},
+				{ name: "skipRound", from: ["taskGuessing", "taskDrawing", "tagInsertion"], to: "waitRole" },
 				{ name: "tag", from: "Sketcher", to: "tagInsertion" },
 				{ name: "tag", from: "Guesser", to: "tagWait" },
 				{ name: "task", from: ["Sketcher", "tagInsertion"], to: "taskDrawing" },
