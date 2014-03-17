@@ -33,7 +33,6 @@ import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages.*;
 import utils.LanguagePicker;
 import utils.LoggerUtils;
-import utils.gamebus.GameEventType;
 import utils.gamebus.GameMessages;
 import utils.gamemanager.GameManager;
 import utils.levenshteinDistance;
@@ -699,9 +698,6 @@ public class Game extends GameRoom {
             width = taskImage.get("width").asInt();
             height = taskImage.get("height").asInt();
             GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText(),id,medialocator,width,height), roomChannel));
-            nextRound();
-
-
         }
         guessedWord = true;
     }

@@ -20,6 +20,7 @@ define(["Class","jquery"], function(Class, $) {
 				var message = JSON.parse(event.originalEvent.data).message;
 				event.type = message.type;
 				$this.trigger(event, [message.content]);
+				console.log(event);
 			});
 		},
 

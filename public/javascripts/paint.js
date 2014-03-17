@@ -201,6 +201,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 */
 				onleaveSketcher: function() {
 					this.communicator.off("tag task");
+					this.painter.hideImage();
+					//this.painter.image.project.activeLayer.removeChildren();
 				},
 
 				/**
@@ -208,6 +210,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 */
 				onenterGuesser: function() {
 					var that = this;
+					that.painter.hideImage();
 					this.communicator.on({
 						tag: function() {
 							that.tag();
@@ -232,6 +235,15 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				timeUp: function() {
 					this.communicator.send("timer", {user: sketchness.myself});
 				},
+				
+				/**
+				 * Utility method to send the timeout
+				 * message to the server
+				 */
+				nextRoundCall: function() {
+					this.nextRound();
+					this.communicator.send("timer", {user: sketchness.myself});
+				},
 
 				/**
 				 * Setup of tag insertion state
@@ -245,7 +257,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.skip.show();
 					elements.wordInput.show();
 					this.chat.disable();
-    //uncomment when timer will work
+					
 					this.clock.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
 
 					var that = this;
@@ -547,6 +559,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						painter = this.painter;
 
 					this.write.top($.i18n.prop('guess'));
+					that.painter.hideImage();
 					wordInput.show();
 
 					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
@@ -647,8 +660,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 */
 				onenterimageViewing: function() {
 					this.write.top($.i18n.prop('solution'), this.sketchness.word);
-
-					this.clock.setCountdown("solution", this.constants.solutionTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
+					this.clock.setCountdown("solution", this.constants.solutionTime * Time.second, Time.second, this.write.time.bind(this.write), this.nextRoundCall.bind(this));
 
 					var that = this;
 
@@ -656,9 +668,9 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						image: function(e, content) {
 							that.painter.showImage(content.url, content.width, content.height);
 						},
-						beginRound: function(e, content) {
-							that.beginRound(content.sketcher);
-						},
+						//beginRound: function(e, content) {
+						//	that.beginRound(content.sketcher);
+						//},
 						leave: function(e, content) {
                             delete sk.players[content.user];
                             write.players(sk.players);
@@ -723,8 +735,9 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			events: [
 				{ name: "startup", from: "none", to: "playersWait" },
 				{ name: "load", from: "playersWait", to: "loading" },
-				{ name: "beSketcher", from: ["loading", "imageViewing", "tagInsertion", "tagWait"], to: "Sketcher" },
-				{ name: "beGuesser", from: ["loading", "imageViewing", "tagInsertion", "tagWait"], to: "Guesser" },
+				{ name: "beSketcher", from: ["loading", "waitRole", "tagInsertion", "tagWait"], to: "Sketcher" },
+				{ name: "beGuesser", from: ["loading", "waitRole", "tagInsertion", "tagWait"], to: "Guesser" },
+				{ name: "nextRound", from: ["imageViewing"], to: "waitRole"},
 				{ name: "tag", from: "Sketcher", to: "tagInsertion" },
 				{ name: "tag", from: "Guesser", to: "tagWait" },
 				{ name: "task", from: ["Sketcher", "tagInsertion"], to: "taskDrawing" },

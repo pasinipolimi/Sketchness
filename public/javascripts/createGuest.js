@@ -3,7 +3,7 @@ function fillForm(){
         var n2= Math.floor((Math.random()*5000)+1);
 
         n = (n*n + n2)*n2;
-
+		$('#loginForm').attr('autocomplete', 'off');
         document.getElementById("name").value ="Guest";
         document.getElementById("email").value = n+"@gmail.com";
         document.getElementById("password").value = "12345";

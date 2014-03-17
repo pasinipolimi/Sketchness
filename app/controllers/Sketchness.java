@@ -123,7 +123,7 @@ public class Sketchness extends Controller {
 	 */
 	@Restrict(@Group(Application.USER_ROLE))
     public static WebSocket<JsonNode> gameStream( final String roomName, final Integer players) {
-
+            
 		final User localUser = getLocalUser(session());
 		final String username = localUser.name;
 

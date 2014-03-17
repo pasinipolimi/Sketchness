@@ -76,30 +76,36 @@ public class Lobby extends UntypedActor {
     }
 
     private void handleJoin(Join message) {
-        // Check if this username is free.
-        if (playersMap.containsKey(message.getUsername())) {
-            getSender().tell(Messages.get(LanguagePicker.retrieveLocale(), "usernameused"), this.getSelf());
-        } else {
-            playersMap.put(message.getUsername(), message.getChannel());
-            getSender().tell("OK", this.getSelf());
-            Logger.debug("[LOBBY] added player " + message.getUsername());
-            GameManager.getInstance().getCurrentGames();
+        try {
+            // Check if this username is free.
+            if (playersMap.containsKey(message.getUsername())) {
+                getSender().tell(Messages.get(LanguagePicker.retrieveLocale(), "usernameused"), this.getSelf());
+            } else {
+                playersMap.put(message.getUsername(), message.getChannel());
+                getSender().tell("OK", this.getSelf());
+                Logger.debug("[LOBBY] added player " + message.getUsername());
+                GameManager.getInstance().getCurrentGames();
+            }
+        }
+        catch(Exception e) {
+          LoggerUtils.error("[LOBBY]", e);
         }
     }
 
-    private void handleStartEnd() {
-        GameManager.getInstance().getCurrentGames();
-    }
-
     private void handleQuitter(JsonNode jquitter) throws InterruptedException {
-        String quitter = jquitter.get("content").get("user").asText();
-        for (Map.Entry<String, WebSocket.Out<JsonNode>> entry : playersMap.entrySet()) {
-            if (entry.getKey().equalsIgnoreCase(quitter)) {
-                //Close the websocket
-                entry.getValue().close();
-                playersMap.remove(quitter);
-                Logger.debug("[LOBBY] " + quitter + " has disconnected.");
+        try {
+            String quitter = jquitter.get("content").get("user").asText();
+            for (Map.Entry<String, WebSocket.Out<JsonNode>> entry : playersMap.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase(quitter)) {
+                    //Close the websocket
+                    entry.getValue().close();
+                    playersMap.remove(quitter);
+                    Logger.debug("[LOBBY] " + quitter + " has disconnected.");
+                }
             }
+        }
+        catch(Exception e) {
+          LoggerUtils.error("[LOBBY]", e);
         }
     }
 }

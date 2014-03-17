@@ -1,11 +1,9 @@
 package models.paint;
 
 import java.awt.image.BufferedImage;
-import java.net.URL;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.imageio.ImageIO;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ObjectNode;
 import play.Logger;
@@ -20,7 +18,6 @@ import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.json.JSONException;
 import utils.LanguagePicker;
-import utils.gamebus.GameEventType;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.Join;
 import utils.gamebus.GameMessages.Room;
@@ -175,18 +172,28 @@ public class Paint extends GameRoom {
     }
 
     private void roundEnd(JsonNode json){
-        String word = json.get("word").asText();
-        notifyAll(GameMessages.composeRoundEnd(word));
-        String id = json.get("id").asText();
-        String medialocator = json.get("url").asText();
-        int width = json.get("width").asInt();
-        int height = json.get("height").asInt();
-        notifyAll(GameMessages.composeImage(id,medialocator,width,height));
+        try {
+            String word = json.get("word").asText();
+            notifyAll(GameMessages.composeRoundEnd(word));
+            String id = json.get("id").asText();
+            String medialocator = json.get("url").asText();
+            int width = json.get("width").asInt();
+            int height = json.get("height").asInt();
+            notifyAll(GameMessages.composeImage(id,medialocator,width,height));
+        }
+        catch(Exception ex) {
+          Logger.error(ex.toString());
+        }
     }
 
     private void roundBegin(JsonNode json){
-        String sketcher = json.get("sketcher").asText();
-        notifyAll(GameMessages.composeRoundBegin(sketcher));
+        try {
+            String sketcher = json.get("sketcher").asText();
+            notifyAll(GameMessages.composeRoundBegin(sketcher));
+        }
+        catch(Exception ex) {
+          Logger.error(ex.toString());
+        }
     }
 
     private void saveTraces() {
@@ -223,14 +230,19 @@ public class Paint extends GameRoom {
     }
 
     private void handleQuitter(String quitter) throws InterruptedException {
-        for (Map.Entry<String, Painter> entry : painters.entrySet()) {
-            if (entry.getKey().equalsIgnoreCase(quitter)) {
-                entry.getValue().channel.close();
-                painters.remove(quitter);
-                Logger.debug("[PAINT] " + quitter + " has disconnected.");
-      //          GameBus.getInstance().publish(new GameEvent(quitter, roomChannel, GameEventType.quit));
-                GameBus.getInstance().publish(new GameEvent(GameMessages.composeQuit(quitter), roomChannel));
+        try {
+            for (Map.Entry<String, Painter> entry : painters.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase(quitter)) {
+                    entry.getValue().channel.close();
+                    painters.remove(quitter);
+                    Logger.debug("[PAINT] " + quitter + " has disconnected.");
+          //          GameBus.getInstance().publish(new GameEvent(quitter, roomChannel, GameEventType.quit));
+                    GameBus.getInstance().publish(new GameEvent(GameMessages.composeQuit(quitter), roomChannel));
+                }
             }
+        }
+        catch(Exception ex) {
+          Logger.error(ex.toString());
         }
     }
 
@@ -262,14 +274,19 @@ public class Paint extends GameRoom {
     }
     */
     private void sendTask(JsonNode task) throws Exception {
-        taskUrl = task.get("url").asText();
-        taskWidth = task.get("width").asInt();
-        taskHeight = task.get("height").asInt();
-        guessWord = task.get("word").asText();
-        //Send to the users the information about their role
-        for (Map.Entry<String, Painter> entry : painters.entrySet()) {
-            entry.getValue().channel.write(GameMessages.composeTask(guessWord));
-            entry.getValue().channel.write(GameMessages.composeImage(task.get("id").asText(), taskUrl, taskWidth, taskHeight));
+        try {
+            taskUrl = task.get("url").asText();
+            taskWidth = task.get("width").asInt();
+            taskHeight = task.get("height").asInt();
+            guessWord = task.get("word").asText();
+            //Send to the users the information about their role
+            for (Map.Entry<String, Painter> entry : painters.entrySet()) {
+                entry.getValue().channel.write(GameMessages.composeTask(guessWord));
+                entry.getValue().channel.write(GameMessages.composeImage(task.get("id").asText(), taskUrl, taskWidth, taskHeight));
+            }
+        }
+        catch(Exception ex) {
+          Logger.error(ex.toString());
         }
     }
 
@@ -347,7 +364,6 @@ public class Paint extends GameRoom {
 
     private void notifyLeaderboard(JsonNode task) throws Exception {
         //TODO
-
     }
 
     private void notifyScore(JsonNode task) throws Exception{
