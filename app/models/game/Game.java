@@ -471,7 +471,7 @@ public class Game extends GameRoom {
             //If we have received a response from all the active players in the game, end the round
             if ((missingPlayers - disconnectedPlayers) == 0) {
                 //Before calling the new round, show the solution to all the players and end the round
-                if (shownImages == false && areWeAsking == false) {
+                if (areWeAsking == false) {
                  //   showImages();
                  //   shownImages = true;
                   //  missingPlayers = requiredPlayers;
@@ -488,14 +488,10 @@ public class Game extends GameRoom {
                     int width = taskImage.get("width").asInt();
                     int height = taskImage.get("height").asInt();
                     GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText(),id,medialocator,width,height), roomChannel));
-                    shownImages = true;
                     missingPlayers = requiredPlayers;
+                    nextRound();
 
                 } //If the solution has been given or a tag has not been chosen, start a new round
-                else if(shownImages) {
-                    shownImages=false;
-                    nextRound();
-                }
                 else {
                     if (areWeAsking) {
             //            GameBus.getInstance().publish(new SystemMessage(sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "notag"), roomChannel));
@@ -509,7 +505,6 @@ public class Game extends GameRoom {
                     int height = taskImage.get("height").asInt();
                     GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText(), id, medialocator, width, height), roomChannel));
                     nextRound();
-                    shownImages = false;
                     missingPlayers = requiredPlayers;
                 }
             }
@@ -792,14 +787,6 @@ public class Game extends GameRoom {
         return leaderboard;
     }
 
-    private ObjectNode timerChange(int remainingTime, CountdownTypes timeObject) {
-        ObjectNode timeChange = Json.newObject();
-        timeChange.put("type", "timeChange");
-        timeChange.put("amount", remainingTime);
-        timeChange.put("timeObject", timeObject.name());
-        return timeChange;
-    }
-
     private void skipTask() {        //private void skipTask(String kind) {
         CMS.postAction(sessionId, "skiptask", sketcherPainter.name, "");
    //     GameBus.getInstance().publish(new SystemMessage(sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "skiptask"), roomChannel));
@@ -810,34 +797,6 @@ public class Game extends GameRoom {
         nextRound();
     }
 
-    private void showImages() {
-//        GameEvent showImages = new GameEvent(roomChannel, GameEventType.showImages);
-//        ObjectNode show = Json.newObject();
-//        show.put("type", "showImages");
-        //If we are in single player mode, don't show the images again
-       /*if(requiredPlayers==1)
-         show.put("seconds",0);
-         else*/
-//        show.put("seconds", 5);
-//        showImages.setObject(show);
-        String id = taskImage.get("id").asText();
-        String medialocator = taskImage.get("image").asText();
-        int width = taskImage.get("width").asInt();
-        int height = taskImage.get("height").asInt();
-        GameEvent showImages = new GameEvent(GameMessages.composeImage(id,medialocator,width,height),roomChannel);
-        GameBus.getInstance().publish(showImages);
-        GameEvent timeEvent = new GameEvent(GameMessages.composeTimer(5),roomChannel);
-        GameBus.getInstance().publish(timeEvent);
-        //Send also the image to be shown
-        for (Painter painter : playersVect) {
-            if (!painter.role.equals("SKETCHER") && painter.guessed == false) {
-          //      GameEvent eventGuesser = new GameEvent(painter.name, roomChannel, GameEventType.guessedObject);
-          //      eventGuesser.setObject(guessObject);
-                GameEvent eventGuesser = new GameEvent(GameMessages.composeImage(painter.name, id,medialocator,width,height),roomChannel);
-                GameBus.getInstance().publish(eventGuesser);
-            }
-        }
-    }
 
 
     private void tagReceived(String word){

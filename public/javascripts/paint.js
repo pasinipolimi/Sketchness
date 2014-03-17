@@ -74,9 +74,17 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			}
 		});
 
-		//var painter = new Painter(elements.task[0], elements.draws[0], elements.positions[0]);
 		var painter = new Painter(elements.task[0], elements.draws[0], elements.positions[0]);
 
+		Object.size = function(obj) {
+			var size = 0, key;
+			for (key in obj) {
+				if (obj.hasOwnProperty(key)) size++;
+			}
+			return size;
+		};
+		
+		
 		/**
 		 * Finite state machine that handle
 		 * each game phase.
@@ -138,8 +146,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 */
 				onleaveplayersWait: function() {
 					this.write.top();
-
 					this.communicator.off("join leave loading");
+					console.log("[LEAVE] PlayerWait");
 				},
 
 				/**
@@ -147,7 +155,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 */
 				onenterloading: function() {
 					this.write.top($.i18n.prop('matchstarting'));
-
+					console.log("[ENTER] Loading");
 					var that = this;
 
 					this.communicator.on("roundBegin", function(e, content) {
@@ -160,7 +168,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 */
 				onleaveloading: function() {
 					this.write.top();
-
+					console.log("[LEAVE] Loading");
 					this.communicator.off("beginRound");
 				},
 
@@ -186,6 +194,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 */
 				onenterSketcher: function() {
 					var that = this;
+					console.log("[BEGIN] Sketcher");
 					this.communicator.on({
 						tag: function() {
 							that.tag();
@@ -202,7 +211,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				onleaveSketcher: function() {
 					this.communicator.off("tag task");
 					this.painter.hideImage();
-					//this.painter.image.project.activeLayer.removeChildren();
+					console.log("[LEAVE] Sketcher");
 				},
 
 				/**
@@ -211,6 +220,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				onenterGuesser: function() {
 					var that = this;
 					that.painter.hideImage();
+					console.log("[BEGIN] Guesser");
 					this.communicator.on({
 						tag: function() {
 							that.tag();
@@ -226,6 +236,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 */
 				onleaveGuesser: function() {
 					this.communicator.off("tag task");
+					console.log("[LEAVE] Guesser");
 				},
 
 				/**
@@ -233,7 +244,12 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * message to the server
 				 */
 				timeUp: function() {
-					this.communicator.send("timer", {user: sketchness.myself});
+					if(Object.size(this.sketchness.players)==1) {
+						this.skipRound();
+						this.communicator.send("skip", {});
+					}
+					else
+						this.communicator.send("timer", {user: sketchness.myself});
 				},
 				
 				/**
@@ -251,7 +267,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 */
 				onentertagInsertion: function() {
 					var elements = this.elements;
-
+					console.log("[BEGIN] TagInsertion");
 					elements.main.addClass("sketcher");
 					this.write.top($.i18n.prop("asktagsketcher"));
 					this.write.warnTag($.i18n.prop("warnTag"));
@@ -307,7 +323,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 */
 				onleavetagInsertion: function() {
 					var elements = this.elements;
-
+					console.log("[END] TagInsertion");
 					elements.main.removeClass("sketcher");
 					this.write.top();
 					this.write.warnTag();
@@ -331,7 +347,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				onentertagWait: function() {
 					this.write.top($.i18n.prop('asktag'));
 					this.write.canvasMessage($.i18n.prop('sketchertagging'));
-
+					console.log("[BEGIN] TagWait");
 					var question = this.elements.questionMark;
 					this.painter.showImage(question.attr("src"), question.attr("rwidth"), question.attr("rheight"));
 
@@ -363,7 +379,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.write.top();
 					this.write.canvasMessage();
 					this.write.time();
-
+					console.log("[END] TagWait");
 					this.clock.clearCountdown("tag");
 
 					this.painter.hideImage();
@@ -391,7 +407,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.skip.show();
 					elements.hudArea.show();
 					this.chat.disable();
-
+					console.log("[BEGIN] TaskDrawing");
 					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
 
 					var that = this,
@@ -533,7 +549,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.endSegmentation.hide();
 					elements.hudArea.hide();
 					this.chat.enable();
-
+					console.log("[END] TaskDrawing");
 					this.clock.clearCountdown("task");
 
 					elements.skip.off("click");
@@ -564,7 +580,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.write.top($.i18n.prop('guess'));
 					that.painter.hideImage();
 					wordInput.show();
-
+					console.log("[BEGIN] TaskGuessing");
 					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
 
 					painter.setName(sk.players[sk.sketcher].name);
@@ -637,7 +653,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				onleavetaskGuessing: function() {
 					this.write.top();
 					this.write.time();
-
+					console.log("[END] TaskGuessing");
 					this.elements.wordInput.hide().off("keypress");
 
 					this.clock.clearCountdown("task");
@@ -664,7 +680,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				onenterimageViewing: function() {
 					this.write.top($.i18n.prop('solution'), this.sketchness.word);
 					this.clock.setCountdown("solution", this.constants.solutionTime * Time.second, Time.second, this.write.time.bind(this.write), this.nextRoundCall.bind(this));
-
+					console.log("[BEGIN] ImageViewing");
 					var that = this;
 
 					this.communicator.on({
@@ -690,7 +706,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				onleaveimageViewing: function() {
 					this.write.top();
 					this.write.time();
-
+					console.log("[END] ImageViewing");
 					this.clock.clearCountdown("solution");
 
 					this.painter.hideImage();
@@ -715,7 +731,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					var results="",
 						that = this,
 						sk = this.sketchness;
-
+					console.log("[BEGIN] Leaderboard");
 					for (var i = 0; i < this.scores.lenght; i++) {
 						results += ":" + sk.players[this.scores[i].user].name + ":" + this.scores[i].points;
 					}
