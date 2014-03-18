@@ -192,6 +192,7 @@ public class GameMessages {
         return event;
     }
     
+    
     public static ObjectNode composeRoundBegin(String sketcher) {
           ObjectNode content = Json.newObject();
           content.put("sketcher", sketcher);

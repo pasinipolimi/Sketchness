@@ -28,7 +28,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			top: $("#topMessage"),
 			error: $("#onError"),
 			canvasMessage: $("#canvasMessage"),
-			warnTag: $("#warnTag"),
+			//warnTag: $("#warnTag"),
 			websocket: $('#paintWebSocket'),
 			chatContainer: $("#messages"),
 			chatInput: $("#talk"),
@@ -270,7 +270,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					console.log("[BEGIN] TagInsertion");
 					elements.main.addClass("sketcher");
 					this.write.top($.i18n.prop("asktagsketcher"));
-					this.write.warnTag($.i18n.prop("warnTag"));
+					//this.write.warnTag($.i18n.prop("warnTag"));
 					elements.skip.show();
 					elements.wordInput.show();
 					this.chat.disable();
@@ -295,11 +295,13 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
                         },
 						task: function(e, content) {
 							that.task(content.word);
+						},
+						skipTask: function(e, content) {
+							that.skipRound();
 						}
 					});
 
 					elements.skip.one("click", function() {
-						that.skipRound();
 						that.communicator.send("skip", {});
 					});
 
@@ -326,7 +328,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					console.log("[END] TagInsertion");
 					elements.main.removeClass("sketcher");
 					this.write.top();
-					this.write.warnTag();
+					//this.write.warnTag();
 					this.write.time();
 					elements.skip.hide();
 					elements.wordInput.hide();
@@ -336,7 +338,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					this.painter.hideImage();
 
-					this.communicator.off("image beginRound leave leaderboard task");
+					this.communicator.off("image beginRound leave leaderboard task skipTask");
 					elements.skip.off("click");
 					elements.wordInput.off("keypress");
 				},
@@ -443,11 +445,13 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						roundEnd: function(e, content) {
 						    sk.word = content.word;
 							that.endRound(content.word);
+						},
+						skipTask: function(e, content) {
+							that.skipRound();
 						}
 					});
 
 					elements.skip.on("click", function() {
-						that.skipRound();
 						that.communicator.send("skip", {});
 					});
 
@@ -565,7 +569,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.painter.hidePosition();
 					this.painter.hidePath();
 
-					this.communicator.off("image timer guess guessed score leave leaderboard roundEnd");
+					this.communicator.off("image timer guess guessed score leave leaderboard roundEnd skipTask");
 				},
 
 				/**
@@ -682,14 +686,15 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.clock.setCountdown("solution", this.constants.solutionTime * Time.second, Time.second, this.write.time.bind(this.write), this.nextRoundCall.bind(this));
 					console.log("[BEGIN] ImageViewing");
 					var that = this;
+					var elements = that.elements;
+					elements.skip.hide();
+					elements.endSegmentation.hide();
+					elements.hudArea.hide();
 
 					this.communicator.on({
 						image: function(e, content) {
 							that.painter.showImage(content.url, content.width, content.height);
 						},
-						//beginRound: function(e, content) {
-						//	that.beginRound(content.sketcher);
-						//},
 						leave: function(e, content) {
                             delete sk.players[content.user];
                             write.players(sk.players);

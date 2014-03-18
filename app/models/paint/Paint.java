@@ -101,6 +101,9 @@ public class Paint extends GameRoom {
                             case "loading":
                                 gameLoading();
                                 break;
+                            case "skip":
+                                skipTask();
+                                break;
                             case "roundBegin":
                                 gameStarted = true;
                                 roundBegin(event.get("content"));
@@ -434,6 +437,12 @@ public class Paint extends GameRoom {
     private void gameLoading() {
         for (Map.Entry<String, Painter> entry : painters.entrySet()) {
             entry.getValue().channel.write(GameMessages.composeLoading());
+        }
+    }
+    
+    private void skipTask() {
+        for (Map.Entry<String, Painter> entry : painters.entrySet()) {
+            entry.getValue().channel.write(GameMessages.composeSkip());
         }
     }
 

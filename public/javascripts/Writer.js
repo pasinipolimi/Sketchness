@@ -100,7 +100,7 @@ define(["Class", "Time", "jquery", "i18n"], function(Class, Time, $) {
 			 * Writes a message near the tag input field
 			 *
 			 * @param message :String The message to write
-			 */
+			 *
 			warnTag: function(message) {
 				var warnTag = this.elements.warnTag;
 				if(message) {
@@ -115,7 +115,7 @@ define(["Class", "Time", "jquery", "i18n"], function(Class, Time, $) {
 					warnTag.hide();
 					warnTag.off("click");
 				}
-			},
+			},*/
 
 			/**
 			 * Write the list of the opponents avatars

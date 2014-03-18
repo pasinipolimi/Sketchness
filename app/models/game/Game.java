@@ -789,11 +789,10 @@ public class Game extends GameRoom {
 
     private void skipTask() {        //private void skipTask(String kind) {
         CMS.postAction(sessionId, "skiptask", sketcherPainter.name, "");
-   //     GameBus.getInstance().publish(new SystemMessage(sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "skiptask"), roomChannel));
+        //GameBus.getInstance().publish(new GameEvent(GameMessages.composeSkip(), roomChannel));
         GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info,sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "skiptask")), roomChannel));
-    //    GameEvent timeEvent = new GameEvent(roomChannel, GameEventType.timerChange);
-    //    timeEvent.setObject(timerChange(0, CountdownTypes.valueOf(kind)));
-        //GameEvent timeEvent = new GameEvent(GameMessages.composeTimer(0),roomChannel);
+
+
         nextRound();
     }
 
@@ -817,12 +816,6 @@ public class Game extends GameRoom {
         }
     }
     
-    
-    
-    /***COPIED FROM CHAT****/
-    private void retrieveTask(ObjectNode task) {
-        currentGuess = task.get("tag").asText();
-    }
 
     /**
      * [works][not tested]
@@ -857,11 +850,6 @@ public class Game extends GameRoom {
                 }
             }
         }
-    }
-     private void handleAskTag(GameEvent message) {
-        askTagSketcher = message.getMessage();
-       // notifyAll(ChatKind.system, "Sketchness", Messages.get(LanguagePicker.retrieveLocale(), "asktag"));
-        askTag = true;
     }
 }
 
