@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -14,7 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpEntity;
@@ -60,22 +58,10 @@ public class CMS {
 			.getString("cmsUrl");
 	private final static String oauthConsumerKey = Play.application()
 			.configuration().getString("oauthConsumerKey");
-	private final static Set<String> ilioCollection = new HashSet<String>(
-			Arrays.asList("6210", "6224", "6225", "6226", "6234", "6237",
-					"6240", "6243", "6254", "6257", "6263", "6269", "6274",
-					"6276", "6282", "6283", "6287", "6292", "7619", "7620",
-					"7621", "7622", "7623", "7624", "7625", "7626", "7627",
-					"7628", "7629", "7630", "7631", "7634", "7635", "7637",
-					"7640", "7641", "7642", "7643", "7644", "7646", "7648",
-					"7649", "7650", "7651", "7652", "7653", "7654", "7656",
-					"7657", "7658", "7659", "7660", "7662", "7663", "7664",
-					"7665", "7666", "7667", "7668", "7669", "7670", "7672",
-					"7673", "7674", "7675", "7677", "7678", "7679", "7680",
-					"7681", "7683", "7684", "7685", "7686", "7687", "7688",
-					"7689", "7690", "7691", "7692", "7693", "7694", "7695",
-					"7696", "7697", "7698", "7699", "7700", "7701", "7702",
-					"7703", "7704", "7705", "7706", "7708", "7709", "7711",
-					"7712", "7713", "7714"));
+
+	private final static String collection = Play.application().configuration()
+			.getString("collection");
+
 	private static HashMap<String, Cancellable> runningThreads = new HashMap<String, Cancellable>();
 
 	public static void closeUTask(final Integer uTaskID, final Integer actionId) {
@@ -320,186 +306,60 @@ public class CMS {
 	 * on the requirements of our tasks such as completing tasks that have not
 	 * been already faced and so on. We will add this feature in the future.
 	 * 
+	 * @param maxRound
+	 * 
 	 */
 	public static void taskSetInitialization(
 			final HashSet<ObjectNode> priorityTaskHashSet,
-			final HashSet<ObjectNode> taskHashSet, final Room roomChannel)
-			throws Error, JSONException {
+			final HashSet<ObjectNode> taskHashSet, final Room roomChannel,
+			final Integer maxRound) throws Error, JSONException {
+
+		final int uploadedTasks = retrieveTasks(maxRound, priorityTaskHashSet,
+				roomChannel);
+
+		final int tasksToAdd = maxRound - uploadedTasks;
+		if (tasksToAdd > 0) {
+			retrieveImages(tasksToAdd, taskHashSet, roomChannel,
+					uploadedTasks > 0);
+		}
+
+		Logger.debug("Task init from CMS end");
+
+	}
+
+	private static void retrieveImages(final Integer tasksToAdd,
+			final HashSet<ObjectNode> taskHashSet, final Room roomChannel,
+			boolean taskSent) {
+
+		final JsonNode retrievedImagesOrdered;
+		// final ArrayList<JsonNode> retrievedImages;
+
+		// [TODO] Fail safe in case of not being able to retrieve the instances
 
 		final JsonReader jsonReader = new JsonReader();
-		JsonNode retrievedTasks;
-		JsonNode retrievedImagesOrdered;
-
-		boolean taskSent = false;
-
-		// [TODO] Fail safe in case of not being able to retrieve the instances
-		try {
-			Logger.debug("Requested task list to CMS");
-			retrievedTasks = jsonReader.readJsonArrayFromUrl(rootUrl
-					+ "/wsmc/task.json");
-			Logger.debug("Requested task list to CMS end");
-		} catch (final IllegalArgumentException e) {
-			throw new RuntimeException(
-					"[CMS] The request to the CMS is malformed");
-		}
-
-		// Fill the set of task to be performed with the task that has been
-		// explicitly declared
-
-		if (retrievedTasks != null) {
-			retrievedTasks = retrievedTasks.get("task");
-			for (JsonNode item : retrievedTasks) {
-				if (item.getElements().hasNext()) {
-					// If the task is still open
-					if (item.get("status").asInt() == 1) {
-						final String taskId = item.get("id").getTextValue();
-						final JsonNode uTasks = item.get("utask");
-						item = jsonReader.readJsonArrayFromUrl(rootUrl
-								+ "/wsmc/task/" + item.get("id").getTextValue()
-								+ ".json");
-						item = item.get("task");
-						Logger.debug("[CMS] Retrieved open task "
-								+ item.toString());
-						final String id = item.get("image").getElements()
-								.next().getElements().next().asText();
-						if (uTasks != null) {
-							// Retrieve the first uTask for the current task and
-							// assign it
-							for (JsonNode utask : uTasks) {
-								if (utask.getElements().hasNext()) {
-									if (utask.get("status").asInt() == 1) {
-										utask = jsonReader
-												.readJsonArrayFromUrl(rootUrl
-														+ "/wsmc/utask/"
-														+ utask.get("id")
-																.getTextValue()
-														+ ".json");
-										final JsonNode image = jsonReader
-												.readJsonArrayFromUrl(rootUrl
-														+ "/wsmc/image/" + id
-														+ ".json");
-										utask = utask.get("uTask");
-										final ObjectNode guessWord = Json
-												.newObject();
-										guessWord.put("type", "task");
-										guessWord.put("id", id);
-										// Change the task to assign based on
-										// the kind of task that has to be
-										// performed
-										// for now just tagging and segmentation
-										// are supported for the images.
-										switch (utask.get("taskType").asText()) {
-										case "tagging":
-											guessWord.put("tag",
-													chooseTag(null));
-											guessWord.put("lang",
-													LanguagePicker
-															.retrieveIsoCode());
-											guessWord.put("image", rootUrl
-													+ image.get("mediaLocator")
-															.asText());
-											guessWord.put("width",
-													image.get("width").asInt());
-											guessWord
-													.put("height",
-															image.get("height")
-																	.asInt());
-											guessWord.put("utaskid",
-													utask.get("id").asInt());
-											guessWord.put("taskid", taskId);
-											priorityTaskHashSet.add(guessWord);
-											if (!taskSent) {
-												taskSent = true;
-												sendTaskAcquired(roomChannel);
-											}
-											break;
-										case "segmentation":
-											HashSet<String> tags;
-											// Get all the segments that have
-											// been stored for the image
-											final JsonNode imageSegments = image
-													.get("descriptions");
-											if (imageSegments != null) {
-												Logger.debug("Chiamao la retrievetask io cms task");
-												tags = retrieveTags(imageSegments);
-												guessWord.put("tag",
-														chooseTag(tags));
-												guessWord
-														.put("lang",
-																LanguagePicker
-																		.retrieveIsoCode());
-												guessWord
-														.put("image",
-																rootUrl
-																		+ image.get(
-																				"mediaLocator")
-																				.asText());
-												guessWord.put("width", image
-														.get("width").asInt());
-												guessWord.put("height", image
-														.get("height").asInt());
-												guessWord.put("utaskid", utask
-														.get("id").asInt());
-												guessWord.put("taskid", taskId);
-												priorityTaskHashSet
-														.add(guessWord);
-												if (!taskSent) {
-													taskSent = true;
-													sendTaskAcquired(roomChannel);
-												}
-											}
-											break;
-										}
-										break;
-									}
-								}
-							}
-						} // There are no more uTasks left, close the task
-						else {
-							closeTask(Integer.parseInt(taskId));
-						}
-					}
-				}
-			}
-		}
-
-		ArrayList<JsonNode> retrievedImages;
-
-		// [TODO] Fail safe in case of not being able to retrieve the instances
 		try {
 			Logger.debug("Requested image list to CMS");
+			final HashMap<String, String> params = new HashMap<>();
+			params.put("collection", collection);
+			params.put("limit", tasksToAdd.toString());
+			// params.put("select", "id");
 			retrievedImagesOrdered = jsonReader.readJsonArrayFromUrl(rootUrl
-					+ "/wsmc/image/light.json");
+					+ "/wsmc/image.json", params);
 			Logger.debug("Requested image list to CMS end");
 		} catch (final IllegalArgumentException e) {
 			throw new RuntimeException(
 					"[CMS] The request to the CMS is malformed");
 		}
 
-		int i = 0;
-		retrievedImages = new ArrayList<>();
-
-		while (i < retrievedImagesOrdered.size()) {
-			retrievedImages.add(i, retrievedImagesOrdered.get(i));
-			i++;
-		}
-		final Long seed = System.nanoTime();
-		Collections.shuffle(retrievedImages, new Random(seed));
-
-		// For each image
-		for (final JsonNode item : retrievedImages) {
+		for (final JsonNode item : retrievedImagesOrdered) {
 			if (item.getElements().hasNext()) {
 				// Save information related to the image
 				final String id = item.get("id").asText();
 
-				if (!ilioCollection.contains(id)) {
-					// the image is not part of the collection
-					continue;
-				}
-
-				final String url = rootUrl + item.get("mediaLocator").asText();
-				final Integer width = item.get("width").asInt();
-				final Integer height = item.get("height").asInt();
+				// final String url = rootUrl +
+				// item.get("mediaLocator").asText();
+				// final Integer width = item.get("width").asInt();
+				// final Integer height = item.get("height").asInt();
 
 				// Get all the segments that have been stored for the image
 				final JsonNode imageSegments = item.get("descriptions");
@@ -513,24 +373,151 @@ public class CMS {
 					tags = retrieveTags(imageSegments);
 				}
 
-				// Add one tag among the ones that have been retrieved following
-				// a particular policy
-				guessWord.put("tag", chooseTag(tags));
-				guessWord.put("lang", LanguagePicker.retrieveIsoCode());
-				guessWord.put("image", url);
-				guessWord.put("width", width);
-				guessWord.put("height", height);
+				buildGuessWordSegment(guessWord, tags, item);
 				taskHashSet.add(guessWord);
 
 				if (!taskSent) {
 					taskSent = true;
-					Logger.debug("Adding new image and send task aquired " + id);
+					Logger.debug("Send task aquired for image:" + id
+							+ ", rooomChanel: " + roomChannel);
 					sendTaskAcquired(roomChannel);
 				}
 
 			}
 		}
-		Logger.debug("Task init from CMS end");
+
+	}
+
+	private static int retrieveTasks(final Integer maxRound,
+			final HashSet<ObjectNode> priorityTaskHashSet,
+			final Room roomChannel) {
+		boolean taskSent = false;
+
+		int uploadedTasks = 0;
+
+		JsonNode retrievedTasks = null;
+		final JsonReader jsonReader = new JsonReader();
+		try {
+			// TODO add id...
+			Logger.debug("Requested task list to CMS " + roomChannel);
+			final HashMap<String, String> params = new HashMap<>();
+			params.put("collection", collection);
+			params.put("limit", maxRound.toString());
+			params.put("open", "true");
+			final String url = rootUrl + "/wsmc/task.json";
+			retrievedTasks = jsonReader.readJsonArrayFromUrl(url, params);
+			Logger.debug("Requested task list to CMS end" + roomChannel);
+		} catch (final IllegalArgumentException e) {
+			throw new RuntimeException(
+					"[CMS] The request to the CMS is malformed");
+		}
+
+		// Fill the set of task to be performed with the task that has been
+		// explicitly declared
+
+		if (retrievedTasks != null) {
+			retrievedTasks = retrievedTasks.get("task");
+			for (final JsonNode item : retrievedTasks) {
+				if (item.getElements().hasNext()) {
+
+					final String taskId = item.get("id").getTextValue();
+					final JsonNode uTasks = item.get("utask");
+
+					final String imageId = item.get("image").getElements()
+							.next().getElements().next().asText();
+					final JsonNode image = jsonReader
+							.readJsonArrayFromUrl(rootUrl + "/wsmc/image/"
+									+ imageId + ".json");
+					if (uTasks != null) {
+						// Retrieve the first uTask for the current task and
+						// assign it
+						for (final JsonNode utask : uTasks) {
+							if (utask.getElements().hasNext()) {
+								// FIXME non necessario, ho gia tutto
+								// quello
+								// che mi serve
+
+								final ObjectNode guessWord = Json.newObject();
+								guessWord.put("type", "task");
+								guessWord.put("id", imageId);
+								// Change the task to assign based on
+								// the kind of task that has to be
+								// performed
+								// for now just tagging and segmentation
+								// are supported for the images.
+								switch (utask.get("taskType").asText()) {
+								case "tagging":
+									buildGuessWordTagging(guessWord, image,
+											utask, taskId);
+
+									priorityTaskHashSet.add(guessWord);
+									uploadedTasks++;
+									if (!taskSent) {
+										taskSent = true;
+										sendTaskAcquired(roomChannel);
+									}
+									break;
+								case "segmentation":
+									HashSet<String> tags;
+									// Get all the segments that have
+									// been stored for the image
+									final JsonNode imageSegments = image
+											.get("descriptions");
+									if (imageSegments != null) {
+										tags = retrieveTags(imageSegments);
+										buildGuessWordSegmentTask(guessWord,
+												tags, image, taskId, utask);
+
+										priorityTaskHashSet.add(guessWord);
+										uploadedTasks++;
+										if (!taskSent) {
+											taskSent = true;
+											sendTaskAcquired(roomChannel);
+										}
+									}
+									break;
+								}
+								break;
+							}
+						}
+					}
+
+				}
+			}
+		}
+		return uploadedTasks;
+	}
+
+	private static void buildGuessWordSegment(final ObjectNode guessWord,
+			final HashSet<String> tags, final JsonNode image) {
+		// Add one tag among the ones that have been retrieved following
+		// a particular policy
+		guessWord.put("tag", chooseTag(tags));
+		guessWord.put("lang", LanguagePicker.retrieveIsoCode());
+		guessWord.put("image", rootUrl + image.get("mediaLocator").asText());
+		guessWord.put("width", image.get("width").asInt());
+		guessWord.put("height", image.get("height").asInt());
+
+	}
+
+	private static void buildGuessWordSegmentTask(final ObjectNode guessWord,
+			final HashSet<String> tags, final JsonNode image,
+			final String taskId, final JsonNode utask) {
+		buildGuessWordSegment(guessWord, tags, image);
+		guessWord.put("utaskid", utask.get("id").asInt());
+		guessWord.put("taskid", taskId);
+
+	}
+
+	private static void buildGuessWordTagging(final ObjectNode guessWord,
+			final JsonNode image, final JsonNode utask, final String taskId) {
+		guessWord.put("tag", chooseTag(null));
+		guessWord.put("lang", LanguagePicker.retrieveIsoCode());
+		guessWord.put("image", rootUrl + image.get("mediaLocator").asText());
+		guessWord.put("width", image.get("width").asInt());
+		guessWord.put("height", image.get("height").asInt());
+		guessWord.put("utaskid", utask.get("id").asInt());
+		guessWord.put("taskid", taskId);
 
 	}
 

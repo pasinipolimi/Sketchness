@@ -1,6 +1,5 @@
 package models.game;
 
-import akka.actor.Cancellable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,7 +10,6 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 
 import models.Painter;
 import models.factory.GameRoom;
@@ -36,6 +34,7 @@ import utils.gamebus.GameMessages.GameEvent;
 import utils.gamebus.GameMessages.Room;
 import utils.gamebus.GameMessages.SystemMessage;
 import utils.gamemanager.GameManager;
+import akka.actor.Cancellable;
 
 /**
  * A chat room is an Actor.
@@ -607,17 +606,18 @@ public class Game extends GameRoom {
 		roundNumber = 0;
 		gameStarted = false;
 		playersVect = new CopyOnWriteArrayList<>();
-                CMS.cancelThread(roomChannel.getRoom());
-                while(CMS.getThread(roomChannel.getRoom())) {
-                    try {
-                        //Waiting for thread cancellation
-                        Thread.sleep(500);
-                        Logger.info("Waiting thread termination...");
-                    } catch (Exception ex) {
-                        Logger.error("Error while waiting thread termination");
-                    }
-                }
-		Cancellable init = Akka.system()
+		CMS.cancelThread(roomChannel.getRoom());
+		while (CMS.getThread(roomChannel.getRoom())) {
+			try {
+				// Waiting for thread cancellation
+				Thread.sleep(500);
+				Logger.info("Waiting thread termination...");
+			} catch (final Exception ex) {
+				Logger.error("Error while waiting thread termination");
+			}
+		}
+		final Cancellable init = Akka
+				.system()
 				.scheduler()
 				.scheduleOnce(Duration.create(1000, TimeUnit.MILLISECONDS),
 						new Runnable() {
@@ -633,7 +633,8 @@ public class Game extends GameRoom {
 										if (!fixGroundTruth)
 											CMS.taskSetInitialization(
 													priorityTaskHashSet,
-													taskHashSet, roomChannel);
+													taskHashSet, roomChannel,
+													maxRound);
 										else
 											CMS.fixGroundTruth(groundTruthId,
 													priorityTaskHashSet,
@@ -645,12 +646,14 @@ public class Game extends GameRoom {
 								}
 								if (trials >= 5) {
 									killActor();
-									throw new RuntimeException(
-											"[GAME]: Impossible to retrieve the set of image relevant for this game, aborting");
+									LoggerUtils
+											.error("GAME",
+													"Impossible to retrieve the set of image relevant for this game, aborting");
+
 								}
 							}
 						}, Akka.system().dispatcher());
-                CMS.addInitializationThread(roomChannel.getRoom(), init);
+		CMS.addInitializationThread(roomChannel.getRoom(), init);
 		Logger.info("[GAME] New game started");
 	}
 
