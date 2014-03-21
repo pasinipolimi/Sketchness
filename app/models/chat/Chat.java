@@ -73,16 +73,21 @@ public class Chat extends GameRoom {
 
     private void handleJoin(Join message) {
         // Check if this username is free.
-        if (playersMap.containsKey(message.getUsername())) {
-            getSender().tell(Messages.get(LanguagePicker.retrieveLocale(), "usernameused"), this.getSelf());
-        } else {
-            playersMap.put(message.getUsername(), message.getChannel());
-            ObjectNode event = GameMessages.composeJoin(message.getUsername());
-            getSender().tell("OK", this.getSelf());
-            notifySystem(LogLevel.info,message.getUsername()+" "+Messages.get(LanguagePicker.retrieveLocale(), "join"));
-            notifyMemberChange(event);
-            notifyMemberList(event);
-            Logger.debug("[CHAT] added player " + message.getUsername());
+        try {
+            if (playersMap.containsKey(message.getUsername())) {
+                getSender().tell(Messages.get(LanguagePicker.retrieveLocale(), "usernameused"), this.getSelf());
+            } else {
+                playersMap.put(message.getUsername(), message.getChannel());
+                ObjectNode event = GameMessages.composeJoin(message.getUsername());
+                getSender().tell("OK", this.getSelf());
+                notifySystem(LogLevel.info,message.getUsername()+" "+Messages.get(LanguagePicker.retrieveLocale(), "join"));
+                notifyMemberChange(event);
+                notifyMemberList(event);
+                Logger.debug("[CHAT] added player " + message.getUsername());
+            }
+        }
+        catch(Exception e) {
+            Logger.error("[CHAT] "+e.toString());
         }
     }
     
@@ -91,17 +96,22 @@ public class Chat extends GameRoom {
     
 
     private void handleQuitter(JsonNode jquitter) throws InterruptedException {
-        String quitter = jquitter.get("content").get("user").asText();
-        for (Map.Entry<String, WebSocket.Out<JsonNode>> entry : playersMap.entrySet()) {
-            if (entry.getKey().equalsIgnoreCase(quitter)) {
-                //Close the websocket
-                entry.getValue().close();
-                playersMap.remove(quitter);
-                JsonNode event = GameMessages.composeQuit(quitter);
-                notifySystem(LogLevel.info,quitter+" "+Messages.get(LanguagePicker.retrieveLocale(), "quit"));
-                notifyMemberChange(event);
-                Logger.debug("[CHAT] " + quitter + " has disconnected.");
+        try {
+            String quitter = jquitter.get("content").get("user").asText();
+            for (Map.Entry<String, WebSocket.Out<JsonNode>> entry : playersMap.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase(quitter)) {
+                    //Close the websocket
+                    entry.getValue().close();
+                    playersMap.remove(quitter);
+                    JsonNode event = GameMessages.composeQuit(quitter);
+                    notifySystem(LogLevel.info,quitter+" "+Messages.get(LanguagePicker.retrieveLocale(), "quit"));
+                    notifyMemberChange(event);
+                    Logger.debug("[CHAT] " + quitter + " has disconnected.");
+                }
             }
+        }
+        catch(Exception e) {
+            Logger.error("[CHAT] "+e.toString());
         }
     }
 

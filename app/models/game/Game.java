@@ -1,7 +1,6 @@
 package models.game;
 
 import akka.actor.Cancellable;
-import play.libs.*;
 import play.libs.Akka;
 import play.libs.F.*;
 import play.i18n.Messages;
@@ -20,7 +19,6 @@ import org.codehaus.jackson.node.*;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import models.Painter;
 import models.factory.GameRoom;
 import org.codehaus.jackson.JsonNode;
@@ -64,7 +62,6 @@ public class Game extends GameRoom {
     private Integer numberGuessed = 0;   //Number of players that have guessed for a specific round
     private Painter sketcherPainter;  //The current sketcher
     //System variables
-    private Integer modules = 2; //Number of modules available in the game (chat/paint)
     private Room roomChannel;  //Name of the room
     private Boolean taskAcquired = false;
     // Members of this room.
@@ -81,9 +78,9 @@ public class Game extends GameRoom {
     private HashSet<Integer> usedUTasks = new HashSet<>();
     //We should not use more times the same tag
     private HashSet<String> usedTags = new HashSet<>();
-    private Integer uTaskID = null;
     private ObjectNode taskImage;
     private Integer sessionId;
+    private Integer uTaskID;
     private final static Integer maxSinglePlayer = Play.application().configuration().getInt("maxSinglePlayer");
     
     String currentGuess;
@@ -432,16 +429,10 @@ public class Game extends GameRoom {
         String word = guessObject.get("tag").asText();
         if (ask) {
             areWeAsking = true;
-        //    GameEvent task = new GameEvent(sketcherPainter.name, roomChannel, GameEventType.askTag);
-        //    task.setObject(taskImage);
             GameEvent task = new GameEvent(GameMessages.composeTag(sketcherPainter.name,id,medialocator,width,height), roomChannel);
             GameBus.getInstance().publish(task);
         } else {
             areWeAsking = false;
-     //       GameBus.getInstance().publish(new GameEvent(sketcherPainter.name, roomChannel, GameEventType.nextRound));
-      //      GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundBegin(sketcherPainter.name),roomChannel));
-      //      GameEvent task = new GameEvent(sketcherPainter.name, roomChannel, GameEventType.task);
-      //      task.setObject(taskImage);
             GameEvent task = new GameEvent(GameMessages.composeTask(sketcherPainter.name,id,medialocator,word, width, height), roomChannel);
             GameBus.getInstance().publish(task);
         }
@@ -471,10 +462,7 @@ public class Game extends GameRoom {
             //If we have received a response from all the active players in the game, end the round
             if ((missingPlayers - disconnectedPlayers) == 0) {
                 //Before calling the new round, show the solution to all the players and end the round
-                if (areWeAsking == false) {
-                 //   showImages();
-                 //   shownImages = true;
-                  //  missingPlayers = requiredPlayers;
+                if ((areWeAsking == false && shownImages == true) || requiredPlayers==1 || guessedWord) {
                     //If at least one player has guessed, it means that the drawn contour is a good one
                     if (guessedWord) {
             //            GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.saveTraces));
@@ -482,30 +470,34 @@ public class Game extends GameRoom {
                     }
                     
                     areWeAsking = false;
+                    shownImages = false;
                     //Start a new round
-                    String id = taskImage.get("id").asText();
-                    String medialocator = taskImage.get("image").asText();
-                    int width = taskImage.get("width").asInt();
-                    int height = taskImage.get("height").asInt();
-                    GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText(),id,medialocator,width,height), roomChannel));
                     missingPlayers = requiredPlayers;
                     nextRound();
 
                 } //If the solution has been given or a tag has not been chosen, start a new round
                 else {
                     if (areWeAsking) {
-            //            GameBus.getInstance().publish(new SystemMessage(sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "notag"), roomChannel));
                         GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info,sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "notag")), roomChannel));
+                        //Start a new round
+                        String id = taskImage.get("id").asText();
+                        String medialocator = taskImage.get("image").asText();
+                        int width = taskImage.get("width").asInt();
+                        int height = taskImage.get("height").asInt();
+                        GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText(), id, medialocator, width, height), roomChannel));
+                        nextRound();
+                        missingPlayers = requiredPlayers;
                     }
                     areWeAsking = false;
-                    //Start a new round
-                    String id = taskImage.get("id").asText();
-                    String medialocator = taskImage.get("image").asText();
-                    int width = taskImage.get("width").asInt();
-                    int height = taskImage.get("height").asInt();
-                    GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText(), id, medialocator, width, height), roomChannel));
-                    nextRound();
-                    missingPlayers = requiredPlayers;
+                    if(!shownImages) {
+                        shownImages=true;
+                        String id = taskImage.get("id").asText();
+                        String medialocator = taskImage.get("image").asText();
+                        int width = taskImage.get("width").asInt();
+                        int height = taskImage.get("height").asInt();
+                        GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText(),id,medialocator,width,height), roomChannel));
+                        missingPlayers = requiredPlayers;
+                    }
                 }
             }
         }
@@ -791,8 +783,6 @@ public class Game extends GameRoom {
         CMS.postAction(sessionId, "skiptask", sketcherPainter.name, "");
         //GameBus.getInstance().publish(new GameEvent(GameMessages.composeSkip(), roomChannel));
         GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info,sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "skiptask")), roomChannel));
-
-
         nextRound();
     }
 

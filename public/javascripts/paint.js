@@ -647,6 +647,9 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
                         },
 						roundEnd: function(e, content) {
 							that.endRound(content.word);
+						},
+						skipTask: function(e, content) {
+							that.skipRound();
 						}
 					});
 				},
@@ -665,7 +668,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.painter.hidePosition();
 					this.painter.hidePath();
 
-					this.communicator.off("timer change beginPath point endPath guess guessed score leave leaderboard roundEnd");
+					this.communicator.off("timer change beginPath point endPath guess guessed score leave leaderboard roundEnd skipTask");
 				},
 
 				/**
@@ -720,7 +723,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				},
 
 				/**
-				 * Transition method between image viewing and leatherboard
+				 * Transition method between image viewing and leaderboard
 				 * which stores the players scores.
 				 *
 				 * @param scores :String The scores
@@ -737,7 +740,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						that = this,
 						sk = this.sketchness;
 					console.log("[BEGIN] Leaderboard");
-					for (var i = 0; i < this.scores.lenght; i++) {
+					for (var i = 0; i < this.scores.length; i++) {
 						results += ":" + sk.players[this.scores[i].user].name + ":" + this.scores[i].points;
 					}
 
@@ -749,6 +752,19 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							that.write.error("Error!");
 						}
 					});
+				},
+				
+				onenterwaitRole: function() {
+					var that = this;
+					this.communicator.on({
+						leaderboard: function(e, content) {
+							that.quit(content);
+						}
+					});
+				},
+				
+				onleavewaitRole: function() {
+					this.communicator.off("leaderboard");
 				}
 			}
 		});
@@ -768,7 +784,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				{ name: "task", from: ["Sketcher", "tagInsertion"], to: "taskDrawing" },
 				{ name: "task", from: ["Guesser", "tagWait"], to: "taskGuessing" },
 				{ name: "endRound", from: ["taskGuessing", "taskDrawing"], to: "imageViewing" },
-				{ name: "quit", from: "imageViewing", to: "leaderboard" }
+				{ name: "quit", from: ["imageViewing", "tagInsertion", "taskDrawing", "taskGuessing", "tagWait", "waitRole"], to: "leaderboard" },
+				{ name: "toLobby", from: "leaderboard", to: "lobby" }
 			]
 		});
 

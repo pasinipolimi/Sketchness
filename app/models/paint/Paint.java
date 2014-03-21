@@ -366,7 +366,8 @@ public class Paint extends GameRoom {
     }
 
     private void notifyLeaderboard(JsonNode task) throws Exception {
-        //TODO
+        ObjectNode toSend = (ObjectNode) task;
+        notifyAll(GameMessages.composeLeaderboard(toSend));
     }
 
     private void notifyScore(JsonNode task) throws Exception{
