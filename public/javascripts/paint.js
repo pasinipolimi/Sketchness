@@ -740,11 +740,11 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						that = this,
 						sk = this.sketchness;
 					console.log("[BEGIN] Leaderboard");
-					for (var i = 0; i < this.scores.length; i++) {
-						results += ":" + sk.players[this.scores[i].user].name + ":" + this.scores[i].points;
+					for (var i = 0; i < this.scores.playerList.length; i++) {
+						results += ":" + this.scores.playerList[i].name + ":" + this.scores.playerList[i].points;
 					}
 
-					this.jsRoutes.controllers.Sketchness.leaderboard(sk.players[sk.myself].name, results).ajax({
+					jsRoutes.controllers.Sketchness.leaderboard(sk.players[sk.myself].name, results).ajax({
 						success: function(data) {
 							that.elements.main.html(data);
 						},
