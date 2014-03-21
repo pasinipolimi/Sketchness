@@ -131,9 +131,9 @@ public class Sketchness extends Controller {
 			@Override
 			public void onReady(final In<JsonNode> in, final Out<JsonNode> out) {
 				try {
-                    GameFactory.createGame(username, roomName, players, in, out);
+                                    GameFactory.createGame(username, roomName, players, in, out);
 				} catch (final Exception ex) {
-					LoggerUtils.error("PAINT", ex);
+					LoggerUtils.error("GAME", ex);
 				}
 			}
 		};

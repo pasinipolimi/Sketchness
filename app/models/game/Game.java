@@ -129,6 +129,7 @@ public class Game extends GameRoom {
                         case "guessed": guessed(event.get("content").get("user").asText());break;
                         case "guessAttempt": handleTalk(event);break;
                         case "tag": tagReceived(event.get("content").get("word").asText());break;
+                        case "endSegmentation": endSegmentation();break;
                         // break point between working and doing
                         case "timer":
                             playerTimeExpired(event.get("content").get("user").asText());
@@ -267,6 +268,12 @@ public class Game extends GameRoom {
             }
         }
         return guessObject;
+    }
+    
+    
+    private void endSegmentation() {
+         GameBus.getInstance().publish(new GameEvent(GameMessages.composeSaveTraces(), roomChannel));
+         nextRound();
     }
 
     /*
@@ -452,7 +459,7 @@ public class Game extends GameRoom {
             //We are still missing the end response from some players
             //[TODO] POSSIBLE EXPLOIT
             if (missingPlayers > 0) {
-                for (Iterator<Painter> it = playersVect.iterator(); it.hasNext();) {
+                for(Iterator<Painter> it = playersVect.iterator(); it.hasNext();) {
                     Painter painter = it.next();
                     if (painter.name.equals(name)) {
                         missingPlayers--;
@@ -479,17 +486,12 @@ public class Game extends GameRoom {
                 else {
                     if (areWeAsking) {
                         GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info,sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "notag")), roomChannel));
-                        //Start a new round
-                        String id = taskImage.get("id").asText();
-                        String medialocator = taskImage.get("image").asText();
-                        int width = taskImage.get("width").asInt();
-                        int height = taskImage.get("height").asInt();
-                        GameBus.getInstance().publish(new GameEvent(GameMessages.composeRoundEnd(taskImage.get("tag").asText(), id, medialocator, width, height), roomChannel));
-                        nextRound();
+                        GameBus.getInstance().publish(new GameEvent(GameMessages.composeNoTag(), roomChannel));
                         missingPlayers = requiredPlayers;
+                        areWeAsking = false;
+                        nextRound();
                     }
-                    areWeAsking = false;
-                    if(!shownImages) {
+                    else if(!shownImages) {
                         shownImages=true;
                         String id = taskImage.get("id").asText();
                         String medialocator = taskImage.get("image").asText();
@@ -511,17 +513,7 @@ public class Game extends GameRoom {
         roundNumber = 0;
         gameStarted = false;
         playersVect = new CopyOnWriteArrayList<>();
-        CMS.cancelThread(roomChannel.getRoom());
-        while(CMS.getThread(roomChannel.getRoom())) {
-            try {
-                //Waiting for thread cancellation
-                Thread.sleep(500);
-                    Logger.info("Waiting thread termination...");
-            } catch (Exception ex) {
-                    Logger.error("Error while waiting thread termination");
-                }
-        }
-		Cancellable init = Akka.system()
+	Cancellable init = Akka.system()
 				.scheduler()
 				.scheduleOnce(Duration.create(1000, TimeUnit.MILLISECONDS),
                 new Runnable() {
@@ -694,6 +686,7 @@ public class Game extends GameRoom {
 
     private void gameEnded() {
         //Close the gaming session
+        CMS.cancelThread(roomChannel.getRoom());
         if (sessionId != null) {
             CMS.closeSession(sessionId);
         }
@@ -783,6 +776,10 @@ public class Game extends GameRoom {
         CMS.postAction(sessionId, "skiptask", sketcherPainter.name, "");
         //GameBus.getInstance().publish(new GameEvent(GameMessages.composeSkip(), roomChannel));
         GameBus.getInstance().publish(new GameEvent(GameMessages.composeLogMessage(LogLevel.info,sketcherPainter.name + " " + Messages.get(LanguagePicker.retrieveLocale(), "skiptask")), roomChannel));
+        nextRound();
+    }
+    
+    private void callNextRound() {
         nextRound();
     }
 

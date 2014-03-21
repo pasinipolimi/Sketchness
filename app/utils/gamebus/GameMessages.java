@@ -152,6 +152,12 @@ public class GameMessages {
         ObjectNode event = composeJsonMessage("matchEnd",content);
         return event;
     }
+    
+    public static ObjectNode composeNoTag() {
+        ObjectNode content = Json.newObject();
+        ObjectNode event = composeJsonMessage("noTag",content);
+        return event;
+    }
 
     public static ObjectNode composeMatchIfo(String id, String roomName, Integer currentPlayers, Integer maxPlayers, Boolean visible) {
         ObjectNode content = Json.newObject();
