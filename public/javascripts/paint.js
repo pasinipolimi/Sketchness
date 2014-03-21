@@ -766,6 +766,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				
 				onenterwaitRole: function() {
 					var that = this;
+					console.log("[BEGIN] EnterWaitRole");
 					that.painter.hidePath();
 					elements.endSegmentation.hide();
 					elements.skip.hide();
@@ -777,6 +778,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				},
 				
 				onleavewaitRole: function() {
+					console.log("[END] LeaveWaitRole");
 					this.communicator.off("leaderboard");
 				}
 			}

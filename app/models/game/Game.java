@@ -779,12 +779,6 @@ public class Game extends GameRoom {
         nextRound();
     }
     
-    private void callNextRound() {
-        nextRound();
-    }
-
-
-
     private void tagReceived(String word){
         taskImage.remove("tag");
         taskImage.put("tag", word);
