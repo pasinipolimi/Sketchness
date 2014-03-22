@@ -58,7 +58,13 @@ define(["Class", "Time", "jquery", "i18n"], function(Class, Time, $) {
 			 * @param red :String The text of the additional red message
 			 */
 			top: function(text, red) {
-				var html = "<font size='5'><b>" + text;
+				var html = "";
+				if(text !== undefined) {
+					html = "<font size='5'><b>" + text;
+				}
+				else {
+					html = "<font size='5'><b>";
+				}
 				if(red !== undefined) {
 					html += "<font color='red'>" + red + "</font>";
 				}

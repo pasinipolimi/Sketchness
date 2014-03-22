@@ -613,20 +613,10 @@ public class Game extends GameRoom {
                 numberGuessed++;
                 painter.setPoints(painter.getPoints() + guesserPointsRemaining);
                 painter.setCorrectGuess();
-
-                //Send the updated information to the other modules
-       //         ObjectNode guesserJson = Json.newObject();
-       //         guesserJson.put("type", "points");
-       //         guesserJson.put("name", guesser);
-       //         guesserJson.put("points", guesserPointsRemaining);
-       //         GameEvent eventGuesser = new GameEvent(guesser, roomChannel, GameEventType.points);
-       //         eventGuesser.setObject(guesserJson);
+                
                 GameEvent eventGuesser = new GameEvent(GameMessages.composeScore(guesser, guesserPointsRemaining),roomChannel);
                 GameBus.getInstance().publish(eventGuesser);
 
-                //Send also the image to be shown
-       //         eventGuesser = new GameEvent(guesser, roomChannel, GameEventType.guessedObject);
-       //         eventGuesser.setObject(guessObject);
                 id = guessObject.get("id").asText();
                 medialocator = guessObject.get("image").asText();
                 width = guessObject.get("width").asInt();
@@ -638,14 +628,6 @@ public class Game extends GameRoom {
                     //Assign the points to the sketcher. Has someone guessed for this round? If not, assign maximum points, if so assign the minimum for each guess
                     sketcherPointsRemaining = (guesserPointsRemaining == maxGuesserPointsRemaining) ? maxSketcherPointsRemaining : minSketcherPointsRemaining;
                     sketcherPainter.setPoints(sketcherPainter.getPoints() + sketcherPointsRemaining);
-
-                    //Send the updated information to the other modules
-          //          ObjectNode sketcherJson = Json.newObject();
-          //          sketcherJson.put("type", "points");
-          //          sketcherJson.put("name", sketcherPainter.name);
-          //          sketcherJson.put("points", sketcherPointsRemaining);
-          //          GameEvent eventSketcher = new GameEvent(sketcherPainter.name, roomChannel, GameEventType.points);
-          //          eventSketcher.setObject(sketcherJson);
                     GameEvent eventSketcher = new GameEvent(GameMessages.composeScore(sketcherPainter.name, sketcherPointsRemaining),roomChannel);
                     GameBus.getInstance().publish(eventSketcher);
                 }
