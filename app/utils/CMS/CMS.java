@@ -525,12 +525,8 @@ public class CMS {
 	 * Inform the game that at least one task is ready and we can start the game
 	 */
 	private static void sendTaskAcquired(final Room roomChannel) {
-
 		Logger.debug("CMS sends task aquired... ");
-		final GameMessages.GameEvent taskAcquired = new GameMessages.GameEvent(
-				roomChannel, GameEventType.taskAcquired);
-		GameBus.getInstance().publish(taskAcquired);
-
+		GameBus.getInstance().publish(new GameMessages.GameEvent(GameMessages.composeTaskAcquired(),roomChannel));
 	}
 
 	public static HashSet<String> retrieveTags(JsonNode imageSegments) {

@@ -163,6 +163,7 @@ public class Game extends GameRoom {
                 Logger.error("[GAME] Failed to retrieve Task Image, retrying.");
                 trials++;
                 if (trials >= 5) {
+                    gameEnded();
                     throw new Error("[GAME] Failed to retrieve Task Image, aborting");
                 }
             }
@@ -170,7 +171,7 @@ public class Game extends GameRoom {
 
         return item;
     }
-    public static Integer generateRandomItem(int size){
+    public Integer generateRandomItem(int size){
         Integer item;
         byte trials = 0;
         do {
@@ -181,6 +182,7 @@ public class Game extends GameRoom {
                 Logger.error("[GAME] Failed to retrieve Task Image, retrying.");
                 trials++;
                 if (trials >= 5) {
+                    gameEnded();
                     throw new Error("[GAME] Failed to retrieve Task Image, aborting");
                 }
             }
@@ -525,7 +527,7 @@ public class Game extends GameRoom {
                             try {
                                 trials++;
                                 if(!fixGroundTruth)
-                                    CMS.taskSetInitialization(priorityTaskHashSet, taskHashSet, roomChannel);
+                                    CMS.taskSetInitialization(priorityTaskHashSet, taskHashSet, roomChannel,maxRound);
                                 else
                                     CMS.fixGroundTruth(groundTruthId, priorityTaskHashSet, taskHashSet, roomChannel);
                                 completed = true;
