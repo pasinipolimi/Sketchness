@@ -16,7 +16,6 @@ import play.Logger;
 
 import org.codehaus.jackson.node.*;
 
-import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import models.Painter;
@@ -76,8 +75,6 @@ public class Game extends GameRoom {
     //We should not assign the same uTask to the same match, keep a list of the 
     //uTasks that has been already used
     private HashSet<Integer> usedUTasks = new HashSet<>();
-    //We should not use more times the same tag
-    private HashSet<String> usedTags = new HashSet<>();
     private ObjectNode taskImage;
     private Integer sessionId;
     private Integer uTaskID;
@@ -104,16 +101,14 @@ public class Game extends GameRoom {
                 requiredPlayers = ((Room) message).getRequiredPlayers();
                 //In the initial idea of single player, give 50 images to the 
                 //player that is segmenting
-                if (requiredPlayers == 1) {
-                maxRound = maxSinglePlayer;
-                }
+                if (requiredPlayers == 1) 
+                    maxRound = maxSinglePlayer;
                 missingPlayers = requiredPlayers;
                 newGameSetup();
                 Logger.info("[GAME] " + roomChannel.getRoom() + " created.");
             }
              if (message instanceof Join) {
                 playerJoin(((Join) message).getUsername());
-          //      publishLobbyEvent();     //publishLobbyEvent(GameEventType.matchEnd);
             }
             else if (message instanceof GameEvent) {
                 JsonNode event = ((GameEvent) message).getJson();
@@ -151,45 +146,6 @@ public class Game extends GameRoom {
           LoggerUtils.error("[GAME]:", e);
       }
     }
-    
-    public Integer generateRandomItem(int i, int size){
-        Integer item;
-        byte trials = 0;
-        do {
-            try {
-                item = new Random().nextInt(size);
-            } catch (IllegalArgumentException ex) {
-                item = null;
-                Logger.error("[GAME] Failed to retrieve Task Image, retrying.");
-                trials++;
-                if (trials >= 5) {
-                    gameEnded();
-                    throw new Error("[GAME] Failed to retrieve Task Image, aborting");
-                }
-            }
-        } while ((item == null)||(item == i));
-
-        return item;
-    }
-    public Integer generateRandomItem(int size){
-        Integer item;
-        byte trials = 0;
-        do {
-            try {
-                item = new Random().nextInt(size);
-            } catch (IllegalArgumentException ex) {
-                item = null;
-                Logger.error("[GAME] Failed to retrieve Task Image, retrying.");
-                trials++;
-                if (trials >= 5) {
-                    gameEnded();
-                    throw new Error("[GAME] Failed to retrieve Task Image, aborting");
-                }
-            }
-        } while (item == null);
-
-        return item;
-    }
 
     /*
      * Retrieves one of the images that has been stored to be segmented at random
@@ -202,72 +158,31 @@ public class Game extends GameRoom {
         uTaskID = null;
         //If we have task prioritized, then use them first
         while (priorityTaskHashSet.size() > 0 && guessObject == null) {
-            int size = priorityTaskHashSet.size();
-            Integer item = generateRandomItem(size);
-            int i = 0;
             Iterator<ObjectNode> it2 = priorityTaskHashSet.iterator();
             while (it2.hasNext()) {
                 ObjectNode obj = it2.next();
-                if (i == item) {
-                    usedTags.add(obj.get("tag").asText());
-                    guessObject = obj;
-                    Integer task = guessObject.get("taskid").asInt();
-                    if (usedUTasks.contains(task)) {
-                        priorityTaskHashSet.remove(guessObject);
-                        guessObject = null;
-                    } else {
-                        uTaskID = guessObject.get("utaskid").asInt();
-                        usedUTasks.add(task);
-                    }
-                    break;
+                guessObject = obj;
+                Integer task = guessObject.get("taskid").asInt();
+                if (usedUTasks.contains(task)) {
+                    priorityTaskHashSet.remove(guessObject);
+                    guessObject = null;
+                } else {
+                    uTaskID = guessObject.get("utaskid").asInt();
+                    usedUTasks.add(task);
                 }
-                i++;
+                break;
             }
             if (guessObject != null) {
                 priorityTaskHashSet.remove(guessObject);
             }
         }
         if (guessObject == null) {
-            int size= taskHashSet.size();
-            Integer item;
-            int startingSize = size;
-            item = generateRandomItem(size);
-            HashSet<ObjectNode> tmpTaskHashSet = new HashSet<>();
-            if (item != null) {
-                int i = 0;
-                int iter = 0;
-                Iterator<ObjectNode> it = taskHashSet.iterator();
-                while (it.hasNext()) {
-                    ObjectNode obj = it.next();
-                    if (i == item) {
-                        if(!usedTags.contains(obj.get("tag").asText())|| requiredPlayers == 1){
-                            guessObject = obj;
-                            usedTags.add(obj.get("tag").asText());
-                            break;
-                        }
-                        else if(iter == startingSize){
-                            Iterator<ObjectNode> tmpIt = tmpTaskHashSet.iterator();
-                            if(tmpIt.hasNext()){
-                                guessObject = tmpIt.next();
-                            }
-                        }
-                        else{
-                            tmpTaskHashSet.add(obj);
-                            iter++;
-                            taskHashSet.remove(obj);
-                            size = taskHashSet.size();
-                            item = generateRandomItem(i,size);
-                            i= 0;
-                            it = taskHashSet.iterator();
-                            continue;
-                        }
-                    }
-                    i = i + 1;
-                }
-                taskHashSet.remove(guessObject);
-            } else {
-                guessObject = null;
+            Iterator<ObjectNode> it = taskHashSet.iterator();
+            while (it.hasNext()) {
+                ObjectNode obj = it.next();
+                guessObject = obj;
             }
+            taskHashSet.remove(guessObject);
         }
         return guessObject;
     }
