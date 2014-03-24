@@ -120,6 +120,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						sk = this.sketchness;
 
 					write.top($.i18n.prop('waiting'));
+					console.log("[BEGIN] PlayersWait");
 
 					this.communicator.on({
 						join: function(e, content) {
@@ -137,6 +138,9 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						},
 						loading: function() {
 							that.load();
+						},
+						roundBegin: function(e, content) {
+							that.beginRound(content.sketcher);
 						}
 					});
 				},
@@ -789,9 +793,9 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 			events: [
 				{ name: "startup", from: "none", to: "playersWait" },
-				{ name: "load", from: "playersWait", to: "loading" },
-				{ name: "beSketcher", from: ["loading", "waitRole", "tagInsertion", "tagWait"], to: "Sketcher" },
-				{ name: "beGuesser", from: ["loading", "waitRole", "tagInsertion", "tagWait"], to: "Guesser" },
+				{ name: "load", from: ["none", "playersWait"], to: "loading" },
+				{ name: "beSketcher", from: ["loading", "playersWait", "waitRole", "tagInsertion", "tagWait"], to: "Sketcher" },
+				{ name: "beGuesser", from: ["loading", "playersWait", "waitRole", "tagInsertion", "tagWait"], to: "Guesser" },
 				{ name: "nextRound", from: ["imageViewing", "taskDrawing",  "tagInsertion", "tagWait"], to: "waitRole"},
 				{ name: "skipRound", from: ["taskGuessing", "taskDrawing"], to: "waitRole" },
 				{ name: "tag", from: "Sketcher", to: "tagInsertion" },
