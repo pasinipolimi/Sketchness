@@ -490,11 +490,37 @@ table.gameList th, table.gameList td {
 	width:116px;height:45px;background: url("../images/UI/game/game.png") no-repeat -182px -1200px;
 }
 
+#pen {
+	background: url("../images/UI/controls/pencil.png") no-repeat;
+	height: 66px;
+	left: 3px;
+	position: absolute;
+	border-width: 0px;
+	top: 132px;
+	width: 66px;
+	background-size: cover;
+}
+
+#eraser {
+	background: url("../images/UI/controls/eraserD.png") no-repeat;
+	height: 66px;
+	left: 3px;
+	position: absolute;
+	border-width: 0px;
+	top: 203px;
+	width: 66px;
+	background-size: cover;
+}
+
 #wordInput {
 	display: none;
 	position: absolute;
 	top: 530px;
 	left: 235px;
+}
+
+#size {
+	height: 200px;
 }
 
 #join {

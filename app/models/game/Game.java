@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import models.Painter;
 import models.factory.GameRoom;
 import org.codehaus.jackson.JsonNode;
+import org.json.JSONException;
 import play.Play;
 import play.db.DB;
 import scala.concurrent.duration.Duration;
@@ -451,8 +452,8 @@ public class Game extends GameRoom {
                             }
                         }
                         if (trials >= 5) {
-                            killActor();
-                            throw new RuntimeException("[GAME] Impossible to retrieve the set of image relevant for this game, aborting");
+                            gameEnded();
+                            LoggerUtils.error("GAME", "[GAME] Impossible to retrieve the set of image relevant for this game, aborting");
                         }
                     }
                 },Akka.system().dispatcher());
@@ -589,12 +590,9 @@ public class Game extends GameRoom {
         if (sessionId != null) {
             CMS.closeSession(sessionId);
         }
-  //      GameEvent endEvent = new GameEvent(roomChannel, GameEventType.leaderboard);
-  //      endEvent.setObject(compileLeaderboard());
+
         GameEvent endEvent = new GameEvent(GameMessages.composeLeaderboard(compileLeaderboard()),roomChannel);
         GameBus.getInstance().publish(endEvent);
-  //      GameBus.getInstance().publish(new GameEvent(roomChannel, GameEventType.matchEnd));
-  //      publishLobbyEvent();      //publishLobbyEvent(GameEventType.matchEnd);
 
         Painter[] sorted = playersVect.toArray(new Painter[0]);
         Connection connection = null;

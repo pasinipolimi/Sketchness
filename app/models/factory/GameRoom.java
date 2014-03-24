@@ -29,6 +29,7 @@ public abstract class GameRoom extends UntypedActor {
 	 * Function called by an actor in order to kill himself
 	 */
 	protected void killActor() {
+            try {
 		final ActorRef me = this.getContext().self();
 		if (!me.path().toString().endsWith("lobby")) {
 			me.tell(PoisonPill.getInstance(), null);
@@ -36,5 +37,9 @@ public abstract class GameRoom extends UntypedActor {
 			Logger.info("[" + roomType.getName() + "]: killed room "
 					+ me.path());
 		}
+            }
+            catch(Exception e){
+                Logger.info("[GameRoom] Poison pill already sent");
+            }
 	}
 }

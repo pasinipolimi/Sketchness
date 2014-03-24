@@ -1,4 +1,4 @@
-require(["Class", "Chat", "StateMachine", "Communicator", "Time", "Writer", "canvas/Painter", "jquery", "i18n"],
+require(["Class", "Chat", "StateMachine", "Communicator", "Time", "Writer", "canvas/Painter", "jquery", "nouislider", "i18n"],
 function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Painter,          $) {
 
 	$(function() {
@@ -39,6 +39,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			questionMark: $('#questionMark'),
 			hudArea: $("#hudArea"),
 			hud: $("#hud"),
+			pen: $("#pen"),
+			eraser: $("#eraser"),
 			tool: $("#tool"),
 			size: $("#size"),
 			color: $("#color"),
@@ -47,7 +49,28 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			draws: $("#draws"),
 			positions: $("#positions")
 		};
-
+		
+		
+		$("#size").noUiSlider({
+			start: [ 5 ],
+			step: 1,
+			orientation: 'vertical',
+			range: {
+				'min': [  3 ],
+				'max': [ 20 ]
+			}
+		});
+		
+		$("#size").change(function(){
+			var tool = {
+							tool: elements.tool.val(),
+							size: elements.size.val(),
+							color: elements.color.val()
+						};
+			painter.setTool(tool);
+			this.communicator.send("changeTool", tool);
+		});
+		
 		var write = new Writer(elements, sketchness.myself);
 		
 		var communicator = new Communicator(elements.websocket.data('ws'));
@@ -83,6 +106,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			}
 			return size;
 		};
+		
+		
 		
 		
 		/**
@@ -164,9 +189,15 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					console.log("[ENTER] Loading");
 					var that = this;
 
-					this.communicator.on("roundBegin", function(e, content) {
-						that.beginRound(content.sketcher);
+					this.communicator.on({
+						leaderboard: function(e, content) {
+								that.quit(content);
+							},
+						roundBegin: function(e, content) {
+							that.beginRound(content.sketcher);
+						}
 					});
+					
 				},
 
 				/**
@@ -466,6 +497,34 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					elements.skip.on("click", function() {
 						that.communicator.send("skip", {});
+					});
+					
+					elements.pen.on("click", function() {
+						elements.tool.val("pen");
+						elements.eraser.css('background-image', 'url(assets/images/UI/controls/eraserD.png)'); 
+						elements.pen.css('background-image', 'url(assets/images/UI/controls/pencil.png)'); 
+						var tool = {
+							tool: elements.tool.val(),
+							size: elements.size.val(),
+							color: elements.color.val()
+						};
+
+						painter.setTool(tool);
+						that.communicator.send("changeTool", tool);
+					});
+					
+					elements.eraser.on("click", function() {
+						elements.tool.val("eraser");
+						elements.eraser.css('background-image', 'url(assets/images/UI/controls/eraser.png)'); 
+						elements.pen.css('background-image', 'url(assets/images/UI/controls/pencilD.png)'); 
+						var tool = {
+							tool: elements.tool.val(),
+							size: elements.size.val(),
+							color: elements.color.val()
+						};
+
+						painter.setTool(tool);
+						that.communicator.send("changeTool", tool);
 					});
 
 					if(Object.size(this.sketchness.players)==1) {
@@ -803,7 +862,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				{ name: "task", from: ["Sketcher", "tagInsertion"], to: "taskDrawing" },
 				{ name: "task", from: ["Guesser", "tagWait"], to: "taskGuessing" },
 				{ name: "endRound", from: ["taskGuessing", "taskDrawing"], to: "imageViewing" },
-				{ name: "quit", from: ["imageViewing", "tagInsertion", "taskDrawing", "taskGuessing", "tagWait", "waitRole"], to: "leaderboard" },
+				{ name: "quit", from: ["imageViewing", "tagInsertion", "taskDrawing", "taskGuessing", "tagWait", "waitRole", "loading"], to: "leaderboard" },
 				{ name: "toLobby", from: "leaderboard", to: "lobby" }
 			]
 		});

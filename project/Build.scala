@@ -47,7 +47,9 @@ object ApplicationBuild extends Build {
 		Resource("jScrollPane CSS", "public/stylesheets/lib/jquery.jscrollpane.css", "http://jscrollpane.kelvinluck.com/style/jquery.jscrollpane.css", false),
 		Resource("Bootstrap CSS", "public/stylesheets/lib/bootstrap.css", "https://raw.github.com/twbs/bootstrap/master/dist/css/bootstrap.css", false),
 		Resource("Bootstrap Js", "public/javascripts/lib/bootstrap.min.js","https://raw.github.com/twbs/bootstrap/master/dist/js/bootstrap.min.js",false),
-		Resource("Howler Js", "public/javascripts/lib/howler.min.js","https://raw.github.com/goldfire/howler.js/master/howler.min.js",false),
+		Resource("Howler Js", "public/javascripts/lib/howler.js","https://raw.github.com/goldfire/howler.js/master/howler.min.js",false),
+		Resource("noUISlider", "public/javascripts/lib/nouislider.js","https://raw.github.com/leongersen/noUiSlider/master/jquery.nouislider.js",false),
+		Resource("noUISlider CSS", "public/stylesheets/lib/nouislider.css", "https://raw.github.com/leongersen/noUiSlider/master/jquery.nouislider.css", false),
 		//Zipped files with assets: images and sounds
 		Resource("Website Images", "public/images", "http://54.228.220.100/spritesheets.zip",true),
 		Resource("Website Sound Effects", "public/sounds/effects", "http://54.228.220.100/effects.zip",true)

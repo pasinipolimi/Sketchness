@@ -7,8 +7,9 @@ require.config({
 		"jscrollpane": "lib/jquery.jscrollpane",
 		"popup": "lib/popUp",
 		"paper": "lib/paper",
-		"howler": "lib/howler.min",
-		"StateMachine": "lib/state-machine"
+		"howler": "lib/howler",
+		"StateMachine": "lib/state-machine",
+		"nouislider": "lib/nouislider"
 	},
 	shim: {
 		"jquery": {
@@ -31,6 +32,10 @@ require.config({
 		},
 		"StateMachine": {
 			exports: "StateMachine"
+		},
+		"nouislider": {
+			deps: ["jquery"],
+			exports: "$.fn.noUiSlider"
 		}
 	}
 });

@@ -26,6 +26,8 @@
 					<canvas id="task" width="420" height="350"></canvas>
 				</div>
 			</div>
+                        <button id="pen"></button>
+                        <button id="eraser"></button>
 			<button id="skipTask"></button>
 			<button id="endSegmentation" style="display:none"></button>
 			<input type="text" id="wordInput" placeholder="@Messages("wordInput")" style="display:none"/>
@@ -42,23 +44,19 @@
 		<!-- A SIMPLE CANVAS USED AS AN HUD TO DRAW TOOLS-->
 		<div id="hudArea">
 			<form id="hud" action="javscript:void(0)">
-				<label for="tool">Tool:</label>
-				<select name="tool" id="tool">
+				<select name="tool" id="tool" visibility="hidden">
 					<option value="pen">Pen</option>
 					<option value="eraser">Eraser</option>
 				</select>
 
-				<label for="size">Size:</label>
-				<input type="range" name="size" id="size"min="3" max="20" step="1" value="5" />
-
-				<label for="color">Color:</label>
-				<select name="color" id="color">
+				<select name="color" id="color" visibility="hidden">
 					<option value="red">Red</option>
 					<option value="green">Green</option>
 					<option value="blue">Blue</option>
 				</select>
 				<!-- TODO: aggiungere i comandi per lo zoom e lo spostamento nell'img dopo aver zoommato -->
 		    </form>
+                    <div id="size" name="size" id="size"/></div>
 	    </div>
 
 		<!--MESSAGES AND SCORES FOR THE PLAYERS-->
