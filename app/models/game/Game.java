@@ -125,7 +125,7 @@ public class Game extends GameRoom {
                         case "guessed": guessed(event.get("content").get("user").asText());break;
                         case "guessAttempt": handleTalk(event);break;
                         case "tag": tagReceived(event.get("content").get("word").asText());break;
-                        case "endSegmentation": endSegmentation();break;
+                        case "endSegmentation": endSegmentation(event.get("content").get("user").asText());break;
                         // break point between working and doing
                         case "timer":
                             playerTimeExpired(event.get("content").get("user").asText());
@@ -189,8 +189,11 @@ public class Game extends GameRoom {
     }
     
     
-    private void endSegmentation() {
+    private void endSegmentation(String user) {
+         GameEvent eventGuesser = new GameEvent(GameMessages.composeScore(user, guesserPointsRemaining),roomChannel);
+         GameBus.getInstance().publish(eventGuesser);
          GameBus.getInstance().publish(new GameEvent(GameMessages.composeSaveTraces(), roomChannel));
+         GameBus.getInstance().publish(new GameEvent(GameMessages.composeEndSegmentation(), roomChannel));
          nextRound();
     }
 

@@ -9,7 +9,8 @@ require.config({
 		"paper": "lib/paper",
 		"howler": "lib/howler",
 		"StateMachine": "lib/state-machine",
-		"nouislider": "lib/nouislider"
+		"nouislider": "lib/nouislider",
+		"spectrum": "lib/spectrum"
 	},
 	shim: {
 		"jquery": {
@@ -36,6 +37,9 @@ require.config({
 		"nouislider": {
 			deps: ["jquery"],
 			exports: "$.fn.noUiSlider"
+		},
+		"spectrum": {
+			exports: "$.fn.spectrum"
 		}
 	}
 });

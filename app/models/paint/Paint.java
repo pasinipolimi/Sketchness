@@ -92,6 +92,9 @@ public class Paint extends GameRoom {
                             case "score":
                                 notifyScore(event.get("content"));
                                 break;
+                            case "endSegmentationC":
+                                notifyEndSegmentation(event.get("content"));
+                                break;
                             case "guessed":
                                 notifyGuessed(event.get("content"));
                                 break;
@@ -283,6 +286,10 @@ public class Paint extends GameRoom {
         String user = task.get("user").asText();
         int score = task.get("score").asInt();
         notifyAll(GameMessages.composeScore(user,score));
+    }
+    
+    private void notifyEndSegmentation(JsonNode task) throws Exception{
+        notifyAll(GameMessages.composeEndSegmentation());
     }
 
     private void beginPath() throws Exception {

@@ -520,7 +520,16 @@ table.gameList th, table.gameList td {
 }
 
 #size {
-	height: 200px;
+	height: 100px;
+	top: 280px;
+	left: 20px;
+	position: relative;
+}
+
+.picker {
+	top: 300px;
+	position: relative;
+	left: 10px;
 }
 
 #join {

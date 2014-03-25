@@ -1,4 +1,4 @@
-require(["Class", "Chat", "StateMachine", "Communicator", "Time", "Writer", "canvas/Painter", "jquery", "nouislider", "i18n"],
+require(["Class", "Chat", "StateMachine", "Communicator", "Time", "Writer", "canvas/Painter", "jquery", "nouislider", "spectrum", "i18n"],
 function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Painter,          $) {
 
 	$(function() {
@@ -28,7 +28,6 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			top: $("#topMessage"),
 			error: $("#onError"),
 			canvasMessage: $("#canvasMessage"),
-			//warnTag: $("#warnTag"),
 			websocket: $('#paintWebSocket'),
 			chatContainer: $("#messages"),
 			chatInput: $("#talk"),
@@ -38,38 +37,16 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			endSegmentation: $("#endSegmentation"),
 			questionMark: $('#questionMark'),
 			hudArea: $("#hudArea"),
-			hud: $("#hud"),
 			pen: $("#pen"),
 			eraser: $("#eraser"),
-			tool: $("#tool"),
+			tool: "pen",
 			size: $("#size"),
-			color: $("#color"),
+			color: $("#picker"),
 			viewport: $("#canvaswindows"),
 			task: $("#task"),
 			draws: $("#draws"),
 			positions: $("#positions")
 		};
-		
-		
-		$("#size").noUiSlider({
-			start: [ 5 ],
-			step: 1,
-			orientation: 'vertical',
-			range: {
-				'min': [  3 ],
-				'max': [ 20 ]
-			}
-		});
-		
-		$("#size").change(function(){
-			var tool = {
-							tool: elements.tool.val(),
-							size: elements.size.val(),
-							color: elements.color.val()
-						};
-			painter.setTool(tool);
-			this.communicator.send("changeTool", tool);
-		});
 		
 		var write = new Writer(elements, sketchness.myself);
 		
@@ -82,6 +59,45 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				console.error("error", evt);
 			}
 		});
+		
+		//Use noUISlider to prepare the size slider
+		$("#size").noUiSlider({
+			start: [ 5 ],
+			step: 1,
+			orientation: 'vertical',
+			range: {
+				'min': [  3 ],
+				'max': [ 20 ]
+			}
+		});
+		
+		$("#size").change(function(){
+			toolChange();
+		});
+		
+		//Use spectrum for the color picker
+		$("#picker").spectrum({
+			showPaletteOnly: true,
+			showPalette:true,
+			color: 'red',
+			palette: [
+				['red', 'yellow', 'green', 'blue']
+			],
+			change: function(color) {
+				toolChange();
+			},
+			className: 'picker'
+		});
+		
+		function toolChange() {
+			var tool = {
+							tool: elements.tool,
+							size: elements.size.val(),
+							color: elements.color.spectrum("get").toRgbString()
+						};
+			painter.setTool(tool);
+			communicator.send("changeTool", tool);
+		};
 
 		var chat = new Chat(elements.chatContainer, elements.chatInput);
 		$(chat).on("send", function(e, message) {
@@ -97,7 +113,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			}
 		});
 
-		var painter = new Painter(elements.task[0], elements.draws[0], elements.positions[0]);
+		var painter = new Painter(elements.task[0], elements.draws[0], elements.positions[0])
+		toolChange();
 
 		Object.size = function(obj) {
 			var size = 0, key;
@@ -145,8 +162,11 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						sk = this.sketchness;
 
 					write.top($.i18n.prop('waiting'));
+					write.score('0');
 					console.log("[BEGIN] PlayersWait");
-
+					elements.pen.hide();
+					elements.eraser.hide();
+					
 					this.communicator.on({
 						join: function(e, content) {
 							sk.players[content.user] = {
@@ -450,6 +470,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.main.addClass("sketcher");
 					this.write.top($.i18n.prop("draw"), this.sketchness.word);
 					elements.skip.show();
+					elements.pen.show();
+					elements.eraser.show();
 					elements.hudArea.show();
 					elements.endSegmentation.hide();
 					this.chat.disable();
@@ -492,6 +514,9 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						},
 						skipTask: function(e, content) {
 							that.skipRound();
+						},
+						endSegmentationC: function(e, content) {
+							that.nextRound();
 						}
 					});
 
@@ -500,52 +525,25 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					});
 					
 					elements.pen.on("click", function() {
-						elements.tool.val("pen");
+						elements.tool = "pen";
 						elements.eraser.css('background-image', 'url(assets/images/UI/controls/eraserD.png)'); 
 						elements.pen.css('background-image', 'url(assets/images/UI/controls/pencil.png)'); 
-						var tool = {
-							tool: elements.tool.val(),
-							size: elements.size.val(),
-							color: elements.color.val()
-						};
-
-						painter.setTool(tool);
-						that.communicator.send("changeTool", tool);
+						toolChange();
 					});
 					
 					elements.eraser.on("click", function() {
-						elements.tool.val("eraser");
+						elements.tool = "eraser";
 						elements.eraser.css('background-image', 'url(assets/images/UI/controls/eraser.png)'); 
 						elements.pen.css('background-image', 'url(assets/images/UI/controls/pencilD.png)'); 
-						var tool = {
-							tool: elements.tool.val(),
-							size: elements.size.val(),
-							color: elements.color.val()
-						};
-
-						painter.setTool(tool);
-						that.communicator.send("changeTool", tool);
+						toolChange();
 					});
 
 					if(Object.size(this.sketchness.players)==1) {
 						elements.endSegmentation.show();
 						elements.endSegmentation.on("click", function() {
-							that.nextRound();
-							that.communicator.send("endSegmentation", {});
+							that.communicator.send("endSegmentation", {user: sk.myself});
 						});
 					}
-
-					elements.hud.on("change", function() {
-						var tool = {
-							tool: elements.tool.val(),
-							size: elements.size.val(),
-							color: elements.color.val()
-						};
-
-						painter.setTool(tool);
-						that.communicator.send("changeTool", tool);
-					});
-					elements.hud.trigger("change");
 
 					var started = false;
 
@@ -631,7 +629,6 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					elements.skip.off("click");
 					elements.endSegmentation.off("click");
-					elements.hud.off("change");
 
 					elements.viewport.off(this.isMobile ? "touchstart" : "mousedown");
 					elements.viewport.off(this.isMobile ? "touchmove" : "mousemove");
@@ -653,7 +650,9 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						sk = this.sketchness,
 						wordInput = this.elements.wordInput,
 						painter = this.painter;
-
+						
+					elements.pen.hide();
+					elements.eraser.hide();
 					this.write.top($.i18n.prop('guess'));
 					that.painter.hideImage();
 					wordInput.show();

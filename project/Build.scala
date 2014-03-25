@@ -50,6 +50,8 @@ object ApplicationBuild extends Build {
 		Resource("Howler Js", "public/javascripts/lib/howler.js","https://raw.github.com/goldfire/howler.js/master/howler.min.js",false),
 		Resource("noUISlider", "public/javascripts/lib/nouislider.js","https://raw.github.com/leongersen/noUiSlider/master/jquery.nouislider.js",false),
 		Resource("noUISlider CSS", "public/stylesheets/lib/nouislider.css", "https://raw.github.com/leongersen/noUiSlider/master/jquery.nouislider.css", false),
+		Resource("Spectrum", "public/javascripts/lib/spectrum.js", "https://raw.github.com/bgrins/spectrum/master/spectrum.js", false),
+		Resource("Spectrum JS", "public/stylesheets/lib/spectrum.css", "https://raw.github.com/bgrins/spectrum/master/spectrum.css", false),
 		//Zipped files with assets: images and sounds
 		Resource("Website Images", "public/images", "http://54.228.220.100/spritesheets.zip",true),
 		Resource("Website Sound Effects", "public/sounds/effects", "http://54.228.220.100/effects.zip",true)

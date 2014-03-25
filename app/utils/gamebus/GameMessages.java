@@ -297,6 +297,11 @@ public class GameMessages {
         return event;
     }
     
+    public static ObjectNode composeEndSegmentation() {
+        ObjectNode event = composeJsonMessage("endSegmentationC",Json.newObject());
+        return event;
+    }
+    
     public static ObjectNode composeTask(String word) {
         ObjectNode content = Json.newObject();
         content.put("word", word);

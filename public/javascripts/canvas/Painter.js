@@ -117,6 +117,10 @@ define(["Class", "./Image", "./Path", "./Position"], function(Class, Image, Path
 			 */
 			endPath: function() {
 				this.path.end();
+			},
+			
+			clearCanvas: function() {
+				this.path.clear();
 			}
 		}
 	});

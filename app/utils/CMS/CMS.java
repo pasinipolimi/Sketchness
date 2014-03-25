@@ -415,7 +415,7 @@ public class CMS {
 		// Fill the set of task to be performed with the task that has been
 		// explicitly declared
                 try {
-                    if (retrievedTasks != null) {
+                    if (retrievedTasks != null && retrievedTasks.size()!=0) {
                             retrievedTasks = retrievedTasks.get("task");
                             for (final JsonNode item : retrievedTasks) {
                                     if (item.getElements().hasNext()) {

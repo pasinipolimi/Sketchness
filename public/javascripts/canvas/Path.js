@@ -119,7 +119,6 @@ define(["Class", "paper"], function(Class, paper) {
 			hide: function() {
 				this.end();
 				this.group.setVisible(false);
-
 				this.view.draw();
 			},
 
@@ -129,6 +128,15 @@ define(["Class", "paper"], function(Class, paper) {
 			show: function() {
 				this.group.setVisible(true);
 				this.view.draw();
+			},
+			
+			/**
+			 * Clears the canvas
+			 */
+			clear: function() {
+				if(project.activeLayer.hasChildren()){
+					project.activeLayer.removeChildren();
+				}
 			}
 		}
 
