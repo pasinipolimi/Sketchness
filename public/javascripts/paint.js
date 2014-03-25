@@ -115,7 +115,6 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 		var painter = new Painter(elements.task[0], elements.draws[0], elements.positions[0])
 		toolChange();
-
 		Object.size = function(obj) {
 			var size = 0, key;
 			for (key in obj) {
@@ -469,6 +468,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					var elements = this.elements;
 					elements.main.addClass("sketcher");
 					this.write.top($.i18n.prop("draw"), this.sketchness.word);
+					toolChange();
 					elements.skip.show();
 					elements.pen.show();
 					elements.eraser.show();
