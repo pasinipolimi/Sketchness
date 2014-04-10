@@ -41,7 +41,6 @@ import scala.concurrent.duration.Duration;
 import utils.JsonReader;
 import utils.LanguagePicker;
 import utils.gamebus.GameBus;
-import utils.gamebus.GameEventType;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.Room;
 import akka.actor.Cancellable;
@@ -414,81 +413,82 @@ public class CMS {
 
 		// Fill the set of task to be performed with the task that has been
 		// explicitly declared
-                try {
-                    if (retrievedTasks != null && retrievedTasks.size()!=0) {
-                            retrievedTasks = retrievedTasks.get("task");
-                            for (final JsonNode item : retrievedTasks) {
-                                    if (item.getElements().hasNext()) {
+		try {
+			if (retrievedTasks != null && retrievedTasks.size() != 0) {
+				retrievedTasks = retrievedTasks.get("task");
+				for (final JsonNode item : retrievedTasks) {
+					if (item.getElements().hasNext()) {
 
-                                            final String taskId = item.get("id").getTextValue();
-                                            final JsonNode uTasks = item.get("utask");
+						final String taskId = item.get("id").getTextValue();
+						final JsonNode uTasks = item.get("utask");
 
-                                            final String imageId = item.get("image").getElements()
-                                                            .next().getElements().next().asText();
-                                            final JsonNode image = jsonReader
-                                                            .readJsonArrayFromUrl(rootUrl + "/wsmc/image/"
-                                                                            + imageId + ".json");
-                                            if (uTasks != null) {
-                                                    // Retrieve the first uTask for the current task and
-                                                    // assign it
-                                                    for (final JsonNode utask : uTasks) {
-                                                            if (utask.getElements().hasNext()) {
-                                                                    // FIXME non necessario, ho gia tutto
-                                                                    // quello
-                                                                    // che mi serve
+						final String imageId = item.get("image").getElements()
+								.next().getElements().next().asText();
+						final JsonNode image = jsonReader
+								.readJsonArrayFromUrl(rootUrl + "/wsmc/image/"
+										+ imageId + ".json");
+						if (uTasks != null) {
+							// Retrieve the first uTask for the current task and
+							// assign it
+							for (final JsonNode utask : uTasks) {
+								if (utask.getElements().hasNext()) {
+									// FIXME non necessario, ho gia tutto
+									// quello
+									// che mi serve
 
-                                                                    final ObjectNode guessWord = Json.newObject();
-                                                                    guessWord.put("type", "task");
-                                                                    guessWord.put("id", imageId);
-                                                                    // Change the task to assign based on
-                                                                    // the kind of task that has to be
-                                                                    // performed
-                                                                    // for now just tagging and segmentation
-                                                                    // are supported for the images.
-                                                                    switch (utask.get("taskType").asText()) {
-                                                                    case "tagging":
-                                                                            buildGuessWordTagging(guessWord, image,
-                                                                                            utask, taskId);
+									final ObjectNode guessWord = Json
+											.newObject();
+									guessWord.put("type", "task");
+									guessWord.put("id", imageId);
+									// Change the task to assign based on
+									// the kind of task that has to be
+									// performed
+									// for now just tagging and segmentation
+									// are supported for the images.
+									switch (utask.get("taskType").asText()) {
+									case "tagging":
+										buildGuessWordTagging(guessWord, image,
+												utask, taskId);
 
-                                                                            priorityTaskHashSet.add(guessWord);
-                                                                            uploadedTasks++;
-                                                                            if (!taskSent) {
-                                                                                    taskSent = true;
-                                                                                    sendTaskAcquired(roomChannel);
-                                                                            }
-                                                                            break;
-                                                                    case "segmentation":
-                                                                            HashSet<String> tags;
-                                                                            // Get all the segments that have
-                                                                            // been stored for the image
-                                                                            final JsonNode imageSegments = image
-                                                                                            .get("descriptions");
-                                                                            if (imageSegments != null) {
-                                                                                    tags = retrieveTags(imageSegments);
-                                                                                    buildGuessWordSegmentTask(guessWord,
-                                                                                                    tags, image, taskId, utask);
+										priorityTaskHashSet.add(guessWord);
+										uploadedTasks++;
+										if (!taskSent) {
+											taskSent = true;
+											sendTaskAcquired(roomChannel);
+										}
+										break;
+									case "segmentation":
+										HashSet<String> tags;
+										// Get all the segments that have
+										// been stored for the image
+										final JsonNode imageSegments = image
+												.get("descriptions");
+										if (imageSegments != null) {
+											tags = retrieveTags(imageSegments);
+											buildGuessWordSegmentTask(
+													guessWord, tags, image,
+													taskId, utask);
 
-                                                                                    priorityTaskHashSet.add(guessWord);
-                                                                                    uploadedTasks++;
-                                                                                    if (!taskSent) {
-                                                                                            taskSent = true;
-                                                                                            sendTaskAcquired(roomChannel);
-                                                                                    }
-                                                                            }
-                                                                            break;
-                                                                    }
-                                                                    break;
-                                                            }
-                                                    }
-                                            }
+											priorityTaskHashSet.add(guessWord);
+											uploadedTasks++;
+											if (!taskSent) {
+												taskSent = true;
+												sendTaskAcquired(roomChannel);
+											}
+										}
+										break;
+									}
+									break;
+								}
+							}
+						}
 
-                                    }
-                            }
-                    }
-                }
-                catch(Exception e) {
-                    throw new RuntimeException("[CMS] Data malformed");
-                }
+					}
+				}
+			}
+		} catch (final Exception e) {
+			throw new RuntimeException("[CMS] Data malformed");
+		}
 		return uploadedTasks;
 	}
 
@@ -530,7 +530,9 @@ public class CMS {
 	 */
 	private static void sendTaskAcquired(final Room roomChannel) {
 		Logger.debug("CMS sends task aquired... ");
-		GameBus.getInstance().publish(new GameMessages.GameEvent(GameMessages.composeTaskAcquired(),roomChannel));
+		GameBus.getInstance().publish(
+				new GameMessages.GameEvent(GameMessages.composeTaskAcquired(),
+						roomChannel));
 	}
 
 	public static HashSet<String> retrieveTags(JsonNode imageSegments) {
@@ -545,26 +547,12 @@ public class CMS {
 					if (null != segment) {
 						// Logger.debug("send request to retrieve tags "
 						// + segment.get("id").getTextValue());
-						JsonNode retrieved = jsonReader
-								.readJsonArrayFromUrl(rootUrl
-										+ "/wsmc/content/"
-										+ segment.get("id").getTextValue()
-										+ ".json");
-						// Logger.debug("send request to retrieve tags end "
-						// + segment.get("id").getTextValue());
-						retrieved = retrieved.get("itemAnnotations").get(0);
-						// If the annotation is a tag and is in the same
-						// language as the one defined in the system, add the
-						// tag to the list of possible tags
-						if ((retrieved.get("name").asText().equals("tag"))
-								&& (retrieved
-										.get("language")
-										.asText()
-										.equals(LanguagePicker
-												.retrieveIsoCode()) || LanguagePicker
-										.retrieveIsoCode().equals(""))) {
-							tags.add(retrieved.get("value").asText());
+						if (segment.get("lang").getTextValue()
+								.equals(LanguagePicker.retrieveIsoCode())
+								|| LanguagePicker.retrieveIsoCode().equals("")) {
+							tags.add(segment.get("value").getTextValue());
 						}
+
 					}
 				}
 			}

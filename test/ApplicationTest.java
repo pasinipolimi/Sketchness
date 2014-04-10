@@ -1,7 +1,4 @@
 import static org.fest.assertions.Assertions.assertThat;
-import static play.test.Helpers.contentAsString;
-import static play.test.Helpers.contentType;
-import play.mvc.Content;
 
 /**
  * 
@@ -19,10 +16,10 @@ public class ApplicationTest {
 
 	// @Test
 	public void renderTemplate() {
-		final Content html = views.html.index.render();
-		assertThat(contentType(html)).isEqualTo("text/html");
-		assertThat(contentAsString(html)).contains(
-				"Your new application is ready.");
+		// final Content html = views.html.index.render();
+		// assertThat(contentType(html)).isEqualTo("text/html");
+		// assertThat(contentAsString(html)).contains(
+		// "Your new application is ready.");
 	}
 
 }
