@@ -25,5 +25,9 @@ function checkOnline(){
 
 function displayTerms(){
 
-    $('#showTerms').toggle().load("assets/javascripts/term&conditions.txt");
+    $('#showTerms').toggle();
 }
+
+$(document).ready(function() {
+    $("#showTerms").load("assets/javascripts/term&conditions.txt");
+});
