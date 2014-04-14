@@ -26,6 +26,10 @@ require(["Communicator", "jquery", "popup", "jscrollpane"], function(Communicato
 		var chosenId = undefined;
 
 		// WebSocket
+		if( typeof(WebSocket) != "function" ) {
+            alert("Error!!Your browser does not support HTML5 Web Sockets.");
+        }
+
 		var communicator = new Communicator($('#lobbyWebSocket').data('ws'));
 
 		$(communicator.websocket).on({
