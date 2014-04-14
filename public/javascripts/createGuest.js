@@ -22,3 +22,8 @@ function checkOnline(){
     xhr.send(null);
 
 }
+
+function displayTerms(){
+
+    $('#showTerms').toggle().load("assets/javascripts/term&conditions.txt");
+}
