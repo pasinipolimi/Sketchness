@@ -176,7 +176,6 @@ public class Paint extends GameRoom {
 				GameMessages.composeFinalTraces(taskUrl, guessWord, filtered,
 						traces, taskId), roomChannel);
 		GameBus.getInstance().publish(tracesMessage);
-		final int i;
 	}
 
 	private void addTrace(final JsonNode json) throws JSONException {
