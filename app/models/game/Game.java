@@ -5,8 +5,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -126,7 +130,9 @@ public class Game extends GameRoom {
 	private Integer missingPlayers = requiredPlayers;
 	private Integer disconnectedPlayers = 0;
 	private Boolean shownImages = false;
-	private final HashSet<ObjectNode> taskHashSet = new HashSet<>();
+	List<ObjectNode> queue = Collections
+			.synchronizedList(new LinkedList<ObjectNode>());
+	private final HashSet<ObjectNode> taskHashSet1 = new HashSet<>();
 	private final HashSet<ObjectNode> priorityTaskHashSet = new HashSet<>();
 	// We should not assign the same uTask to the same match, keep a list of the
 	// uTasks that has been already used
@@ -195,6 +201,11 @@ public class Game extends GameRoom {
 					case "tag":
 						tagReceived(event.get("content").get("word").asText());
 						break;
+					case "saveTraces":
+						CMS.closeUTask(uTaskID, CMS.segmentation(
+								(ObjectNode) event.get("content"),
+								sketcherPainter.name, sessionId));
+						break;
 					case "endSegmentation":
 						endSegmentation(event.get("content").get("user")
 								.asText());
@@ -254,12 +265,16 @@ public class Game extends GameRoom {
 			}
 		}
 		if (guessObject == null) {
-			final Iterator<ObjectNode> it = taskHashSet.iterator();
-			while (it.hasNext()) {
-				final ObjectNode obj = it.next();
-				guessObject = obj;
+
+			if (queue.size() > 0) {
+				guessObject = queue.remove(0);
 			}
-			taskHashSet.remove(guessObject);
+			// final Iterator<ObjectNode> it = taskHashSet.iterator();
+			// while (it.hasNext()) {
+			// final ObjectNode obj = it.next();
+			// guessObject = obj;
+			// }
+			// taskHashSet.remove(guessObject);
 		}
 		return guessObject;
 	}
@@ -451,6 +466,48 @@ public class Game extends GameRoom {
 		return false;
 	}
 
+	public Integer generateRandomItem(final int i, final int size) {
+		Integer item;
+		byte trials = 0;
+		do {
+			try {
+				item = new Random().nextInt(size);
+			} catch (final IllegalArgumentException ex) {
+				item = null;
+				Logger.error("[GAME] Failed to retrieve Task Image, retrying.");
+				trials++;
+				if (trials >= 5) {
+					gameEnded();
+					throw new Error(
+							"[GAME] Failed to retrieve Task Image, aborting");
+				}
+			}
+		} while ((item == null) || (item == i));
+
+		return item;
+	}
+
+	public Integer generateRandomItem(final int size) {
+		Integer item;
+		byte trials = 0;
+		do {
+			try {
+				item = new Random().nextInt(size);
+			} catch (final IllegalArgumentException ex) {
+				item = null;
+				Logger.error("[GAME] Failed to retrieve Task Image, retrying.");
+				trials++;
+				if (trials >= 5) {
+					gameEnded();
+					throw new Error(
+							"[GAME] Failed to retrieve Task Image, aborting");
+				}
+			}
+		} while (item == null);
+
+		return item;
+	}
+
 	/*
 	 * Start a new round of the game
 	 */
@@ -476,6 +533,7 @@ public class Game extends GameRoom {
 				// the game
 			catch (final Exception e) {
 				gameEnded();
+				return;
 			}
 			if (taskImage != null) {
 				final String label = taskImage.get("tag").asText();
@@ -491,13 +549,16 @@ public class Game extends GameRoom {
 			} // We have no more things to do
 			else {
 				gameEnded();
+				return;
 			}
 		} // We have played all the rounds for the game, inform the users and
 			// the modules
 			// that the match has ended
 		else {
 			gameEnded();
+			return;
 		}
+
 	}
 
 	private void sendTask(final Boolean ask) {
@@ -632,17 +693,20 @@ public class Game extends GameRoom {
 										trials++;
 										if (!fixGroundTruth)
 											CMS.taskSetInitialization(
-													priorityTaskHashSet,
-													taskHashSet, roomChannel,
-													maxRound);
+													priorityTaskHashSet, queue,
+													roomChannel, maxRound);
 										else
 											CMS.fixGroundTruth(groundTruthId,
-													priorityTaskHashSet,
-													taskHashSet, roomChannel);
+													priorityTaskHashSet, queue,
+													roomChannel);
+										// CMS.fixGroundTruth(groundTruthId,
+										// priorityTaskHashSet,
+										// taskHashSet, roomChannel);
 										completed = true;
 									} catch (final Exception ex) {
 										gameEnded();
 										LoggerUtils.error("GAME", ex);
+										return;
 									}
 								}
 								if (trials >= 5) {
@@ -650,6 +714,7 @@ public class Game extends GameRoom {
 									LoggerUtils
 											.error("GAME",
 													"[GAME] Impossible to retrieve the set of image relevant for this game, aborting");
+									return;
 								}
 							}
 						}, Akka.system().dispatcher());

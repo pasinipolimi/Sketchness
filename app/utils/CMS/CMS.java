@@ -197,7 +197,7 @@ public class CMS {
 
 	public static void fixGroundTruth(final Integer sessionId,
 			final HashSet<ObjectNode> priorityTaskHashSet,
-			final HashSet<ObjectNode> taskHashSet, final Room roomChannel) {
+			final List<ObjectNode> queue, final Room roomChannel) {
 		final JsonReader jsonReader = new JsonReader();
 		JsonNode retrievedImages;
 		final HashMap<String, ObjectNode> temporary = new HashMap<>();
@@ -253,7 +253,7 @@ public class CMS {
 				}
 			}
 			for (final Map.Entry pairs : temporary.entrySet()) {
-				taskHashSet.add((ObjectNode) pairs.getValue());
+				queue.add((ObjectNode) pairs.getValue());
 			}
 			if (!taskSent) {
 				taskSent = true;
@@ -310,16 +310,19 @@ public class CMS {
 	 */
 	public static void taskSetInitialization(
 			final HashSet<ObjectNode> priorityTaskHashSet,
-			final HashSet<ObjectNode> taskHashSet, final Room roomChannel,
+			final List<ObjectNode> queue, final Room roomChannel,
 			final Integer maxRound) throws Error, JSONException {
 
-		final int uploadedTasks = retrieveTasks(maxRound, priorityTaskHashSet,
-				roomChannel);
+		// final int uploadedTasks = retrieveTasks(maxRound,
+		// priorityTaskHashSet,
+		// roomChannel);
 
-		final int tasksToAdd = maxRound - uploadedTasks;
+		// final int tasksToAdd = maxRound - uploadedTasks;
+		final int tasksToAdd = maxRound - 0;
 		if (tasksToAdd > 0) {
-			retrieveImages(tasksToAdd, taskHashSet, roomChannel,
-					uploadedTasks > 0);
+			// retrieveImages(tasksToAdd, queue, roomChannel, uploadedTasks >
+			// 0);
+			retrieveImages(tasksToAdd, queue, roomChannel, 0 > 0);
 		}
 
 		Logger.debug("Task init from CMS end");
@@ -327,7 +330,7 @@ public class CMS {
 	}
 
 	private static void retrieveImages(final Integer tasksToAdd,
-			final HashSet<ObjectNode> taskHashSet, final Room roomChannel,
+			final List<ObjectNode> queue, final Room roomChannel,
 			boolean taskSent) {
 
 		final JsonNode retrievedImagesOrdered;
@@ -373,7 +376,7 @@ public class CMS {
 				}
 
 				buildGuessWordSegment(guessWord, tags, item);
-				taskHashSet.add(guessWord);
+				queue.add(guessWord);
 
 				if (!taskSent) {
 					taskSent = true;
@@ -420,7 +423,7 @@ public class CMS {
 					if (item.getElements().hasNext()) {
 
 						final String taskId = item.get("id").getTextValue();
-						final JsonNode uTasks = item.get("utask");
+						final JsonNode uTasks = item.get("utasks");
 
 						final String imageId = item.get("image").getElements()
 								.next().getElements().next().asText();
@@ -547,6 +550,7 @@ public class CMS {
 					if (null != segment) {
 						// Logger.debug("send request to retrieve tags "
 						// + segment.get("id").getTextValue());
+
 						if (segment.get("lang").getTextValue()
 								.equals(LanguagePicker.retrieveIsoCode())
 								|| LanguagePicker.retrieveIsoCode().equals("")) {

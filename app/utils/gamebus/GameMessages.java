@@ -3,491 +3,522 @@ package utils.gamebus;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.ObjectNode;
+
 import play.libs.Json;
 import play.mvc.WebSocket;
 
 public class GameMessages {
 
-    public static class GameEvent {
+	public static class GameEvent {
 
-        protected Room channel;
-        protected GameEventType type;
-        protected String message;
-        protected ObjectNode object;
-        protected String username;
-        protected JsonNode json;
+		protected Room channel;
+		protected GameEventType type;
+		protected String message;
+		protected ObjectNode object;
+		protected String username;
+		protected JsonNode json;
 
-        private GameEvent(String message, Room channel) {
-            this.channel = channel;
-            this.type = GameEventType.unknown;
-            this.message = message;
-        }
-        
-        public GameEvent(JsonNode message, Room channel) {
-            this.channel = channel;
-            this.type = GameEventType.unknown;
-            this.json = message;
-        }
-        
-        public GameEvent(JsonNode message) {
-            this.channel = null;
-            this.type = GameEventType.unknown;
-            this.json = message;
-        }
+		private GameEvent(final String message, final Room channel) {
+			this.channel = channel;
+			this.type = GameEventType.unknown;
+			this.message = message;
+		}
 
-        public GameEvent(Room channel, GameEventType type) {
-            this.channel = channel;
-            this.type = type;
-        }
+		public GameEvent(final JsonNode message, final Room channel) {
+			this.channel = channel;
+			this.type = GameEventType.unknown;
+			this.json = message;
+		}
 
-        public GameEvent(GameEventType type) {
-            this.type = type;
-        }
+		public GameEvent(final JsonNode message) {
+			this.channel = null;
+			this.type = GameEventType.unknown;
+			this.json = message;
+		}
 
-        public GameEvent(String message, Room channel, GameEventType type) {
-            this.channel = channel;
-            this.type = type;
-            this.message = message;
-        }
+		public GameEvent(final Room channel, final GameEventType type) {
+			this.channel = channel;
+			this.type = type;
+		}
 
-        public GameEvent(String message, String username, GameEventType type) {
-            this.message = message;
-            this.username = username;
-            this.type = type;
-        }
+		public GameEvent(final GameEventType type) {
+			this.type = type;
+		}
 
-        public GameEvent(String message, String username, Room channel, GameEventType type) {
-            this(message, channel);
-            this.username = username;
-            this.type = type;
-        }
+		public GameEvent(final String message, final Room channel,
+				final GameEventType type) {
+			this.channel = channel;
+			this.type = type;
+			this.message = message;
+		}
 
-        public GameEventType getType() {
-            return type;
-        }
+		public GameEvent(final String message, final String username,
+				final GameEventType type) {
+			this.message = message;
+			this.username = username;
+			this.type = type;
+		}
 
-        public void setObject(ObjectNode object) {
-            this.object = object;
-        }
+		public GameEvent(final String message, final String username,
+				final Room channel, final GameEventType type) {
+			this(message, channel);
+			this.username = username;
+			this.type = type;
+		}
 
-        public ObjectNode getObject() {
-            return object;
-        }
+		public GameEventType getType() {
+			return type;
+		}
 
-        public Room getChannel() {
-            return channel;
-        }
+		public void setObject(final ObjectNode object) {
+			this.object = object;
+		}
 
-        public String getMessage() {
-            return message;
-        }
+		public ObjectNode getObject() {
+			return object;
+		}
 
-        public String getUsername() {
-            return username;
-        }
+		public Room getChannel() {
+			return channel;
+		}
 
-        public JsonNode getJson() {
-            return json;
-        }
-        
-    }
+		public String getMessage() {
+			return message;
+		}
 
-    public static ObjectNode composeJoin(String username) {
-        ObjectNode event = Json.newObject();
-        ObjectNode structure = Json.newObject();
-        structure.put("type", "join");
-        ObjectNode content = Json.newObject();
-        content.put("user", username);
-        content.put("name", username);
-        content.put("img", "images/UI/femaleAvatar.png");
-        structure.put("content",content);
-        event.put("message", structure);
-        return event;
-    }
-    
-    public static ObjectNode composeTaskAcquired() {
-        ObjectNode content = Json.newObject();
-        ObjectNode event = composeJsonMessage("taskAcquired",content);
-        return event;
-    }
-    
-    public static ObjectNode composeMatchInfo() {
-        ObjectNode content = Json.newObject();
-        ObjectNode event = composeJsonMessage("matchInfo",content);
-        return event;
-    }
-    
-    public static ObjectNode composeChatMessage(String user, String text) {
-            ObjectNode content = Json.newObject();
-            content.put("user", user);
-            content.put("message", text);
-            ObjectNode event = composeJsonMessage("chat",content);
-            return event;
-    }
+		public String getUsername() {
+			return username;
+		}
 
-    public static ObjectNode composeMatchStart(String id, String roomName, Integer currentPlayers, Integer maxPlayers, Boolean visible) {
-        ObjectNode content = Json.newObject();
-        content.put("id", id);
-        content.put("roomName", roomName);
-        content.put("currentPlayers", currentPlayers);
-        content.put("maxPlayers", maxPlayers);
-        content.put("visible", visible);
-        ObjectNode event = composeJsonMessage("matchStart",content);
-        return event;
-    }
+		public JsonNode getJson() {
+			return json;
+		}
 
-    public static ObjectNode composeMatchEnd(String id, String roomName, Integer currentPlayers, Integer maxPlayers, Boolean visible) {
-        ObjectNode content = Json.newObject();
-        content.put("id", id);
-        content.put("roomName", roomName);
-        content.put("currentPlayers", currentPlayers);
-        content.put("maxPlayers", maxPlayers);
-        content.put("visible", visible);
-        ObjectNode event = composeJsonMessage("matchEnd",content);
-        return event;
-    }
+	}
 
-    public static ObjectNode composeMatchEnd() {
-        ObjectNode content = Json.newObject();
-        ObjectNode event = composeJsonMessage("matchEnd",content);
-        return event;
-    }
-    
-    public static ObjectNode composeNoTag() {
-        ObjectNode content = Json.newObject();
-        ObjectNode event = composeJsonMessage("noTag",content);
-        return event;
-    }
+	public static ObjectNode composeJoin(final String username) {
+		final ObjectNode event = Json.newObject();
+		final ObjectNode structure = Json.newObject();
+		structure.put("type", "join");
+		final ObjectNode content = Json.newObject();
+		content.put("user", username);
+		content.put("name", username);
+		content.put("img", "images/UI/femaleAvatar.png");
+		structure.put("content", content);
+		event.put("message", structure);
+		return event;
+	}
 
-    public static ObjectNode composeMatchIfo(String id, String roomName, Integer currentPlayers, Integer maxPlayers, Boolean visible) {
-        ObjectNode content = Json.newObject();
-        content.put("id", id);
-        content.put("roomName", roomName);
-        content.put("currentPlayers", currentPlayers);
-        content.put("maxPlayers", maxPlayers);
-        content.put("visible", visible);
-        ObjectNode event = composeJsonMessage("matchInfo",content);
-        return event;
-    }
+	public static ObjectNode composeTaskAcquired() {
+		final ObjectNode content = Json.newObject();
+		final ObjectNode event = composeJsonMessage("taskAcquired", content);
+		return event;
+	}
 
-    public static ObjectNode composeGameListUpdate(JsonNode game) {
-            ObjectNode event = composeJsonMessage("updateList",(ObjectNode)game);
-            return event;
-    }
-    
-    public static ObjectNode composeLogMessage(LogLevel level, String message) {
-            ObjectNode content = Json.newObject();
-            content.put("level", level.name());
-            content.put("message", message);
-            ObjectNode event = composeJsonMessage("log",content);
-            return event;
-    }
-    
-    
-    public static ObjectNode composeJsonMessage(String kind, ObjectNode content) {
-        ObjectNode event = Json.newObject();
-        ObjectNode structure = Json.newObject();
-        structure.put("type", kind);
-        structure.put("content",content);
-        event.put("message", structure);
-        return event;
-    }
-    
-    public static ObjectNode composeLoading() {
-        ObjectNode event = composeJsonMessage("loading",Json.newObject());
-        return event;
-    }
-    
-    
-    public static ObjectNode composeRoundBegin(String sketcher) {
-          ObjectNode content = Json.newObject();
-          content.put("sketcher", sketcher);
-          ObjectNode event = composeJsonMessage("roundBegin",content);
-          return event;
-    }
-    
-    public static ObjectNode composeRoundEnd(String word) {
-          ObjectNode content = Json.newObject();
-          content.put("word", word);
-          ObjectNode event = composeJsonMessage("roundEnd",content);
-          return event;
-    }
+	public static ObjectNode composeMatchInfo() {
+		final ObjectNode content = Json.newObject();
+		final ObjectNode event = composeJsonMessage("matchInfo", content);
+		return event;
+	}
 
-    public static ObjectNode composeRoundEnd(String word, String id,String url,Integer width, Integer height) {
-        ObjectNode content = Json.newObject();
-        content.put("word", word);
-        content.put("id", id);
-        content.put("url", url);
-        content.put("width", width);
-        content.put("height", height);
-        ObjectNode event = composeJsonMessage("roundEndS",content);
-        return event;
-    }
-    
-    public static ObjectNode composeImageInfo(String id,String url,Integer width, Integer height) {
-          ObjectNode content = Json.newObject();
-          content.put("id", id);
-          content.put("url", url);
-          content.put("width", width);
-          content.put("height", height);
-          ObjectNode event = composeJsonMessage("image",content);
-          return event;
-    }
+	public static ObjectNode composeChatMessage(final String user,
+			final String text) {
+		final ObjectNode content = Json.newObject();
+		content.put("user", user);
+		content.put("message", text);
+		final ObjectNode event = composeJsonMessage("chat", content);
+		return event;
+	}
 
-    public static ObjectNode composeImage(String id,String url,Integer width, Integer height) {
-        ObjectNode content = Json.newObject();
-        content.put("id", id);
-        content.put("url", url);
-        content.put("width", width);
-        content.put("height", height);
-        ObjectNode event = composeJsonMessage("image",content);
-        return event;
-    }
-    public static ObjectNode composeImage(String user, String id,String url,Integer width, Integer height) {
-        ObjectNode content = Json.newObject();
-        content.put("user", user);
-        content.put("id", id);
-        content.put("url", url);
-        content.put("width", width);
-        content.put("height", height);
-        ObjectNode event = composeJsonMessage("image",content);
-        return event;
-    }
+	public static ObjectNode composeMatchStart(final String id,
+			final String roomName, final Integer currentPlayers,
+			final Integer maxPlayers, final Boolean visible) {
+		final ObjectNode content = Json.newObject();
+		content.put("id", id);
+		content.put("roomName", roomName);
+		content.put("currentPlayers", currentPlayers);
+		content.put("maxPlayers", maxPlayers);
+		content.put("visible", visible);
+		final ObjectNode event = composeJsonMessage("matchStart", content);
+		return event;
+	}
 
-    public static ObjectNode composeImage(String id,String url,Integer width, Integer height, Integer time) {
-        ObjectNode content = Json.newObject();
-        content.put("id", id);
-        content.put("url", url);
-        content.put("width", width);
-        content.put("height", height);
-        content.put("time", time);
-        ObjectNode event = composeJsonMessage("image",content);
-        return event;
-    }
-    
-    public static ObjectNode composeTag(String user, String id,String url,Integer width, Integer height) {
-         ObjectNode content = Json.newObject();
-         content.put("sketcher", user);
-         content.put("id", id);
-         content.put("url", url);
-         content.put("width", width);
-         content.put("height", height);
-         ObjectNode event = composeJsonMessage("tagS",content);
-         return event;
-    }
-    public static ObjectNode composeTag() {
-        ObjectNode event = composeJsonMessage("tag",Json.newObject());
-        return event;
-    }
+	public static ObjectNode composeMatchEnd(final String id,
+			final String roomName, final Integer currentPlayers,
+			final Integer maxPlayers, final Boolean visible) {
+		final ObjectNode content = Json.newObject();
+		content.put("id", id);
+		content.put("roomName", roomName);
+		content.put("currentPlayers", currentPlayers);
+		content.put("maxPlayers", maxPlayers);
+		content.put("visible", visible);
+		final ObjectNode event = composeJsonMessage("matchEnd", content);
+		return event;
+	}
 
-    public static ObjectNode composeSkip() {
-        ObjectNode event = composeJsonMessage("skipTask",Json.newObject());
-        return event;
-    }
+	public static ObjectNode composeMatchEnd() {
+		final ObjectNode content = Json.newObject();
+		final ObjectNode event = composeJsonMessage("matchEnd", content);
+		return event;
+	}
 
-    public static ObjectNode composeTimeExpired(String player) {
-        ObjectNode content = Json.newObject();
-        content.put("player", player);
-        ObjectNode event = composeJsonMessage("timeExpired",Json.newObject());
-        return event;
-    }
+	public static ObjectNode composeNoTag() {
+		final ObjectNode content = Json.newObject();
+		final ObjectNode event = composeJsonMessage("noTag", content);
+		return event;
+	}
 
-    public static ObjectNode composeSaveTraces() {
-        ObjectNode event = composeJsonMessage("saveTraces",Json.newObject());
-        return event;
-    }
-    
-    public static ObjectNode composeEndSegmentation() {
-        ObjectNode event = composeJsonMessage("endSegmentationC",Json.newObject());
-        return event;
-    }
-    
-    public static ObjectNode composeTask(String word) {
-        ObjectNode content = Json.newObject();
-        content.put("word", word);
-        ObjectNode event = composeJsonMessage("task",content);
-        return event;
-    }
+	public static ObjectNode composeMatchIfo(final String id,
+			final String roomName, final Integer currentPlayers,
+			final Integer maxPlayers, final Boolean visible) {
+		final ObjectNode content = Json.newObject();
+		content.put("id", id);
+		content.put("roomName", roomName);
+		content.put("currentPlayers", currentPlayers);
+		content.put("maxPlayers", maxPlayers);
+		content.put("visible", visible);
+		final ObjectNode event = composeJsonMessage("matchInfo", content);
+		return event;
+	}
 
-    public static ObjectNode composeTask(String user, String id,String url,String word, Integer width, Integer height) {
-        ObjectNode content = Json.newObject();
-        content.put("sketcher", user);
-        content.put("id", id);
-        content.put("url", url);
-        content.put("width", width);
-        content.put("height", height);
-        content.put("word", word);
-        ObjectNode event = composeJsonMessage("task",content);
-        return event;
-    }
+	public static ObjectNode composeGameListUpdate(final JsonNode game) {
+		final ObjectNode event = composeJsonMessage("updateList",
+				(ObjectNode) game);
+		return event;
+	}
 
-    public static ObjectNode composeScore(String user, Integer score) {
-        ObjectNode content = Json.newObject();
-        content.put("user", user);
-        content.put("score", score);
-        ObjectNode event = composeJsonMessage("score",content);
-        return event;
-    }
-    
-    
-     public static ObjectNode composeTimer(Integer time) {
-        ObjectNode content = Json.newObject();
-        content.put("time", time);
-        ObjectNode event = composeJsonMessage("timerS",content);
-        return event;
-    }
+	public static ObjectNode composeLogMessage(final LogLevel level,
+			final String message) {
+		final ObjectNode content = Json.newObject();
+		content.put("level", level.name());
+		content.put("message", message);
+		final ObjectNode event = composeJsonMessage("log", content);
+		return event;
+	}
 
-    public static ObjectNode composeTimerForClient(Integer time) {
-        ObjectNode content = Json.newObject();
-        content.put("time", time);
-        ObjectNode event = composeJsonMessage("timer",content);
-        return event;
-    }
-     
-     public static ObjectNode composeGuess(String user, String word, String affinity) {
-        ObjectNode content = Json.newObject();
-        content.put("user", user);
-        content.put("word", word);
-        content.put("affinity", affinity);
-        ObjectNode event = composeJsonMessage("guess",content);
-        return event;
-    }
-     
-    public static ObjectNode composeGuessed(String user, String word) {
-        ObjectNode content = Json.newObject();
-        content.put("user", user);
-        content.put("word", word);
-        ObjectNode event = composeJsonMessage("guessed",content);
-        return event;
-    }
+	public static ObjectNode composeJsonMessage(final String kind,
+			final ObjectNode content) {
+		final ObjectNode event = Json.newObject();
+		final ObjectNode structure = Json.newObject();
+		structure.put("type", kind);
+		structure.put("content", content);
+		event.put("message", structure);
+		return event;
+	}
 
-    public static ObjectNode composeChangeTool(String tool, Integer size, String color) {
-        ObjectNode content = Json.newObject();
-        content.put("tool", tool);
-        content.put("size", size);
-        content.put("color", color);
-        ObjectNode event = composeJsonMessage("changeTool",content);
-        return event;
-    }
+	public static ObjectNode composeLoading() {
+		final ObjectNode event = composeJsonMessage("loading", Json.newObject());
+		return event;
+	}
 
-    public static ObjectNode composePoint(Integer x, Integer y) {
-        ObjectNode content = Json.newObject();
-        content.put("x", x);
-        content.put("y", y);
-        ObjectNode event = composeJsonMessage("point",content);
-        return event;
-    }
+	public static ObjectNode composeRoundBegin(final String sketcher) {
+		final ObjectNode content = Json.newObject();
+		content.put("sketcher", sketcher);
+		final ObjectNode event = composeJsonMessage("roundBegin", content);
+		return event;
+	}
 
-    public static ObjectNode composeBeginPath() {
-        ObjectNode event = composeJsonMessage("beginPath",Json.newObject());
-        return event;
-    }
+	public static ObjectNode composeRoundEnd(final String word) {
+		final ObjectNode content = Json.newObject();
+		content.put("word", word);
+		final ObjectNode event = composeJsonMessage("roundEnd", content);
+		return event;
+	}
 
-    public static ObjectNode composeEndPath() {
-        ObjectNode event = composeJsonMessage("endPath",Json.newObject());
-        return event;
-    }
+	public static ObjectNode composeRoundEnd(final String word,
+			final String id, final String url, final Integer width,
+			final Integer height) {
+		final ObjectNode content = Json.newObject();
+		content.put("word", word);
+		content.put("id", id);
+		content.put("url", url);
+		content.put("width", width);
+		content.put("height", height);
+		final ObjectNode event = composeJsonMessage("roundEndS", content);
+		return event;
+	}
 
-    public static ObjectNode composeLeaderboard(ObjectNode object) {
-        ObjectNode event = composeJsonMessage("leaderboard",object);
-        return event;
-    }
+	public static ObjectNode composeImageInfo(final String id,
+			final String url, final Integer width, final Integer height) {
+		final ObjectNode content = Json.newObject();
+		content.put("id", id);
+		content.put("url", url);
+		content.put("width", width);
+		content.put("height", height);
+		final ObjectNode event = composeJsonMessage("image", content);
+		return event;
+	}
 
-    public static ObjectNode composeFinalTraces(String id, String label, ArrayNode traces, ObjectNode history) {
-        ObjectNode content = Json.newObject();
-        content.put("id", id);
-        content.put("label", label);
-        content.put("traces", traces);
-        content.put("history", history);
-        ObjectNode event = composeJsonMessage("finalTraces",content);
-        return event;
-    }
+	public static ObjectNode composeImage(final String id, final String url,
+			final Integer width, final Integer height) {
+		final ObjectNode content = Json.newObject();
+		content.put("id", id);
+		content.put("url", url);
+		content.put("width", width);
+		content.put("height", height);
+		final ObjectNode event = composeJsonMessage("image", content);
+		return event;
+	}
 
-    public static ObjectNode composeQuit(final String username) {
-        ObjectNode content = Json.newObject();
-        content.put("user", username);
-        ObjectNode event = composeJsonMessage("leave",content);
-        return event;
-    }
-     
-    public static class SystemMessage extends GameEvent {
+	public static ObjectNode composeImage(final String user, final String id,
+			final String url, final Integer width, final Integer height) {
+		final ObjectNode content = Json.newObject();
+		content.put("user", user);
+		content.put("id", id);
+		content.put("url", url);
+		content.put("width", width);
+		content.put("height", height);
+		final ObjectNode event = composeJsonMessage("image", content);
+		return event;
+	}
 
-        public SystemMessage(String message, Room channel) {
-            super(message, channel);
-        }
-    }
-    
-    
+	public static ObjectNode composeImage(final String id, final String url,
+			final Integer width, final Integer height, final Integer time) {
+		final ObjectNode content = Json.newObject();
+		content.put("id", id);
+		content.put("url", url);
+		content.put("width", width);
+		content.put("height", height);
+		content.put("time", time);
+		final ObjectNode event = composeJsonMessage("image", content);
+		return event;
+	}
 
-    public static class Join {
+	public static ObjectNode composeTag(final String user, final String id,
+			final String url, final Integer width, final Integer height) {
+		final ObjectNode content = Json.newObject();
+		content.put("sketcher", user);
+		content.put("id", id);
+		content.put("url", url);
+		content.put("width", width);
+		content.put("height", height);
+		final ObjectNode event = composeJsonMessage("tagS", content);
+		return event;
+	}
 
-        final String username;
-        final WebSocket.Out<JsonNode> channel;
+	public static ObjectNode composeTag() {
+		final ObjectNode event = composeJsonMessage("tag", Json.newObject());
+		return event;
+	}
 
-        public Join(String username, WebSocket.Out<JsonNode> channel) {
-            this.username = username;
-            this.channel = channel;
-        }
+	public static ObjectNode composeSkip() {
+		final ObjectNode event = composeJsonMessage("skipTask",
+				Json.newObject());
+		return event;
+	}
 
-        public WebSocket.Out<JsonNode> getChannel() {
-            return channel;
-        }
+	public static ObjectNode composeTimeExpired(final String player) {
+		final ObjectNode content = Json.newObject();
+		content.put("player", player);
+		final ObjectNode event = composeJsonMessage("timeExpired",
+				Json.newObject());
+		return event;
+	}
 
-        public String getUsername() {
-            return username;
-        }
-    }
+	public static ObjectNode composeSaveTraces() {
+		final ObjectNode event = composeJsonMessage("saveTraces",
+				Json.newObject());
+		return event;
+	}
 
-    public static class Room {
+	public static ObjectNode composeEndSegmentation() {
+		final ObjectNode event = composeJsonMessage("endSegmentationC",
+				Json.newObject());
+		return event;
+	}
 
-        final String room;
-        final int requiredPlayers;
+	public static ObjectNode composeTask(final String word) {
+		final ObjectNode content = Json.newObject();
+		content.put("word", word);
+		final ObjectNode event = composeJsonMessage("task", content);
+		return event;
+	}
 
-        public Room(String room, int requiredPlayers) {
-            this.room = room;
-            this.requiredPlayers = requiredPlayers;
-        }
+	public static ObjectNode composeTask(final String user, final String id,
+			final String url, final String word, final Integer width,
+			final Integer height) {
+		final ObjectNode content = Json.newObject();
+		content.put("sketcher", user);
+		content.put("id", id);
+		content.put("url", url);
+		content.put("width", width);
+		content.put("height", height);
+		content.put("word", word);
+		final ObjectNode event = composeJsonMessage("task", content);
+		return event;
+	}
 
-        public Room(String room) {
-            this.room = room;
-            requiredPlayers = -1;
-        }
+	public static ObjectNode composeScore(final String user, final Integer score) {
+		final ObjectNode content = Json.newObject();
+		content.put("user", user);
+		content.put("score", score);
+		final ObjectNode event = composeJsonMessage("score", content);
+		return event;
+	}
 
-        public String getRoom() {
-            return room;
-        }
+	public static ObjectNode composeTimer(final Integer time) {
+		final ObjectNode content = Json.newObject();
+		content.put("time", time);
+		final ObjectNode event = composeJsonMessage("timerS", content);
+		return event;
+	}
 
-        public int getRequiredPlayers() {
-            return requiredPlayers;
-        }
-    }
+	public static ObjectNode composeTimerForClient(final Integer time) {
+		final ObjectNode content = Json.newObject();
+		content.put("time", time);
+		final ObjectNode event = composeJsonMessage("timer", content);
+		return event;
+	}
 
-    public static class GameInfo {
+	public static ObjectNode composeGuess(final String user, final String word,
+			final String affinity) {
+		final ObjectNode content = Json.newObject();
+		content.put("user", user);
+		content.put("word", word);
+		content.put("affinity", affinity);
+		final ObjectNode event = composeJsonMessage("guess", content);
+		return event;
+	}
 
-        String roomName;
-        Integer nPlayers;
-        Integer maxPlayers;
+	public static ObjectNode composeGuessed(final String user, final String word) {
+		final ObjectNode content = Json.newObject();
+		content.put("user", user);
+		content.put("word", word);
+		final ObjectNode event = composeJsonMessage("guessed", content);
+		return event;
+	}
 
-        public GameInfo(String roomName, Integer nPlayers, Integer maxPlayers) {
-            this.roomName = roomName;
-            this.nPlayers = nPlayers;
-            this.maxPlayers = maxPlayers;
-        }
+	public static ObjectNode composeChangeTool(final String tool,
+			final Integer size, final String color) {
+		final ObjectNode content = Json.newObject();
+		content.put("tool", tool);
+		content.put("size", size);
+		content.put("color", color);
+		final ObjectNode event = composeJsonMessage("changeTool", content);
+		return event;
+	}
 
-        public Integer getMaxPlayers() {
-            return maxPlayers;
-        }
+	public static ObjectNode composePoint(final Integer x, final Integer y) {
+		final ObjectNode content = Json.newObject();
+		content.put("x", x);
+		content.put("y", y);
+		final ObjectNode event = composeJsonMessage("point", content);
+		return event;
+	}
 
-        public String getRoomName() {
-            return roomName;
-        }
+	public static ObjectNode composeBeginPath() {
+		final ObjectNode event = composeJsonMessage("beginPath",
+				Json.newObject());
+		return event;
+	}
 
-        public Integer getnPlayers() {
-            return nPlayers;
-        }
-    }
-    
-    public enum LogLevel {
-        debug,info,warning,error
-    }
+	public static ObjectNode composeEndPath() {
+		final ObjectNode event = composeJsonMessage("endPath", Json.newObject());
+		return event;
+	}
+
+	public static ObjectNode composeLeaderboard(final ObjectNode object) {
+		final ObjectNode event = composeJsonMessage("leaderboard", object);
+		return event;
+	}
+
+	public static ObjectNode composeFinalTraces(final String url,
+			final String label, final ArrayNode traces,
+			final ObjectNode history, final String taskId) {
+		final ObjectNode content = Json.newObject();
+		content.put("id", taskId);
+		content.put("url", url);
+		content.put("label", label);
+		content.put("traces", traces);
+		content.put("history", history);
+		final ObjectNode event = composeJsonMessage("finalTraces", content);
+		return event;
+	}
+
+	public static ObjectNode composeQuit(final String username) {
+		final ObjectNode content = Json.newObject();
+		content.put("user", username);
+		final ObjectNode event = composeJsonMessage("leave", content);
+		return event;
+	}
+
+	public static class SystemMessage extends GameEvent {
+
+		public SystemMessage(final String message, final Room channel) {
+			super(message, channel);
+		}
+	}
+
+	public static class Join {
+
+		final String username;
+		final WebSocket.Out<JsonNode> channel;
+
+		public Join(final String username, final WebSocket.Out<JsonNode> channel) {
+			this.username = username;
+			this.channel = channel;
+		}
+
+		public WebSocket.Out<JsonNode> getChannel() {
+			return channel;
+		}
+
+		public String getUsername() {
+			return username;
+		}
+	}
+
+	public static class Room {
+
+		final String room;
+		final int requiredPlayers;
+
+		public Room(final String room, final int requiredPlayers) {
+			this.room = room;
+			this.requiredPlayers = requiredPlayers;
+		}
+
+		public Room(final String room) {
+			this.room = room;
+			requiredPlayers = -1;
+		}
+
+		public String getRoom() {
+			return room;
+		}
+
+		public int getRequiredPlayers() {
+			return requiredPlayers;
+		}
+	}
+
+	public static class GameInfo {
+
+		String roomName;
+		Integer nPlayers;
+		Integer maxPlayers;
+
+		public GameInfo(final String roomName, final Integer nPlayers,
+				final Integer maxPlayers) {
+			this.roomName = roomName;
+			this.nPlayers = nPlayers;
+			this.maxPlayers = maxPlayers;
+		}
+
+		public Integer getMaxPlayers() {
+			return maxPlayers;
+		}
+
+		public String getRoomName() {
+			return roomName;
+		}
+
+		public Integer getnPlayers() {
+			return nPlayers;
+		}
+	}
+
+	public enum LogLevel {
+		debug, info, warning, error
+	}
 }

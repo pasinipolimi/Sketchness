@@ -26,7 +26,7 @@ public class JsonReader {
 		Promise<WS.Response> res;
 		try {
 			// res = WS.url(url).setTimeout(1000000).get();
-			final WSRequestHolder wsurl = WS.url(url).setTimeout(1000000);
+			final WSRequestHolder wsurl = WS.url(url).setTimeout(60000);
 
 			final Iterator<Entry<String, String>> it = params.entrySet()
 					.iterator();
@@ -56,7 +56,7 @@ public class JsonReader {
 		Promise<WS.Response> res;
 		try {
 			// res = WS.url(url).setTimeout(1000000).get();
-			final WSRequestHolder wsurl = WS.url(url).setTimeout(1000000);
+			final WSRequestHolder wsurl = WS.url(url).setTimeout(60000);
 
 			res = wsurl.get();
 			if (res != null) {
