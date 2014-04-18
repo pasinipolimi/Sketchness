@@ -168,6 +168,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					
 					this.communicator.on({
 						join: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] join");
 							sk.players[content.user] = {
 								id: content.user,
 								name: content.name,
@@ -177,13 +178,16 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							write.players(sk.players);
 						},
 						leave: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] leave");
 							delete sk.players[content.user];
 							write.players(sk.players);
 						},
 						loading: function() {
+						    console.log("[RECEIVED MESSAGE] loading");
 							that.load();
 						},
 						roundBegin: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] roundBegin");
 							that.beginRound(content.sketcher);
 						}
 					});
@@ -210,9 +214,11 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					this.communicator.on({
 						leaderboard: function(e, content) {
+						        console.log("[RECEIVED MESSAGE] leaderboard");
 								that.quit(content);
 							},
 						roundBegin: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] roundBegin");
 							that.beginRound(content.sketcher);
 						}
 					});
@@ -253,9 +259,11 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					console.log("[BEGIN] Sketcher");
 					this.communicator.on({
 						tag: function() {
+						    console.log("[RECEIVED MESSAGE] tag");
 							that.tag();
 						},
 						task: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] task");
 							that.task(content.word);
 						}
 					});
@@ -279,9 +287,11 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					console.log("[BEGIN] Guesser");
 					this.communicator.on({
 						tag: function() {
+						    console.log("[RECEIVED MESSAGE] tag");
 							that.tag();
 						},
 						task: function() {
+						    console.log("[RECEIVED MESSAGE] task");
 							that.task();
 						}
 					});
@@ -302,10 +312,13 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				timeUp: function() {
 					if(Object.size(this.sketchness.players)==1) {
 						this.skipRound();
+						console.log("[SENDING MESSAGE] skip");
 						this.communicator.send("skip", {});
 					}
-					else
+					else{
+					    console.log("[SENDING MESSAGE] timer");
 						this.communicator.send("timer", {user: sketchness.myself});
+					}
 				},
 				
 				/**
@@ -314,6 +327,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 */
 				nextRoundCall: function() {
 					this.nextRound();
+					console.log("[SENDING MESSAGE] timer");
 					this.communicator.send("timer", {user: sketchness.myself});
 				},
 				
@@ -337,37 +351,45 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					this.communicator.on({
 						image: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] image");
 							that.painter.showImage(content.url, content.width, content.height);
 						},
 						beginRound: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] beginRound");
 							that.beginRound(content.sketcher);
 						},
 						leave: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] leave");
                             delete sk.players[content.user];
                             write.players(sk.players);
                         },
                         leaderboard: function(e, content) {
+                            console.log("[RECEIVED MESSAGE] leaderboard");
                             that.quit(content);
                         },
 						task: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] task");
 							that.task(content.word);
 						},
 						skipTask: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] skipTask");
 							that.skipRound();
 						},
 						noTag: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] noTag");
 							that.nextRound();
 						}
 					});
 
 					elements.skip.one("click", function() {
+					    console.log("[SENDING MESSAGE] skip");
 						that.communicator.send("skip", {});
 					});
 
 					elements.wordInput.on("keypress", function(event) {
 						if (event.which === 13 && $(this).val() !== "") {
 							event.preventDefault();
-
+                            console.log("[SENDING MESSAGE] tag");
 							that.communicator.send("tag", {
 								word: $(this).val()
 							});
@@ -418,19 +440,24 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					this.communicator.on({
 						beginRound: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] beginRound");
 							that.beginRound(content.sketcher);
 						},
 						leave: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] leave");
                             delete sk.players[content.user];
                             write.players(sk.players);
                         },
                         leaderboard: function(e, content) {
+                            console.log("[RECEIVED MESSAGE] leaderboard");
                             that.quit(content);
                         },
 						task: function() {
+						    console.log("[RECEIVED MESSAGE] task");
 							that.task();
 						},
 						noTag: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] noTag");
 							that.nextRound();
 						}
 					});
@@ -486,15 +513,19 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					this.communicator.on({
 						image: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] image");
 							painter.showImage(content.url, content.width, content.height);
 						},
 						timer: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] timer");
 							that.clock.changeCountdown("task", content.time * Time.second);
 						},
 						guess: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] guess");
 							that.chat.guess(sk.players[content.user].name, content.word, content.affinity, content.user == sk.myself);
 						},
 						score: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] score");
 							sk.players[content.user].score += content.score;
 
 							if(content.user == sk.myself) {
@@ -502,25 +533,31 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							}
 						},
 						leave: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] leave");
                             delete sk.players[content.user];
                             write.players(sk.players);
                         },
                         leaderboard: function(e, content) {
+                            console.log("[RECEIVED MESSAGE] leaderboard");
                             that.quit(content);
                         },
 						roundEnd: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] roundEnd");
 						    sk.word = content.word;
 							that.endRound(content.word);
 						},
 						skipTask: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] skipTask");
 							that.skipRound();
 						},
 						endSegmentationC: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] endSegmentationC");
 							that.nextRound();
 						}
 					});
 
 					elements.skip.on("click", function() {
+					    console.log("[SENDING MESSAGE] skip");
 						that.communicator.send("skip", {});
 					});
 					
@@ -541,6 +578,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					if(Object.size(this.sketchness.players)==1) {
 						elements.endSegmentation.show();
 						elements.endSegmentation.on("click", function() {
+						    console.log("[SENDING MESSAGE] endSegmentation");
 							that.communicator.send("endSegmentation", {user: sk.myself});
 						});
 					}
@@ -664,7 +702,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					wordInput.on("keypress", function(event) {
 						if (event.which === 13) {
 							event.preventDefault();
-
+                            console.log("[SENDING MESSAGE] guessAttempt");
 							that.communicator.send("guessAttempt", {
 							    user: sk.myself,
 								word: $(this).val()
@@ -676,9 +714,11 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					this.communicator.on({
 						timer: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] timer");
 							that.clock.changeCountdown("task", content.time * Time.second);
 						},
 						changeTool: function(e, tool) {
+						    console.log("[RECEIVED MESSAGE] changeTool");
 							painter.setTool(tool);
 						},
 						beginPath: function() {
@@ -691,9 +731,11 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							painter.endPath();
 						},
 						guess: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] guess");
 							that.chat.guess(sk.players[content.user].name, content.word, content.affinity, content.user == sk.myself);
 						},
 						guessed: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] guessed");
 						    if(sk.myself == content.user){
                                 sk.word = content.word;
                                 that.write.top($.i18n.prop('guessed'), sk.word);
@@ -704,6 +746,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							}
 						},
 						score: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] score");
 							sk.players[content.user].score += content.score;
 
 							if(content.user == sk.myself) {
@@ -711,16 +754,20 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							}
 						},
 						leave: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] leave");
                             delete sk.players[content.user];
                             write.players(sk.players);
                         },
                         leaderboard: function(e, content) {
+                            console.log("[RECEIVED MESSAGE] leaderboard");
                             that.quit(content);
                         },
 						roundEnd: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] roundEnd");
 							that.endRound(content.word);
 						},
 						skipTask: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] skipTask");
 							that.skipRound();
 						}
 					});
@@ -768,13 +815,16 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					this.communicator.on({
 						image: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] image");
 							that.painter.showImage(content.url, content.width, content.height);
 						},
 						leave: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] leave");
                             delete sk.players[content.user];
                             write.players(sk.players);
                         },
 						leaderboard: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] leaderboard");
 							that.quit(content);
 						}
 					});
@@ -834,6 +884,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.skip.hide();
 					this.communicator.on({
 						leaderboard: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] leaderboard");
 							that.quit(content);
 						}
 					});
