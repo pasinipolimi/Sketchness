@@ -39,6 +39,7 @@ require.config({
 			exports: "$.fn.noUiSlider"
 		},
 		"spectrum": {
+		    deps: ["jquery"],
 			exports: "$.fn.spectrum"
 		}
 	}

@@ -26,22 +26,7 @@ public class LanguagePicker {
                 platformLang = "undefined";
                 langCode = 0;
         }
-        //[TODO] HAS TO BE FIXED, NOW IT'S FIXED TO ITA
-        setLanguage("en");
-    }
-
-    public static void setLanguage(String lang) {
-        switch (AllowedLang.valueOf(lang)) {
-            case it:
-                platformLang = "ita";
-                break;
-            case en:
-                platformLang = "eng";
-                break;
-            default:
-                platformLang = "undefined";
-        }
-        playLang = new Lang(play.api.i18n.Lang.apply(lang));
+        playLang = new Lang(play.api.i18n.Lang.apply(retrieved.language()));
     }
 
     public static String retrieveIsoCode() {

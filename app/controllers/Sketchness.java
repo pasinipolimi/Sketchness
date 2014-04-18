@@ -73,6 +73,11 @@ public class Sketchness extends Controller {
 			LanguagePicker.setLanguage(Lang.preferred(request()
 					.acceptLanguages()));
 		}
+
+        if(!(roomName.contains("[en]")||roomName.contains("[it]"))){
+            String lang = LanguagePicker.retrieveLocale().language();
+            roomName += "["+lang+"]";
+        }
 		/* Fix the errors with all the possible cases */
 		if (username == null || username.trim().equals("")) {
 			flash("error", "Please choose a valid username.");
@@ -122,7 +127,7 @@ public class Sketchness extends Controller {
      * Handle the gameStream websocket
 	 */
 	@Restrict(@Group(Application.USER_ROLE))
-    public static WebSocket<JsonNode> gameStream( final String roomName, final Integer players) {
+    public static WebSocket<JsonNode> gameStream(final String roomName, final Integer players) {
             
 		final User localUser = getLocalUser(session());
 		final String username = localUser.name;
