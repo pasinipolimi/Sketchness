@@ -1,7 +1,7 @@
 package models;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import play.libs.Json;
 import play.mvc.WebSocket;
 
@@ -34,13 +34,13 @@ public class Painter extends Player implements Comparable<Painter> {
 
     public void updateFromJson(JsonNode json) {
         if (json.has("name")) {
-            this.name = json.get("name").getTextValue();
+            this.name = json.get("name").textValue();
         }
         if (json.has("role")) {
-            this.role = json.get("role").getTextValue();
+            this.role = json.get("role").textValue();
         }
         if (json.has("guessed")) {
-            this.guessed = Boolean.getBoolean(json.get("guessed").getTextValue());
+            this.guessed = Boolean.getBoolean(json.get("guessed").textValue());
         }
     }
 

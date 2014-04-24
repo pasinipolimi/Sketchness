@@ -3,11 +3,10 @@ package controllers;
 import java.util.Map;
 
 import models.User;
-import views.html.gameRoom;
 import models.game.GameFactory;
 import models.lobby.LobbyFactory;
 
-import org.codehaus.jackson.JsonNode;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import play.Logger;
 import play.i18n.Lang;

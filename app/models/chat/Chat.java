@@ -5,8 +5,8 @@ import play.i18n.Messages;
 import play.mvc.*;
 import play.Logger;
 
-import org.codehaus.jackson.node.*;
-import org.codehaus.jackson.*;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;

@@ -17,10 +17,10 @@ import java.util.concurrent.TimeUnit;
 import models.Painter;
 import models.factory.GameRoom;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.JsonNodeFactory;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import play.Logger;
 import play.Play;
@@ -529,8 +529,10 @@ public class Game extends GameRoom {
 				// closing
 				// the game
 			catch (final Exception e) {
+                                Logger.error("[GAME] Failed to retrieve Task Image, aborting.");
 				gameEnded();
-				return;
+				throw new Error(
+							"[GAME] Failed to retrieve Task Image, aborting");
 			}
 			if (taskImage != null) {
 				final String label = taskImage.get("tag").asText();
@@ -545,15 +547,15 @@ public class Game extends GameRoom {
 				}
 			} // We have no more things to do
 			else {
+                                Logger.info("[GAME] Nothing more to do.");
 				gameEnded();
-				return;
 			}
 		} // We have played all the rounds for the game, inform the users and
 			// the modules
 			// that the match has ended
 		else {
+                        Logger.info("[GAME] Round ended, closing the game.");
 			gameEnded();
-			return;
 		}
 
 	}
@@ -589,6 +591,7 @@ public class Game extends GameRoom {
 		if (((requiredPlayers - disconnectedPlayers) <= 1) && gameStarted
 				&& requiredPlayers != 1) {
 			// Restart the game
+                        Logger.info("[GAME] No more players playing, closing the game.");
 			gameEnded();
 		} // There are still players in game
 		else {
@@ -696,9 +699,6 @@ public class Game extends GameRoom {
 											CMS.fixGroundTruth(groundTruthId,
 													priorityTaskHashSet, queue,
 													roomChannel);
-										// CMS.fixGroundTruth(groundTruthId,
-										// priorityTaskHashSet,
-										// taskHashSet, roomChannel);
 										completed = true;
 									} catch (final Exception ex) {
 										gameEnded();
@@ -777,6 +777,7 @@ public class Game extends GameRoom {
 				// End the game if there's just one player or less
 				if (((requiredPlayers - disconnectedPlayers) == 1)
 						&& gameStarted) {
+                                        Logger.info("[GAME] Just one player left, closing the game.");
 					gameEnded();
 				} else if (((requiredPlayers - disconnectedPlayers) <= 0)
 						&& gameStarted) {
@@ -786,6 +787,7 @@ public class Game extends GameRoom {
 			}
 		}
 		if (playersVect.isEmpty()) {
+                        Logger.info("[GAME] No more players, closing the game.");
 			gameEnded();
 		}
 	}

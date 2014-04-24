@@ -25,8 +25,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -85,14 +85,14 @@ public class CMS {
 	public static Integer segmentation(final ObjectNode finalTraces,
 			final String username, final Integer session)
 			throws MalformedURLException, IOException, JSONException {
-		final String id = finalTraces.get("id").getTextValue();
-		final String label = finalTraces.get("label").getTextValue();
+		final String id = finalTraces.get("id").textValue();
+		final String label = finalTraces.get("label").textValue();
 		textAnnotation(finalTraces, username, session);
 		final String traces = finalTraces.get("traces").toString();
 		final String history = finalTraces.get("history").toString();
 
 		final String urlParameters = "ta_name=tag&ta_val=" + label
-				+ "&content_type=segmentation&&user_id=" + username
+				+ "&content_type=segmentation&&user_id=" + username 
 				+ "&language=" + LanguagePicker.retrieveIsoCode()
 				+ "&session_id=" + session + "&polyline_r=" + traces
 				+ "&polyline_h=" + history + "&oauth_consumer_key="
@@ -114,8 +114,8 @@ public class CMS {
 			final String username, final Integer session)
 			throws MalformedURLException, IOException, JSONException {
 		final JsonReader jsonReader = new JsonReader();
-		final String label = finalTraces.get("label").getTextValue();
-		final String id = finalTraces.get("id").getTextValue();
+		final String label = finalTraces.get("label").textValue();
+		final String id = finalTraces.get("id").textValue();
 		final JsonNode image = jsonReader.readJsonArrayFromUrl(rootUrl
 				+ "/wsmc/image/" + id + ".json");
 		final JsonNode imageSegments = image.get("descriptions");
@@ -207,7 +207,7 @@ public class CMS {
 		if (retrievedImages != null) {
 			// For each image
 			for (final JsonNode item : retrievedImages) {
-				if (item.getElements().hasNext()) {
+				if (item.elements().hasNext()) {
 					// Save information related to the image
 					final String id = item.get("id").asText();
 					final String url = rootUrl
@@ -354,7 +354,7 @@ public class CMS {
 		}
 
 		for (final JsonNode item : retrievedImagesOrdered) {
-			if (item.getElements().hasNext()) {
+			if (item.elements().hasNext()) {
 				// Save information related to the image
 				final String id = item.get("id").asText();
 
@@ -420,13 +420,13 @@ public class CMS {
 			if (retrievedTasks != null && retrievedTasks.size() != 0) {
 				retrievedTasks = retrievedTasks.get("task");
 				for (final JsonNode item : retrievedTasks) {
-					if (item.getElements().hasNext()) {
+					if (item.elements().hasNext()) {
 
-						final String taskId = item.get("id").getTextValue();
+						final String taskId = item.get("id").textValue();
 						final JsonNode uTasks = item.get("utasks");
 
-						final String imageId = item.get("image").getElements()
-								.next().getElements().next().asText();
+						final String imageId = item.get("image").elements()
+								.next().elements().next().asText();
 						final JsonNode image = jsonReader
 								.readJsonArrayFromUrl(rootUrl + "/wsmc/image/"
 										+ imageId + ".json");
@@ -434,7 +434,7 @@ public class CMS {
 							// Retrieve the first uTask for the current task and
 							// assign it
 							for (final JsonNode utask : uTasks) {
-								if (utask.getElements().hasNext()) {
+								if (utask.elements().hasNext()) {
 									// FIXME non necessario, ho gia tutto
 									// quello
 									// che mi serve
@@ -544,17 +544,17 @@ public class CMS {
 		final HashSet<String> tags = new HashSet<>();
 		imageSegments = imageSegments.get("availableTags");
 		if (imageSegments != null) {
-			if (imageSegments.getElements().hasNext()) {
+			if (imageSegments.elements().hasNext()) {
 				for (final JsonNode segment : imageSegments) {
 					// Retrieve the content descriptor
 					if (null != segment) {
 						// Logger.debug("send request to retrieve tags "
-						// + segment.get("id").getTextValue());
+						// + segment.get("id").textValue());
 
-						if (segment.get("lang").getTextValue()
+						if (segment.get("lang").textValue()
 								.equals(LanguagePicker.retrieveIsoCode())
 								|| LanguagePicker.retrieveIsoCode().equals("")) {
-							tags.add(segment.get("value").getTextValue());
+							tags.add(segment.get("value").textValue());
 						}
 
 					}

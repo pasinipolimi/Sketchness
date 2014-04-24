@@ -9,10 +9,10 @@ import models.Point;
 import models.Segment;
 import models.factory.GameRoom;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.JsonNodeFactory;
-import org.codehaus.jackson.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.json.JSONException;
 
 import play.Logger;
@@ -180,7 +180,7 @@ public class Paint extends GameRoom {
 	}
 
 	private void addTrace(final JsonNode json) throws JSONException {
-		final Integer iKey = json.get("num").getIntValue();
+		final Integer iKey = json.get("num").intValue();
 		final ObjectNode trace = new ObjectNode(factory);
 		final ArrayNode points = (ArrayNode) json.get("points");
 		trace.put("points", points);

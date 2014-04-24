@@ -1,14 +1,13 @@
 import java.util.Arrays;
 
+import play.*;
+import play.mvc.*;
+import play.mvc.Http.*;
+import play.libs.F.*;
 import models.SecurityRole;
-import play.Application;
-import play.GlobalSettings;
 import play.Logger;
-import play.mvc.Call;
-import play.mvc.Http;
-import play.mvc.Result;
-import play.mvc.Results;
 import views.html.pageNotFound;
+import static play.mvc.Results.*;
 
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.PlayAuthenticate.Resolver;
@@ -20,8 +19,8 @@ import controllers.routes;
 public class Global extends GlobalSettings {
 
 	@Override
-	public Result onHandlerNotFound(final Http.RequestHeader request) {
-		return Results.notFound(pageNotFound.render());
+	public Promise<SimpleResult> onHandlerNotFound(final Http.RequestHeader request) {
+		return Promise.<SimpleResult>pure(notFound(pageNotFound.render()));
 	}
 
 	@Override

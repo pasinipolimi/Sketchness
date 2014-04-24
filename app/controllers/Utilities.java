@@ -3,7 +3,7 @@ package controllers;
 import java.io.File;
 import java.io.IOException;
 
-import org.codehaus.jackson.JsonNode;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.json.JSONException;
 
 import play.Play;

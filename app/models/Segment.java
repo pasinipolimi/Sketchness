@@ -2,8 +2,8 @@ package models;
 
 import java.util.ArrayList;
 import java.util.ListIterator;
-import org.codehaus.jackson.node.ArrayNode;
-import org.codehaus.jackson.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 public class Segment {
 
