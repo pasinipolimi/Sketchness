@@ -132,7 +132,6 @@ public class Game extends GameRoom {
 	private Boolean shownImages = false;
 	List<ObjectNode> queue = Collections
 			.synchronizedList(new LinkedList<ObjectNode>());
-	private final HashSet<ObjectNode> taskHashSet1 = new HashSet<>();
 	private final HashSet<ObjectNode> priorityTaskHashSet = new HashSet<>();
 	// We should not assign the same uTask to the same match, keep a list of the
 	// uTasks that has been already used
@@ -201,11 +200,9 @@ public class Game extends GameRoom {
 					case "tag":
 						tagReceived(event.get("content").get("word").asText());
 						break;
-					case "saveTraces":
-						CMS.closeUTask(uTaskID, CMS.segmentation(
-								(ObjectNode) event.get("content"),
-								sketcherPainter.name, sessionId));
-						break;
+                                        case "finalTraces": 
+                                                CMS.segmentation((ObjectNode) event.get("content"), sketcherPainter.name, sessionId);
+                                                break;
 					case "endSegmentation":
 						endSegmentation(event.get("content").get("user")
 								.asText());

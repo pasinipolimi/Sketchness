@@ -11,13 +11,17 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			sketcher: null,
 			task: null,
 			word: null,
+			points: [],
+			lastSent: 0,
+			traceNum: 1,
 			isMobile: /ipad|iphone|android/i.test(navigator.userAgent)
 		};
 
 		var constants = {
 			tagTime: 25,
 			taskTime: 120,
-			solutionTime: 5
+			solutionTime: 5,
+			minSendRate: 50
 		};
 
 		var elements = {
@@ -598,20 +602,39 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						}
 
 						if(!sk.isMobile) {
-							return {
+							if(event.originalEvent.type !== "mouseup")
+							  return {
 								x: (event.pageX - offsetX),
-								y: (event.pageY - offsetY)
-							};
+								y: (event.pageY - offsetY),
+								size: elements.size.val(),
+								color: elements.color.spectrum("get").toRgbString()
+							  };
+							else
+							  return {
+								x: (event.pageX - offsetX),
+								y: (event.pageY - offsetY),
+								size: elements.size.val(),
+								color: "end"
+							  };
 						} else {
 							// Touchend does not have the position of when we lifted our finger
 							if(event.originalEvent.type !== "touchend" && event.originalEvent.touches) {
 								return {
 									x: (event.originalEvent.touches[0].pageX - offsetX),
-									y: (event.originalEvent.touches[0].pageY - offsetY)
+									y: (event.originalEvent.touches[0].pageY - offsetY),
+									size: elements.size.val(),
+									color: elements.color.spectrum("get").toRgbString()
 								};
-							} else {
-								return null;
+							} else if(event.originalEvent.type == "touchend"){
+								return {
+									x: (event.pageX - offsetX),
+									y: (event.pageY - offsetY),
+									size: elements.size.val(),
+									color: "end"
+								};
 							}
+							else
+								return null;
 						}
 					};
 
@@ -619,29 +642,60 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						var point = relativePosition(event, elements.viewport);
 
 						if (point != null && point.x > 0 && point.x < elements.viewport.width() && point.y > 0 && point.y < elements.viewport.height()) {
-
 							painter.setPoint(point);
+							++(sketchness.traceNum);
+							addPoint(point.x, point.y, point.size, point.color);
 							that.communicator.send("point", point);
 						}
+					};
+					
+					var addPoint = function(x, y, size, color) {
+						sketchness.points.push({
+							x: x,
+							y: y,
+							size: size,
+							color: color
+						});
+					};
+					
+					var canSendNow = function() {
+							return Date.now() - sketchness.lastSent > constants.minSendRate;
+					};
+					
+					var sendPoints = function() {
+						sketchness.lastSent = Date.now(); //Refresh the countdown timer
+						var toBeSent = {
+							points: sketchness.points,
+							num: sketchness.traceNum,
+							name: sketchness.sketcher,
+							time: clock.getTimer("round")
+						};
+						communicator.send("trace",toBeSent);
+						sketchness.points = [];
 					};
 
 					elements.viewport.on((sk.isMobile ? "touchstart" : "mousedown"), function(e) {
 						if(!started) {
-							that.communicator.send("beginPath", {});
 							painter.beginPath();
 							started=true;
 							setPoint(e);
+							that.communicator.send("beginPath", {});
 						}
 					});
 
 					elements.viewport.on((sk.isMobile ? "touchmove" : "mousemove"), function(e) {
 						e.preventDefault();
 						setPoint(e);
+						if (canSendNow()) 
+							sendPoints();
 					});
 
 					$(document).on((sk.isMobile ? "touchend" : "mouseup"), function(e) {
 						if(started) {
 							setPoint(e);
+							var point = relativePosition(e, elements.viewport);
+							addPoint(point.x, point.y, point.size, "end");
+							sendPoints();
 							started=false;
 							that.communicator.send("endPath", {});
 							painter.endPath();
@@ -892,6 +946,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				
 				onleavewaitRole: function() {
 					console.log("[END] LeaveWaitRole");
+					clock.setTimer("round");
 					this.communicator.off("leaderboard");
 				}
 			}

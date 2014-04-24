@@ -155,6 +155,7 @@ public class Paint extends GameRoom {
 			final int height = json.get("height").asInt();
 			notifyAll(GameMessages
 					.composeImage(id, medialocator, width, height));
+                        saveTraces();
 		} catch (final Exception ex) {
 			Logger.error(ex.toString());
 		}
@@ -206,8 +207,6 @@ public class Paint extends GameRoom {
 					entry.getValue().channel.close();
 					painters.remove(quitter);
 					Logger.debug("[PAINT] " + quitter + " has disconnected.");
-					// GameBus.getInstance().publish(new GameEvent(quitter,
-					// roomChannel, GameEventType.quit));
 					GameBus.getInstance().publish(
 							new GameEvent(GameMessages.composeQuit(quitter),
 									roomChannel));
@@ -312,23 +311,6 @@ public class Paint extends GameRoom {
 	private void notifyAll(final JsonNode json) {
 		for (final Painter painter : painters.values()) {
 			painter.channel.write(json);
-		}
-	}
-
-	private void notifySingle(final String username, final JsonNode json) {
-		for (final Painter painter : painters.values()) {
-			if (painter.name.equalsIgnoreCase(username)) {
-				painter.channel.write(json);
-			}
-		}
-	}
-
-	private void notifySingle(final JsonNode json) {
-		final String username = json.get("user").asText();
-		for (final Painter painter : painters.values()) {
-			if (painter.name.equalsIgnoreCase(username)) {
-				painter.channel.write(json);
-			}
 		}
 	}
 
