@@ -100,27 +100,39 @@ public class Sketchness extends Controller {
 
 
 	/**
-     * Handle the chat websocket.
+          * Handle the chat websocket.
+          * @return Opened Websocket 
 	 */
 	@Restrict(@Group(Application.USER_ROLE))
 	public static WebSocket<JsonNode> lobbyStream() {
 
 		final User localUser = getLocalUser(session());
 		final String username = localUser.name;
-		return new WebSocket<JsonNode>() {
-			// Called when the Websocket Handshake is done.
-			@Override
-			public void onReady(final WebSocket.In<JsonNode> in,
-					final WebSocket.Out<JsonNode> out) {
+                try {
+                    return new WebSocket<JsonNode>() {
+                            // Called when the Websocket Handshake is done.
+                            @Override
+                            public void onReady(final WebSocket.In<JsonNode> in,
+                                            final WebSocket.Out<JsonNode> out) {
 
-				// Join the chat room.
-				try {
-					LobbyFactory.createLobby(username, in, out);
-				} catch (final Exception ex) {
-					LoggerUtils.error("LOBBY", ex);
-				}
-			}
-		};
+                                    // Join the chat room.
+                                    try {
+                                            LobbyFactory.createLobby(username, in, out);
+                                    } catch (final Exception ex) {
+                                            LoggerUtils.error("LOBBY", ex);
+                                    }
+                            }
+                    };
+                }
+                catch(final Exception e) {
+                   return new WebSocket<JsonNode>() {
+
+                       @Override
+                       public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
+                           LoggerUtils.error("LOBBY", e);
+                       }
+                   }; 
+                }
 	}
 
 	/**
@@ -132,17 +144,27 @@ public class Sketchness extends Controller {
                 Http.Session current = session();
 		final User localUser = getLocalUser(session());
 		final String username = localUser.name;
+                try {
+                    return new WebSocket<JsonNode>() {
+                            @Override
+                            public void onReady(final In<JsonNode> in, final Out<JsonNode> out) {
+                                    try {
+                                        GameFactory.createGame(username, roomName, players, in, out);
+                                    } catch (final Exception ex) {
+                                            LoggerUtils.error("GAME", ex);
+                                    }
+                            }
+                    };
+                }
+                catch(final Exception e) {
+                   return new WebSocket<JsonNode>() {
 
-		return new WebSocket<JsonNode>() {
-			@Override
-			public void onReady(final In<JsonNode> in, final Out<JsonNode> out) {
-				try {
-                                    GameFactory.createGame(username, roomName, players, in, out);
-				} catch (final Exception ex) {
-					LoggerUtils.error("GAME", ex);
-				}
-			}
-		};
+                       @Override
+                       public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
+                           LoggerUtils.error("GAME", e);
+                       }
+                   }; 
+                }
 	}
 
 	/**

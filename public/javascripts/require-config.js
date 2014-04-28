@@ -37,9 +37,11 @@ require.config({
 			exports: "StateMachine"
 		},
 		"classVal": {
+			deps: ["jquery"],
 			exports: "$.classVal"
 		},
 		"link": {
+			deps: ["jquery"],
 			exports: "$.Link"
 		},
 		"nouislider": {
