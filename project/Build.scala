@@ -45,6 +45,8 @@ object ApplicationBuild extends Build {
 		Resource("Bootstrap Js", "public/javascripts/lib/bootstrap.min.js","https://raw.github.com/twbs/bootstrap/master/dist/js/bootstrap.min.js",false),
 		Resource("Howler Js", "public/javascripts/lib/howler.js","https://raw.github.com/goldfire/howler.js/master/howler.min.js",false),
 		Resource("noUISlider", "public/javascripts/lib/nouislider.js","https://raw.github.com/leongersen/noUiSlider/master/jquery.nouislider.js",false),
+		Resource("noUISlider Link", "public/javascripts/lib/Link.js","https://raw.github.com/leongersen/noUiSlider/master/Link.js",false),
+		Resource("classVal", "public/javascripts/lib/classVal.js","https://raw.githubusercontent.com/leongersen/classVal/master/jquery.classval.js",false),
 		Resource("noUISlider CSS", "public/stylesheets/lib/nouislider.css", "https://raw.github.com/leongersen/noUiSlider/master/jquery.nouislider.css", false),
 		Resource("Spectrum", "public/javascripts/lib/spectrum.js", "https://raw.github.com/bgrins/spectrum/master/spectrum.js", false),
 		Resource("Spectrum JS", "public/stylesheets/lib/spectrum.css", "https://raw.github.com/bgrins/spectrum/master/spectrum.css", false),
