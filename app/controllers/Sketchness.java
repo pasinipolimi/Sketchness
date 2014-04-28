@@ -36,6 +36,7 @@ public class Sketchness extends Controller {
 			LanguagePicker.setLanguage(Lang.preferred(request()
 					.acceptLanguages()));
 		}
+                response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 		return redirect(routes.Application.login());
 	}
 
@@ -93,7 +94,8 @@ public class Sketchness extends Controller {
 		// with
 		// spaces in it.
 		roomName = roomName.replaceAll(" ", "");
-        return ok(gameRoom.render(localUser, roomName,nPlayers));
+                response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
+                return ok(gameRoom.render(localUser, roomName,nPlayers));
 	}
 
 
@@ -123,11 +125,11 @@ public class Sketchness extends Controller {
 
 	/**
 	 * 
-     * Handle the gameStream websocket
+         * Handle the gameStream websocket
 	 */
 	@Restrict(@Group(Application.USER_ROLE))
     public static WebSocket<JsonNode> gameStream(final String roomName, final Integer players) {
-            
+                Http.Session current = session();
 		final User localUser = getLocalUser(session());
 		final String username = localUser.name;
 
@@ -148,7 +150,6 @@ public class Sketchness extends Controller {
 	 */
 	@Restrict(@Group(Application.USER_ROLE))
 	public static Result lobby() throws Exception {
-
 		final User localUser = getLocalUser(session());
 		final String username = localUser.name;
 
@@ -162,6 +163,7 @@ public class Sketchness extends Controller {
 			return redirect(routes.Sketchness.index());
 		}
 		GameManager.getInstance().getCurrentGames();
+                response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 		return ok(lobby.render(localUser));
 	}
 
@@ -178,6 +180,7 @@ public class Sketchness extends Controller {
 			flash("name" + ((x / 2) + 1), splitted[x]);
 			flash("points" + ((x / 2) + 1), splitted[x + 1]);
 		}
+                response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 		return ok(leaderboard.render(username, null));
 	}
 

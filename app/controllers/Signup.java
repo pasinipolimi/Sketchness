@@ -124,6 +124,7 @@ public class Signup extends Controller {
                 return badRequest(sketchness_signup.render(filledForm));
             }
 			// Everything was filled
+                        response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 			return UsernamePasswordAuthProvider.handleSignup(ctx());
 		}
 	}
@@ -295,7 +296,8 @@ public class Signup extends Controller {
 		final String email = ta.targetUser.email;
 		User.verify(ta.targetUser);
 		flash(Application.FLASH_MESSAGE_KEY,
-				Messages.get("playauthenticate.verify_email.success", email));
+		Messages.get("playauthenticate.verify_email.success", email));
+                response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 		if (Application.getLocalUser(session()) != null) {
 			return redirect(routes.Application.index());
 		} else {
