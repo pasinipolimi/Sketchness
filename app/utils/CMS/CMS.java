@@ -119,7 +119,6 @@ public class CMS {
 		final JsonNode image = jsonReader.readJsonArrayFromUrl(rootUrl
 				+ "/wsmc/image/" + id + ".json");
 		final JsonNode imageSegments = image.get("descriptions");
-		Logger.debug("Chiamao la retrievetask io annotator");
 		final HashSet<String> available = retrieveTags(imageSegments);
 		// If the tag is not present in the list of the available tags, add it
 		// to
@@ -313,16 +312,14 @@ public class CMS {
 			final List<ObjectNode> queue, final Room roomChannel,
 			final Integer maxRound) throws Error, JSONException {
 
-		// final int uploadedTasks = retrieveTasks(maxRound,
-		// priorityTaskHashSet,
-		// roomChannel);
+		final int uploadedTasks = retrieveTasks(maxRound, priorityTaskHashSet,
+				roomChannel);
 
-		// final int tasksToAdd = maxRound - uploadedTasks;
-		final int tasksToAdd = maxRound - 0;
+		final int tasksToAdd = maxRound - uploadedTasks;
+		// final int tasksToAdd = maxRound - 0;
 		if (tasksToAdd > 0) {
-			// retrieveImages(tasksToAdd, queue, roomChannel, uploadedTasks >
-			// 0);
-			retrieveImages(tasksToAdd, queue, roomChannel, 0 > 0);
+			retrieveImages(tasksToAdd, queue, roomChannel, uploadedTasks > 0);
+			// retrieveImages(tasksToAdd, queue, roomChannel, 0 > 0);
 		}
 
 		Logger.debug("Task init from CMS end");
@@ -400,7 +397,6 @@ public class CMS {
 		JsonNode retrievedTasks = null;
 		final JsonReader jsonReader = new JsonReader();
 		try {
-			// TODO add id...
 			Logger.debug("Requested task list to CMS " + roomChannel);
 			final HashMap<String, String> params = new HashMap<>();
 			params.put("collection", collection);
@@ -540,7 +536,6 @@ public class CMS {
 
 	public static HashSet<String> retrieveTags(JsonNode imageSegments) {
 
-		final JsonReader jsonReader = new JsonReader();
 		final HashSet<String> tags = new HashSet<>();
 		imageSegments = imageSegments.get("availableTags");
 		if (imageSegments != null) {
@@ -562,22 +557,6 @@ public class CMS {
 			}
 		}
 		return tags;
-	}
-
-	/**
-	 * Returns all the items of a selected collection
-	 * 
-	 * @param collectonId
-	 * @return
-	 */
-	public static HashSet<String> getCollection(final String collectonId) {
-
-		final HashSet<String> photos = new HashSet<>();
-		final JsonReader jsonReader = new JsonReader();
-		final JsonNode retrieved = jsonReader.readJsonArrayFromUrl(rootUrl
-				+ "/wsmc/content/" + collectonId + ".json");
-		// (retrieved.get("name").asText().equals("tag")
-		return photos;
 	}
 
 	/**
