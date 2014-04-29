@@ -115,31 +115,31 @@ public class CMS {
 	public static Integer textAnnotation(final ObjectNode finalTraces,
 			final String username, final Integer session)
 			throws MalformedURLException, IOException, JSONException {
-		final JsonReader jsonReader = new JsonReader();
+		// final JsonReader jsonReader = new JsonReader();
 		final String label = finalTraces.get("label").textValue();
 		final String id = finalTraces.get("id").textValue();
-		final JsonNode image = jsonReader.readJsonArrayFromUrl(rootUrl
-				+ "/wsmc/image/" + id + ".json");
-		final JsonNode imageSegments = image.get("descriptions");
-		final HashSet<String> available = retrieveTags(imageSegments);
+		// final JsonNode image = jsonReader.readJsonArrayFromUrl(rootUrl
+		// + "/wsmc/image/" + id + ".json");
+		// final JsonNode imageSegments = image.get("descriptions");
+		// final HashSet<String> available = retrieveTags(imageSegments);
 		// If the tag is not present in the list of the available tags, add it
 		// to
 		// the list
-		if (!available.contains(label)) {
-			// Just the list of the single, current tags is saved under a
-			// content descriptor called availableTags
-			final String urlParameters = "ta_name=tag&ta_val=" + label
-					+ "&content_type=availableTags&&user_id=" + username
-					+ "&language=" + LanguagePicker.retrieveIsoCode()
-					+ "&session_id=" + session + "&oauth_consumer_key="
-					+ oauthConsumerKey;
-			final String request = rootUrl + "/wsmc/image/" + id
-					+ "/textAnnotation.json";
-			WS.url(request).setContentType("application/x-www-form-urlencoded")
-					.post(urlParameters);
-			Logger.debug("[CMS] Adding new tag: " + label
-					+ " for image with id " + id);
-		}
+		// if (!available.contains(label)) {
+		// // Just the list of the single, current tags is saved under a
+		// // content descriptor called availableTags
+		// final String urlParameters = "ta_name=tag&ta_val=" + label
+		// + "&content_type=availableTags&&user_id=" + username
+		// + "&language=" + LanguagePicker.retrieveIsoCode()
+		// + "&session_id=" + session + "&oauth_consumer_key="
+		// + oauthConsumerKey;
+		// final String request = rootUrl + "/wsmc/image/" + id
+		// + "/textAnnotation.json";
+		// WS.url(request).setContentType("application/x-www-form-urlencoded")
+		// .post(urlParameters);
+		// Logger.debug("[CMS] Adding new tag: " + label
+		// + " for image with id " + id);
+		// }
 		// In any case, record that the player has tagged the image with this
 		// tag
 		final String urlParameters = "ta_name=tag&ta_val=" + label
@@ -540,6 +540,7 @@ public class CMS {
 	public static HashSet<String> retrieveTags(JsonNode imageSegments) {
 
 		final HashSet<String> tags = new HashSet<>();
+
 		imageSegments = imageSegments.get("availableTags");
 		if (imageSegments != null) {
 			if (imageSegments.elements().hasNext()) {
@@ -706,16 +707,16 @@ public class CMS {
 			throws JSONException {
 
 		final JSONArray info = new JSONArray();
-		final JsonReader jsonReader = new JsonReader();
-		JsonNode itemTag;
-		JsonNode segmentArr, object2, tagId;
+
+		JsonNode segmentArr, tagId;
+		// JsonNode segmentArr, object2, tagId;
+		String object2;
 		JsonNode descObj;
 		JsonNode tagArr;
 		JSONObject element;
 		final JSONArray tags = new JSONArray();
 		int numSegment = 0;
 		int j = 0;
-		String tmpTag;
 		JsonNode media;
 
 		media = jsonImages.get("mediaLocator");
@@ -725,12 +726,7 @@ public class CMS {
 				tagArr = descObj.get("availableTags");
 				while (j < tagArr.size()) {
 					tagId = tagArr.get(j);
-					tmpTag = tagId.get("id").toString();
-					tmpTag = tmpTag.substring(1, tmpTag.length() - 1);
-					itemTag = jsonReader.readJsonArrayFromUrl(rootUrl
-							+ "/wsmc/content/" + tmpTag + ".json");
-					object2 = itemTag.get("itemAnnotations").get(0)
-							.get("value");
+					object2 = tagId.get("value").textValue();
 					element = new JSONObject();
 					element.put("tag", object2);
 					tags.put(element);
