@@ -25,11 +25,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.openqa.selenium.remote.JsonException;
 
 import play.Logger;
 import play.Play;
@@ -44,6 +43,9 @@ import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.Room;
 import akka.actor.Cancellable;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Wrapper for the CMS API
@@ -92,7 +94,7 @@ public class CMS {
 		final String history = finalTraces.get("history").toString();
 
 		final String urlParameters = "ta_name=tag&ta_val=" + label
-				+ "&content_type=segmentation&&user_id=" + username 
+				+ "&content_type=segmentation&&user_id=" + username
 				+ "&language=" + LanguagePicker.retrieveIsoCode()
 				+ "&session_id=" + session + "&polyline_r=" + traces
 				+ "&polyline_h=" + history + "&oauth_consumer_key="
@@ -406,7 +408,7 @@ public class CMS {
 			retrievedTasks = jsonReader.readJsonArrayFromUrl(url, params);
 			Logger.debug("Requested task list to CMS end" + roomChannel);
 		} catch (final IllegalArgumentException e) {
-			throw new RuntimeException(
+			throw new JsonException(null,
 					"[CMS] The request to the CMS is malformed");
 		}
 
@@ -444,7 +446,7 @@ public class CMS {
 									// performed
 									// for now just tagging and segmentation
 									// are supported for the images.
-									switch (utask.get("taskType").asText()) {
+									switch (utask.get("utaskType").asText()) {
 									case "tagging":
 										buildGuessWordTagging(guessWord, image,
 												utask, taskId);
@@ -486,7 +488,7 @@ public class CMS {
 				}
 			}
 		} catch (final Exception e) {
-			throw new RuntimeException("[CMS] Data malformed");
+			throw new JsonException(null, "[CMS] Data malformed");
 		}
 		return uploadedTasks;
 	}
