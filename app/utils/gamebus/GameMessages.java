@@ -2,8 +2,13 @@ package utils.gamebus;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import models.Painter;
 import play.libs.Json;
 import play.mvc.WebSocket;
 
@@ -96,15 +101,20 @@ public class GameMessages {
 
 	}
 
-	public static ObjectNode composeJoin(final String username) {
+	public static ObjectNode composeJoin(ConcurrentHashMap<String, WebSocket.Out<JsonNode>> playersMap) {
 		final ObjectNode event = Json.newObject();
 		final ObjectNode structure = Json.newObject();
 		structure.put("type", "join");
-		final ObjectNode content = Json.newObject();
-		content.put("user", username);
-		content.put("name", username);
-		content.put("img", "images/UI/femaleAvatar.png");
-		structure.put("content", content);
+                final ArrayNode users = new ArrayNode(JsonNodeFactory.instance);
+                for (Map.Entry<String, WebSocket.Out<JsonNode>> entry : playersMap.entrySet()) {
+                    String username = entry.getKey();
+                    ObjectNode joined = Json.newObject();
+                    joined.put("user", username);
+                    joined.put("name", username);
+                    joined.put("img", "images/UI/femaleAvatar.png");
+                    users.add(joined);
+                }
+		structure.put("content", users);
 		event.put("message", structure);
 		return event;
 	}

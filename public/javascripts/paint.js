@@ -176,12 +176,16 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.communicator.on({
 						join: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] join");
-							sk.players[content.user] = {
-								id: content.user,
-								name: content.name,
-								img: content.img,
-								score: 0
-							};
+						    sk.players = [];
+						    for(var i in content)
+							{
+								sk.players[content[i].user] = {
+									id: content[i].user,
+									name: content[i].name,
+									img: content[i].img,
+									score: 0
+								};
+							}
 							write.players(sk.players);
 						},
 						leave: function(e, content) {
@@ -209,7 +213,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 */
 				onleaveplayersWait: function() {
 					this.write.top();
-					this.communicator.off("join leave loading");
+					this.communicator.off("join leave loading roundBegin leaderboard");
 					console.log("[LEAVE] PlayerWait");
 				},
 
@@ -221,17 +225,33 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.endSegmentation.hide();
 					elements.skip.hide();
 					console.log("[ENTER] Loading");
-					var that = this;
+					var that = this,
+						sk = this.sketchness;
 
 					this.communicator.on({
 						leaderboard: function(e, content) {
 						        console.log("[RECEIVED MESSAGE] leaderboard");
 								that.quit(content);
 							},
+						join: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] join");
+						    sk.players = [];
+						    for(var i in content)
+							{
+								sk.players[content[i].user] = {
+									id: content[i].user,
+									name: content[i].name,
+									img: content[i].img,
+									score: 0
+								};
+							}
+							write.players(sk.players);
+						},
 						roundBegin: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] roundBegin");
 							that.beginRound(content.sketcher);
 						}
+
 					});
 					
 				},
@@ -242,7 +262,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				onleaveloading: function() {
 					this.write.top();
 					console.log("[LEAVE] Loading");
-					this.communicator.off("beginRound");
+					this.communicator.off("leaderboard roundBegin join");
 				},
 
 				/**
@@ -288,7 +308,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * Tear down of sketcher state
 				 */
 				onleaveSketcher: function() {
-					this.communicator.off("tag task");
+					this.communicator.off("tag task leaderboard");
 					this.painter.hideImage();
 					console.log("[LEAVE] Sketcher");
 				},
@@ -320,7 +340,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * Tear down of guesser state
 				 */
 				onleaveGuesser: function() {
-					this.communicator.off("tag task");
+					this.communicator.off("tag task leaderboard");
 					console.log("[LEAVE] Guesser");
 				},
 
@@ -438,7 +458,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					this.painter.hideImage();
 
-					this.communicator.off("image beginRound leave leaderboard task skipTask");
+					this.communicator.off("image beginRound leave leaderboard task skipTask noTag");
 					elements.skip.off("click");
 					elements.wordInput.off("keypress");
 				},
@@ -494,7 +514,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					this.painter.hideImage();
 
-					this.communicator.off("beginRound leave leaderboard task");
+					this.communicator.off("beginRound leave leaderboard task noTag");
 				},
 
 				/**
@@ -746,7 +766,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.painter.hidePosition();
 					//this.painter.hidePath();
 
-					this.communicator.off("image timer guess guessed score leave leaderboard roundEnd skipTask");
+					this.communicator.off("image timer guess score leave leaderboard roundEnd skipTask endSegmentationC");
 				},
 
 				/**
@@ -856,7 +876,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.painter.hidePosition();
 					//this.painter.hidePath();
 
-					this.communicator.off("timer change beginPath point endPath guess guessed score leave leaderboard roundEnd skipTask");
+					this.communicator.off("timer changeTool beginPath point endPath guess guessed score leave leaderboard roundEnd skipTask");
 				},
 
 				/**
@@ -910,7 +930,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					this.painter.hideImage();
 
-					this.communicator.off("image beginRound leave leaderboard");
+					this.communicator.off("image leave leaderboard");
 				},
 
 				/**
@@ -955,6 +975,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						leaderboard: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] leaderboard");
 							that.quit(content);
+						},
+						roundBegin: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] roundBegin");
+							that.beginRound(content.sketcher);
 						}
 					});
 				},
@@ -962,7 +986,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				onleavewaitRole: function() {
 					console.log("[END] LeaveWaitRole");
 					clock.setTimer("round");
-					this.communicator.off("leaderboard");
+					this.communicator.off("leaderboard roundBegin");
 				}
 			}
 		});
@@ -973,8 +997,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			events: [
 				{ name: "startup", from: "none", to: "playersWait" },
 				{ name: "load", from: ["none", "playersWait"], to: "loading" },
-				{ name: "beSketcher", from: ["loading", "playersWait", "waitRole", "tagInsertion", "tagWait", "Sketcher" ], to: "Sketcher" },
-				{ name: "beGuesser", from: ["loading", "playersWait", "waitRole", "tagInsertion", "tagWait", "Guesser"], to: "Guesser" },
+				{ name: "beSketcher", from: ["loading", "playersWait", "waitRole", "tagInsertion", "tagWait" ], to: "Sketcher" },
+				{ name: "beGuesser", from: ["loading", "playersWait", "waitRole", "tagInsertion", "tagWait" ], to: "Guesser" },
 				{ name: "nextRound", from: ["imageViewing", "taskDrawing",  "tagInsertion", "tagWait"], to: "waitRole"},
 				{ name: "skipRound", from: ["taskGuessing", "taskDrawing", "tagInsertion"], to: "waitRole" },
 				{ name: "tag", from: "Sketcher", to: "tagInsertion" },

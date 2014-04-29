@@ -343,9 +343,6 @@ public class Game extends GameRoom {
 						Messages.get(LanguagePicker.retrieveLocale(),
 								"thesketcheris") + " " + sketcherPainter.name),
 						roomChannel));
-		// GameBus.getInstance().publish(new
-		// GameEvent(sketcherPainter.name,roomChannel,
-		// GameEventType.nextRound));
 		GameBus.getInstance().publish(
 				new GameEvent(GameMessages
 						.composeRoundBegin(sketcherPainter.name), roomChannel));
@@ -451,8 +448,6 @@ public class Game extends GameRoom {
 								LogLevel.info, Messages.get(
 										LanguagePicker.retrieveLocale(),
 										"acquiring")), roomChannel));
-				// GameBus.getInstance().publish(new GameEvent(roomChannel,
-				// GameEventType.gameLoading));
 				GameBus.getInstance().publish(
 						new GameEvent(GameMessages.composeLoading(),
 								roomChannel));
@@ -968,10 +963,8 @@ public class Game extends GameRoom {
 		return leaderboard;
 	}
 
-	private void skipTask() { // private void skipTask(String kind) {
+	private void skipTask() {
 		CMS.postAction(sessionId, "skiptask", sketcherPainter.name, "");
-		// GameBus.getInstance().publish(new
-		// GameEvent(GameMessages.composeSkip(), roomChannel));
 		GameBus.getInstance().publish(
 				new GameEvent(GameMessages.composeLogMessage(
 						LogLevel.info,

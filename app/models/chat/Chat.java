@@ -78,11 +78,10 @@ public class Chat extends GameRoom {
                 getSender().tell(Messages.get(LanguagePicker.retrieveLocale(), "usernameused"), this.getSelf());
             } else {
                 playersMap.put(message.getUsername(), message.getChannel());
-                ObjectNode event = GameMessages.composeJoin(message.getUsername());
+                ObjectNode event = GameMessages.composeJoin(playersMap);
                 getSender().tell("OK", this.getSelf());
                 notifySystem(LogLevel.info,message.getUsername()+" "+Messages.get(LanguagePicker.retrieveLocale(), "join"));
                 notifyMemberChange(event);
-                notifyMemberList(event);
                 Logger.debug("[CHAT] added player " + message.getUsername());
             }
         }
@@ -147,17 +146,6 @@ public class Chat extends GameRoom {
     private void notifyMemberChange(JsonNode event) {
         for (WebSocket.Out<JsonNode> channel : playersMap.values()) {
             channel.write(event);
-        }
-    }
-    
-    private void notifyMemberList(JsonNode event) {
-         
-         event = event.get("message");
-         String username = event.get("content").get("user").asText();
-         WebSocket.Out<JsonNode> channel = playersMap.get(username);
-         for (Map.Entry<String, WebSocket.Out<JsonNode>> entry : playersMap.entrySet()) {
-            JsonNode user = GameMessages.composeJoin(entry.getKey());
-            channel.write(user);
         }
     }
 }
