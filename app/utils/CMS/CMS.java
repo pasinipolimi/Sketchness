@@ -101,10 +101,16 @@ public class CMS {
 				+ oauthConsumerKey;
 		final String request = rootUrl + "/wsmc/image/" + id
 				+ "/segmentation.json";
-		final F.Promise<WS.Response> returned = WS.url(request)
-				.setContentType("application/x-www-form-urlencoded")
-				.post(urlParameters);
-		final JSONObject actionInfo = new JSONObject(returned.get().getBody());
+		final JSONObject actionInfo;
+		try {
+			final F.Promise<WS.Response> returned = WS.url(request)
+					.setContentType("application/x-www-form-urlencoded")
+					.post(urlParameters);
+			actionInfo = new JSONObject(returned.get().getBody());
+		} catch (final Exception ex) {
+			Logger.error("Unable to save segmentation", ex);
+			return 0;
+		}
 		final Integer actionId = Integer.parseInt(actionInfo.get("vid")
 				.toString());
 		Logger.debug("[CMS] Storing segmentation with action " + actionId
@@ -118,28 +124,7 @@ public class CMS {
 		// final JsonReader jsonReader = new JsonReader();
 		final String label = finalTraces.get("label").textValue();
 		final String id = finalTraces.get("id").textValue();
-		// final JsonNode image = jsonReader.readJsonArrayFromUrl(rootUrl
-		// + "/wsmc/image/" + id + ".json");
-		// final JsonNode imageSegments = image.get("descriptions");
-		// final HashSet<String> available = retrieveTags(imageSegments);
-		// If the tag is not present in the list of the available tags, add it
-		// to
-		// the list
-		// if (!available.contains(label)) {
-		// // Just the list of the single, current tags is saved under a
-		// // content descriptor called availableTags
-		// final String urlParameters = "ta_name=tag&ta_val=" + label
-		// + "&content_type=availableTags&&user_id=" + username
-		// + "&language=" + LanguagePicker.retrieveIsoCode()
-		// + "&session_id=" + session + "&oauth_consumer_key="
-		// + oauthConsumerKey;
-		// final String request = rootUrl + "/wsmc/image/" + id
-		// + "/textAnnotation.json";
-		// WS.url(request).setContentType("application/x-www-form-urlencoded")
-		// .post(urlParameters);
-		// Logger.debug("[CMS] Adding new tag: " + label
-		// + " for image with id " + id);
-		// }
+
 		// In any case, record that the player has tagged the image with this
 		// tag
 		final String urlParameters = "ta_name=tag&ta_val=" + label
@@ -148,10 +133,16 @@ public class CMS {
 				+ "&oauth_consumer_key=" + oauthConsumerKey;
 		final String request = rootUrl + "/wsmc/image/" + id
 				+ "/textAnnotation.json";
-		final F.Promise<WS.Response> returned = WS.url(request)
-				.setContentType("application/x-www-form-urlencoded")
-				.post(urlParameters);
-		final JSONObject actionInfo = new JSONObject(returned.get().getBody());
+		final JSONObject actionInfo;
+		try {
+			final F.Promise<WS.Response> returned = WS.url(request)
+					.setContentType("application/x-www-form-urlencoded")
+					.post(urlParameters);
+			actionInfo = new JSONObject(returned.get().getBody());
+		} catch (final Exception e) {
+			Logger.error("Unable to save annotation.", e);
+			return 0;
+		}
 		final Integer actionId = Integer.parseInt(actionInfo.get("vid")
 				.toString());
 		Logger.debug("[CMS] Storing textAnnotation with action " + actionId
