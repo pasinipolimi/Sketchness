@@ -1,9 +1,13 @@
-require(["Class", "Chat", "StateMachine", "Communicator", "Time", "Writer", "canvas/Painter", "jquery", "nouislider", "spectrum", "i18n"],
+require(["Class", "Chat", "StateMachine", "Communicator", "Time", "Writer", "canvas/Painter", "jquery", "nouislider", "spectrum", "i18n", "howler"],
 function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Painter,          $) {
 
 	$(function() {
 
 		var clock = new Time();
+
+		//var background_music = new Howl({
+		//	urls: ['assets/sounds/music/background.ogg']
+		//});
 	
 		var sketchness = {
 			players: [],
@@ -151,7 +155,6 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			 */
 			_init: function(options) {
 				$.extend(this, options);
-
 				this.startup();
 			},
 
@@ -193,6 +196,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						roundBegin: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] roundBegin");
 							that.beginRound(content.sketcher);
+						},
+						leaderboard: function(e, content) {
+						        console.log("[RECEIVED MESSAGE] leaderboard");
+								that.quit(content);
 						}
 					});
 				},
@@ -269,6 +276,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						task: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] task");
 							that.task(content.word);
+						},
+						leaderboard: function(e, content) {
+						        console.log("[RECEIVED MESSAGE] leaderboard");
+								that.quit(content);
 						}
 					});
 				},
@@ -297,6 +308,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						task: function() {
 						    console.log("[RECEIVED MESSAGE] task");
 							that.task();
+						},
+						leaderboard: function(e, content) {
+						        console.log("[RECEIVED MESSAGE] leaderboard");
+								that.quit(content);
 						}
 					});
 				},
@@ -967,7 +982,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				{ name: "task", from: ["Sketcher", "tagInsertion"], to: "taskDrawing" },
 				{ name: "task", from: ["Guesser", "tagWait"], to: "taskGuessing" },
 				{ name: "endRound", from: ["taskGuessing", "taskDrawing"], to: "imageViewing" },
-				{ name: "quit", from: ["imageViewing", "tagInsertion", "taskDrawing", "taskGuessing", "tagWait", "waitRole", "loading"], to: "leaderboard" },
+				{ name: "quit", from: ["imageViewing", "tagInsertion", "taskDrawing", "taskGuessing", "tagWait", "waitRole", "loading", "Sketcher", "Guesser"], to: "leaderboard" },
 				{ name: "toLobby", from: "leaderboard", to: "lobby" }
 			]
 		});

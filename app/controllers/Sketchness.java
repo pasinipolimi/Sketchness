@@ -65,19 +65,19 @@ public class Sketchness extends Controller {
 				.asFormUrlEncoded();
 		String roomName = values.get("room")[0];
 		if (values.containsKey("nPlayers")) {
-            number = values.get("nPlayers")[0];
+                    number = values.get("nPlayers")[0];
 		}
-        Integer nPlayers = Integer.valueOf(number);
+                Integer nPlayers = Integer.valueOf(number);
 
 		if (LanguagePicker.retrieveIsoCode().equals("")) {
 			LanguagePicker.setLanguage(Lang.preferred(request()
 					.acceptLanguages()));
 		}
 
-        if(!(roomName.contains("[en]")||roomName.contains("[it]"))){
-            String lang = LanguagePicker.retrieveLocale().language();
-            roomName += "["+lang+"]";
-        }
+                if(!(roomName.contains("[en]")||roomName.contains("[it]"))){
+                    String lang = LanguagePicker.retrieveLocale().language();
+                    roomName += "["+lang+"]";
+                }
 		/* Fix the errors with all the possible cases */
 		if (username == null || username.trim().equals("")) {
 			flash("error", "Please choose a valid username.");
@@ -90,7 +90,7 @@ public class Sketchness extends Controller {
 		if (nPlayers < 0 || nPlayers > 4) {
 			nPlayers = 3;
 		}
-        //Force the room name to be without spaces. We cannot create actors with
+                //Force the room name to be without spaces. We cannot create actors with
 		// with
 		// spaces in it.
 		roomName = roomName.replaceAll(" ", "");
@@ -140,7 +140,7 @@ public class Sketchness extends Controller {
          * Handle the gameStream websocket
 	 */
 	@Restrict(@Group(Application.USER_ROLE))
-    public static WebSocket<JsonNode> gameStream(final String roomName, final Integer players) {
+        public static WebSocket<JsonNode> gameStream(final String roomName, final Integer players) {
                 Http.Session current = session();
 		final User localUser = getLocalUser(session());
 		final String username = localUser.name;
