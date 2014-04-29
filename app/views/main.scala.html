@@ -48,7 +48,7 @@
                 });
         </script>
         <script>
-            $(window).unload(function() { 
+            window.addEventListener("beforeunload", function (e) {
                 $.ajax({
                         url: "@routes.Application.doLogout",
                         type: "GET",

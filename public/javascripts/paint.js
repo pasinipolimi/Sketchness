@@ -974,7 +974,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				{ name: "startup", from: "none", to: "playersWait" },
 				{ name: "load", from: ["none", "playersWait"], to: "loading" },
 				{ name: "beSketcher", from: ["loading", "playersWait", "waitRole", "tagInsertion", "tagWait", "Sketcher" ], to: "Sketcher" },
-				{ name: "beGuesser", from: ["loading", "playersWait", "waitRole", "tagInsertion", "tagWait"], to: "Guesser" },
+				{ name: "beGuesser", from: ["loading", "playersWait", "waitRole", "tagInsertion", "tagWait", "Guesser"], to: "Guesser" },
 				{ name: "nextRound", from: ["imageViewing", "taskDrawing",  "tagInsertion", "tagWait"], to: "waitRole"},
 				{ name: "skipRound", from: ["taskGuessing", "taskDrawing", "tagInsertion"], to: "waitRole" },
 				{ name: "tag", from: "Sketcher", to: "tagInsertion" },
