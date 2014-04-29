@@ -343,6 +343,7 @@ public class CMS {
 			final HashMap<String, String> params = new HashMap<>();
 			params.put("collection", collection);
 			params.put("limit", tasksToAdd.toString());
+			params.put("nocache", String.valueOf(System.currentTimeMillis()));
 			// params.put("select", "id");
 			retrievedImagesOrdered = jsonReader.readJsonArrayFromUrl(rootUrl
 					+ "/wsmc/image.json", params);

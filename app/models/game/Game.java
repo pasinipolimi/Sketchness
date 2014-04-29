@@ -16,12 +16,6 @@ import java.util.concurrent.TimeUnit;
 
 import models.Painter;
 import models.factory.GameRoom;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import play.Logger;
 import play.Play;
 import play.db.DB;
@@ -40,6 +34,11 @@ import utils.gamebus.GameMessages.LogLevel;
 import utils.gamebus.GameMessages.Room;
 import utils.gamemanager.GameManager;
 import akka.actor.Cancellable;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * A chat room is an Actor.
@@ -130,7 +129,7 @@ public class Game extends GameRoom {
 	private Integer missingPlayers = requiredPlayers;
 	private Integer disconnectedPlayers = 0;
 	private Boolean shownImages = false;
-	List<ObjectNode> queue = Collections
+	List<ObjectNode> queueImages = Collections
 			.synchronizedList(new LinkedList<ObjectNode>());
 	private final HashSet<ObjectNode> priorityTaskHashSet = new HashSet<>();
 	// We should not assign the same uTask to the same match, keep a list of the
@@ -200,9 +199,10 @@ public class Game extends GameRoom {
 					case "tag":
 						tagReceived(event.get("content").get("word").asText());
 						break;
-                                        case "finalTraces": 
-                                                CMS.segmentation((ObjectNode) event.get("content"), sketcherPainter.name, sessionId);
-                                                break;
+					case "finalTraces":
+						CMS.segmentation((ObjectNode) event.get("content"),
+								sketcherPainter.name, sessionId);
+						break;
 					case "endSegmentation":
 						endSegmentation(event.get("content").get("user")
 								.asText());
@@ -263,8 +263,8 @@ public class Game extends GameRoom {
 		}
 		if (guessObject == null) {
 
-			if (queue.size() > 0) {
-				guessObject = queue.remove(0);
+			if (queueImages.size() > 0) {
+				guessObject = queueImages.remove(0);
 			}
 			// final Iterator<ObjectNode> it = taskHashSet.iterator();
 			// while (it.hasNext()) {
@@ -529,10 +529,10 @@ public class Game extends GameRoom {
 				// closing
 				// the game
 			catch (final Exception e) {
-                                Logger.error("[GAME] Failed to retrieve Task Image, aborting.");
+				Logger.error("[GAME] Failed to retrieve Task Image, aborting.");
 				gameEnded();
 				throw new Error(
-							"[GAME] Failed to retrieve Task Image, aborting");
+						"[GAME] Failed to retrieve Task Image, aborting");
 			}
 			if (taskImage != null) {
 				final String label = taskImage.get("tag").asText();
@@ -547,14 +547,14 @@ public class Game extends GameRoom {
 				}
 			} // We have no more things to do
 			else {
-                                Logger.info("[GAME] Nothing more to do.");
+				Logger.info("[GAME] Nothing more to do.");
 				gameEnded();
 			}
 		} // We have played all the rounds for the game, inform the users and
 			// the modules
 			// that the match has ended
 		else {
-                        Logger.info("[GAME] Round ended, closing the game.");
+			Logger.info("[GAME] Round ended, closing the game.");
 			gameEnded();
 		}
 
@@ -591,7 +591,7 @@ public class Game extends GameRoom {
 		if (((requiredPlayers - disconnectedPlayers) <= 1) && gameStarted
 				&& requiredPlayers != 1) {
 			// Restart the game
-                        Logger.info("[GAME] No more players playing, closing the game.");
+			Logger.info("[GAME] No more players playing, closing the game.");
 			gameEnded();
 		} // There are still players in game
 		else {
@@ -693,12 +693,13 @@ public class Game extends GameRoom {
 										trials++;
 										if (!fixGroundTruth)
 											CMS.taskSetInitialization(
-													priorityTaskHashSet, queue,
-													roomChannel, maxRound);
+													priorityTaskHashSet,
+													queueImages, roomChannel,
+													maxRound);
 										else
 											CMS.fixGroundTruth(groundTruthId,
-													priorityTaskHashSet, queue,
-													roomChannel);
+													priorityTaskHashSet,
+													queueImages, roomChannel);
 										completed = true;
 									} catch (final Exception ex) {
 										gameEnded();
@@ -777,7 +778,7 @@ public class Game extends GameRoom {
 				// End the game if there's just one player or less
 				if (((requiredPlayers - disconnectedPlayers) == 1)
 						&& gameStarted) {
-                                        Logger.info("[GAME] Just one player left, closing the game.");
+					Logger.info("[GAME] Just one player left, closing the game.");
 					gameEnded();
 				} else if (((requiredPlayers - disconnectedPlayers) <= 0)
 						&& gameStarted) {
@@ -787,7 +788,7 @@ public class Game extends GameRoom {
 			}
 		}
 		if (playersVect.isEmpty()) {
-                        Logger.info("[GAME] No more players, closing the game.");
+			Logger.info("[GAME] No more players, closing the game.");
 			gameEnded();
 		}
 	}
