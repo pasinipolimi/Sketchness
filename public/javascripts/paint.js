@@ -763,8 +763,6 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					$(document).off(this.isMobile ? "touchend" : "mouseup");
 
 					this.painter.hideImage();
-					this.painter.hidePosition();
-					//this.painter.hidePath();
 
 					this.communicator.off("image timer guess score leave leaderboard roundEnd skipTask endSegmentationC");
 				},
@@ -872,9 +870,6 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.elements.wordInput.hide().off("keypress");
 
 					this.clock.clearCountdown("task");
-
-					this.painter.hidePosition();
-					//this.painter.hidePath();
 
 					this.communicator.off("timer changeTool beginPath point endPath guess guessed score leave leaderboard roundEnd skipTask");
 				},
