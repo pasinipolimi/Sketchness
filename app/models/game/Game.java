@@ -39,6 +39,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.logging.Level;
 
 /**
  * A chat room is an Actor.
@@ -403,7 +404,7 @@ public class Game extends GameRoom {
 		}
 	}
 
-	private boolean triggerStart() throws Error {
+	private boolean triggerStart() throws Exception {
 		// We need to wait for all the modules to receive the player list
 		if (playersVect.size() >= requiredPlayers) {
 			GameManager.getInstance().removeInstance(getSelf());
@@ -458,7 +459,7 @@ public class Game extends GameRoom {
 		return false;
 	}
 
-	public Integer generateRandomItem(final int i, final int size) {
+	public Integer generateRandomItem(final int i, final int size) throws Exception {
 		Integer item;
 		byte trials = 0;
 		do {
@@ -479,7 +480,7 @@ public class Game extends GameRoom {
 		return item;
 	}
 
-	public Integer generateRandomItem(final int size) {
+	public Integer generateRandomItem(final int size) throws Exception {
 		Integer item;
 		byte trials = 0;
 		do {
@@ -697,13 +698,21 @@ public class Game extends GameRoom {
 													queueImages, roomChannel);
 										completed = true;
 									} catch (final Exception ex) {
-										gameEnded();
+                                                                            try {
+                                                                                gameEnded();
+                                                                            } catch (Exception ex1) {
+                                                                                LoggerUtils.error("GAME", ex1);
+                                                                            }
 										LoggerUtils.error("GAME", ex);
 										return;
 									}
 								}
 								if (trials >= 5) {
-									gameEnded();
+                                                                    try {
+                                                                        gameEnded();
+                                                                    } catch (Exception ex) {
+                                                                        LoggerUtils.error("GAME", ex);
+                                                                    }
 									LoggerUtils
 											.error("GAME",
 													"[GAME] Impossible to retrieve the set of image relevant for this game, aborting");
@@ -973,7 +982,7 @@ public class Game extends GameRoom {
 		nextRound();
 	}
 
-	private void tagReceived(final String word) {
+	private void tagReceived(final String word) throws Exception {
 		taskImage.remove("tag");
 		taskImage.put("tag", word);
 		currentGuess = word;
@@ -983,7 +992,7 @@ public class Game extends GameRoom {
 	/*
 	 * [TESTED]
 	 */
-	private void taskAcquired() {
+	private void taskAcquired() throws Exception {
 		if (!taskAcquired) {
 			taskAcquired = true;
 			triggerStart();
