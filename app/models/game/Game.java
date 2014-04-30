@@ -238,7 +238,7 @@ public class Game extends GameRoom {
 	 * 
 	 * @return The object related to the task: image + tag
 	 */
-	private ObjectNode retrieveTaskImage() {
+	private ObjectNode retrieveTaskImage() throws Exception {
 		guessObject = null;
 		uTaskID = null;
 		// If we have task prioritized, then use them first
@@ -276,7 +276,7 @@ public class Game extends GameRoom {
 		return guessObject;
 	}
 
-	private void endSegmentation(final String user) {
+	private void endSegmentation(final String user) throws Exception {
 		final GameEvent eventGuesser = new GameEvent(GameMessages.composeScore(
 				user, guesserPointsRemaining), roomChannel);
 		GameBus.getInstance().publish(eventGuesser);
@@ -503,7 +503,7 @@ public class Game extends GameRoom {
 	/*
 	 * Start a new round of the game
 	 */
-	private void nextRound() {
+	private void nextRound() throws Exception {
 		roundNumber++;
 		if (roundNumber <= maxRound) {
 			// Reset the points and status counters
@@ -555,7 +555,7 @@ public class Game extends GameRoom {
 
 	}
 
-	private void sendTask(final Boolean ask) {
+	private void sendTask(final Boolean ask) throws Exception {
 		final String id = guessObject.get("id").asText();
 		final String medialocator = guessObject.get("image").asText();
 		final int width = guessObject.get("width").asInt();
@@ -580,7 +580,7 @@ public class Game extends GameRoom {
 	 * Check if the timer for all the players has expired, show the solution for
 	 * the current round and start a new one
 	 */
-	private void playerTimeExpired(final String name) {
+	private void playerTimeExpired(final String name) throws Exception {
 		// If all the players have disconnected during a game, start a new one
 		// if it's not a single player game
 		if (((requiredPlayers - disconnectedPlayers) <= 1) && gameStarted
@@ -669,7 +669,7 @@ public class Game extends GameRoom {
 	/*
 	 * Initialization of the variables to start a new game
 	 */
-	public void newGameSetup() {
+	public void newGameSetup() throws Exception {
 		disconnectedPlayers = 0;
 		roundNumber = 0;
 		gameStarted = false;
@@ -740,7 +740,7 @@ public class Game extends GameRoom {
 	 */
 	// @param type the type of the event to publish: room created, room
 
-	private void publishLobbyEvent() { // private void
+	private void publishLobbyEvent() throws Exception { // private void
 										// publishLobbyEvent(GameEventType type)
 										// {
 		final ObjectNode status = new ObjectNode(JsonNodeFactory.instance);
@@ -750,16 +750,14 @@ public class Game extends GameRoom {
 		status.put("currentPlayers", playersVect.size());
 		status.put("maxPlayers", requiredPlayers);
 		status.put("visible", playersVect.size() < requiredPlayers);
-		final GameEvent join = new GameEvent(
-				GameMessages.composeGameListUpdate(status), GameManager
-						.getInstance().getLobby());
+		final GameEvent join = new GameEvent(GameMessages.composeGameListUpdate(status), GameManager.getInstance().getLobby());
 		Logger.info("[GAME] room - " + roomChannel.getRoom()
 				+ " current players - " + playersVect.size()
 				+ " max players - " + requiredPlayers);
 		GameBus.getInstance().publish(join);
 	}
 
-	private void handleQuitter(final JsonNode jquitter) {
+	private void handleQuitter(final JsonNode jquitter) throws Exception {
 		final String quitter = jquitter.get("content").get("user").asText();
 		for (final Painter painter : playersVect) {
 			if (painter.name.equalsIgnoreCase(quitter)) {
@@ -788,7 +786,7 @@ public class Game extends GameRoom {
 		}
 	}
 
-	private void guessed(final String guesser) {
+	private void guessed(final String guesser) throws Exception {
 		String id;
 		String medialocator;
 		int width;
@@ -875,7 +873,7 @@ public class Game extends GameRoom {
 		guessedWord = true;
 	}
 
-	private void gameEnded() {
+	private void gameEnded() throws Exception {
 		// Close the gaming session
 		CMS.cancelThread(roomChannel.getRoom());
 		if (sessionId != null) {
@@ -945,7 +943,7 @@ public class Game extends GameRoom {
 	}
 
 	// Prepares the leaderboard of the players based on their points
-	private ObjectNode compileLeaderboard() {
+	private ObjectNode compileLeaderboard() throws Exception {
 		final JsonNodeFactory factory = JsonNodeFactory.instance;
 		final ObjectNode leaderboard = new ObjectNode(factory);
 		leaderboard.put("type", "leaderboard");
@@ -963,7 +961,7 @@ public class Game extends GameRoom {
 		return leaderboard;
 	}
 
-	private void skipTask() {
+	private void skipTask() throws Exception {
 		CMS.postAction(sessionId, "skiptask", sketcherPainter.name, "");
 		GameBus.getInstance().publish(
 				new GameEvent(GameMessages.composeLogMessage(
@@ -997,7 +995,7 @@ public class Game extends GameRoom {
 	 * 
 	 * @param jguess
 	 */
-	private void handleTalk(final JsonNode jguess) {
+	private void handleTalk(final JsonNode jguess) throws Exception {
 		final String text = jguess.get("content").get("word").asText();
 		final String username = jguess.get("content").get("user").asText();
 		// Received a Talk message
