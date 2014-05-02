@@ -2,12 +2,13 @@ package models.game;
 
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import java.util.concurrent.TimeoutException;
 import models.chat.ChatFactory;
 import models.factory.Factory;
 import models.paint.PaintFactory;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import play.libs.F;
 import play.libs.Json;
 import play.mvc.WebSocket;
@@ -21,6 +22,8 @@ import utils.gamemanager.GameManager;
 public class GameFactory extends Factory {
 
     public static synchronized void createGame(final String username, final String room, final Integer maxPlayers, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception {
+        int trial = 0;
+        
         final ActorRef obtained = create(room, maxPlayers, Game.class);
         GameManager.getInstance().addInstance(maxPlayers, room, obtained);
         //Subscribe to lobby messages
@@ -28,7 +31,19 @@ public class GameFactory extends Factory {
         
         Future<Object> future = Patterns.ask(obtained, new GameMessages.Join(username, out), 50000);
         // Send the Join message to the room
-        String result = (String) Await.result(future, Duration.create(50, SECONDS));
+        String result = null;
+        while(trial<=5 && result==null) {
+            try {
+                result = (String) Await.result(future, Duration.create(50, SECONDS));
+            }
+            catch (TimeoutException timeout) {
+                result=null;
+                trial++;
+                future = Patterns.ask(obtained, new GameMessages.Join(username, out), 50000);
+            }
+        }
+        if(result==null)
+            throw new Exception("Game creation failed after 5 trials");
        
         if ("OK".equals(result)) {
             ChatFactory.createChat(username, room, in, out);

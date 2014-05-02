@@ -2,11 +2,12 @@ package models.lobby;
 
 import akka.actor.ActorRef;
 import akka.pattern.Patterns;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import models.chat.ChatFactory;
-import models.factory.Factory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import java.util.concurrent.TimeoutException;
+import models.chat.ChatFactory;
+import models.factory.Factory;
 import play.libs.F;
 import play.libs.Json;
 import play.mvc.WebSocket;
@@ -14,18 +15,30 @@ import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import utils.gamebus.GameMessages;
-import utils.gamebus.GameMessages.GameEvent;
 import utils.gamebus.GameMessages.Join;
 
 
 public class LobbyFactory extends Factory {
 
     public static synchronized void createLobby(final String username, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception {
+        int trial = 0;
+        
         final ActorRef finalRoom = create("lobby", Lobby.class);
         Future<Object> future = Patterns.ask(finalRoom, new Join(username, out), 50000);
         // Send the Join message to the room
-        String result = (String) Await.result(future, Duration.create(50, SECONDS));
-       
+        String result = null;
+        while(trial<=5 && result==null) {
+            try {
+                result = (String) Await.result(future, Duration.create(50, SECONDS));
+            }
+            catch (TimeoutException timeout) {
+                result=null;
+                trial++;
+                future = Patterns.ask(finalRoom, new Join(username, out), 50000);
+            }
+        }
+        if(result==null)
+            throw new Exception("Lobby creation failed after 5 trials");
         if ("OK".equals(result)) {
             ChatFactory.createChat(username, "lobby", in, out);
             //Define the actions to be performed on the websockets

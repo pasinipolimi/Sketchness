@@ -3,8 +3,8 @@ package utils.gamemanager;
 import akka.actor.ActorRef;
 import akka.actor.TypedActor;
 import akka.actor.TypedProps;
+import java.io.Serializable;
 import java.util.HashMap;
-
 import java.util.Map;
 import play.Logger;
 import play.libs.Akka;
@@ -20,7 +20,7 @@ import utils.gamebus.GameMessages.Room;
  *
  * @author Luca Galli <lgalli@elet.polimi.it>
  */
-public class GameManager implements GameManagerInterface {
+public class GameManager implements GameManagerInterface, Serializable {
 
     private static GameManagerInterface instance = null;
     private static Long matchId = 1L;
