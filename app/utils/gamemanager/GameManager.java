@@ -33,7 +33,7 @@ public class GameManager implements GameManagerInterface, Serializable {
     public static GameManagerInterface getInstance() {
         if (instance == null) {
             synchronized (GameManager.class) {
-                    instance = TypedActor.get(Akka.system()).typedActorOf(new TypedProps<>(GameManagerInterface.class, GameManager.class).withTimeout(new Timeout(40000)));
+                    instance = TypedActor.get(Akka.system()).typedActorOf(new TypedProps<>(GameManagerInterface.class, GameManager.class).withTimeout(new Timeout(5000)));
             }
         }
         return instance;

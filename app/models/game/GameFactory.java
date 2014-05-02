@@ -9,6 +9,7 @@ import java.util.concurrent.TimeoutException;
 import models.chat.ChatFactory;
 import models.factory.Factory;
 import models.paint.PaintFactory;
+import play.Logger;
 import play.libs.F;
 import play.libs.Json;
 import play.mvc.WebSocket;
@@ -23,9 +24,20 @@ public class GameFactory extends Factory {
 
     public static synchronized void createGame(final String username, final String room, final Integer maxPlayers, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception {
         int trial = 0;
-        
+        boolean retrieved = false;
         final ActorRef obtained = create(room, maxPlayers, Game.class);
-        GameManager.getInstance().addInstance(maxPlayers, room, obtained);
+        while(trial<=5 && !retrieved) {
+           try {
+            GameManager.getInstance().addInstance(maxPlayers, room, obtained);
+            retrieved = true;
+           } catch(Exception e) {
+               trial++;
+               Logger.error("GameManager failure, retrying...");
+           }
+        }
+        trial = 0;
+        if(!retrieved)
+            throw new Exception("Game creation failed after 5 trials");
         //Subscribe to lobby messages
         GameBus.getInstance().subscribe(obtained, GameManager.getInstance().getLobby());
         

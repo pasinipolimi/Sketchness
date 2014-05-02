@@ -212,8 +212,10 @@ public class Sketchness extends Controller {
 	public static Result keepOnline() {
 
 		final User localUser = getLocalUser(session());
-		final String username = localUser.name;
-		models.IsOnline.keepOnline(username);
+                if(localUser!=null) {
+                    final String username = localUser.name;
+                    models.IsOnline.keepOnline(username);
+                }
 
 		return ok();
 	}
