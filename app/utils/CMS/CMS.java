@@ -125,8 +125,6 @@ public class CMS {
 		final String label = finalTraces.get("label").textValue();
 		final String id = finalTraces.get("id").textValue();
 
-		// In any case, record that the player has tagged the image with this
-		// tag
 		final String urlParameters = "ta_name=tag&ta_val=" + label
 				+ "&content_type=tagging&&user_id=" + username + "&language="
 				+ LanguagePicker.retrieveIsoCode() + "&session_id=" + session
