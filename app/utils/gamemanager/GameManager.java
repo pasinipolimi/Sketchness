@@ -3,12 +3,12 @@ package utils.gamemanager;
 import akka.actor.ActorRef;
 import akka.actor.TypedActor;
 import akka.actor.TypedProps;
+import akka.util.Timeout;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import play.Logger;
 import play.libs.Akka;
-import utils.gamebus.GameEventType;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.GameEvent;
 import utils.gamebus.GameMessages.Room;
@@ -33,7 +33,7 @@ public class GameManager implements GameManagerInterface, Serializable {
     public static GameManagerInterface getInstance() {
         if (instance == null) {
             synchronized (GameManager.class) {
-                    instance = TypedActor.get(Akka.system()).typedActorOf(new TypedProps<>(GameManagerInterface.class, GameManager.class));
+                    instance = TypedActor.get(Akka.system()).typedActorOf(new TypedProps<>(GameManagerInterface.class, GameManager.class).withTimeout(new Timeout(40000)));
             }
         }
         return instance;
