@@ -47,12 +47,18 @@ public class GameManager implements GameManagerInterface, Serializable {
 
     @Override
     public String addInstance(Integer maxPlayers, String roomName, ActorRef current) {
-        Long id = matchId++;
-        String instanceId = roomName + id;
-        if (!gameInstances.containsValue(current)) {
-            gameInstances.put(instanceId, current);
+        try {
+            Long id = matchId++;
+            String instanceId = roomName + id;
+            if (!gameInstances.containsValue(current)) {
+                gameInstances.put(instanceId, current);
+            }
+            return instanceId;
         }
-        return instanceId;
+        catch (Exception e) {
+            LoggerUtils.error("GAMEMANAGER", e);
+            throw e;
+        }
     }
 
     @Override
