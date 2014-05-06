@@ -32,17 +32,12 @@ public class GameManager implements GameManagerInterface, Serializable {
     }
 
     public static GameManagerInterface getInstance() throws Exception{
-        try {
-            if (instance == null) {
-                synchronized (GameManager.class) {
-                        instance = TypedActor.get(Akka.system()).typedActorOf(new TypedProps<>(GameManagerInterface.class, GameManager.class).withTimeout(new Timeout(5000)));
-                }
-            }
-            return instance;
-        }
-        catch(Exception e) {
-            throw e;
-        }
+       if (instance == null) {
+           synchronized (GameManager.class) {
+                instance = TypedActor.get(Akka.system()).typedActorOf(new TypedProps<>(GameManagerInterface.class, GameManager.class).withTimeout(new Timeout(5000)));
+           }
+       }
+       return instance;
     }
 
     @Override

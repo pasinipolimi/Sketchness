@@ -20,6 +20,7 @@ import utils.LoggerUtils;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages;
 import utils.gamemanager.GameManager;
+import utils.gamemanager.GameManagerInterface;
 
 public class GameFactory extends Factory {
 
@@ -29,12 +30,15 @@ public class GameFactory extends Factory {
         final ActorRef obtained = create(room, maxPlayers, Game.class);
         while(trial<=5 && !retrieved) {
            try {
-            GameManager.getInstance().addInstance(maxPlayers, room, obtained);
-            retrieved = true;
+              GameManagerInterface GMInstance = GameManager.getInstance();
+              if(GMInstance!=null) {
+                    GMInstance.addInstance(maxPlayers, room, obtained);
+                    retrieved = true;
+              }
            } catch(Exception e) {
-               trial++;
-               LoggerUtils.error(room, e);
-               Logger.error("GameManager failure, retrying...");
+              trial++;
+              LoggerUtils.error(room, e);
+              Logger.error("GameManager failure, retrying...");
            }
         }
         trial = 0;
