@@ -46,7 +46,7 @@ public class GameManager implements GameManagerInterface, Serializable {
     }
 
     @Override
-    public String addInstance(Integer maxPlayers, String roomName, ActorRef current) {
+    public String addInstance(String roomName, ActorRef current) {
         try {
             Long id = matchId++;
             String instanceId = roomName + id;

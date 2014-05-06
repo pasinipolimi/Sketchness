@@ -32,7 +32,7 @@ public class GameFactory extends Factory {
            try {
               GameManagerInterface GMInstance = GameManager.getInstance();
               if(GMInstance!=null) {
-                    GMInstance.addInstance(maxPlayers, room, obtained);
+                    GMInstance.addInstance(room, obtained);
                     retrieved = true;
               }
            } catch(Exception e) {
