@@ -46,6 +46,7 @@ import akka.actor.Cancellable;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.logging.Level;
 
 /**
  * Wrapper for the CMS API
@@ -84,38 +85,45 @@ public class CMS {
 		}
 	}
 
-	public static Integer segmentation(final ObjectNode finalTraces,
-			final String username, final Integer session)
-			throws MalformedURLException, IOException, JSONException {
-		final String id = finalTraces.get("id").textValue();
-		final String label = finalTraces.get("label").textValue();
-		textAnnotation(finalTraces, username, session);
-		final String traces = finalTraces.get("traces").toString();
-		final String history = finalTraces.get("history").toString();
-
-		final String urlParameters = "ta_name=tag&ta_val=" + label
-				+ "&content_type=segmentation&&user_id=" + username
-				+ "&language=" + LanguagePicker.retrieveIsoCode()
-				+ "&session_id=" + session + "&polyline_r=" + traces
-				+ "&polyline_h=" + history + "&oauth_consumer_key="
-				+ oauthConsumerKey;
-		final String request = rootUrl + "/wsmc/image/" + id
-				+ "/segmentation.json";
-		final JSONObject actionInfo;
-		try {
-			final F.Promise<WS.Response> returned = WS.url(request)
-					.setContentType("application/x-www-form-urlencoded")
-					.post(urlParameters);
-			actionInfo = new JSONObject(returned.get().getBody());
-		} catch (final Exception ex) {
-			Logger.error("Unable to save segmentation", ex);
-			return 0;
-		}
-		final Integer actionId = Integer.parseInt(actionInfo.get("vid")
-				.toString());
-		Logger.debug("[CMS] Storing segmentation with action " + actionId
-				+ " for image with id " + id + " and tag " + label);
-		return actionId;
+	public static void segmentation(final ObjectNode finalTraces, final String username, final Integer session) throws MalformedURLException, IOException, JSONException {
+            Akka.system().scheduler().scheduleOnce(
+                    Duration.create(1000, TimeUnit.MILLISECONDS),new Runnable() {
+		    @Override
+		    public void run() {
+                            try {
+                                final String id = finalTraces.get("id").textValue();
+                                final String label = finalTraces.get("label").textValue();
+                                textAnnotation(finalTraces, username, session);
+                                final String traces = finalTraces.get("traces").toString();
+                                final String history = finalTraces.get("history").toString();
+                                
+                                final String urlParameters = "ta_name=tag&ta_val=" + label
+                                        + "&content_type=segmentation&&user_id=" + username
+                                        + "&language=" + LanguagePicker.retrieveIsoCode()
+                                        + "&session_id=" + session + "&polyline_r=" + traces
+                                        + "&polyline_h=" + history + "&oauth_consumer_key="
+                                        + oauthConsumerKey;
+                                final String request = rootUrl + "/wsmc/image/" + id
+                                        + "/segmentation.json";
+                                JSONObject actionInfo;
+                                try {
+                                    final F.Promise<WS.Response> returned = WS.url(request)
+                                            .setContentType("application/x-www-form-urlencoded")
+                                            .post(urlParameters);
+                                    actionInfo = new JSONObject(returned.get().getBody());
+                                    final Integer actionId = Integer.parseInt(actionInfo.get("vid")
+                                            .toString());
+                                    Logger.debug("[CMS] Storing segmentation with action " + actionId
+                                            + " for image with id " + id + " and tag " + label);
+                                } catch (final Exception ex) {
+                                    Logger.error("Unable to save segmentation", ex);
+                                }
+                                
+                            } catch (Exception ex) {
+                                   Logger.error("Unable to save segmentation", ex);
+                            }  
+                    }
+		    }, Akka.system().dispatcher());                
 	}
 
 	public static Integer textAnnotation(final ObjectNode finalTraces,

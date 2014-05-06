@@ -16,6 +16,7 @@ import play.mvc.WebSocket;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import utils.LoggerUtils;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages;
 import utils.gamemanager.GameManager;
@@ -32,6 +33,7 @@ public class GameFactory extends Factory {
             retrieved = true;
            } catch(Exception e) {
                trial++;
+               LoggerUtils.error(room, e);
                Logger.error("GameManager failure, retrying...");
            }
         }

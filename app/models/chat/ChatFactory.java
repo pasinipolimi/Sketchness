@@ -7,11 +7,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import java.util.concurrent.TimeoutException;
+import play.Logger;
 import play.libs.Json;
 import play.mvc.WebSocket;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import utils.LoggerUtils;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages.Join;
 import utils.gamemanager.GameManager;
@@ -32,6 +34,7 @@ public class ChatFactory extends Factory {
             }
             catch (TimeoutException timeout) {
                 result=null;
+                LoggerUtils.error("CHATFACTORY", timeout);
                 trial++;
                 future = Patterns.ask(obtained, new Join(username, out), 5000);
             }

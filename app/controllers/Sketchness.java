@@ -195,7 +195,12 @@ public class Sketchness extends Controller {
 	@Restrict(@Group(Application.USER_ROLE))
 	public static Result leaderboard(final String username, String result)
 			throws Exception {
-		result = result.substring(1);
+                if(result.equals("")||result==null) {
+                    result="";
+                }
+                else {
+                    result = result.substring(1);
+                }
 		final String[] splitted = result.split(":");
 		for (int x = 0; x < splitted.length; x = x + 2) {
 			flash("score" + ((x / 2) + 1), "");

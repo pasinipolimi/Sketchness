@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import play.Logger;
 import play.libs.Akka;
+import utils.LoggerUtils;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.GameEvent;
 import utils.gamebus.GameMessages.Room;
@@ -30,13 +31,18 @@ public class GameManager implements GameManagerInterface, Serializable {
     private GameManager() {
     }
 
-    public static GameManagerInterface getInstance() {
-        if (instance == null) {
-            synchronized (GameManager.class) {
-                    instance = TypedActor.get(Akka.system()).typedActorOf(new TypedProps<>(GameManagerInterface.class, GameManager.class).withTimeout(new Timeout(5000)));
+    public static GameManagerInterface getInstance() throws Exception{
+        try {
+            if (instance == null) {
+                synchronized (GameManager.class) {
+                        instance = TypedActor.get(Akka.system()).typedActorOf(new TypedProps<>(GameManagerInterface.class, GameManager.class).withTimeout(new Timeout(5000)));
+                }
             }
+            return instance;
         }
-        return instance;
+        catch(Exception e) {
+            throw e;
+        }
     }
 
     @Override
