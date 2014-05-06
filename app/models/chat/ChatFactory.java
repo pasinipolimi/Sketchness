@@ -22,18 +22,18 @@ public class ChatFactory extends Factory {
         int trial = 0;
         
         final ActorRef obtained = create(room, Chat.class);
-        Future<Object> future = Patterns.ask(obtained, new Join(username, out), 50000);
+        Future<Object> future = Patterns.ask(obtained, new Join(username, out), 5000);
         // Send the Join message to the room
         
         String result = null;
         while(trial<=5 && result==null) {
             try {
-                result = (String) Await.result(future, Duration.create(50, SECONDS));
+                result = (String) Await.result(future, Duration.create(5, SECONDS));
             }
             catch (TimeoutException timeout) {
                 result=null;
                 trial++;
-                future = Patterns.ask(obtained, new Join(username, out), 50000);
+                future = Patterns.ask(obtained, new Join(username, out), 5000);
             }
         }
         if(result==null)
