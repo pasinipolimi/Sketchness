@@ -677,7 +677,7 @@ public class Game extends GameRoom {
 		final Cancellable init = Akka
 				.system()
 				.scheduler()
-				.scheduleOnce(Duration.create(1000, TimeUnit.MILLISECONDS),
+				.scheduleOnce(Duration.create(10, TimeUnit.MILLISECONDS),
 						new Runnable() {
 							@Override
 							public void run() {

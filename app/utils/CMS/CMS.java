@@ -97,7 +97,7 @@ public class CMS {
 	}
         public static void segmentation(final ObjectNode finalTraces, final String username, final Integer session) throws MalformedURLException, IOException, JSONException {
             Akka.system().scheduler().scheduleOnce(
-                    Duration.create(10, TimeUnit.MILLISECONDS),new Runnable() {
+                    Duration.create(200, TimeUnit.MILLISECONDS),new Runnable() {
 		    @Override
 		    public void run() {
                             try {
@@ -139,7 +139,7 @@ public class CMS {
 			final String username, final Integer session)
 			throws MalformedURLException, IOException, JSONException {
                     Akka.system().scheduler().scheduleOnce(
-                    Duration.create(10, TimeUnit.MILLISECONDS),new Runnable() {
+                    Duration.create(200, TimeUnit.MILLISECONDS),new Runnable() {
 		    @Override
 		    public void run() {
                         // final JsonReader jsonReader = new JsonReader();
