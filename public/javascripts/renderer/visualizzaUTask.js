@@ -41,7 +41,6 @@ function  visualizzaUTask(){
                         
                         if(aperto === "1"){
                             $("#closeTaskButton").hide();   //for the review
-                        //    $("#closeTaskButton").show();
                             $("#closedTaskLabel").hide();
                         }
                         else{

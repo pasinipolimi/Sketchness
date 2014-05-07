@@ -2,6 +2,7 @@ package controllers;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.StringTokenizer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.json.JSONException;
@@ -15,6 +16,10 @@ import utils.LoggerUtils;
 import utils.Renderer;
 import views.html.newRenderer;
 import views.html.renderer;
+import views.html.admin_home;
+import views.html.tasks;
+import views.html.systemInfo;
+import views.html.userInfo;
 
 /**
  * 
@@ -35,6 +40,7 @@ public class Utilities extends Controller {
 			return ok("[AGGREGATOR] " + e.toString());
 		}
 	}
+	
 
 	public static Result retrieveTags(final String imageID) {
 		try {
@@ -68,7 +74,8 @@ public class Utilities extends Controller {
 	}
 
 	public static Result newRendererCall() {
-		return ok(newRenderer.render());
+		//return ok(newRenderer.render());
+		return ok(admin_home.render());
 
 	}
 
@@ -78,6 +85,7 @@ public class Utilities extends Controller {
 	}
 
 	public static Result taskSelectionCall() throws JSONException {
+
 		final String result = Renderer.taskSelection();
 		return ok(result);
 	}
@@ -86,6 +94,12 @@ public class Utilities extends Controller {
 		final String result = Renderer.loadStats();
 		return ok(result);
 	}
+	
+	public static Result usersStatsAjaxCall() throws JSONException {
+		final String result = Renderer.loadUsersStats();
+		return ok(result);
+	}
+
 
 	public static Result webInfoAjaxCall() throws JSONException {
 		final String selectedImg = request().getHeader("selected");
@@ -157,5 +171,55 @@ public class Utilities extends Controller {
 			}
 		};
 	}
+	
+	public static Result invalidateTag() throws IOException {
+		final String tagId = request().getHeader("tagId");
+		Renderer.invalidateTag(tagId);
+		final String result = "ok";
+		return ok(result);
+	}
+	
+	public static Result tasksPageCall() {
+		return ok(tasks.render());
+	}
+	
+	public static Result systemInfoPageCall() {
+		return ok(systemInfo.render());
+	}
+	
+	public static Result usersInfoPageCall() {
+		return ok(userInfo.render());
+	}
+	
+	public static Result collectionAjaxCall() throws JSONException {
+		final String result = Renderer.collectionAjaxCall();
+		return ok(result);
+	}
+	
+	public static Result collectionImagesAjaxCall() throws JSONException {
+		final String collectionId = request().getHeader("selected");
+		final String result = Renderer.collectionImagesAjaxCall(collectionId);
+		return ok(result);
+	}
+	
+	public static Result maskAjaxCall() throws JSONException {
+		
+		
+		final String imageId = request().getHeader("idImage");
+		final String tagId = request().getHeader("idTag");
+		final String result = Renderer.maskAjaxCall(imageId,tagId);
+		return ok(result);
+		
+	}
+	
+	public static Result maskFashionistaAjaxCall() throws JSONException {
+		final String imageId = request().getHeader("idImage");
+		final String tagId = request().getHeader("idTag");
+		final String result = Renderer.maskFashionistaAjaxCall(imageId,tagId);
+		return ok(result);
+	}
+	
+
+
 
 }

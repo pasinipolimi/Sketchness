@@ -3,15 +3,12 @@
  * and open the template in the editor.
  */
 
-function nuovoUTask(){
-    
-    var taskType = $("#creanuovoUTask").val();
-    var selectionTask = $("#TaskAttivo").val();
+function nuovoUTask(utaskType, selectionTask, taskType, taskStatus){
     
      $.jAjax({
         url: "AddUTask",
         headers : {
-            "taskType" : taskType,
+            "taskType" : utaskType,
             "selectionTask" : selectionTask
         },
         onComplete: function(xhr,status){
@@ -20,7 +17,7 @@ function nuovoUTask(){
                 if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
                    var newTaskId = xhr.responseText;
                    alert("New micro task code is: " + newTaskId);
-                   visualizzaUTask();
+                   taskPreview(selectionTask, taskType, taskStatus);
                 }
                 else{
                     alert("Request was unsuccesfull: "+ xhr.status);
@@ -28,5 +25,6 @@ function nuovoUTask(){
             }
         }
     });
+
 }
 

@@ -1,0 +1,114 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <title>Sketchness AdminUI</title>
+       
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/style.css")">
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/dropkick.css")">
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/blank_theme.css")">
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap-theme.css")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap-theme.css.map")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap-theme.min.css")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap.css")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap.css.map")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap.min.css")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap-responsive.css")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap-responsive.min.css")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/ResponsiveFullWidthGrid/default.css")" >
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/ResponsiveFullWidthGrid/component.css")">
+		<script src="js/modernizr.custom.js"></script>
+    </head>
+    <body class="cf">
+    @header(title = "System Info") {
+        
+	<div class="statsCont">
+	    <div class="panelTitle">System Info</div>
+		<table id="statisticheSistema"  class="infoTable">
+			<tr>
+				<td class="infoLabel">Images:</td>
+				<td class="infoValue" id="numeroFoto"></td>
+			</tr>
+			<tr>
+				<td class="infoLabel">Tag avg. per Image:</td>
+				<td class="infoValue" id="mediaTagFoto"></td>
+			</tr>
+			<tr>
+				<td class="infoLabel">Annotations:</td>
+				<td class="infoValue" id="numeroSegmenti"></td>
+			</tr>
+			<tr>
+				<td class="infoLabel">Annotation avg. per image:</td>
+				<td class="infoValue" id="mediaSegmenti"></td>
+			</tr>
+			<tr>
+				<td class="infoLabel">Number of users:</td>
+				<td class="infoValue" id="numberUsers"></td>
+			</tr>
+		</table>
+    </div>
+    <div class="span12" id="statsButton">
+        <a class='btn' onclick="caricaStatistiche()"><i class='icon-repeat'></i> <strong>Update Stats</strong></a>
+        <a class='btn' onclick="displayGraphs()"><i class='icon-ok'></i> <strong>Display Graphs</strong></a>
+    	<a class='btn' onclick="#"><i class='icon-repeat'></i> <strong>Update Masks</strong></a>
+    </div>
+	
+	<div id="drawArea" class="span12" style="display:none;">
+                <div id="chart_div1"></div>
+                <div id="chart_div2"></div>
+    </div>
+
+     <div class="span12" id="downloadButton">
+     	<div class="panelTitle">Download data</div>
+     	<a class='btn' onclick="download1()"><i class='icon-download-alt'></i> <strong>User data</strong></a>
+     	<a class='btn' onclick="download2()"><i class='icon-download-alt'></i> <strong>Image data</strong></a>
+     	<a class='btn' onclick="downloadgraph1()"><i class='icon-download-alt'></i> <strong>First Graph Data</strong></a>
+     	<a class='btn' onclick="downloadgraph2()"><i class='icon-download-alt'></i> <strong>Second Graph Data</strong></a>
+    </div>
+
+
+	
+
+  	}
+
+	</body>
+    <script src="@routes.Assets.at("javascripts/renderer/jquery/jquery-1.10.2.min.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/loadMask.js")?nocache=@(new Date().getTime())"></script>
+	<script src="@routes.Assets.at("javascripts/renderer/invalidateTag.js")?nocache=@(new Date().getTime())"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/jquery/jquery.dropkick-min.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/jquery/jAjax.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/visualizzaImg.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/popolaSelectionAjax.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/popolaSelectionAjaxTasks.js")"></script>
+	<script src="@routes.Assets.at("javascripts/renderer/visualizzaImgAjax.js")?nocache=@(new Date().getTime())"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/popolaTask.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/visualizzaUTask.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/nuovoTask.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/nuovoUTask.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/caricaStatistiche.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/chiudiTask.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/loadFirstGraph.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/loadSecondGraph.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/FileSaver.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/download.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/imgPreview.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/taskPreview.js")"></script>
+    <script src="https://www.google.com/jsapi"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/bootstrap/boostrap.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/bootstrap/boostrap.min.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/ResponsiveFullWidthGrid/modernizr.custom.js")"></script>
+    <script>google.load('visualization', '1', {'packages':['corechart']});</script>
+    <script>
+        window.onload = function(){
+            caricaStatistiche();
+           
+        };
+        
+    </script>
+    
+</html>

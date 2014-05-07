@@ -3,9 +3,8 @@
  * and open the template in the editor.
  */
 function caricaStatistiche(){
-  popolaSelectionAjax();
-  loadFirstGraph();
-  loadSecondGraph();
+
+
   $.jAjax({
     url: "LoadStats",
     onComplete: function(xhr,status){
@@ -19,7 +18,6 @@ function caricaStatistiche(){
              var mediaSegmenti = result.mediaSegImg[0];
              var numberUsers = result.numberUsers[0];
 
-             $("#statisticheSistema").show();
              $("#numeroFoto").text(totImg);
              $("#mediaTagFoto").text(Number(mediaTag).toFixed(2));
              $("#numeroSegmenti").text(numSegment);
@@ -32,5 +30,13 @@ function caricaStatistiche(){
       }
     }
   });
+}
+
+function displayGraphs(){
+	  loadFirstGraph();
+	  loadSecondGraph();
+	$("#drawArea").show();
+	$("#chart_div1").show();
+	$("#chart_div2").show();
 }
 

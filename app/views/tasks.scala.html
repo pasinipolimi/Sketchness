@@ -1,0 +1,108 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <title>Sketchness AdminUI</title>
+       
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/style.css")">
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/dropkick.css")">
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/blank_theme.css")">
+        <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap-theme.css")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap-theme.css.map")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap-theme.min.css")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap.css")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap.css.map")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap.min.css")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap-responsive.css")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap-responsive.min.css")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/ResponsiveFullWidthGrid/default.css")" >
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/ResponsiveFullWidthGrid/component.css")">
+		<script src="js/modernizr.custom.js"></script>
+    </head>
+    <body class="cf">
+    @header(title = "Tasks") {
+
+     
+  		<input type="text" id="ImgAttivattiva" style="display:none;"/>
+        <input type="text" id="TaskAttivo" style="display:none;"/>
+        <input type="text" id="mediaLocator" style="display:none;"/>
+        <input type="text" id="ImgPreview" style="display:none;"/>
+        	
+		
+		<div class='taskCont'>
+			<div id='taskTitle' class='panelTitle' style="display:none;"></div>
+			<div class='span12'>
+			<table id='taskInfo' class='infoTable' style="display:none;"></table>
+			</div>
+		</div>
+		<div class = "createTask" style="display:none;"></div>
+
+				<div class = "imagesCont">
+                    <div class="panelTitle">Tasks</div>
+					<form action="#" method="get" id="filterForm" >
+						<div class="input-group">
+							<input id="system-search" type="text" name="taskIdSearch" placeholder='Task Id'> 
+							<span class="input-group-btn">
+								<a class='btn' onclick="filter();"><i class='icon-search'></i><strong> Search</strong></a>
+								<a class='btn' onclick="repopolate();"><i class='icon-remove-circle'></i><strong> Reset</strong></a>
+							</span>	
+						</div>
+					</form>
+						<ul id="tasksList"></ul>
+                </div>
+         
+         <div class='panelTitle' id="newTaskTile">Create New Task</div>
+         	<span id="newTask" class="input-group-btn">
+         		<a class='btn' onclick="newSegmentationTask();"><i class='icon-plus'></i><strong> New Segmentation Task</strong></a>
+		 		<a class='btn' onclick="newTaggingTask();"><i class='icon-plus'></i><strong> New Tagging Task</strong></a>
+         	</span>
+         <div id="collectionListTask" class="checkbox"></div>
+      	 <span class="input-group-btn">
+			 <a id="filterCollTaskButt" class='btn' onclick="visualizzaCollectionTask();"><i class='icon-search'></i><strong> Filter collection</strong></a>
+      	 </span>
+         <div id="TaskImagesList" class="cbp-rfgrid"></div>
+
+  	}
+
+	</body>
+    <script src="@routes.Assets.at("javascripts/renderer/jquery/jquery-1.10.2.min.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/loadMask.js")?nocache=@(new Date().getTime())"></script>
+	<script src="@routes.Assets.at("javascripts/renderer/invalidateTag.js")?nocache=@(new Date().getTime())"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/jquery/jquery.dropkick-min.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/jquery/jAjax.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/visualizzaImg.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/popolaSelectionAjax.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/popolaSelectionAjaxTasks.js")"></script>
+	<script src="@routes.Assets.at("javascripts/renderer/visualizzaImgAjax.js")?nocache=@(new Date().getTime())"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/popolaTask.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/visualizzaUTask.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/nuovoTask.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/nuovoUTask.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/caricaStatistiche.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/chiudiTask.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/loadFirstGraph.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/loadSecondGraph.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/FileSaver.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/download.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/imgPreview.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/taskPreview.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/filterTasks.js")"></script>
+    <script src="https://www.google.com/jsapi"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/bootstrap/boostrap.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/bootstrap/boostrap.min.js")"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/ResponsiveFullWidthGrid/modernizr.custom.js")"></script>
+    <script>google.load('visualization', '1', {'packages':['corechart']});</script>
+    <script>
+
+        window.onload = function(){
+            popolaSelectionAjaxTasks();
+           
+        };
+    </script>
+    
+</html>

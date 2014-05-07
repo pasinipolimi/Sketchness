@@ -13,6 +13,7 @@ import java.awt.image.ImageProducer;
 import java.awt.image.RGBImageFilter;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -49,6 +50,8 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.pattern.Patterns;
+
+import java.util.StringTokenizer;
 
 public class Renderer extends UntypedActor {
 
@@ -240,6 +243,7 @@ public class Renderer extends UntypedActor {
 		Logger.error("[AGGREGATOR] Retrieved mask for image " + ImageID);
 		return null;
 	}
+	
 
 	public static synchronized JsonNode retrieveImages() throws Exception {
 
@@ -299,6 +303,7 @@ public class Renderer extends UntypedActor {
 		final JsonNode itemTask = jsonReader.readJsonArrayFromUrl(rootUrl
 				+ "/wsmc/task.json");
 		JSONArray images = new JSONArray();
+
 		JSONArray tasks = new JSONArray();
 		JSONObject element;
 		final JSONObject result = new JSONObject();
@@ -381,7 +386,7 @@ public class Renderer extends UntypedActor {
 		final String totImg = Integer.toString(itemImage.size());
 		String numUsers = "0";
 		final JSONArray stats = CMS.retriveStats(itemImage);
-
+		
 		Connection connection = null;
 		PreparedStatement statement = null;
 		ResultSet rs = null;
@@ -443,6 +448,48 @@ public class Renderer extends UntypedActor {
 		final String sendStats = result.toString();
 		return sendStats;
 	}
+	
+	/**
+	 * Load the stats of the users
+	 * 
+	 * @return name, number of annotations, number of plays, quality
+	 * @throws JSONException
+	 */
+	public static String loadUsersStats() throws JSONException {
+		
+		final JsonReader jsonReader = new JsonReader();
+		final JsonNode itemApp = jsonReader.readJsonArrayFromUrl(rootUrl
+					+ "/wsmc/cubrikuser/9.json");
+
+		final JSONObject result = new JSONObject();
+
+		final JSONArray usersInfo = new JSONArray();
+		JSONObject element; 
+		JsonNode object;
+
+		
+
+		int i=0;
+		while (i < itemApp.size()) {
+			object = itemApp.get(i);
+			element = new JSONObject();
+			element.put("cubrik_userid", object.get("cubrik_userid").toString());
+			element.put("app_id", object.get("app_id").toString());
+			element.put("app_user_id", object.get("app_user_id").toString());
+			element.put("number_of_plays", object.get("number_of_plays").toString());
+			element.put("number_of_annotations", object.get("number_of_annotations").toString());
+			usersInfo.put(element);
+
+			i++;
+			}// fine while
+
+		result.append("usersInfo", usersInfo);
+		final String sendStats = result.toString();
+		return sendStats;
+		
+		
+	}
+
 
 	/**
 	 * Load more details of a particular image such as the medialocator, the
@@ -464,6 +511,83 @@ public class Renderer extends UntypedActor {
 
 		return info;
 	}
+	
+	/**
+	 * Load more details of a particular mask such as the medialocator
+	 * 
+	 * @param imageId
+	 *            the image that I want to analyse
+	 * @param tagId
+	 *            the tag that I want to analyse
+	 * @return the info that i retrived
+	 * @throws JSONException
+	 */
+	public static String maskAjaxCall(final String imageId, final String tagId)
+			throws JSONException {
+
+		final JsonReader jsonReader = new JsonReader();
+		final JsonNode item = jsonReader.readJsonArrayFromUrl(rootUrl
+				+ "/wsmc/mask/" + imageId + "/" + tagId + ".json");
+
+		final String info = CMS.retriveMaskInfo(item);
+		return info;
+	}
+	
+	/**
+	 * Retrieve the file name of the fashionista mask, given imageId and tagId
+	 * 
+	 * @param imageId
+	 *            the image that I want to analyse
+	 * @param tagId
+	 *            the tag that I want to analyse
+	 * @return the image url
+	 * @throws JSONException
+	 */
+	public static String maskFashionistaAjaxCall(final String imageId, final String tagId)
+			throws JSONException {
+		
+		
+		    final JSONObject result = new JSONObject();
+		    final JSONArray info = new JSONArray();
+
+		    
+			String url = "";
+			String img = "";
+			String tag = "";
+			String qual = "";
+			String temp = "";
+			String quality = "";
+
+		    java.io.File folder = play.Play.application().getFile("public/images/fashionista");
+
+		    File[] files = folder.listFiles();
+		    
+		    if (files != null) {
+			    for (File file : files) {
+			    		temp = file.getName();
+			    		StringTokenizer st = new StringTokenizer(temp, "_");
+			    		String mask = (String) st.nextElement();
+			    		img = (String) st.nextElement();
+			    		tag = (String) st.nextElement();
+			    		qual = (String) st.nextElement();
+			    		
+			    		if(img.equals(imageId)&&tag.equals(tagId))
+			    		{
+			    			url = file.getName();
+			    			StringTokenizer st2 = new StringTokenizer(qual, ".png");
+			    			quality = (String) st2.nextElement();
+			    		}	
+			    }
+		    }
+
+		    result.append("url", url);
+		    result.append("quality", quality);
+		    info.put(result);
+		    return info.toString();
+
+	}
+	
+	
 
 	/**
 	 * Load the list of microTask of a particular task
@@ -477,14 +601,20 @@ public class Renderer extends UntypedActor {
 			throws JSONException {
 
 		final JsonReader jsonReader = new JsonReader();
-		final JsonNode itemTask = jsonReader.readJsonArrayFromUrl(rootUrl
-				+ "/wsmc/task.json"); // TODO possible speed increment, directly
+		//final JsonNode itemTask = jsonReader.readJsonArrayFromUrl(rootUrl
+		//		+ "/wsmc/task.json"); // TODO possible speed increment, directly
 										// download need task and not all task +
 										// loacal search
-
-		final String info = CMS.retriveTaskInfo(itemTask, selection);
+		
+		final JsonNode itemTask = jsonReader.readJsonArrayFromUrl(rootUrl
+				+ "/wsmc/task/" + selection + ".json");
+		
+		//final String info = CMS.retriveTaskInfo(itemTask, selection);
+		final String info = CMS.retriveTaskInfo(itemTask);
 
 		return info;
+
+
 	}
 
 	/**
@@ -496,6 +626,13 @@ public class Renderer extends UntypedActor {
 	 */
 	public static void closeTask(final String selection) throws IOException {
 		CMS.closeTask2(selection);
+	}
+	
+	/**
+	 * Invalidate tag
+	 */
+	public static void invalidateTag(final String selection) throws IOException {
+		CMS.invalidateTag(selection);
 	}
 
 	/**
@@ -569,6 +706,8 @@ public class Renderer extends UntypedActor {
 		final String result = info.toString();
 		return result;
 	}
+	
+	
 
     /**
      * Generate a json file with User Data
@@ -578,6 +717,7 @@ public class Renderer extends UntypedActor {
      */
 	public static String downloadStats1() throws JSONException {
 		final JsonReader jsonReader = new JsonReader();
+		
 		final JsonNode itemAction = jsonReader.readJsonArrayFromUrl(rootUrl
 				+ "/wsmc/action.json");
 
@@ -601,6 +741,57 @@ public class Renderer extends UntypedActor {
 		final String result = info.toString();
 		return result;
 	}
+	
+	
+	/**
+	 * Load the list of collections of images
+	 * 
+	 * @return the info that i retrived
+	 * @throws JSONException
+	 */
+	public static String collectionAjaxCall()
+			throws JSONException {
+
+		final JsonReader jsonReader = new JsonReader();
+		final JsonNode itemCollection = jsonReader.readJsonArrayFromUrl(rootUrl
+				+ "/wsmc/collection.json");
+		
+		JSONArray collections = new JSONArray();
+		collections = CMS.retriveCollectionInfo(itemCollection);
+		
+		final JSONObject result = new JSONObject();
+		result.append("collections", collections);
+		final String options = result.toString();
+		return options;
+
+	}
+	
+	/**
+	 * Load the images of a collection
+	 * 
+	 * @param collectionId
+	 *            the id of the collection
+	 * @return the info that i retrived
+	 * @throws JSONException
+	 */
+	public static String collectionImagesAjaxCall(final String collectionId)
+			throws JSONException {
+
+		final JsonReader jsonReader = new JsonReader();
+		final JsonNode item = jsonReader.readJsonArrayFromUrl(rootUrl
+				+ "/wsmc/collection/" + collectionId + ".json");
+
+		//JSONArray images = new JSONArray();
+		String images = CMS.retriveCollImages(item);
+		/*
+		final JSONObject result = new JSONObject();
+		result.append("images", images);
+		final String options = result.toString();
+		return options;
+		*/
+		return images;
+	}
+
 
 }
 

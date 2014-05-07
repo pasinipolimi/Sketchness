@@ -13,7 +13,8 @@ var rendererGlobalVar = (function() {
 })();
 
 
-function loadMask(tag) {
+function loadMask(tag, selectionimg, mediaimg) {
+
 
 var selectionimg = $("#ImgAttivattiva").val()
     ,mediaimg = $("#mediaLocator").val()
@@ -22,7 +23,8 @@ var selectionimg = $("#ImgAttivattiva").val()
     ,taskCanvas = document.getElementById("task")
     ,taskContext = taskCanvas.getContext("2d")
     ,taskImage=new Image();
-taskImage.src=mediaimg;
+    taskImage.src=mediaimg;
+
 
  var graph1 = document.getElementById("chart_div1");
  var graph2 = document.getElementById("chart_div2");
@@ -53,14 +55,12 @@ taskImage.onload = function() {
 try {
 	  var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
 	  socket = new WS("ws://localhost:9000/rendererStream?imageID="+selectionimg);
-	//  socket = new WS("ws://www.sketchness.com/rendererStream?imageID="+selectionimg);
-
-      socket.onmessage = onSocketMessage;
+	
 
       socket.onopen = function(evt) {
 		console.log( evt, this );
         connected = true;
-        rendererGlobalVar.setSocket(socket);
+
 		drawTracesMask(taskImage,selectionimg,tag);
       };
 
@@ -75,6 +75,7 @@ try {
 		console.error("Error in the connection");
 		console.error(e);
     }
+    
 }
 
 var drawTracesMask = function(taskImage,selectionimg,tag) {
@@ -93,93 +94,28 @@ var drawTracesMask = function(taskImage,selectionimg,tag) {
 		ctx.clearRect(0,0,canvas.width,canvas.height);
 		maskContext.fillText("Computing aggregated mask...",10,50);
 
-        var serverSocket = rendererGlobalVar.getSocket();
-        serverSocket.send(JSON.stringify({"type":"tag","tag":tag}));
+        
         var maskImage = null;
         maskImage = new Image();
         maskImage.src = "/retrieveMask?imageID="+selectionimg+"&tag="+tag;
-
+        
 
         maskImage.onload = function() {
 
         if((maskImage.src.substring(maskImage.src.indexOf("=")+1,maskImage.src.indexOf("&"))==$("#ImgAttivattiva").val())&& ($("#ImgPreview").val() == $("#ImgAttivattiva").val())){
             maskContext.save();
             maskContext.beginPath();
-
             maskCanvas.width=taskCanvas.width;
             maskCanvas.height=taskCanvas.height;
             maskContext.drawImage(taskImage,0,0,maskCanvas.width,maskCanvas.height);
             maskContext.drawImage(maskImage,0,0,maskCanvas.width,maskCanvas.height);
             maskContext.restore();
+            maskContext.globalCompositeOperation = 'source-over';
+            maskContext.font="bold 30px Arial";
+            maskContext.fillStyle = 'white';
+            maskContext.fillText('Quality: unknown', 10,50);
             };
         }
+        
+
 }
-
-
-function send (o) {
-    if (!connected) return;
-    socket.send(JSON.stringify(o));
-  }
-
-
-var gameloop = (function(){
-  var canvas = document.getElementById("draws");
-  var ctx = canvas.getContext("2d");
-  var taskCanvas = document.getElementById("task");
-  var taskContext = taskCanvas.getContext("2d");
-  var maskCanvas = document.getElementById("mask");
-  var maskContext = maskCanvas.getContext("2d");
-
-  /*******************************MANAGING THE INCOMING MESSAGES*****************/
-  onSocketMessage = function (e) {
-    var m = JSON.parse(e.data);
-    switch(m.type)
-    	{
-
-
-    		case "trace":
-    		                if((m.imageId == $("#ImgAttivattiva").val())&& (m.imageId == $("#ImgPreview").val())){
-    							ctx.lineJoin = "round";
-
-                                ctx.beginPath();
-                                        var points = m.points;
-    									var drawable=true;
-                                        ctx.moveTo(points[0].x, points[0].y);
-    									for(var i=0;i<points.length;i++)
-    									{
-    										var p=points[i];
-    										if(p.removed===false&&p.color!='end')
-    										{
-    												if(!drawable)
-    												{
-    													drawable=true;
-    													ctx.beginPath();
-    													ctx.moveTo(p.x,p.y);
-    												}
-    												ctx.strokeStyle=m.color;
-    												ctx.lineWidth = p.size;
-    												ctx.lineTo(p.x, p.y);
-    										}
-    										else
-    										{
-    											if(drawable)
-    											{
-    												ctx.stroke();
-    												drawable=false;
-    											}
-    										}
-
-                                        };
-                            }
-    			break;
-
-
-    	}
-
-
-    };
-
-    var w = canvas.width, h = canvas.height;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-  })();

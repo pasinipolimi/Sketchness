@@ -1,5 +1,25 @@
 
-function visualizzaImgAjax(idselected){
+function visualizzaImgAjax(idselected, mediaLocator){
+		
+   //clear tag
+   var tagTitle = $("#tagTitle");
+   tagTitle.hide();
+   //clear masks
+   var maskCanvas = document.getElementById("maskNew");
+   var maskContext = maskCanvas.getContext("2d");
+   maskContext.clearRect(0,0,maskCanvas.width,maskCanvas.height);
+   var maskCanvas2 = document.getElementById("mask");
+   var maskContext2 = maskCanvas2.getContext("2d");
+   maskContext2.clearRect(0,0,maskCanvas2.width,maskCanvas2.height);
+   var maskCanvas3 = document.getElementById("maskFashion");
+   var maskContext3 = maskCanvas3.getContext("2d");
+   maskContext3.clearRect(0,0,maskCanvas3.width,maskCanvas3.height);
+   //clear buttons
+   var maskButtons = $("#maskButtons");
+   maskButtons.children().remove();
+   
+
+   
    var tagContainer = $(".tag.listBody")
        ,url= "http://54.228.220.100/"
        ,taskImage
@@ -11,11 +31,6 @@ function visualizzaImgAjax(idselected){
        ,graph2 = document.getElementById("chart_div2")
        ,viewport = document.getElementById("viewport");
 
-   tagContainer.children().remove();
-
-   $(graph1).hide();
-   $(graph2).hide();
-   $(viewport).show();
 
 
    $.jAjax({
@@ -24,30 +39,59 @@ function visualizzaImgAjax(idselected){
         onComplete: function(xhr,status){
             if(xhr.readyState === 4){
                 if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
-				
-					
-				
+                	
                     var result = JSON.parse(xhr.responseText);
                     var tags = result[0].tags;
                     var annotations = result[0].annotations;
+                    var width = result[0].width;
+                    var height = result[0].height;
+                    $(".infoTable").show();
                     $("#imageAnnotations").text(annotations);
+                    $("#imageId").text(idselected);
+                    $("#imageWidth").text(width.substring(1, width.length -1)+" px");
+                    $("#imageHeight").text(height.substring(1, height.length -1)+" px");
+                    
+                    
+                    var tagList = $("#imageTags");
+                    tagList.children().remove();
+                    
+                    var tr = document.createElement("tr");
+					tagList.append(tr);
+					tr.innerHTML = "<td class='infoLabel'>Image Tags:</td>";
                     
                     if(tags.length === 0)
-                        tagContainer.append("<span>No tags available</span>");
+                    	tagList.append("<tr>No tags available</tr>");
+                    
                     $.each(tags,function(i,d){
-                        tagContainer.append("<div class='listItem' onclick=\"loadMask('"+d.tag.substring(1, d.tag.length -1)+"')\">"+ d.tag.substring(1, d.tag.length -1) +"</div>");
+                    	if(d.valid.substring(1, d.valid.length -1)=="1"){
+                    		tagList.append("<tr><td class='infoValue' onclick=\"newMask('"+d.annotationId.substring(1, d.annotationId.length -1)+"','"+idselected+"','"+d.tag.substring(1, d.tag.length -1)+"')\">"+ d.tag.substring(1, d.tag.length -1) +" ( "+d.lang.substring(1, d.lang.length -1)+" )"+"</td>"+
+                    				"<td class='infoValue' ><a href='#' class='btn' onclick=\"invalidateTag('"+d.tagId+"')\"><i class='icon-remove-circle'></i> <strong>Invalidate</strong></a></td></tr>");
+                    			
+                    		
+                    	}
                     });
+                    
+                    
+   					$(".createTask").show();
+   					var createTask = $(".createTask");
+   					createTask.children().remove();
+   					createTask.append("<div class='span12' id='statsButton'>"+
+   									"<a id='newUtask' class='btn' onclick=\"nuovoTask('"+"segmentation"+"','"+idselected+"')\"><i class='icon-plus'></i> <strong>New Segmentation Task</strong></a>"+
+   									"<a id='newUtask' class='btn' onclick=\"nuovoTask('"+"tagging"+"','"+idselected+"')\"><i class='icon-plus'></i> <strong>New Tagging Task</strong></a>"
+   									+"</div>");
+                    
                     
                     url += result[0].medialocator.substring(1, result[0].medialocator.length -1);
                     taskImage=new Image();
                     taskImage.src=url;
                     $("#immagine").attr("src",url);
-                    $("#imageId").text(idselected);
+                    
                     $("#dati").show();
-                    tagContainer.parent().show();
+                    
                     $("#img").hide();
                     $("#ImgAttivattiva").val(idselected);
                     $("#mediaLocator").val(url);
+                    
                     taskImage.onload = function() {
                                                     taskContext.save();
                                                     taskContext.beginPath();
@@ -62,6 +106,7 @@ function visualizzaImgAjax(idselected){
 													var maskContext = maskCanvas.getContext("2d");
 													maskContext.clearRect(0,0,maskCanvas.width,maskCanvas.height);
                                                 };
+                      
 
                 }
                 else

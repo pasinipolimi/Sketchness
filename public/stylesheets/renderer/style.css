@@ -17,7 +17,7 @@ small, strong, sub, sup, var,
 b, i,
 dl, dt, dd, ol, ul, li,
 fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
+/*table, caption, tbody, tfoot, thead, tr, th, td,*/
 article, aside, canvas, details, figcaption, figure, 
 footer, header, hgroup, menu, nav, section, summary,
 time, mark, audio, video {
@@ -125,7 +125,9 @@ p{
 
 a {
   text-decoration: none; /* no underline */
+
 }
+
 
 button[type="submit"] {
   background-color: #f8f8f8;
@@ -431,6 +433,13 @@ div.header .logo > span{
 .latosinistro{
 }
 
+.imagesCont{
+	float:left;
+	width: 80%;
+	margin-left: 10%;
+	display: block;
+}
+
 .latodestro{
 }
 
@@ -461,15 +470,19 @@ div.header .logo > span{
   border-bottom: 1px solid #c1c1c1;
   width: 100%;
   padding: 10px 0 5px;
+  float: left;
+  margin-bottom: 10px;
 }
 
 .infoTable .infoLabel {
   font-weight: bold;
   padding: 3px 0;
+
 }
-.infoTable .infoValue {
-  vertical-align: middle;
-  padding-left: 6px;
+
+
+#imageTags .infoValue {
+  cursor: pointer;
 }
 
 #dati{
@@ -491,3 +504,206 @@ div.header .logo > span{
     position: relative;
     float: right;
 }
+
+.imageDiv{
+	width:80%;
+	margin-left:10%;
+}
+
+/*
+.infoTable {
+	float: right;
+	margin-right: 50%;
+	margin-top: 2.5%;
+	margin-bottom: 2.5%;
+	font-size:110%;
+}
+*/
+.segTask, .tagTask{
+  margin-left:10%;
+  display:block;
+  color: #47A3DA;
+}
+
+
+.infoTable {
+	float: left;
+	margin-top: 2.5%;
+	margin-bottom: 2.5%;
+	font-size:110%;
+}
+
+#imageInfo{
+	margin-left:10%;
+}
+
+#draws, #task {
+	margin-left:9%;
+	margin-bottom:5%;
+	width:23%;
+}
+
+#mask, #maskNew{
+	float: right;
+	margin-bottom:5%;
+	width:20%;
+}
+
+#mask{
+	margin-left:20%;
+}
+
+#maskFashion{
+	width:20%;
+	margin-left:40%;
+}
+
+.canvasmask{
+	margin-right:10%;
+}
+
+.createTask{
+	margin-top:2.5%;
+}
+
+li {
+	cursor: pointer;
+}
+
+#tasksList {
+	float: left;
+	margin-top:2.5%;
+}
+
+#taskUtasks{
+	width:50%;
+}
+
+#taskUtasks .infoLabel{
+	height: 50px;
+}  
+
+#taskUtasks .infoValue, #statisticheSistema .infoLabel {
+  height: 30px;
+}
+
+#imageInfo{
+	float: left;
+	margin-left:10%;
+	width: 20%;	
+}
+
+#imageTags{
+	width: 30%;
+	margin-left:6%;
+}
+
+.taskId{
+	font-size:110%;
+}
+
+#taskInfo{
+	width:51%;
+}
+
+.taskCont{
+	margin-left:10%;
+	width:80%;
+}
+
+.statsCont{
+	margin-left:10%;
+	width:80%;
+	margin-bottom:5%;
+}
+
+#statisticheSistema{
+	width:30%;
+}
+
+#statsButton{
+	margin-left:10%;
+	margin-bottom: 5%;
+}
+
+#maskButton{
+	margin-left:10%;
+	margin-bottom: 2.5%;
+	margin-top:2%;
+}
+
+#downloadButton{
+	margin-left:10%;
+	margin-bottom: 5%;
+	width:80%;
+}
+	
+#emptyRow{
+	height:50px;
+}
+
+#TaskImagesList li{
+	 width: calc(100% / 7);
+	 height: 40px;
+}
+
+#imageList li{
+	height: 150px;
+}
+	
+
+#TaskImagesList, #newTaskTile{
+	width:80%;
+	float: left;
+	margin-left:10%;
+}
+
+#newTask{
+	float:left;
+	margin-left:10%;
+}
+
+.range{
+	margin-left:8%;
+}
+
+#filterFormImage{
+	float:right;
+	width:80%;
+}
+
+#reset{
+	float: right;
+}
+
+#system-search{
+	height: 2%;
+	margin-top: 0.9%;
+}
+
+#tagTitle{
+	width:80%;
+	float:left;
+	margin-left:10%;
+}
+
+#statisticheUsers{
+	width:100%;
+}
+
+#maskButtons{
+	margin-left:10%;
+	margin-bottom: 2%;
+}
+
+
+#collectionListTask{
+	float: right;
+	margin-right: 12%;
+}
+
+#filterCollTaskButt{
+	float: right;
+	margin-right:3%;
+}
+
