@@ -3,12 +3,13 @@ package utils.gamemanager;
 import akka.actor.ActorRef;
 import akka.actor.TypedActor;
 import akka.actor.TypedProps;
+import akka.util.Timeout;
+import java.io.Serializable;
 import java.util.HashMap;
-
 import java.util.Map;
 import play.Logger;
 import play.libs.Akka;
-import utils.gamebus.GameEventType;
+import utils.LoggerUtils;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.GameEvent;
 import utils.gamebus.GameMessages.Room;
@@ -20,7 +21,7 @@ import utils.gamebus.GameMessages.Room;
  *
  * @author Luca Galli <lgalli@elet.polimi.it>
  */
-public class GameManager implements GameManagerInterface {
+public class GameManager implements GameManagerInterface, Serializable {
 
     private static GameManagerInterface instance = null;
     private static Long matchId = 1L;
@@ -30,13 +31,13 @@ public class GameManager implements GameManagerInterface {
     private GameManager() {
     }
 
-    public static GameManagerInterface getInstance() {
-        if (instance == null) {
-            synchronized (GameManager.class) {
-                    instance = TypedActor.get(Akka.system()).typedActorOf(new TypedProps<>(GameManagerInterface.class, GameManager.class));
-            }
-        }
-        return instance;
+    public static GameManagerInterface getInstance() throws Exception{
+       if (instance == null) {
+           synchronized (GameManager.class) {
+                instance = TypedActor.get(Akka.system()).typedActorOf(new TypedProps<>(GameManagerInterface.class, GameManager.class).withTimeout(new Timeout(5000)));
+           }
+       }
+       return instance;
     }
 
     @Override
@@ -45,13 +46,19 @@ public class GameManager implements GameManagerInterface {
     }
 
     @Override
-    public String addInstance(Integer maxPlayers, String roomName, ActorRef current) {
-        Long id = matchId++;
-        String instanceId = roomName + id;
-        if (!gameInstances.containsValue(current)) {
-            gameInstances.put(instanceId, current);
+    public String addInstance(String roomName, ActorRef current) {
+        try {
+            Long id = matchId++;
+            String instanceId = roomName + id;
+            if (!gameInstances.containsValue(current)) {
+                gameInstances.put(instanceId, current);
+            }
+            return instanceId;
         }
-        return instanceId;
+        catch (Exception e) {
+            LoggerUtils.error("GAMEMANAGER", e);
+            throw e;
+        }
     }
 
     @Override

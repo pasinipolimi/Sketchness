@@ -22,7 +22,9 @@ define(["Class", "paper"], function(Class, paper) {
 			this.text = "";
 
 			this.circle = new paper.Path.Circle({
-				radius: 5
+				center: [0, 0],
+    			radius: 5,
+    			strokeColor: 'red'
 			});
 			this.pointText = new paper.PointText({
 				font: "monospace",

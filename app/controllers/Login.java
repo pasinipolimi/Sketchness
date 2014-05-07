@@ -53,7 +53,7 @@ public class Login extends Controller {
 		}
 
 		final User localUser = getLocalUser(session());
-
+                response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 		if (localUser != null) {
 			Logger.debug("User already logged in, enter in the lobby");
 			return ok(lobby.render(localUser));
@@ -88,6 +88,7 @@ public class Login extends Controller {
 			}
 			// Everything was filled and no other users in session
 			Logger.debug("The login form was filled properly, handling login..");
+                        response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 			return UsernamePasswordAuthProvider.handleLogin(ctx());
 		}
 	}

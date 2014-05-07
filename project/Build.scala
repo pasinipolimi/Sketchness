@@ -16,12 +16,8 @@ object ApplicationBuild extends Build {
 		"org.json" % "json" % "20090211",
 		"gov.nih.imagej" % "imagej" % "1.47",
 		"net.sf.json-lib" % "json-lib" % "2.4" classifier "jdk15",
-
-    //For play-authenticate
-    "be.objectify"  %%  "deadbolt-java"     % "2.1-RC2",
-    // Comment this for local development of the Play Authentication core
-    "com.feth"      %%  "play-authenticate" % "0.3.4-SNAPSHOT",
-    "postgresql"    %   "postgresql"        % "9.1-901-1.jdbc4"
+		"be.objectify"  %%  "deadbolt-java"     % "2.2.1-RC2",
+		"com.feth"      %%  "play-authenticate" % "0.5.2-SNAPSHOT"
 	)
 
 	/** Defines a new setting key that contains the resources list */
@@ -38,6 +34,7 @@ object ApplicationBuild extends Build {
 		Resource("PaperJS", "public/javascripts/lib/paper.js", "https://raw.github.com/paperjs/paper.js/v0.9.9/dist/paper-full.js", false),
 		Resource("JS State Machine", "public/javascripts/lib/state-machine.js", "https://raw.github.com/jakesgordon/javascript-state-machine/master/state-machine.js", false),
 		Resource("jQuery", "public/javascripts/lib/jquery.js", "http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js", false),
+		Resource("jQuery map", "public/javascripts/lib/jquery.min.map", "http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.map", false),
 		Resource("jQuery i18n", "public/javascripts/lib/jquery.i18n.properties.js", "http://jquery-i18n-properties.googlecode.com/files/jquery.i18n.properties-min-1.0.9.js", false),
 		Resource("jScrollPane", "public/javascripts/lib/jquery.jscrollpane.js", "http://jscrollpane.kelvinluck.com/script/jquery.jscrollpane.min.js", false),
 		Resource("jScrollPane MouseWheel", "public/javascripts/lib/jquery.mousewheel.js", "http://jscrollpane.kelvinluck.com/script/jquery.mousewheel.js", false),
@@ -46,9 +43,12 @@ object ApplicationBuild extends Build {
 		Resource("popUpCSS","public/stylesheets/lib/popUp.css","https://raw.github.com/Toddish/Popup/master/assets/css/popup.css",false),
 		Resource("jScrollPane CSS", "public/stylesheets/lib/jquery.jscrollpane.css", "http://jscrollpane.kelvinluck.com/style/jquery.jscrollpane.css", false),
 		Resource("Bootstrap CSS", "public/stylesheets/lib/bootstrap.css", "https://raw.github.com/twbs/bootstrap/master/dist/css/bootstrap.css", false),
+		Resource("Bootstrap CSS Map", "public/stylesheets/lib/bootstrap.css.map", "https://raw.github.com/twbs/bootstrap/master/dist/css/bootstrap.css.map", false),
 		Resource("Bootstrap Js", "public/javascripts/lib/bootstrap.min.js","https://raw.github.com/twbs/bootstrap/master/dist/js/bootstrap.min.js",false),
 		Resource("Howler Js", "public/javascripts/lib/howler.js","https://raw.github.com/goldfire/howler.js/master/howler.min.js",false),
 		Resource("noUISlider", "public/javascripts/lib/nouislider.js","https://raw.github.com/leongersen/noUiSlider/master/jquery.nouislider.js",false),
+		Resource("noUISlider Link", "public/javascripts/lib/Link.js","https://raw.github.com/leongersen/noUiSlider/master/Link.js",false),
+		Resource("classVal", "public/javascripts/lib/classVal.js","https://raw.githubusercontent.com/leongersen/classVal/master/jquery.classval.js",false),
 		Resource("noUISlider CSS", "public/stylesheets/lib/nouislider.css", "https://raw.github.com/leongersen/noUiSlider/master/jquery.nouislider.css", false),
 		Resource("Spectrum", "public/javascripts/lib/spectrum.js", "https://raw.github.com/bgrins/spectrum/master/spectrum.js", false),
 		Resource("Spectrum JS", "public/stylesheets/lib/spectrum.css", "https://raw.github.com/bgrins/spectrum/master/spectrum.css", false),
@@ -89,17 +89,15 @@ object ApplicationBuild extends Build {
 		sketchnessGetResourcesTask,
 		sketchnessCleanResourcesTask,
 		resolvers += "MavenHub repository" at "http://repo1.maven.org/maven2",
+		
+		resolvers += Resolver.url("Objectify Play Repository (release)", url("http://schaloner.github.com/releases/"))(Resolver.ivyStylePatterns),
+        resolvers += Resolver.url("Objectify Play Repository (snapshot)", url("http://schaloner.github.com/snapshots/"))(Resolver.ivyStylePatterns),
 
+        resolvers += Resolver.url("play-easymail (release)", url("http://joscha.github.com/play-easymail/repo/releases/"))(Resolver.ivyStylePatterns),
+        resolvers += Resolver.url("play-easymail (snapshot)", url("http://joscha.github.com/play-easymail/repo/snapshots/"))(Resolver.ivyStylePatterns),
 
-    //For play-authenticate
-    resolvers += Resolver.url("Objectify Play Repository (release)", url("http://schaloner.github.com/releases/"))(Resolver.ivyStylePatterns),
-    resolvers += Resolver.url("Objectify Play Repository (snapshot)", url("http://schaloner.github.com/snapshots/"))(Resolver.ivyStylePatterns),
-
-    resolvers += Resolver.url("play-easymail (release)", url("http://joscha.github.com/play-easymail/repo/releases/"))(Resolver.ivyStylePatterns),
-    resolvers += Resolver.url("play-easymail (snapshot)", url("http://joscha.github.com/play-easymail/repo/snapshots/"))(Resolver.ivyStylePatterns),
-
-    resolvers += Resolver.url("play-authenticate (release)", url("http://joscha.github.com/play-authenticate/repo/releases/"))(Resolver.ivyStylePatterns),
-    resolvers += Resolver.url("play-authenticate (snapshot)", url("http://joscha.github.com/play-authenticate/repo/snapshots/"))(Resolver.ivyStylePatterns)
-  )
+        resolvers += Resolver.url("play-authenticate (release)", url("http://joscha.github.com/play-authenticate/repo/releases/"))(Resolver.ivyStylePatterns),
+        resolvers += Resolver.url("play-authenticate (snapshot)", url("http://joscha.github.com/play-authenticate/repo/snapshots/"))(Resolver.ivyStylePatterns)
+    )
 
 }

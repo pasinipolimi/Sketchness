@@ -10,6 +10,8 @@ require.config({
 		"howler": "lib/howler",
 		"StateMachine": "lib/state-machine",
 		"nouislider": "lib/nouislider",
+		"link": "lib/Link",
+		"classVal": "lib/classVal",
 		"spectrum": "lib/spectrum"
 	},
 	shim: {
@@ -34,11 +36,20 @@ require.config({
 		"StateMachine": {
 			exports: "StateMachine"
 		},
-		"nouislider": {
+		"classVal": {
 			deps: ["jquery"],
+			exports: "$.classVal"
+		},
+		"link": {
+			deps: ["jquery"],
+			exports: "$.Link"
+		},
+		"nouislider": {
+			deps: ["jquery", "classVal", "link"],
 			exports: "$.fn.noUiSlider"
 		},
 		"spectrum": {
+		    deps: ["jquery"],
 			exports: "$.fn.spectrum"
 		}
 	}

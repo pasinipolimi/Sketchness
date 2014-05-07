@@ -13,7 +13,7 @@ import utils.gamebus.GameMessages.Room;
  */
 public interface GameManagerInterface extends TypedActor.Receiver {
 
-    public String addInstance(Integer maxPlayers, String roomName, ActorRef current);
+    public String addInstance(String roomName, ActorRef current);
 
     public void removeInstance(ActorRef toRemove);
     

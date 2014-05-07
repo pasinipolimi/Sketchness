@@ -5,12 +5,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.codehaus.jackson.JsonNode;
-
 import play.libs.F.Promise;
 import play.libs.WS;
 import play.libs.WS.Response;
 import play.libs.WS.WSRequestHolder;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class JsonReader {
 
@@ -26,7 +26,7 @@ public class JsonReader {
 		Promise<WS.Response> res;
 		try {
 			// res = WS.url(url).setTimeout(1000000).get();
-			final WSRequestHolder wsurl = WS.url(url).setTimeout(1000000);
+			final WSRequestHolder wsurl = WS.url(url).setTimeout(60000);
 
 			final Iterator<Entry<String, String>> it = params.entrySet()
 					.iterator();
@@ -56,7 +56,7 @@ public class JsonReader {
 		Promise<WS.Response> res;
 		try {
 			// res = WS.url(url).setTimeout(1000000).get();
-			final WSRequestHolder wsurl = WS.url(url).setTimeout(1000000);
+			final WSRequestHolder wsurl = WS.url(url).setTimeout(60000);
 
 			res = wsurl.get();
 			if (res != null) {

@@ -110,6 +110,63 @@ public class IsOnline {
 		}
 	}
 
+    public static void deleteOfflineGuests(){
+        Connection connection = null;
+        PreparedStatement statement = null;
+        PreparedStatement statement1 = null;
+        PreparedStatement statement2 = null;
+        PreparedStatement statement3 = null;
+        ResultSet rs = null;
+        int userId;
+        try {
+            connection = DB.getConnection();
+            final String query = "SELECT * FROM USERS WHERE ONLINE=? AND NAME LIKE 'Guest%'";
+            final String query1 ="delete from linked_account where user_id=?";
+            final String query2 ="delete from users_security_role where users_id=?";
+            final String query3 ="delete from users where id=?";
+
+            statement = connection.prepareStatement(query);
+            statement1 = connection.prepareStatement(query1);
+            statement2 = connection.prepareStatement(query2);
+            statement3 = connection.prepareStatement(query3);
+            statement.setBoolean(1, false);
+            rs = statement.executeQuery();
+
+            while(rs.next()){
+                userId=rs.getInt("id");
+
+                statement1.setInt(1, userId);
+                statement2.setInt(1, userId);
+                statement3.setInt(1, userId);
+                statement1.executeUpdate();
+                statement2.executeUpdate();
+                statement3.executeUpdate();
+
+            }
+        } catch (final SQLException ex) {
+            play.Logger.error("Unable to open a SQL connection", ex);
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (statement != null)
+                    statement.close();
+                if (statement1 != null)
+                    statement1.close();
+                if (statement2 != null)
+                    statement2.close();
+                if (statement3 != null)
+                    statement3.close();
+                if (connection != null)
+                    connection.close();
+            } catch (final SQLException e) {
+                play.Logger.error("Unable to close a SQL connection.");
+            }
+        }
+
+    }
+
 	public static void putOffline(final String name) {
 		Connection connection = null;
 		PreparedStatement statement = null;

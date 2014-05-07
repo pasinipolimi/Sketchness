@@ -47,9 +47,8 @@
                         });
                 });
         </script>
-        <script>
-            window.onbeforeunload = bunload;
-            function bunload(){
+        <!--<script>
+            window.addEventListener("beforeunload", function (e) {
                 $.ajax({
                         url: "@routes.Application.doLogout",
                         type: "GET",
@@ -60,10 +59,10 @@
                             console.log("doLogout failed with status:  "+ jqXHR.status + ", error: "+ jqXHR.statusText);
                         }
                     });
-	        }
-        </script>
+	        });
+        </script>-->
 
-        <!--<script>
+        <script>
             window.setInterval(function(){
             $.ajax({
 	                url: "@routes.Sketchness.keepOnline",
@@ -75,11 +74,8 @@
                         console.log("keepOnline failed with status:  "+ jqXHR.status + ", error: "+ jqXHR.statusText);
 	                }
 	            });
-
             }, 1000*20);     
-
-
-        </script>-->
+        </script>
 
 
 

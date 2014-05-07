@@ -597,3 +597,21 @@ ul#ChangeNamePsw{
 	/*backPressed*/
 	width:140px;height:39px;background: url("../images/UI/lobby/lobby.png") no-repeat -799px -762px;
 }
+
+#loadTerms{
+    cursor: pointer;
+    width: 243px;
+    height: 31px;
+    margin-left: 60px;
+    margin-top: -22px;
+}
+
+#showTerms{
+    background-color: #DEDEA6;
+    width: 302px;
+    height: 100px;
+    line-height: 20px;
+    margin-left: 11px;
+    resize: none;
+    display: none;
+}

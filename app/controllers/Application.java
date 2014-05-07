@@ -35,6 +35,7 @@ public class Application extends Controller {
 	public static final String USER_ROLE = "user";
 
 	public static Result index() {
+                response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 		return redirect(routes.Application.login());
 	}
 
@@ -72,12 +73,14 @@ public class Application extends Controller {
 			return badRequest(login.render(filledForm));
 		} else {
 			// Everything was filled
+                        response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 			return UsernamePasswordAuthProvider.handleLogin(ctx());
 		}
 	}
 
 	public static Result signup() {
 		Logger.debug("Requested signin form");
+                response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 		return ok(signup.render(MyUsernamePasswordAuthProvider.SIGNUP_FORM));
 	}
 
@@ -101,6 +104,7 @@ public class Application extends Controller {
 			// Everything was filled
 			// do something with your part of the form before handling the user
 			// signup
+                        response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 			return UsernamePasswordAuthProvider.handleSignup(ctx());
 		}
 	}
@@ -147,9 +151,7 @@ public class Application extends Controller {
 			}
 
 		}
-
-		Logger.debug("Tried to logout but no user logged in");
-
+                response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 		return redirect(routes.Application.index());
 	}
 

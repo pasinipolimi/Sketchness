@@ -32,8 +32,8 @@ public abstract class GameRoom extends UntypedActor {
             try {
 		final ActorRef me = this.getContext().self();
 		if (!me.path().toString().endsWith("lobby")) {
-			me.tell(PoisonPill.getInstance(), null);
-			GameBus.getInstance().unsubscribe(me);
+                        GameBus.getInstance().unsubscribe(me);
+                        me.tell(PoisonPill.getInstance(), me);
 			Logger.info("[" + roomType.getName() + "]: killed room "
 					+ me.path());
 		}

@@ -22,3 +22,12 @@ function checkOnline(){
     xhr.send(null);
 
 }
+
+function displayTerms(){
+
+    $('#showTerms').toggle();
+}
+
+$(document).ready(function() {
+    $("#showTerms").load("assets/javascripts/term&conditions.txt");
+});

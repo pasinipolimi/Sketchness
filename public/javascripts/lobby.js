@@ -110,12 +110,15 @@ require(["Communicator", "Chat", "jquery", "popup", "jscrollpane", "howler"], fu
 
 		communicator.on({
 			join: function(e, content) {
-				sketchness.players[content.user] = {
-					id: content.user,
-					name: content.name,
-					img: content.img,
-				};
-
+				sketchness.players = [];
+			    for(var i in content)
+				{
+					sketchness.players[content[i].user] = {
+						id: content[i].user,
+						name: content[i].name,
+						img: content[i].img
+					};
+				}
 				writePlayers(sketchness.players, sketchness.myself);
 				login_sound.play();
 			},
