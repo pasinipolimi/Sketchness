@@ -79,11 +79,11 @@ public class CMS {
 		if (taskID != null) {
 			final String request = rootUrl + "/wsmc/task/" + taskID + "/close";
 			WS.url(request).setContentType("application/x-www-form-urlencoded")
-					.put("");
+			.put("");
 			Logger.debug("[CMS] Closing Task " + taskID);
 		}
 	}
-	
+
 	public static void invalidateTag(final String tagID) throws IOException{
 		final CloseableHttpClient httpclient = HttpClients.createDefault();
 		final HttpPut httpPut = new HttpPut(rootUrl + "/wsmc/content/" + tagID
@@ -95,7 +95,6 @@ public class CMS {
 		response1.close();
 		httpclient.close();
 	}
-
         public static void segmentation(final ObjectNode finalTraces, final String username, final Integer session) throws MalformedURLException, IOException, JSONException {
             Akka.system().scheduler().scheduleOnce(
                     Duration.create(10, TimeUnit.MILLISECONDS),new Runnable() {
@@ -353,6 +352,7 @@ public class CMS {
 			final HashMap<String, String> params = new HashMap<>();
 			params.put("collection", collection);
 			params.put("limit", tasksToAdd.toString());
+			params.put("nocache", String.valueOf(System.currentTimeMillis()));
 			// params.put("select", "id");
 			retrievedImagesOrdered = jsonReader.readJsonArrayFromUrl(rootUrl
 					+ "/wsmc/image.json", params);
@@ -425,81 +425,81 @@ public class CMS {
 
 		// Fill the set of task to be performed with the task that has been
 		// explicitly declared
-                try {
-                    if (retrievedTasks != null && retrievedTasks.size()!=0) {
-                            retrievedTasks = retrievedTasks.get("task");
-                            for (final JsonNode item : retrievedTasks) {
-                                    if (item.elements().hasNext()) {
+		try {
+			if (retrievedTasks != null && retrievedTasks.size()!=0) {
+				retrievedTasks = retrievedTasks.get("task");
+				for (final JsonNode item : retrievedTasks) {
+					if (item.elements().hasNext()) {
 
-                                            final String taskId = item.get("id").textValue();
-                                            final JsonNode uTasks = item.get("utask");
+						final String taskId = item.get("id").textValue();
+						final JsonNode uTasks = item.get("utask");
 
-                                            final String imageId = item.get("image").elements()
-                                                            .next().elements().next().asText();
-                                            final JsonNode image = jsonReader
-                                                            .readJsonArrayFromUrl(rootUrl + "/wsmc/image/"
-                                                                            + imageId + ".json");
-                                            if (uTasks != null) {
-                                                    // Retrieve the first uTask for the current task and
-                                                    // assign it
-                                                    for (final JsonNode utask : uTasks) {
-                                                            if (utask.elements().hasNext()) {
-                                                                    // FIXME non necessario, ho gia tutto
-                                                                    // quello
-                                                                    // che mi serve
+						final String imageId = item.get("image").elements()
+								.next().elements().next().asText();
+						final JsonNode image = jsonReader
+								.readJsonArrayFromUrl(rootUrl + "/wsmc/image/"
+										+ imageId + ".json");
+						if (uTasks != null) {
+							// Retrieve the first uTask for the current task and
+							// assign it
+							for (final JsonNode utask : uTasks) {
+								if (utask.elements().hasNext()) {
+									// FIXME non necessario, ho gia tutto
+									// quello
+									// che mi serve
 
-                                                                    final ObjectNode guessWord = Json.newObject();
-                                                                    guessWord.put("type", "task");
-                                                                    guessWord.put("id", imageId);
-                                                                    // Change the task to assign based on
-                                                                    // the kind of task that has to be
-                                                                    // performed
-                                                                    // for now just tagging and segmentation
-                                                                    // are supported for the images.
-                                                                    switch (utask.get("taskType").asText()) {
-                                                                    case "tagging":
-                                                                            buildGuessWordTagging(guessWord, image,
-                                                                                            utask, taskId);
+									final ObjectNode guessWord = Json.newObject();
+									guessWord.put("type", "task");
+									guessWord.put("id", imageId);
+									// Change the task to assign based on
+									// the kind of task that has to be
+									// performed
+									// for now just tagging and segmentation
+									// are supported for the images.
+									switch (utask.get("taskType").asText()) {
+									case "tagging":
+										buildGuessWordTagging(guessWord, image,
+												utask, taskId);
 
-                                                                            priorityTaskHashSet.add(guessWord);
-                                                                            uploadedTasks++;
-                                                                            if (!taskSent) {
-                                                                                    taskSent = true;
-                                                                                    sendTaskAcquired(roomChannel);
-                                                                            }
-                                                                            break;
-                                                                    case "segmentation":
-                                                                            HashSet<String> tags;
-                                                                            // Get all the segments that have
-                                                                            // been stored for the image
-                                                                            final JsonNode imageSegments = image
-                                                                                            .get("descriptions");
-                                                                            if (imageSegments != null) {
-                                                                                    tags = retrieveTags(imageSegments);
-                                                                                    buildGuessWordSegmentTask(guessWord,
-                                                                                                    tags, image, taskId, utask);
+										priorityTaskHashSet.add(guessWord);
+										uploadedTasks++;
+										if (!taskSent) {
+											taskSent = true;
+											sendTaskAcquired(roomChannel);
+										}
+										break;
+									case "segmentation":
+										HashSet<String> tags;
+										// Get all the segments that have
+										// been stored for the image
+										final JsonNode imageSegments = image
+												.get("descriptions");
+										if (imageSegments != null) {
+											tags = retrieveTags(imageSegments);
+											buildGuessWordSegmentTask(guessWord,
+													tags, image, taskId, utask);
 
-                                                                                    priorityTaskHashSet.add(guessWord);
-                                                                                    uploadedTasks++;
-                                                                                    if (!taskSent) {
-                                                                                            taskSent = true;
-                                                                                            sendTaskAcquired(roomChannel);
-                                                                                    }
-                                                                            }
-                                                                            break;
-                                                                    }
-                                                                    break;
-                                                            }
-                                                    }
-                                            }
+											priorityTaskHashSet.add(guessWord);
+											uploadedTasks++;
+											if (!taskSent) {
+												taskSent = true;
+												sendTaskAcquired(roomChannel);
+											}
+										}
+										break;
+									}
+									break;
+								}
+							}
+						}
 
-                                    }
-                            }
-                    }
-                }
-                catch(Exception e) {
-                    throw new RuntimeException("[CMS] Data malformed");
-                }
+					}
+				}
+			}
+		}
+		catch(final Exception e) {
+			throw new RuntimeException("[CMS] Data malformed");
+		}
 		return uploadedTasks;
 	}
 
@@ -846,35 +846,35 @@ public class CMS {
 	 * @throws JSONException
 	 */
 	public static String retriveTaskInfo(final JsonNode jsonTasks) throws JSONException {
-		
+
 		final JSONArray info = new JSONArray();
-		JsonNode utaskId;
+		final JsonNode utaskId;
 
 		JsonNode utaskArr;
 		JSONObject element, finalElement;
 		final JSONArray utasks = new JSONArray();
-		int j = 0;
+		final int j = 0;
 		String tmpUtask, status, utaskType;
 
-		
-			if (jsonTasks.has("utasks")) {
 
-				utaskArr = jsonTasks.get("utasks");
+		if (jsonTasks.has("utasks")) {
 
-				for (final JsonNode utask : utaskArr) {
-                    	 tmpUtask = utask.get("id").textValue();
-                    	 status = utask.get("status").textValue();
-                    	 utaskType = utask.get("utaskType").textValue();
-                    	 
-                    	element = new JSONObject();
-     					element.put("id", tmpUtask);
-     					element.put("status", status);
-     					element.put("utaskType", utaskType);
-     					
-     					utasks.put(element);
-				}
-			}// if se c'è campo utasks
-			
+			utaskArr = jsonTasks.get("utasks");
+
+			for (final JsonNode utask : utaskArr) {
+				tmpUtask = utask.get("id").textValue();
+				status = utask.get("status").textValue();
+				utaskType = utask.get("utaskType").textValue();
+
+				element = new JSONObject();
+				element.put("id", tmpUtask);
+				element.put("status", status);
+				element.put("utaskType", utaskType);
+
+				utasks.put(element);
+			}
+		}// if se c'è campo utasks
+
 		finalElement = new JSONObject();
 		finalElement.put("utasks", utasks);
 		info.put(finalElement);
@@ -882,68 +882,43 @@ public class CMS {
 		return result;
 
 		/*
-		
-		
-		
-		final JSONArray info = new JSONArray();
-		JsonNode object, object2;
-		JsonNode taskObj;
-		JSONObject element;
-		final JSONArray uTasks = new JSONArray();
-		int i = 0;
-		int j = 0;
-		String tmpId;
-		JsonNode status = null;
-
-		object = jsonTasks.get("task");
-		while (i < object.size()) {
-			object2 = object.get(i);
-			tmpId = object2.get("id").asText();
-			if (tmpId.equals(selected)) {
-				status = object2.get("status");
-				if (object2.has("utasks")) {
-					element = new JSONObject();
-					element.put("utask", "full");
-					taskObj = object2.get("utasks");
-					while (j < taskObj.size()) {
-						element = new JSONObject();
-						element.put("id", taskObj.get(j).get("id"));
-						element.put("taskType", taskObj.get(j).get("taskType"));
-						element.put("status", taskObj.get(j).get("status"));
-						uTasks.put(element);
-						j++;
-					}
-					break;
-				}// if se c'è il campo uTask
-				else {
-					element = new JSONObject();
-					element.put("utask", "empty");
-					uTasks.put(element);
-				}
-			}
-			i++;
-		}
-		element = new JSONObject();
-		element.put("status", status);
-		element.put("uTasks", uTasks);
-		info.put(element);
-		
-		final String result = info.toString();
-		return result;
-		*/
+		 * 
+		 * 
+		 * 
+		 * final JSONArray info = new JSONArray(); JsonNode object, object2;
+		 * JsonNode taskObj; JSONObject element; final JSONArray uTasks = new
+		 * JSONArray(); int i = 0; int j = 0; String tmpId; JsonNode status =
+		 * null;
+		 * 
+		 * object = jsonTasks.get("task"); while (i < object.size()) { object2 =
+		 * object.get(i); tmpId = object2.get("id").asText(); if
+		 * (tmpId.equals(selected)) { status = object2.get("status"); if
+		 * (object2.has("utasks")) { element = new JSONObject();
+		 * element.put("utask", "full"); taskObj = object2.get("utasks"); while
+		 * (j < taskObj.size()) { element = new JSONObject(); element.put("id",
+		 * taskObj.get(j).get("id")); element.put("taskType",
+		 * taskObj.get(j).get("taskType")); element.put("status",
+		 * taskObj.get(j).get("status")); uTasks.put(element); j++; } break; }//
+		 * if se c'è il campo uTask else { element = new JSONObject();
+		 * element.put("utask", "empty"); uTasks.put(element); } } i++; }
+		 * element = new JSONObject(); element.put("status", status);
+		 * element.put("uTasks", uTasks); info.put(element);
+		 * 
+		 * final String result = info.toString(); return result;
+		 */
 	}
-	
-	
+
+
 
 	/**
-	 * Retrive the list of collections id 
+	 * Retrive the list of collections id
 	 * 
 	 * @param jsonCollection
 	 *            JsonNode of all the Collections
 	 * @return the ids of the collections
 	 * @throws JSONException
 	 */
-	
+
 	public static JSONArray retriveCollectionInfo(final JsonNode jsonCollection)
 			throws JSONException {
 
@@ -961,7 +936,7 @@ public class CMS {
 		}
 		return collectionIds;
 	}
-	
+
 	/**
 	 * Retrive the images of a collection
 	 * 
@@ -970,29 +945,29 @@ public class CMS {
 	 * @return the images info
 	 * @throws JSONException
 	 */
-	
+
 	public static String retriveCollImages(final JsonNode jsonCollection)
 			throws JSONException {
 
 		final JSONArray imageIds = new JSONArray();
-		JsonNode object;
+		final JsonNode object;
 		JSONObject element, finalElement;
 		String tmpImage;
 		JsonNode imagesArr;
-		int i = 0;
+		final int i = 0;
 		final JSONArray info = new JSONArray();
 
 		if (jsonCollection.has("images")) {
-			
+
 			imagesArr = jsonCollection.get("images");
 
 			for (final JsonNode image : imagesArr) {
-                	tmpImage = image.get("id").textValue();
-                	 
-                	element = new JSONObject();
- 					element.put("id", tmpImage);
- 					
- 					imageIds.put(element);
+				tmpImage = image.get("id").textValue();
+
+				element = new JSONObject();
+				element.put("id", tmpImage);
+
+				imageIds.put(element);
 			}
 		}// if se c'è campo images
 		/*
@@ -1003,7 +978,7 @@ public class CMS {
 				imageIds.put(element);
 				i++;
 			}
-		*/
+		 */
 		finalElement = new JSONObject();
 		finalElement.put("images", imageIds);
 		info.put(finalElement);
@@ -1012,8 +987,8 @@ public class CMS {
 		//return imageIds;
 	}
 
-	
-	
+
+
 	/**
 	 * Close a particulr task
 	 * 
@@ -1519,7 +1494,7 @@ public class CMS {
 		if (tags != null && tags.size() > 0) {
 			final Object[] stringTags = tags.toArray();
 			final String toReturn = (String) stringTags[(new Random()
-					.nextInt(tags.size()))];
+			.nextInt(tags.size()))];
 			return toReturn;
 		} else {
 			return "";
