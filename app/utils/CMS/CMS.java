@@ -70,7 +70,7 @@ public class CMS {
 			final String request = rootUrl + "/wsmc/utask/" + uTaskID + "/"
 					+ actionId + "/close";
 			WS.url(request).setContentType("application/x-www-form-urlencoded")
-					.put("");
+			.put("");
 			Logger.debug("[CMS] Closing uTask " + uTaskID);
 		}
 	}
@@ -95,78 +95,77 @@ public class CMS {
 		response1.close();
 		httpclient.close();
 	}
-        public static void segmentation(final ObjectNode finalTraces, final String username, final Integer session) throws MalformedURLException, IOException, JSONException {
-            Akka.system().scheduler().scheduleOnce(
-                    Duration.create(200, TimeUnit.MILLISECONDS),new Runnable() {
-		    @Override
-		    public void run() {
-                            try {
-                                final String id = finalTraces.get("id").textValue();
-                                final String label = finalTraces.get("label").textValue();
-                                textAnnotation(finalTraces, username, session);
-                                final String traces = finalTraces.get("traces").toString();
-                                final String history = finalTraces.get("history").toString();
-                                
-                                final String urlParameters = "ta_name=tag&ta_val=" + label
-                                        + "&content_type=segmentation&&user_id=" + username
-                                        + "&language=" + LanguagePicker.retrieveIsoCode()
-                                        + "&session_id=" + session + "&polyline_r=" + traces
-                                        + "&polyline_h=" + history + "&oauth_consumer_key="
-                                        + oauthConsumerKey;
-                                final String request = rootUrl + "/wsmc/image/" + id
-                                        + "/segmentation.json";
-                                JSONObject actionInfo;
-                                try {
-                                    final F.Promise<WS.Response> returned = WS.url(request)
-                                            .setContentType("application/x-www-form-urlencoded").setTimeout(20000)
-                                            .post(urlParameters);
-                                    actionInfo = new JSONObject(returned.get().getBody());
-                                    final Integer actionId = Integer.parseInt(actionInfo.get("vid")
-                                            .toString());
-                                    Logger.debug("[CMS] Storing segmentation with action " + actionId
-                                            + " for image with id " + id + " and tag " + label);
-                                } catch (final Exception ex) {
-                                    Logger.error("Unable to save segmentation", ex);
-                                } 
-                            } catch (Exception ex) {
-                                   Logger.error("Unable to save segmentation", ex);
-                            }  
-                    }
-		    }, Akka.system().dispatcher());                
+	public static void segmentation(final ObjectNode finalTraces, final String username, final Integer session) throws MalformedURLException, IOException, JSONException {
+		Akka.system().scheduler().scheduleOnce(
+				Duration.create(200, TimeUnit.MILLISECONDS),new Runnable() {
+					@Override
+					public void run() {
+						try {
+							final String id = finalTraces.get("id").textValue();
+							final String label = finalTraces.get("label").textValue();
+							textAnnotation(finalTraces, username, session);
+							final String traces = finalTraces.get("traces").toString();
+							final String history = finalTraces.get("history").toString();
+
+							final String urlParameters = "ta_name=tag&ta_val=" + label
+									+ "&content_type=segmentation&&user_id=" + username
+									+ "&language=" + LanguagePicker.retrieveIsoCode()
+									+ "&session_id=" + session + "&polyline_r=" + traces
+									+ "&polyline_h=" + history + "&oauth_consumer_key="
+									+ oauthConsumerKey;
+							final String request = rootUrl + "/wsmc/image/" + id
+									+ "/segmentation.json";
+							JSONObject actionInfo;
+							try {
+								final F.Promise<WS.Response> returned = WS.url(request)
+										.setContentType("application/x-www-form-urlencoded").setTimeout(20000)
+										.post(urlParameters);
+								actionInfo = new JSONObject(returned.get().getBody());
+								final Integer actionId = Integer.parseInt(actionInfo.get("vid")
+										.toString());
+								Logger.debug("[CMS] Storing segmentation with action " + actionId
+										+ " for image with id " + id + " and tag " + label);
+							} catch (final Exception ex) {
+								Logger.error("Unable to save segmentation", ex);
+							}
+						} catch (final Exception ex) {
+							Logger.error("Unable to save segmentation", ex);
+						}
+					}
+				}, Akka.system().dispatcher());
 	}
 
 	public static void textAnnotation(final ObjectNode finalTraces,
 			final String username, final Integer session)
-			throws MalformedURLException, IOException, JSONException {
-                    Akka.system().scheduler().scheduleOnce(
-                    Duration.create(200, TimeUnit.MILLISECONDS),new Runnable() {
-		    @Override
-		    public void run() {
-                        // final JsonReader jsonReader = new JsonReader();
-                        final String label = finalTraces.get("label").textValue();
-                        final String id = finalTraces.get("id").textValue();
+					throws MalformedURLException, IOException, JSONException {
+		Akka.system().scheduler().scheduleOnce(
+				Duration.create(200, TimeUnit.MILLISECONDS),new Runnable() {
+					@Override
+					public void run() {
+						final String label = finalTraces.get("label").textValue();
+						final String id = finalTraces.get("id").textValue();
 
-                        final String urlParameters = "ta_name=tag&ta_val=" + label
-                                        + "&content_type=tagging&&user_id=" + username + "&language="
-                                        + LanguagePicker.retrieveIsoCode() + "&session_id=" + session
-                                        + "&oauth_consumer_key=" + oauthConsumerKey;
-                        final String request = rootUrl + "/wsmc/image/" + id
-                                        + "/textAnnotation.json";
-                        final JSONObject actionInfo;
-                        try {
-                                final F.Promise<WS.Response> returned = WS.url(request)
-                                                .setContentType("application/x-www-form-urlencoded").setTimeout(120000)
-                                                .post(urlParameters);
-                                actionInfo = new JSONObject(returned.get().getBody());
-                                final Integer actionId = Integer.parseInt(actionInfo.get("vid")
-                                        .toString());
-                                Logger.debug("[CMS] Storing textAnnotation with action " + actionId
-                                        + " for image with id " + id + " and tag " + label);
-                        } catch (final Exception e) {
-                                Logger.error("Unable to save annotation.", e);
-                        }
-                    }
-                }, Akka.system().dispatcher());   
+						final String urlParameters = "ta_name=tag&ta_val=" + label
+								+ "&content_type=tagging&&user_id=" + username + "&language="
+								+ LanguagePicker.retrieveIsoCode() + "&session_id=" + session
+								+ "&oauth_consumer_key=" + oauthConsumerKey;
+						final String request = rootUrl + "/wsmc/image/" + id
+								+ "/textAnnotation.json";
+						final JSONObject actionInfo;
+						try {
+							final F.Promise<WS.Response> returned = WS.url(request)
+									.setContentType("application/x-www-form-urlencoded").setTimeout(120000)
+									.post(urlParameters);
+							actionInfo = new JSONObject(returned.get().getBody());
+							final Integer actionId = Integer.parseInt(actionInfo.get("vid")
+									.toString());
+							Logger.debug("[CMS] Storing textAnnotation with action " + actionId
+									+ " for image with id " + id + " and tag " + label);
+						} catch (final Exception e) {
+							Logger.error("Unable to save annotation.", e);
+						}
+					}
+				}, Akka.system().dispatcher());
 	}
 
 	public static Integer openSession() throws Error {
@@ -186,13 +185,13 @@ public class CMS {
 	public static void closeSession(final Integer sessionId) throws Error {
 		final String request = rootUrl + "/wsmc/session/" + sessionId;
 		WS.url(request).setContentType("application/x-www-form-urlencoded")
-				.put("state=0&oauth_consumer_key=" + oauthConsumerKey);
+		.put("state=0&oauth_consumer_key=" + oauthConsumerKey);
 		Logger.debug("[CMS] Closing session " + sessionId);
 	}
 
 	public static void postAction(final Integer sessionId,
 			final String actionType, final String username, String log)
-			throws Error {
+					throws Error {
 		final String request = rootUrl + "/wsmc/action";
 		if (log.equals("")) {
 			log = "{}";
@@ -201,14 +200,14 @@ public class CMS {
 				+ actionType + "&user_id=" + username + "&oauth_consumer_key="
 				+ oauthConsumerKey + "&action_log=" + log;
 		WS.url(request).setContentType("application/x-www-form-urlencoded")
-				.post(parameters);
+		.post(parameters);
 		Logger.debug("[CMS] Action " + actionType + " for session " + sessionId
 				+ ": " + log);
 	}
 
 	public static void fixGroundTruth(final Integer sessionId,
 			final HashSet<ObjectNode> priorityTaskHashSet,
-			final HashSet<ObjectNode> taskHashSet, final Room roomChannel) {
+			final List<ObjectNode> queueImages, final Room roomChannel) {
 		final JsonReader jsonReader = new JsonReader();
 		JsonNode retrievedImages;
 		final HashMap<String, ObjectNode> temporary = new HashMap<>();
@@ -259,12 +258,12 @@ public class CMS {
 						if (temporary.containsKey(segmentation.get("image")
 								.asText()))
 							temporary
-									.remove(segmentation.get("image").asText());
+							.remove(segmentation.get("image").asText());
 					}
 				}
 			}
 			for (final Map.Entry pairs : temporary.entrySet()) {
-				taskHashSet.add((ObjectNode) pairs.getValue());
+				queueImages.add((ObjectNode) pairs.getValue());
 			}
 			if (!taskSent) {
 				taskSent = true;
@@ -286,27 +285,28 @@ public class CMS {
 	}
 
 	public static void cancelThread(final String roomName) {
+		Logger.debug("cancello th: "+roomName);
 		final Cancellable thread = runningThreads.get(roomName);
 		if (thread != null) {
 			thread.cancel();
 			Akka.system()
-					.scheduler()
-					.scheduleOnce(Duration.create(1000, TimeUnit.MILLISECONDS),
-							new Runnable() {
-								@Override
-								public void run() {
-									while (!thread.isCancelled()) {
-										try {
-											Thread.sleep(100);
-										} catch (final Exception ex) {
-											Logger.error("Error in waiting the thread termination\n"
-													+ ex);
-										}
-									}
-									runningThreads.remove(roomName);
-									Logger.info("Thread cancelled and removed.");
-								}
-							}, Akka.system().dispatcher());
+			.scheduler()
+			.scheduleOnce(Duration.create(1000, TimeUnit.MILLISECONDS),
+					new Runnable() {
+				@Override
+				public void run() {
+					while (!thread.isCancelled()) {
+						try {
+							Thread.sleep(100);
+						} catch (final Exception ex) {
+							Logger.error("Error in waiting the thread termination\n"
+									+ ex);
+						}
+					}
+					runningThreads.remove(roomName);
+					Logger.info("Thread cancelled and removed.");
+				}
+			}, Akka.system().dispatcher());
 		}
 
 	}
@@ -321,7 +321,7 @@ public class CMS {
 	 */
 	public static void taskSetInitialization(
 			final HashSet<ObjectNode> priorityTaskHashSet,
-			final HashSet<ObjectNode> taskHashSet, final Room roomChannel,
+			final List<ObjectNode> queueImages, final Room roomChannel,
 			final Integer maxRound) throws Error, JSONException {
 
 		final int uploadedTasks = retrieveTasks(maxRound, priorityTaskHashSet,
@@ -329,7 +329,7 @@ public class CMS {
 
 		final int tasksToAdd = maxRound - uploadedTasks;
 		if (tasksToAdd > 0) {
-			retrieveImages(tasksToAdd, taskHashSet, roomChannel,
+			retrieveImages(tasksToAdd, queueImages, roomChannel,
 					uploadedTasks > 0);
 		}
 
@@ -338,7 +338,7 @@ public class CMS {
 	}
 
 	private static void retrieveImages(final Integer tasksToAdd,
-			final HashSet<ObjectNode> taskHashSet, final Room roomChannel,
+			final List<ObjectNode> queueImages, final Room roomChannel,
 			boolean taskSent) {
 
 		final JsonNode retrievedImagesOrdered;
@@ -385,7 +385,7 @@ public class CMS {
 				}
 
 				buildGuessWordSegment(guessWord, tags, item);
-				taskHashSet.add(guessWord);
+				queueImages.add(guessWord);
 
 				if (!taskSent) {
 					taskSent = true;
@@ -456,7 +456,7 @@ public class CMS {
 									// performed
 									// for now just tagging and segmentation
 									// are supported for the images.
-									switch (utask.get("taskType").asText()) {
+									switch (utask.get("utaskType").asText()) {
 									case "tagging":
 										buildGuessWordTagging(guessWord, image,
 												utask, taskId);
@@ -573,7 +573,7 @@ public class CMS {
 										.asText()
 										.equals(LanguagePicker
 												.retrieveIsoCode()) || LanguagePicker
-										.retrieveIsoCode().equals(""))) {
+												.retrieveIsoCode().equals(""))) {
 							tags.add(retrieved.get("value").asText());
 						}
 					}
@@ -663,7 +663,7 @@ public class CMS {
 
 		return imageIds;
 	}
-	
+
 
 	/**
 	 * Retrive all the tasks' ids that are stored in the system
@@ -803,7 +803,7 @@ public class CMS {
 		final String result = info.toString();
 		return result;
 	}
-	
+
 	/**
 	 * Retrive info for a specific mask
 	 * 
@@ -818,12 +818,12 @@ public class CMS {
 		final JSONArray info = new JSONArray();
 
 		JSONObject element;
-		
+
 		String media;
 		media = rootUrl + jsonMask.get("path").asText();
 		String quality;
 		quality = jsonMask.get("quality").asText();
-		
+
 		element = new JSONObject();
 		element.put("medialocator", media);
 		element.put("quality", quality);
@@ -831,7 +831,7 @@ public class CMS {
 		info.put(element);
 		final String result = info.toString();
 		return result;
-	
+
 	}
 
 	/**

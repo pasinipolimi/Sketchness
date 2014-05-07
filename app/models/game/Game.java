@@ -27,6 +27,7 @@ import utils.LoggerUtils;
 import utils.levenshteinDistance;
 import utils.CMS.CMS;
 import utils.gamebus.GameBus;
+import utils.gamebus.GameEventType;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.GameEvent;
 import utils.gamebus.GameMessages.Join;
@@ -39,10 +40,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.logging.Level;
-import utils.gamebus.GameEventType;
-import utils.gamemanager.GameManagerInterface;
-import views.html.leaderboard;
 
 /**
  * A chat room is an Actor.
@@ -51,24 +48,13 @@ public class Game extends GameRoom {
 
 	private final Integer remainingTimeOnGuess = Integer.parseInt(Play
 			.application().configuration().getString("remainingTimeOnGuess")); // Once
-																				// a
-																				// player
-																				// has
-																				// guessed,
-																				// change
-																				// the
-																				// time
-																				// for
-																				// everyone
-																				// to
-																				// 20
-																				// seconds
+	// a player has guessed,change the time for everyone to 20 seconds
 	private final Integer remainingTimeOnAllGuess = Integer
 			.parseInt(Play.application().configuration()
 					.getString("remainingTimeOnAllGuess")); // If all have
-															// guessed, reduce
-															// the timer to 3
-															// seconds
+	// guessed, reduce
+	// the timer to 3
+	// seconds
 	private final Integer maxSketcherPointsRemaining = Integer.parseInt(Play
 			.application().configuration()
 			.getString("maxSketcherPointsRemaining"));
@@ -83,7 +69,7 @@ public class Game extends GameRoom {
 			.getString("minGuesserPointsRemaining"));
 	private Integer maxRound = Integer.parseInt(Play.application()
 			.configuration().getString("maxRounds")); // Maximum number of
-														// rounds
+	// rounds
 	private Integer requiredPlayers = Integer.parseInt(Play.application()
 			.configuration().getString("requiredPlayers"));
 	private final Boolean fixGroundTruth = Boolean.parseBoolean(Play
@@ -96,32 +82,20 @@ public class Game extends GameRoom {
 			.configuration().getString("minimumTags"));
 	// Variables used to manage the rounds
 	private Boolean guessedWord = false; // Has the word been guessed for the
-											// current round?
+	// current round?
 	private Boolean gameStarted = false;
 	private Boolean areWeAsking = false;
 	private Integer roundNumber = 0; // Starts with round number 1
 	private Integer sketcherPointsRemaining = 0; // The number of points
-													// available to the
-													// sketcher: for the first
-													// reply he gets 5, for the
-													// second 4 and so on
+	// available to the
+	// sketcher: for the first
+	// reply he gets 5, for the
+	// second 4 and so on
 	private Integer guesserPointsRemaining = maxGuesserPointsRemaining; // The
-																		// number
-																		// of
-																		// points
-																		// available
-																		// to
-																		// the
-																		// guessers:the
-																		// first
-																		// get
-																		// 10,
-																		// the
-																		// second
-																		// 9 and
-																		// so on
+	// number of points available to the guessers:the first get 10,the second 9
+	// and so on
 	private Integer numberGuessed = 0; // Number of players that have guessed
-										// for a specific round
+	// for a specific round
 	private Painter sketcherPainter; // The current sketcher
 	// System variables
 	private Room roomChannel; // Name of the room
@@ -133,7 +107,8 @@ public class Game extends GameRoom {
 	private Integer missingPlayers = requiredPlayers;
 	private Integer disconnectedPlayers = 0;
 	private Boolean shownImages = false;
-	private HashSet<ObjectNode> taskHashSet = new HashSet<>();
+	List<ObjectNode> queueImages = Collections
+			.synchronizedList(new LinkedList<ObjectNode>());
 	private final HashSet<ObjectNode> priorityTaskHashSet = new HashSet<>();
 	// We should not assign the same uTask to the same match, keep a list of the
 	// uTasks that has been already used
@@ -189,7 +164,7 @@ public class Game extends GameRoom {
 					case "matchInfo":
 						publishLobbyEvent();
 						break; // publishLobbyEvent(GameEventType.matchEnd);
-					// break point between tested and not Tested
+						// break point between tested and not Tested
 					case "skip":
 						skipTask();
 						break;
@@ -210,7 +185,7 @@ public class Game extends GameRoom {
 						endSegmentation(event.get("content").get("user")
 								.asText());
 						break;
-					// break point between working and doing
+						// break point between working and doing
 					case "timer":
 						playerTimeExpired(event.get("content").get("user")
 								.asText());
@@ -231,7 +206,7 @@ public class Game extends GameRoom {
 			}
 		} catch (final Exception e) {
 			LoggerUtils.error("[GAME]:", e);
-                        
+
 		}
 	}
 
@@ -265,14 +240,13 @@ public class Game extends GameRoom {
 				priorityTaskHashSet.remove(guessObject);
 			}
 		}
-		 if (guessObject == null) {
-                    Iterator<ObjectNode> it = taskHashSet.iterator();
-                    while (it.hasNext()) {
-                        ObjectNode obj = it.next();
-                        guessObject = obj;
-                    }
-                    taskHashSet.remove(guessObject);
-                }
+		if (guessObject == null) {
+
+			if (queueImages.size() > 0) {
+				guessObject = queueImages.remove(0);
+			}
+
+		}
 		return guessObject;
 	}
 
@@ -324,7 +298,7 @@ public class Game extends GameRoom {
 				}
 				count = 0;
 			} // Find a sketcher at random among the ones that have never played
-				// such a role
+			// such a role
 			else {
 				final int index = (int) (Math.random() * currentPlayers);
 				if (!playersVect.get(index).hasBeenSketcher) {
@@ -342,7 +316,7 @@ public class Game extends GameRoom {
 						LogLevel.info,
 						Messages.get(LanguagePicker.retrieveLocale(),
 								"thesketcheris") + " " + sketcherPainter.name),
-						roomChannel));
+								roomChannel));
 		GameBus.getInstance().publish(
 				new GameEvent(GameMessages
 						.composeRoundBegin(sketcherPainter.name), roomChannel));
@@ -358,47 +332,47 @@ public class Game extends GameRoom {
 	 */
 	private void checkStart() throws Exception {
 		if (!triggerStart()) // Send a message to inform about the missing
-								// players
+			// players
 		{
 			final int nPlayers = playersVect.size();
 			if (requiredPlayers - nPlayers > 1) {
 				GameBus.getInstance()
-						.publish(
-								new GameEvent(
-										GameMessages
-												.composeLogMessage(
-														LogLevel.info,
-														Messages.get(
-																LanguagePicker
-																		.retrieveLocale(),
-																"waitingfor")
-																+ " "
-																+ (requiredPlayers - nPlayers)
-																+ " "
-																+ Messages.get(
-																		LanguagePicker
-																				.retrieveLocale(),
-																		"playerstostart")),
-										roomChannel));
+				.publish(
+						new GameEvent(
+								GameMessages
+								.composeLogMessage(
+										LogLevel.info,
+										Messages.get(
+												LanguagePicker
+												.retrieveLocale(),
+												"waitingfor")
+												+ " "
+												+ (requiredPlayers - nPlayers)
+												+ " "
+												+ Messages.get(
+														LanguagePicker
+														.retrieveLocale(),
+														"playerstostart")),
+														roomChannel));
 			} else if (requiredPlayers - nPlayers == 1) {
 				GameBus.getInstance()
-						.publish(
-								new GameEvent(
-										GameMessages
-												.composeLogMessage(
-														LogLevel.info,
-														Messages.get(
-																LanguagePicker
-																		.retrieveLocale(),
-																"waitingfor")
-																+ " "
-																+ (requiredPlayers - nPlayers)
-																+ " "
-																+ Messages.get(
-																		LanguagePicker
-																				.retrieveLocale(),
-																		"playertostart")),
-										roomChannel));
+				.publish(
+						new GameEvent(
+								GameMessages
+								.composeLogMessage(
+										LogLevel.info,
+										Messages.get(
+												LanguagePicker
+												.retrieveLocale(),
+												"waitingfor")
+												+ " "
+												+ (requiredPlayers - nPlayers)
+												+ " "
+												+ Messages.get(
+														LanguagePicker
+														.retrieveLocale(),
+														"playertostart")),
+														roomChannel));
 			}
 		}
 	}
@@ -458,7 +432,8 @@ public class Game extends GameRoom {
 		return false;
 	}
 
-	public Integer generateRandomItem(final int i, final int size) throws Exception {
+	public Integer generateRandomItem(final int i, final int size)
+			throws Exception {
 		Integer item;
 		byte trials = 0;
 		do {
@@ -521,8 +496,8 @@ public class Game extends GameRoom {
 			try {
 				taskImage = retrieveTaskImage();
 			} // We cannot recover the task to be done, recover the error by
-				// closing
-				// the game
+			// closing
+			// the game
 			catch (final Exception e) {
 				Logger.error("[GAME] Failed to retrieve Task Image, aborting.");
 				gameEnded();
@@ -535,7 +510,7 @@ public class Game extends GameRoom {
 				{
 					sendTask(true);
 				} else // We have already a tag that has been provided, use that
-						// one
+					// one
 				{
 					currentGuess = label;
 					sendTask(false);
@@ -546,8 +521,8 @@ public class Game extends GameRoom {
 				gameEnded();
 			}
 		} // We have played all the rounds for the game, inform the users and
-			// the modules
-			// that the match has ended
+		// the modules
+		// that the match has ended
 		else {
 			Logger.info("[GAME] Round ended, closing the game.");
 			gameEnded();
@@ -625,22 +600,22 @@ public class Game extends GameRoom {
 					nextRound();
 
 				} // If the solution has been given or a tag has not been
-					// chosen, start a new round
+				// chosen, start a new round
 				else {
 					if (areWeAsking) {
 						GameBus.getInstance()
-								.publish(
-										new GameEvent(
-												GameMessages
-														.composeLogMessage(
-																LogLevel.info,
-																sketcherPainter.name
-																		+ " "
-																		+ Messages
-																				.get(LanguagePicker
-																						.retrieveLocale(),
-																						"notag")),
-												roomChannel));
+						.publish(
+								new GameEvent(
+										GameMessages
+										.composeLogMessage(
+												LogLevel.info,
+												sketcherPainter.name
+												+ " "
+												+ Messages
+												.get(LanguagePicker
+														.retrieveLocale(),
+														"notag")),
+														roomChannel));
 						GameBus.getInstance().publish(
 								new GameEvent(GameMessages.composeNoTag(),
 										roomChannel));
@@ -679,46 +654,48 @@ public class Game extends GameRoom {
 				.scheduler()
 				.scheduleOnce(Duration.create(10, TimeUnit.MILLISECONDS),
 						new Runnable() {
-							@Override
-							public void run() {
-								Integer trials = 0;
-								Boolean completed = false;
-								while (trials < 5 && !completed) {
-									try {
-										trials++;
-										if (!fixGroundTruth)
-											CMS.taskSetInitialization(
-													priorityTaskHashSet,
-													taskHashSet, roomChannel,
-													maxRound);
-										else
-											CMS.fixGroundTruth(groundTruthId,
-													priorityTaskHashSet,
-													taskHashSet, roomChannel);
-										completed = true;
-									} catch (final Exception ex) {
-                                                                            try {
-                                                                                gameError();
-                                                                            } catch (Exception ex1) {
-                                                                                LoggerUtils.error("GAME", ex1);
-                                                                            }
-										LoggerUtils.error("GAME", ex);
-										return;
-									}
+					@Override
+					public void run() {
+						Integer trials = 0;
+						Boolean completed = false;
+						while (trials < 5 && !completed) {
+							try {
+								trials++;
+								if (!fixGroundTruth)
+									CMS.taskSetInitialization(
+											priorityTaskHashSet,
+											queueImages, roomChannel,
+											maxRound);
+								else
+									CMS.fixGroundTruth(groundTruthId,
+											priorityTaskHashSet,
+											queueImages, roomChannel);
+								completed = true;
+							} catch (final Exception ex) {
+								try {
+									gameError();
+								} catch (final Exception ex1) {
+									LoggerUtils.error("GAME", ex1);
 								}
-								if (trials >= 5) {
-                                                                    try {
-                                                                        gameEnded();
-                                                                    } catch (Exception ex) {
-                                                                        LoggerUtils.error("GAME", ex);
-                                                                    }
-									LoggerUtils
-											.error("GAME",
-													"[GAME] Impossible to retrieve the set of image relevant for this game, aborting");
-									return;
-								}
+								LoggerUtils.error("GAME", ex);
+								return;
 							}
-						}, Akka.system().dispatcher());
+						}
+						if (trials >= 5) {
+							try {
+								gameEnded();
+							} catch (final Exception ex) {
+								LoggerUtils.error("GAME", ex);
+							}
+							LoggerUtils
+							.error("GAME",
+									"[GAME] Impossible to retrieve the set of image relevant for this game, aborting");
+							return;
+						}
+					}
+				}, Akka.system().dispatcher());
+		Logger.debug("aggiungo fra quelle da cancellare: "
+				+ roomChannel.getRoom());
 		CMS.addInitializationThread(roomChannel.getRoom(), init);
 
 		Logger.info("[GAME] New game started");
@@ -749,25 +726,28 @@ public class Game extends GameRoom {
 	// @param type the type of the event to publish: room created, room
 
 	private void publishLobbyEvent() throws Exception {
-                final ObjectNode status = new ObjectNode(JsonNodeFactory.instance);
+		final ObjectNode status = new ObjectNode(JsonNodeFactory.instance);
 		// Get the hashcode related to this actoref in order to make it unique
 		status.put("id", this.getSelf().hashCode());
 		status.put("roomName", roomChannel.getRoom());
 		status.put("currentPlayers", playersVect.size());
 		status.put("maxPlayers", requiredPlayers);
 		status.put("visible", playersVect.size() < requiredPlayers);
-                GameEvent join = null;
-                try {
-                   join = new GameEvent(GameMessages.composeGameListUpdate(status), GameManager.getInstance().getLobby());
-                } catch(Exception e) {
-                   LoggerUtils.error("[GAME]", e);
-                }
-		Logger.info("[GAME] room - " + roomChannel.getRoom()+ " current players - " + playersVect.size()+ " max players - " + requiredPlayers);
-		if(join!=null)
-                    GameBus.getInstance().publish(join);
-                else {
-                    GameBus.getInstance().publish(new GameEvent(GameEventType.error));
-                }
+		GameEvent join = null;
+		try {
+			join = new GameEvent(GameMessages.composeGameListUpdate(status),
+					GameManager.getInstance().getLobby());
+		} catch (final Exception e) {
+			LoggerUtils.error("[GAME]", e);
+		}
+		Logger.info("[GAME] room - " + roomChannel.getRoom()
+				+ " current players - " + playersVect.size()
+				+ " max players - " + requiredPlayers);
+		if (join != null)
+			GameBus.getInstance().publish(join);
+		else {
+			GameBus.getInstance().publish(new GameEvent(GameEventType.error));
+		}
 	}
 
 	private void handleQuitter(final JsonNode jquitter) throws Exception {
@@ -885,10 +865,10 @@ public class Game extends GameRoom {
 		}
 		guessedWord = true;
 	}
-        
-        private void gameError() throws Exception {
-            throw new Exception("NEEDS TO BE IMPLEMENTED");
-        }
+
+	private void gameError() throws Exception {
+		throw new Exception("NEEDS TO BE IMPLEMENTED");
+	}
 
 	private void gameEnded() throws Exception {
 		// Close the gaming session
@@ -984,9 +964,9 @@ public class Game extends GameRoom {
 				new GameEvent(GameMessages.composeLogMessage(
 						LogLevel.info,
 						sketcherPainter.name
-								+ " "
-								+ Messages.get(LanguagePicker.retrieveLocale(),
-										"skiptask")), roomChannel));
+						+ " "
+						+ Messages.get(LanguagePicker.retrieveLocale(),
+								"skiptask")), roomChannel));
 		nextRound();
 	}
 
