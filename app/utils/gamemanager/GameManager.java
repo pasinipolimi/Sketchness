@@ -46,7 +46,7 @@ public class GameManager implements GameManagerInterface, Serializable {
     }
 
     @Override
-    public String addInstance(String roomName, ActorRef current) {
+    public String addInstance(String roomName, ActorRef current) throws Exception {
         try {
             Long id = matchId++;
             String instanceId = roomName + id;
@@ -57,7 +57,7 @@ public class GameManager implements GameManagerInterface, Serializable {
         }
         catch (Exception e) {
             LoggerUtils.error("GAMEMANAGER", e);
-            throw e;
+            return null;
         }
     }
 

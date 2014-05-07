@@ -32,8 +32,8 @@ public class GameFactory extends Factory {
            try {
               GameManagerInterface GMInstance = GameManager.getInstance();
               if(GMInstance!=null) {
-                    GMInstance.addInstance(room, obtained);
-                    retrieved = true;
+                    if(GMInstance.addInstance(room, obtained)!=null)
+                        retrieved = true;
               }
            } catch(Exception e) {
               trial++;

@@ -28,7 +28,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.openqa.selenium.remote.JsonException;
 
 import play.Logger;
 import play.Play;
@@ -40,14 +39,13 @@ import scala.concurrent.duration.Duration;
 import utils.JsonReader;
 import utils.LanguagePicker;
 import utils.gamebus.GameBus;
-import utils.gamebus.GameEventType;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.Room;
 import akka.actor.Cancellable;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.logging.Level;
+
 
 /**
  * Wrapper for the CMS API
@@ -98,7 +96,7 @@ public class CMS {
 		httpclient.close();
 	}
 
-		public static void segmentation(final ObjectNode finalTraces, final String username, final Integer session) throws MalformedURLException, IOException, JSONException {
+        public static void segmentation(final ObjectNode finalTraces, final String username, final Integer session) throws MalformedURLException, IOException, JSONException {
             Akka.system().scheduler().scheduleOnce(
                     Duration.create(10, TimeUnit.MILLISECONDS),new Runnable() {
 		    @Override
@@ -119,12 +117,10 @@ public class CMS {
                                 final String request = rootUrl + "/wsmc/image/" + id
                                         + "/segmentation.json";
                                 JSONObject actionInfo;
-                                Logger.debug("[CMS PRIMA");
                                 try {
                                     final F.Promise<WS.Response> returned = WS.url(request)
                                             .setContentType("application/x-www-form-urlencoded").setTimeout(20000)
                                             .post(urlParameters);
-                                    Logger.debug("[CMS DOPO");
                                     actionInfo = new JSONObject(returned.get().getBody());
                                     final Integer actionId = Integer.parseInt(actionInfo.get("vid")
                                             .toString());
@@ -132,8 +128,7 @@ public class CMS {
                                             + " for image with id " + id + " and tag " + label);
                                 } catch (final Exception ex) {
                                     Logger.error("Unable to save segmentation", ex);
-                                }
-                                
+                                } 
                             } catch (Exception ex) {
                                    Logger.error("Unable to save segmentation", ex);
                             }  
