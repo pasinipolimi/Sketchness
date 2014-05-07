@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -109,13 +108,12 @@ public class Game extends GameRoom {
 	private Boolean shownImages = false;
 	List<ObjectNode> queueImages = Collections
 			.synchronizedList(new LinkedList<ObjectNode>());
-	private final HashSet<ObjectNode> priorityTaskHashSet = new HashSet<>();
-	// We should not assign the same uTask to the same match, keep a list of the
-	// uTasks that has been already used
-	private final HashSet<Integer> usedUTasks = new HashSet<>();
+	private final List<ObjectNode> priorityTaskQueue = Collections
+			.synchronizedList(new LinkedList<ObjectNode>());
+
 	private ObjectNode taskImage;
 	private Integer sessionId;
-	private Integer uTaskID;
+
 	private final static Integer maxSinglePlayer = Play.application()
 			.configuration().getInt("maxSinglePlayer");
 
@@ -219,27 +217,12 @@ public class Game extends GameRoom {
 	 */
 	private ObjectNode retrieveTaskImage() throws Exception {
 		guessObject = null;
-		uTaskID = null;
 		// If we have task prioritized, then use them first
-		while (priorityTaskHashSet.size() > 0 && guessObject == null) {
-			final Iterator<ObjectNode> it2 = priorityTaskHashSet.iterator();
-			while (it2.hasNext()) {
-				final ObjectNode obj = it2.next();
-				guessObject = obj;
-				final Integer task = guessObject.get("taskid").asInt();
-				if (usedUTasks.contains(task)) {
-					priorityTaskHashSet.remove(guessObject);
-					guessObject = null;
-				} else {
-					uTaskID = guessObject.get("utaskid").asInt();
-					usedUTasks.add(task);
-				}
-				break;
-			}
-			if (guessObject != null) {
-				priorityTaskHashSet.remove(guessObject);
-			}
+		if (priorityTaskQueue.size() > 0) {
+			guessObject = priorityTaskQueue.remove(0);
+
 		}
+
 		if (guessObject == null) {
 
 			if (queueImages.size() > 0) {
@@ -663,12 +646,12 @@ public class Game extends GameRoom {
 								trials++;
 								if (!fixGroundTruth)
 									CMS.taskSetInitialization(
-											priorityTaskHashSet,
+											priorityTaskQueue,
 											queueImages, roomChannel,
 											maxRound);
 								else
 									CMS.fixGroundTruth(groundTruthId,
-											priorityTaskHashSet,
+											priorityTaskQueue,
 											queueImages, roomChannel);
 								completed = true;
 							} catch (final Exception ex) {

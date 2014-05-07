@@ -206,7 +206,7 @@ public class CMS {
 	}
 
 	public static void fixGroundTruth(final Integer sessionId,
-			final HashSet<ObjectNode> priorityTaskHashSet,
+			final List<ObjectNode> priorityTaskHashSet,
 			final List<ObjectNode> queueImages, final Room roomChannel) {
 		final JsonReader jsonReader = new JsonReader();
 		JsonNode retrievedImages;
@@ -320,7 +320,7 @@ public class CMS {
 	 * 
 	 */
 	public static void taskSetInitialization(
-			final HashSet<ObjectNode> priorityTaskHashSet,
+			final List<ObjectNode> priorityTaskHashSet,
 			final List<ObjectNode> queueImages, final Room roomChannel,
 			final Integer maxRound) throws Error, JSONException {
 
@@ -400,7 +400,7 @@ public class CMS {
 	}
 
 	private static int retrieveTasks(final Integer maxRound,
-			final HashSet<ObjectNode> priorityTaskHashSet,
+			final List<ObjectNode> priorityTaskHashSet,
 			final Room roomChannel) {
 		boolean taskSent = false;
 
