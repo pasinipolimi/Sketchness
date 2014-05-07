@@ -1,4 +1,14 @@
 function imgPreview(url, idPreview){
+	
+
+	var imageDiv = $(".imageDiv");
+	$(".imageDiv").show();
+	$("#drawArea").show();
+	$("#filterForm").hide();
+	imageDiv.children().remove();
+	imageDiv.append("<div class='panelTitle'>Image "+idPreview+"</div>");
+
+
     var taskImage
        ,canvas = document.getElementById("draws")
        ,ctx = canvas.getContext("2d")
@@ -12,11 +22,11 @@ function imgPreview(url, idPreview){
         $(graph2).hide();
         $(viewport).show();
 
-
+        
         taskImage=new Image();
         taskImage.src=url;
         $("#ImgPreview").val(idPreview);
-
+        
         taskImage.onload = function() {
                     taskContext.save();
                     taskContext.beginPath();
@@ -32,4 +42,5 @@ function imgPreview(url, idPreview){
                     maskContext.clearRect(0,0,maskCanvas.width,maskCanvas.height);
                 };
 
+        visualizzaImgAjax(idPreview, url);
 }

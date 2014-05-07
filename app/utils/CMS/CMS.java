@@ -82,6 +82,18 @@ public class CMS {
 			Logger.debug("[CMS] Closing Task " + taskID);
 		}
 	}
+	
+	public static void invalidateTag(final String tagID) throws IOException{
+		final CloseableHttpClient httpclient = HttpClients.createDefault();
+		final HttpPut httpPut = new HttpPut(rootUrl + "/wsmc/content/" + tagID
+				+ "/invalidate");
+		final CloseableHttpResponse response1 = httpclient.execute(httpPut);
+
+		final HttpEntity entity1 = response1.getEntity();
+		EntityUtils.consume(entity1);
+		response1.close();
+		httpclient.close();
+	}
 
 	public static Integer segmentation(final ObjectNode finalTraces,
 			final String username, final Integer session)
@@ -646,11 +658,13 @@ public class CMS {
 			final SortObject obj = it.next();
 			element.put("id", obj.getId());
 			element.put("media", obj.getMedia());
+			element.put("numAnnotations", obj.getNum());
 			imageIds.put(element);
 		}
 
 		return imageIds;
 	}
+	
 
 	/**
 	 * Retrive all the tasks' ids that are stored in the system
@@ -673,6 +687,7 @@ public class CMS {
 			object = jsonTask.get("task").get(i);
 			element.put("id", object.get("id"));
 			element.put("taskType", object.get("taskType"));
+			element.put("status", object.get("status"));
 			taskIds.put(element);
 			i++;
 		}
@@ -734,7 +749,7 @@ public class CMS {
 		final JSONArray info = new JSONArray();
 		final JsonReader jsonReader = new JsonReader();
 		JsonNode itemTag;
-		JsonNode segmentArr, object2, tagId;
+		JsonNode segmentArr, object2, tagId, valid, lang, annotationId;
 		JsonNode descObj;
 		JsonNode tagArr;
 		JSONObject element;
@@ -742,9 +757,11 @@ public class CMS {
 		int numSegment = 0;
 		int j = 0;
 		String tmpTag;
-		JsonNode media;
+		JsonNode media, width, height;
 
 		media = jsonImages.get("mediaLocator");
+		width = jsonImages.get("width");
+		height = jsonImages.get("height");
 		if (jsonImages.has("descriptions")) {
 			descObj = jsonImages.get("descriptions");
 			if (descObj.has("availableTags")) {
@@ -757,8 +774,17 @@ public class CMS {
 							+ "/wsmc/content/" + tmpTag + ".json");
 					object2 = itemTag.get("itemAnnotations").get(0)
 							.get("value");
+					lang = itemTag.get("itemAnnotations").get(0)
+							.get("language");
+					annotationId = itemTag.get("itemAnnotations").get(0)
+							.get("id");
+					valid = itemTag.get("valid");
 					element = new JSONObject();
+					element.put("tagId", tmpTag);
 					element.put("tag", object2);
+					element.put("valid", valid);
+					element.put("lang", lang);
+					element.put("annotationId", annotationId);
 					tags.put(element);
 					j++;
 				}// fine while
@@ -771,10 +797,42 @@ public class CMS {
 		element = new JSONObject();
 		element.put("tags", tags);
 		element.put("medialocator", media);
+		element.put("height", height);
+		element.put("width", width);
 		element.put("annotations", numSegment);
 		info.put(element);
 		final String result = info.toString();
 		return result;
+	}
+	
+	/**
+	 * Retrive info for a specific mask
+	 * 
+	 * @param jsonMask
+	 *            The specific mask which I'm evalueting
+	 * @return It's medialocator
+	 * @throws JSONException
+	 */
+	public static String retriveMaskInfo(final JsonNode jsonMask)
+			throws JSONException {
+
+		final JSONArray info = new JSONArray();
+
+		JSONObject element;
+		
+		String media;
+		media = rootUrl + jsonMask.get("path").asText();
+		String quality;
+		quality = jsonMask.get("quality").asText();
+		
+		element = new JSONObject();
+		element.put("medialocator", media);
+		element.put("quality", quality);
+
+		info.put(element);
+		final String result = info.toString();
+		return result;
+	
 	}
 
 	/**
@@ -788,9 +846,46 @@ public class CMS {
 	 *         its microtask (id, type, status)
 	 * @throws JSONException
 	 */
-	public static String retriveTaskInfo(final JsonNode jsonTasks,
-			final String selected) throws JSONException {
+	public static String retriveTaskInfo(final JsonNode jsonTasks) throws JSONException {
+		
+		final JSONArray info = new JSONArray();
+		JsonNode utaskId;
 
+		JsonNode utaskArr;
+		JSONObject element, finalElement;
+		final JSONArray utasks = new JSONArray();
+		int j = 0;
+		String tmpUtask, status, utaskType;
+
+		
+			if (jsonTasks.has("utasks")) {
+
+				utaskArr = jsonTasks.get("utasks");
+
+				for (final JsonNode utask : utaskArr) {
+                    	 tmpUtask = utask.get("id").getTextValue();
+                    	 status = utask.get("status").getTextValue();
+                    	 utaskType = utask.get("utaskType").getTextValue();
+                    	 
+                    	element = new JSONObject();
+     					element.put("id", tmpUtask);
+     					element.put("status", status);
+     					element.put("utaskType", utaskType);
+     					
+     					utasks.put(element);
+				}
+			}// if se c'è campo utasks
+			
+		finalElement = new JSONObject();
+		finalElement.put("utasks", utasks);
+		info.put(finalElement);
+		final String result = info.toString();
+		return result;
+
+		/*
+		
+		
+		
 		final JSONArray info = new JSONArray();
 		JsonNode object, object2;
 		JsonNode taskObj;
@@ -807,10 +902,10 @@ public class CMS {
 			tmpId = object2.get("id").asText();
 			if (tmpId.equals(selected)) {
 				status = object2.get("status");
-				if (object2.has("utask")) {
+				if (object2.has("utasks")) {
 					element = new JSONObject();
 					element.put("utask", "full");
-					taskObj = object2.get("utask");
+					taskObj = object2.get("utasks");
 					while (j < taskObj.size()) {
 						element = new JSONObject();
 						element.put("id", taskObj.get(j).get("id"));
@@ -833,10 +928,93 @@ public class CMS {
 		element.put("status", status);
 		element.put("uTasks", uTasks);
 		info.put(element);
+		
 		final String result = info.toString();
 		return result;
+		*/
+	}
+	
+	
+
+	/**
+	 * Retrive the list of collections id 
+	 * 
+	 * @param jsonCollection
+	 *            JsonNode of all the Collections
+	 * @return the ids of the collections
+	 * @throws JSONException
+	 */
+	
+	public static JSONArray retriveCollectionInfo(final JsonNode jsonCollection)
+			throws JSONException {
+
+		final JSONArray collectionIds = new JSONArray();
+		JsonNode object;
+		JSONObject element;
+		int i = 0;
+
+		while (i < jsonCollection.get("collections").size()) {
+			element = new JSONObject();
+			object = jsonCollection.get("collections").get(i);
+			element.put("id", object.get("id"));
+			collectionIds.put(element);
+			i++;
+		}
+		return collectionIds;
+	}
+	
+	/**
+	 * Retrive the images of a collection
+	 * 
+	 * @param jsonCollection
+	 *            JsonNode of all the Collections
+	 * @return the images info
+	 * @throws JSONException
+	 */
+	
+	public static String retriveCollImages(final JsonNode jsonCollection)
+			throws JSONException {
+
+		final JSONArray imageIds = new JSONArray();
+		JsonNode object;
+		JSONObject element, finalElement;
+		String tmpImage;
+		JsonNode imagesArr;
+		int i = 0;
+		final JSONArray info = new JSONArray();
+
+		if (jsonCollection.has("images")) {
+			
+			imagesArr = jsonCollection.get("images");
+
+			for (final JsonNode image : imagesArr) {
+                	tmpImage = image.get("id").getTextValue();
+                	 
+                	element = new JSONObject();
+ 					element.put("id", tmpImage);
+ 					
+ 					imageIds.put(element);
+			}
+		}// if se c'è campo images
+		/*
+			while (i < jsonCollection.get("images").size()) {
+				element = new JSONObject();
+				object = jsonCollection.get("images").get(i);
+				element.put("id", object.get("id"));
+				imageIds.put(element);
+				i++;
+			}
+		*/
+		finalElement = new JSONObject();
+		finalElement.put("images", imageIds);
+		info.put(finalElement);
+		final String result = info.toString();
+		return result;
+		//return imageIds;
 	}
 
+	
+	
 	/**
 	 * Close a particulr task
 	 * 
@@ -1140,12 +1318,10 @@ public class CMS {
 			if (object.get("type").asText().equals("segmentation")) {
 				if (object.has("user")) {
 					if (object.get("user").has("cubrik_userid")) {
-						sorting = new SortObject() {
-						};
-						sorting.setIdU(object.get("user").get("cubrik_userid")
-								.asInt());
+						sorting = new SortObject() {};
+						sorting.setIdU(object.get("user").get("cubrik_userid").asInt());
 						sorting.setIdTmp(object.get("id").asInt());
-						sorting.setImgTmp(object.get("image").asInt());
+						sorting.setImgTmp(object.get("imageid").asInt());
 						tempList.add(j, sorting);
 						j++;
 					}
@@ -1250,7 +1426,7 @@ public class CMS {
 						sorting.setIdU(object.get("user").get("cubrik_userid")
 								.asInt());
 						sorting.setIdTmp(object.get("id").asInt());
-						sorting.setImgTmp(object.get("image").asInt());
+						sorting.setImgTmp(object.get("imageid").asInt());
 						tempList.add(j, sorting);
 						j++;
 					}
@@ -1350,5 +1526,6 @@ public class CMS {
 			return "";
 		}
 	}
+
 
 }

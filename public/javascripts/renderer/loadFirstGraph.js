@@ -12,6 +12,7 @@ function loadFirstGraph(){
              drawChart(result);
              first_graph_data = xhr.responseText;
 
+
           }
           else{
               alert("Request was unsuccesfull: "+ xhr.status);

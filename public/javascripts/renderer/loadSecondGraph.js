@@ -11,6 +11,7 @@ function loadSecondGraph(){
              var result = JSON.parse(xhr.responseText);
              drawChart2(result);
              second_graph_data = xhr.responseText;
+
           }
           else{
               alert("Request was unsuccesfull: "+ xhr.status);

@@ -1,0 +1,35 @@
+@(title: String)(content: Html)
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>@title</title>
+  </head>
+  <body>
+  <!--NAVIGATION BAR -->
+	    <div class="navbar navbar-inverse">
+		    <div class="navbar-inner">
+				<div class="container-fluid">
+					<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</a>
+					<a class="brand" href="#" name="top"><span class="c1">Sketchness</span><span class="c2">Panel</span></a>
+					<div class="nav-collapse collapse">
+						<ul class="nav">
+							<li><a href="@routes.Utilities.newRendererCall()">Images</a></li>
+							<li class="divider-vertical"></li>
+							<li><a href="@routes.Utilities.tasksPageCall()">Tasks</a></li>
+							<li class="divider-vertical"></li>
+							<li><a href="@routes.Utilities.systemInfoPageCall()">System Info</a></li>
+							<li class="divider-vertical"></li>
+							<li><a href="@routes.Utilities.usersInfoPageCall()">Users Info</a></li>
+							<li class="divider-vertical"></li>
+						</ul>
+					</div><!--/.nav-collapse -->
+				</div><!--/.container-fluid -->
+			</div><!--/.navbar-inner -->
+		</div><!--/.navbar -->
+    <section class="content">@content</section>
+  </body>
+</html>

@@ -11,10 +11,13 @@ function download1(){
                       type: "text/plain;charset=utf-8;",
                   });
                   saveAs(blob, "userData.json");
+                  
               }
+              
               else{
                   alert("Request was unsuccesfull: "+ xhr.status);
               }
+              
           }
         }
       });

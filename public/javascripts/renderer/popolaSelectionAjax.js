@@ -3,19 +3,19 @@
  * and open the template in the editor.
  */
 function popolaSelectionAjax(){
-    var selection = $("#selection")
-        ,selectionTask = $("#selectionTask")
-        ,option
+
+	var selection = $("#imageList")
+        ,selectionCollection = $("#collectionList")
+        ,li,img,div,h3
         ,ids
         ,tasks
         ,result;
 
     selection.children().remove();
-    selectionTask.children().remove();
+    selectionCollection.children().remove();
     
-    selection.append("<option value='' selected disabled>Select Image</option>");
-    selectionTask.append("<option value='' selected disabled>Select Task</option>");
-    $('.customSelect').dropkick();
+    
+    var maxAnn = 0;
 
     $.jAjax({
         url: "WebToolAjax",
@@ -25,25 +25,25 @@ function popolaSelectionAjax(){
                     result = JSON.parse(xhr.responseText);
                     ids = result.image[0];
                     $.each(ids, function(i,d){
-                            option=document.createElement("option");
-                            option.value = d.id+"\" onmouseover=\"imgPreview('"+d.media+"','"+d.id+"');\" onclick=\"visualizzaImgAjax('"+d.id+"');";
-                            option.text = d.id;
-                            selection.append(option);
+                    	
+                    		li = document.createElement("li");
+                    		selection.append(li);
+                    		var html = "<a href='#'><img src='"+d.media+"'/><div><h3 class='imageId'>"+d.id+"</h3></div></a>";
+                    		li.innerHTML = html;
+                    		li.onclick = function() {
+                    			imgPreview(d.media,d.id);
 
+                    		};
+                    		if(d.numAnnotations>maxAnn)
+                    		{
+                    			maxAnn = d.numAnnotations;
+                    		}
+                    	
                     });
                     
-                    if(result.check == "true"){
-                        tasks = result.task[0];
-                        $.each(tasks, function(i,d){
-
-                                option=document.createElement("option");
-                                option.value= d.id.substring(1, d.id.length -1);
-                                option.text= d.id.substring(1, d.id.length -1) + " ( " + d.taskType.substring(1, d.taskType.length -1) + " )";
-                                selectionTask.append(option);
-
-                        });
-                    }
-                    $('.customSelect').dropkick("refresh");
+                    $("#slider").replaceWith("Num. Annotations <input id='slider' type='range' name='range' min='1' max='"+maxAnn+"' value='"+maxAnn/2+"' onchange='numberAnnotations();'><output id='range'> "+maxAnn/2+"</output>");
+                    $("#maxAnn").val(maxAnn);
+                    
                 }
                 else{
                     alert("Request was unsuccesfull: "+ xhr.status);
@@ -51,4 +51,31 @@ function popolaSelectionAjax(){
             }
         }
     });
+    
+    var option;
+    
+    $.jAjax({
+        url: "CollectionAjax",
+        onComplete: function(xhr,status){
+            if(xhr.readyState === 4){
+                if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
+                	
+                    result = JSON.parse(xhr.responseText);
+                    var collIds = result.collections[0];
+                    $.each(collIds, function(i,d){
+					
+                    		selectionCollection.append("<label><input type='checkbox' name='collection' value='"+d.id.substring(1, d.id.length -1)+"'> Collection "+d.id.substring(1, d.id.length -1)+"</input></label>");
+	
+                    });
+          
+                    
+                }
+                else{
+                    alert("Request was unsuccesfull: "+ xhr.status);
+                }
+            }
+        }
+    });
+    
+    
 }

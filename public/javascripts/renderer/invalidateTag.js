@@ -3,21 +3,21 @@
  * and open the template in the editor.
  */
 
-function nuovoUTask(utaskType, selectionTask, taskType, taskStatus){
+function invalidateTag(tagId){
+    
+    var xhr = new XMLHttpRequest();
+	var selectionimg = $("#ImgAttivattiva").val();
     
      $.jAjax({
-        url: "AddUTask",
+        url: "InvalidateTag",
         headers : {
-            "taskType" : utaskType,
-            "selectionTask" : selectionTask
+            "tagId" : tagId,
         },
         onComplete: function(xhr,status){
-            $("#creanuovoUTask").dropkick();
             if(xhr.readyState === 4){
                 if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
-                   var newTaskId = xhr.responseText;
-                   alert("New micro task code is: " + newTaskId);
-                   taskPreview(selectionTask, taskType, taskStatus);
+                   alert("Annotation: " + tagId + "has been invalidated");
+				   visualizzaImgAjax(selectionimg);
                 }
                 else{
                     alert("Request was unsuccesfull: "+ xhr.status);
@@ -25,6 +25,6 @@ function nuovoUTask(utaskType, selectionTask, taskType, taskStatus){
             }
         }
     });
-
+	
+	
 }
-
