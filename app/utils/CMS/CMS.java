@@ -144,8 +144,7 @@ public class CMS {
 	public static void textAnnotation(final ObjectNode finalTraces,
 			final String username, final Integer session)
 			throws MalformedURLException, IOException, JSONException {
-<<<<<<< HEAD
-                Akka.system().scheduler().scheduleOnce(
+                    Akka.system().scheduler().scheduleOnce(
                     Duration.create(10, TimeUnit.MILLISECONDS),new Runnable() {
 		    @Override
 		    public void run() {
@@ -174,51 +173,6 @@ public class CMS {
                         }
                     }
                 }, Akka.system().dispatcher());   
-=======
-		final JsonReader jsonReader = new JsonReader();
-		final String label = finalTraces.get("label").getTextValue();
-		final String id = finalTraces.get("id").getTextValue();
-		final JsonNode image = jsonReader.readJsonArrayFromUrl(rootUrl
-				+ "/wsmc/image/" + id + ".json");
-		final JsonNode imageSegments = image.get("descriptions");
-		Logger.debug("Chiamao la retrievetask io annotator");
-		final HashSet<String> available = retrieveTags(imageSegments);
-		// If the tag is not present in the list of the available tags, add it
-		// to
-		// the list
-		if (!available.contains(label)) {
-			// Just the list of the single, current tags is saved under a
-			// content descriptor called availableTags
-			final String urlParameters = "ta_name=tag&ta_val=" + label
-					+ "&content_type=availableTags&&user_id=" + username
-					+ "&language=" + LanguagePicker.retrieveIsoCode()
-					+ "&session_id=" + session + "&oauth_consumer_key="
-					+ oauthConsumerKey;
-			final String request = rootUrl + "/wsmc/image/" + id
-					+ "/textAnnotation.json";
-			WS.url(request).setContentType("application/x-www-form-urlencoded")
-					.post(urlParameters);
-			Logger.debug("[CMS] Adding new tag: " + label
-					+ " for image with id " + id);
-		}
-		// In any case, record that the player has tagged the image with this
-		// tag
-		final String urlParameters = "ta_name=tag&ta_val=" + label
-				+ "&content_type=tagging&&user_id=" + username + "&language="
-				+ LanguagePicker.retrieveIsoCode() + "&session_id=" + session
-				+ "&oauth_consumer_key=" + oauthConsumerKey;
-		final String request = rootUrl + "/wsmc/image/" + id
-				+ "/textAnnotation.json";
-		final F.Promise<WS.Response> returned = WS.url(request)
-				.setContentType("application/x-www-form-urlencoded")
-				.post(urlParameters);
-		final JSONObject actionInfo = new JSONObject(returned.get().getBody());
-		final Integer actionId = Integer.parseInt(actionInfo.get("vid")
-				.toString());
-		Logger.debug("[CMS] Storing textAnnotation with action " + actionId
-				+ " for image with id " + id + " and tag " + label);
-		return actionId;
->>>>>>> 13c3d462e65d8b0cfb051acc0b78105ab05a925f
 	}
 
 	public static Integer openSession() throws Error {
@@ -270,7 +224,7 @@ public class CMS {
 		if (retrievedImages != null) {
 			// For each image
 			for (final JsonNode item : retrievedImages) {
-				if (item.getElements().hasNext()) {
+				if (item.elements().hasNext()) {
 					// Save information related to the image
 					final String id = item.get("id").asText();
 					final String url = rootUrl
@@ -414,7 +368,7 @@ public class CMS {
 		}
 
 		for (final JsonNode item : retrievedImagesOrdered) {
-			if (item.getElements().hasNext()) {
+			if (item.elements().hasNext()) {
 				// Save information related to the image
 				final String id = item.get("id").asText();
 
@@ -480,13 +434,13 @@ public class CMS {
                     if (retrievedTasks != null && retrievedTasks.size()!=0) {
                             retrievedTasks = retrievedTasks.get("task");
                             for (final JsonNode item : retrievedTasks) {
-                                    if (item.getElements().hasNext()) {
+                                    if (item.elements().hasNext()) {
 
-                                            final String taskId = item.get("id").getTextValue();
+                                            final String taskId = item.get("id").textValue();
                                             final JsonNode uTasks = item.get("utask");
 
-                                            final String imageId = item.get("image").getElements()
-                                                            .next().getElements().next().asText();
+                                            final String imageId = item.get("image").elements()
+                                                            .next().elements().next().asText();
                                             final JsonNode image = jsonReader
                                                             .readJsonArrayFromUrl(rootUrl + "/wsmc/image/"
                                                                             + imageId + ".json");
@@ -494,7 +448,7 @@ public class CMS {
                                                     // Retrieve the first uTask for the current task and
                                                     // assign it
                                                     for (final JsonNode utask : uTasks) {
-                                                            if (utask.getElements().hasNext()) {
+                                                            if (utask.elements().hasNext()) {
                                                                     // FIXME non necessario, ho gia tutto
                                                                     // quello
                                                                     // che mi serve
@@ -601,7 +555,7 @@ public class CMS {
 		final HashSet<String> tags = new HashSet<>();
 		imageSegments = imageSegments.get("availableTags");
 		if (imageSegments != null) {
-			if (imageSegments.getElements().hasNext()) {
+			if (imageSegments.elements().hasNext()) {
 				for (final JsonNode segment : imageSegments) {
 					// Retrieve the content descriptor
 					if (null != segment) {
@@ -610,7 +564,7 @@ public class CMS {
 						JsonNode retrieved = jsonReader
 								.readJsonArrayFromUrl(rootUrl
 										+ "/wsmc/content/"
-										+ segment.get("id").getTextValue()
+										+ segment.get("id").textValue()
 										+ ".json");
 						// Logger.debug("send request to retrieve tags end "
 						// + segment.get("id").getTextValue());
@@ -913,9 +867,9 @@ public class CMS {
 				utaskArr = jsonTasks.get("utasks");
 
 				for (final JsonNode utask : utaskArr) {
-                    	 tmpUtask = utask.get("id").getTextValue();
-                    	 status = utask.get("status").getTextValue();
-                    	 utaskType = utask.get("utaskType").getTextValue();
+                    	 tmpUtask = utask.get("id").textValue();
+                    	 status = utask.get("status").textValue();
+                    	 utaskType = utask.get("utaskType").textValue();
                     	 
                     	element = new JSONObject();
      					element.put("id", tmpUtask);
@@ -1038,7 +992,7 @@ public class CMS {
 			imagesArr = jsonCollection.get("images");
 
 			for (final JsonNode image : imagesArr) {
-                	tmpImage = image.get("id").getTextValue();
+                	tmpImage = image.get("id").textValue();
                 	 
                 	element = new JSONObject();
  					element.put("id", tmpImage);

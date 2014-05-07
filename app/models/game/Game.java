@@ -130,8 +130,7 @@ public class Game extends GameRoom {
 	private Integer missingPlayers = requiredPlayers;
 	private Integer disconnectedPlayers = 0;
 	private Boolean shownImages = false;
-	List<ObjectNode> queueImages = Collections
-			.synchronizedList(new LinkedList<ObjectNode>());
+	private HashSet<ObjectNode> taskHashSet = new HashSet<>();
 	private final HashSet<ObjectNode> priorityTaskHashSet = new HashSet<>();
 	// We should not assign the same uTask to the same match, keep a list of the
 	// uTasks that has been already used
@@ -262,18 +261,14 @@ public class Game extends GameRoom {
 				priorityTaskHashSet.remove(guessObject);
 			}
 		}
-		if (guessObject == null) {
-
-			if (queueImages.size() > 0) {
-				guessObject = queueImages.remove(0);
-			}
-			// final Iterator<ObjectNode> it = taskHashSet.iterator();
-			// while (it.hasNext()) {
-			// final ObjectNode obj = it.next();
-			// guessObject = obj;
-			// }
-			// taskHashSet.remove(guessObject);
-		}
+		 if (guessObject == null) {
+                    Iterator<ObjectNode> it = taskHashSet.iterator();
+                    while (it.hasNext()) {
+                        ObjectNode obj = it.next();
+                        guessObject = obj;
+                    }
+                    taskHashSet.remove(guessObject);
+                }
 		return guessObject;
 	}
 
@@ -690,12 +685,12 @@ public class Game extends GameRoom {
 										if (!fixGroundTruth)
 											CMS.taskSetInitialization(
 													priorityTaskHashSet,
-													queueImages, roomChannel,
+													taskHashSet, roomChannel,
 													maxRound);
 										else
 											CMS.fixGroundTruth(groundTruthId,
 													priorityTaskHashSet,
-													queueImages, roomChannel);
+													taskHashSet, roomChannel);
 										completed = true;
 									} catch (final Exception ex) {
                                                                             try {
