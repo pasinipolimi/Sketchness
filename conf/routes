@@ -5,6 +5,7 @@
 # Home page
 GET     /                                 controllers.Sketchness.index()
 GET     /leaderboard                      controllers.Sketchness.leaderboard(username: String ?= null, result: String ?= null)
+GET     /handlerError                     controllers.Sketchness.handleError()
 
 #new routes
 GET     /lobby                            controllers.Sketchness.lobby

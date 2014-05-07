@@ -20,7 +20,7 @@ import utils.gamemanager.GameManager;
 
 public class ChatFactory extends Factory {
 
-    public static synchronized void createChat(final String username, final String room, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception {
+    public static void createChat(final String username, final String room, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception {
         int trial = 0;
         
         final ActorRef obtained = create(room, Chat.class);
@@ -28,19 +28,17 @@ public class ChatFactory extends Factory {
         // Send the Join message to the room
         
         String result = null;
-        while(trial<=5 && result==null) {
-            try {
-                result = (String) Await.result(future, Duration.create(5, SECONDS));
-            }
-            catch (TimeoutException timeout) {
-                result=null;
-                LoggerUtils.error("CHATFACTORY", timeout);
-                trial++;
-                future = Patterns.ask(obtained, new Join(username, out), 5000);
-            }
+        try {
+            result = (String) Await.result(future, Duration.create(5, SECONDS));
         }
-        if(result==null)
-            throw new Exception("Chat creation failed after 5 trials");
+        catch (TimeoutException timeout) {
+            result=null;
+            LoggerUtils.error("CHATFACTORY", timeout);
+        }
+        if(result==null) {
+            throw new Exception("Chat creation failed");
+        }
+            
 
         if ("OK".equals(result)) {
                 GameBus.getInstance().subscribe(obtained, GameManager.getInstance().getRoom(room));

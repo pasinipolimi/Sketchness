@@ -26,19 +26,13 @@ public class LobbyFactory extends Factory {
         final ActorRef finalRoom = create("lobby", Lobby.class);
         Future<Object> future = Patterns.ask(finalRoom, new Join(username, out), 50000);
         // Send the Join message to the room
-        String result = null;
-        while(trial<=5 && result==null) {
-            try {
-                result = (String) Await.result(future, Duration.create(50, SECONDS));
-            }
-            catch (TimeoutException timeout) {
-                result=null;
-                trial++;
-                future = Patterns.ask(finalRoom, new Join(username, out), 50000);
-            }
+        String result;
+        try {
+            result = (String) Await.result(future, Duration.create(50, SECONDS));
         }
-        if(result==null)
+        catch (TimeoutException timeout) {
             throw new Exception("Lobby creation failed after 5 trials");
+        }  
         if ("OK".equals(result)) {
             ChatFactory.createChat(username, "lobby", in, out);
             //Define the actions to be performed on the websockets

@@ -44,6 +44,7 @@ public class JavascriptController extends Controller {
 		response().setContentType("text/javascript");
 		return ok(Routes.javascriptRouter("jsRoutes",
 		// Routes
-				controllers.routes.javascript.Sketchness.leaderboard()));
+				controllers.routes.javascript.Sketchness.leaderboard(),
+                                controllers.routes.javascript.Sketchness.handleError()));
 	}
 }

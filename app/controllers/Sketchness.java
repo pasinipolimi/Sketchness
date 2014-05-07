@@ -19,12 +19,15 @@ import utils.LoggerUtils;
 import utils.gamemanager.GameManager;
 import views.html.gameRoom;
 import views.html.leaderboard;
+import views.html.handleError;
 import views.html.lobby;
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
 
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.user.AuthUser;
+import static play.mvc.Controller.flash;
+import static play.mvc.Results.redirect;
 
 public class Sketchness extends Controller {
 
@@ -36,12 +39,11 @@ public class Sketchness extends Controller {
 			LanguagePicker.setLanguage(Lang.preferred(request()
 					.acceptLanguages()));
 		}
-                response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 		return redirect(routes.Application.login());
 	}
 
 	/**
-	 * Retrive the user from the session
+	 * Retrieve the user from the session
 	 */
 	public static User getLocalUser(final Http.Session session) {
 		final AuthUser currentAuthUser = PlayAuthenticate.getUser(session);
@@ -53,7 +55,6 @@ public class Sketchness extends Controller {
 	 */
 	@Restrict(@Group(Application.USER_ROLE))
     public static Result gameRoom() throws Exception {
-
 
 		final User localUser = getLocalUser(session());
 		final String username = localUser.name;
@@ -94,7 +95,6 @@ public class Sketchness extends Controller {
 		// with
 		// spaces in it.
 		roomName = roomName.replaceAll(" ", "");
-                response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
                 return ok(gameRoom.render(localUser, roomName,nPlayers));
 	}
 
@@ -120,6 +120,7 @@ public class Sketchness extends Controller {
                                             LobbyFactory.createLobby(username, in, out);
                                     } catch (final Exception ex) {
                                             LoggerUtils.error("LOBBY", ex);
+                                            GameFactory.handleError("LOAD", in, out);
                                     }
                             }
                     };
@@ -130,6 +131,7 @@ public class Sketchness extends Controller {
                        @Override
                        public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
                            LoggerUtils.error("LOBBY", e);
+                           GameFactory.handleError("LOAD", in, out);
                        }
                    }; 
                 }
@@ -152,6 +154,7 @@ public class Sketchness extends Controller {
                                         GameFactory.createGame(username, roomName, players, in, out);
                                     } catch (final Exception ex) {
                                             LoggerUtils.error("GAME", ex);
+                                            GameFactory.handleError("LOAD", in, out);
                                     }
                             }
                     };
@@ -162,6 +165,7 @@ public class Sketchness extends Controller {
                        @Override
                        public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
                            LoggerUtils.error("GAME", e);
+                           GameFactory.handleError("LOAD", in, out);
                        }
                    }; 
                 }
@@ -185,7 +189,6 @@ public class Sketchness extends Controller {
 			return redirect(routes.Sketchness.index());
 		}
 		GameManager.getInstance().getCurrentGames();
-                response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 		return ok(lobby.render(localUser));
 	}
 
@@ -195,20 +198,28 @@ public class Sketchness extends Controller {
 	@Restrict(@Group(Application.USER_ROLE))
 	public static Result leaderboard(final String username, String result)
 			throws Exception {
+                String[] splitted;
                 if(result.equals("")||result==null) {
                     result="";
+                    flash("score" + (1), "error");
+                    flash("name" + (1), "error");
+                    flash("points" + (1), "error");
                 }
                 else {
                     result = result.substring(1);
+                    splitted = result.split(":");
+                    for (int x = 0; x < splitted.length; x = x + 2) {
+                            flash("score" + ((x / 2) + 1), "");
+                            flash("name" + ((x / 2) + 1), splitted[x]);
+                            flash("points" + ((x / 2) + 1), splitted[x + 1]);
+                    }
                 }
-		final String[] splitted = result.split(":");
-		for (int x = 0; x < splitted.length; x = x + 2) {
-			flash("score" + ((x / 2) + 1), "");
-			flash("name" + ((x / 2) + 1), splitted[x]);
-			flash("points" + ((x / 2) + 1), splitted[x + 1]);
-		}
-                response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 		return ok(leaderboard.render(username, null));
+	}
+        
+        @Restrict(@Group(Application.USER_ROLE))
+	public static Result handleError() {
+		return ok(handleError.render());
 	}
 
     /**
@@ -221,7 +232,6 @@ public class Sketchness extends Controller {
                     final String username = localUser.name;
                     models.IsOnline.keepOnline(username);
                 }
-
 		return ok();
 	}
 

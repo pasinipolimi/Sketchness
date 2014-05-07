@@ -20,49 +20,31 @@ import utils.LoggerUtils;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages;
 import utils.gamemanager.GameManager;
-import utils.gamemanager.GameManagerInterface;
 
 public class GameFactory extends Factory {
 
     public static synchronized void createGame(final String username, final String room, final Integer maxPlayers, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception {
-        int trial = 0;
-        boolean retrieved = false;
         final ActorRef obtained = create(room, maxPlayers, Game.class);
-        while(trial<=5 && !retrieved) {
-           try {
-              GameManagerInterface GMInstance = GameManager.getInstance();
-              if(GMInstance!=null) {
-                    if(GMInstance.addInstance(room, obtained)!=null)
-                        retrieved = true;
-              }
-           } catch(Exception e) {
-              trial++;
+          try {
+            GameManager.getInstance().addInstance(room, obtained);
+          }
+          catch(Exception e) {
               LoggerUtils.error(room, e);
               Logger.error("GameManager failure, retrying...");
+              throw new Exception("Game creation failed after 2 trials");
            }
-        }
-        trial = 0;
-        if(!retrieved)
-            throw new Exception("Game creation failed after 5 trials");
         //Subscribe to lobby messages
         GameBus.getInstance().subscribe(obtained, GameManager.getInstance().getLobby());
         
-        Future<Object> future = Patterns.ask(obtained, new GameMessages.Join(username, out), 5000);
+        Future<Object> future = Patterns.ask(obtained, new GameMessages.Join(username, out), 30000);
+        String result;
         // Send the Join message to the room
-        String result = null;
-        while(trial<=5 && result==null) {
-            try {
-                result = (String) Await.result(future, Duration.create(5, SECONDS));
-            }
-            catch (TimeoutException timeout) {
-                result=null;
-                trial++;
-                future = Patterns.ask(obtained, new GameMessages.Join(username, out), 5000);
-            }
+        try {
+            result = (String) Await.result(future, Duration.create(5, SECONDS));
         }
-        if(result==null)
-            throw new Exception("Game creation failed after 5 trials");
-       
+        catch (TimeoutException timeout) {
+            throw new Exception("Game creation failed after 2 trials");
+        }      
         if ("OK".equals(result)) {
             ChatFactory.createChat(username, room, in, out);
             PaintFactory.createPaint(username, room, in, out);
@@ -88,5 +70,9 @@ public class GameFactory extends Factory {
             // Send the error to the socket.
             out.write(error);
         }
+    }
+    
+    public static synchronized void handleError(final String cause, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
+            out.write(GameMessages.composeHandleError(null));
     }
 }

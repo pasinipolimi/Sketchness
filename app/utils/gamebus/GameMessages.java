@@ -431,6 +431,11 @@ public class GameMessages {
 		final ObjectNode event = composeJsonMessage("leaderboard", object);
 		return event;
 	}
+        
+        public static ObjectNode composeHandleError(final ObjectNode object) {
+		final ObjectNode event = composeJsonMessage("error", object);
+		return event;
+	}
 
 	public static ObjectNode composeFinalTraces(final String url,
 			final String label, final ArrayNode traces,

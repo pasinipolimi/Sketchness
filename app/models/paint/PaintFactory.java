@@ -17,7 +17,7 @@ import utils.gamemanager.GameManager;
 
 public class PaintFactory extends Factory {
 
-    public static synchronized void createPaint(final String username, final String room, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception {
+    public static void createPaint(final String username, final String room, WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) throws Exception {
 
         final ActorRef obtained = create(room, Paint.class);
         Future<Object> future = Patterns.ask(obtained, new Join(username, out), 1000);

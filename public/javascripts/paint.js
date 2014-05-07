@@ -204,6 +204,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						leaderboard: function(e, content) {
 						        console.log("[RECEIVED MESSAGE] leaderboard");
 								that.quit(content);
+						},
+						error: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] error");
+							that.errorEvent();
 						}
 					});
 				},
@@ -250,6 +254,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						roundBegin: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] roundBegin");
 							that.beginRound(content.sketcher);
+						},
+						error: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] error");
+							that.errorEvent();
 						}
 
 					});
@@ -300,6 +308,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						leaderboard: function(e, content) {
 						        console.log("[RECEIVED MESSAGE] leaderboard");
 								that.quit(content);
+						},
+						error: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] error");
+							that.errorEvent();
 						}
 					});
 				},
@@ -332,6 +344,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						leaderboard: function(e, content) {
 						        console.log("[RECEIVED MESSAGE] leaderboard");
 								that.quit(content);
+						},
+						error: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] error");
+							that.errorEvent();
 						}
 					});
 				},
@@ -417,6 +433,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						noTag: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] noTag");
 							that.nextRound();
+						},
+						error: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] error");
+							that.errorEvent();
 						}
 					});
 
@@ -498,6 +518,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						noTag: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] noTag");
 							that.nextRound();
+						},
+						error: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] error");
+							that.errorEvent();
 						}
 					});
 				},
@@ -592,6 +616,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						endSegmentationC: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] endSegmentationC");
 							that.nextRound();
+						},
+						error: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] error");
+							that.errorEvent();
 						}
 					});
 
@@ -856,6 +884,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						skipTask: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] skipTask");
 							that.skipRound();
+						},
+						error: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] error");
+							that.errorEvent();
 						}
 					});
 				},
@@ -910,6 +942,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						leaderboard: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] leaderboard");
 							that.quit(content);
+						},
+						error: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] error");
+							that.errorEvent();
 						}
 					});
 				},
@@ -959,6 +995,22 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						}
 					});
 				},
+
+				onenterhandleError: function() {
+					var results="",
+						that = this,
+						sk = this.sketchness;
+					console.log("[BEGIN] HandleError");
+
+					jsRoutes.controllers.Sketchness.handleError().ajax({
+						success: function(data) {
+							that.elements.main.html(data);
+						},
+						error: function() {
+							that.write.error("Error!");
+						}
+					});
+				},
 				
 				onenterwaitRole: function() {
 					var that = this;
@@ -974,6 +1026,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						roundBegin: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] roundBegin");
 							that.beginRound(content.sketcher);
+						},
+						error: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] error");
+							that.errorEvent();
 						}
 					});
 				},
@@ -1002,6 +1058,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				{ name: "task", from: ["Guesser", "tagWait"], to: "taskGuessing" },
 				{ name: "endRound", from: ["taskGuessing", "taskDrawing"], to: "imageViewing" },
 				{ name: "quit", from: ["imageViewing", "tagInsertion", "taskDrawing", "taskGuessing", "tagWait", "waitRole", "loading", "Sketcher", "Guesser"], to: "leaderboard" },
+				{ name: "errorEvent", from: ["imageViewing", "tagInsertion", "taskDrawing", "taskGuessing", "tagWait", "waitRole", "loading", "Sketcher", "Guesser", "playersWait"], to: "handleError" },
 				{ name: "toLobby", from: "leaderboard", to: "lobby" }
 			]
 		});

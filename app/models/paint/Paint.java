@@ -128,6 +128,9 @@ public class Paint extends GameRoom {
 							case "endPath":
 								notifyEndPath();
 								break;
+                                                        case "error":
+                                                                notifyError();
+                                                                break;
 							case "trace":
 								addTrace(event.get("content"));
 								break;
@@ -292,6 +295,10 @@ public class Paint extends GameRoom {
 	private void notifyLeaderboard(final JsonNode task) throws Exception {
 		final ObjectNode toSend = (ObjectNode) task;
 		notifyAll(GameMessages.composeLeaderboard(toSend));
+	}
+        
+        private void notifyError() throws Exception {
+		notifyAll(GameMessages.composeHandleError(new ObjectNode(factory)));
 	}
 
 	private void notifyScore(final JsonNode task) throws Exception {

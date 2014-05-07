@@ -40,6 +40,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.logging.Level;
+import utils.gamebus.GameEventType;
+import utils.gamemanager.GameManagerInterface;
+import views.html.leaderboard;
 
 /**
  * A chat room is an Actor.
@@ -228,6 +231,7 @@ public class Game extends GameRoom {
 			}
 		} catch (final Exception e) {
 			LoggerUtils.error("[GAME]:", e);
+                        
 		}
 	}
 
@@ -465,7 +469,7 @@ public class Game extends GameRoom {
 				Logger.error("[GAME] Failed to retrieve Task Image, retrying.");
 				trials++;
 				if (trials >= 5) {
-					gameEnded();
+					gameError();
 					throw new Error(
 							"[GAME] Failed to retrieve Task Image, aborting");
 				}
@@ -486,7 +490,7 @@ public class Game extends GameRoom {
 				Logger.error("[GAME] Failed to retrieve Task Image, retrying.");
 				trials++;
 				if (trials >= 5) {
-					gameEnded();
+					gameError();
 					throw new Error(
 							"[GAME] Failed to retrieve Task Image, aborting");
 				}
@@ -694,7 +698,7 @@ public class Game extends GameRoom {
 										completed = true;
 									} catch (final Exception ex) {
                                                                             try {
-                                                                                gameEnded();
+                                                                                gameError();
                                                                             } catch (Exception ex1) {
                                                                                 LoggerUtils.error("GAME", ex1);
                                                                             }
@@ -744,21 +748,26 @@ public class Game extends GameRoom {
 	 */
 	// @param type the type of the event to publish: room created, room
 
-	private void publishLobbyEvent() throws Exception { // private void
-										// publishLobbyEvent(GameEventType type)
-										// {
-		final ObjectNode status = new ObjectNode(JsonNodeFactory.instance);
+	private void publishLobbyEvent() throws Exception {
+                final ObjectNode status = new ObjectNode(JsonNodeFactory.instance);
 		// Get the hashcode related to this actoref in order to make it unique
 		status.put("id", this.getSelf().hashCode());
 		status.put("roomName", roomChannel.getRoom());
 		status.put("currentPlayers", playersVect.size());
 		status.put("maxPlayers", requiredPlayers);
 		status.put("visible", playersVect.size() < requiredPlayers);
-		final GameEvent join = new GameEvent(GameMessages.composeGameListUpdate(status), GameManager.getInstance().getLobby());
-		Logger.info("[GAME] room - " + roomChannel.getRoom()
-				+ " current players - " + playersVect.size()
-				+ " max players - " + requiredPlayers);
-		GameBus.getInstance().publish(join);
+                GameEvent join = null;
+                try {
+                   join = new GameEvent(GameMessages.composeGameListUpdate(status), GameManager.getInstance().getLobby());
+                } catch(Exception e) {
+                   LoggerUtils.error("[GAME]", e);
+                }
+		Logger.info("[GAME] room - " + roomChannel.getRoom()+ " current players - " + playersVect.size()+ " max players - " + requiredPlayers);
+		if(join!=null)
+                    GameBus.getInstance().publish(join);
+                else {
+                    GameBus.getInstance().publish(new GameEvent(GameEventType.error));
+                }
 	}
 
 	private void handleQuitter(final JsonNode jquitter) throws Exception {
@@ -876,6 +885,10 @@ public class Game extends GameRoom {
 		}
 		guessedWord = true;
 	}
+        
+        private void gameError() throws Exception {
+            throw new Exception("NEEDS TO BE IMPLEMENTED");
+        }
 
 	private void gameEnded() throws Exception {
 		// Close the gaming session
