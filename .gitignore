@@ -54,3 +54,4 @@ dist
 *.db
 *.orig
 *.orig
+*.sql

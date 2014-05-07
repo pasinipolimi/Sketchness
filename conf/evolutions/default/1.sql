@@ -3,12 +3,6 @@
 
 # --- !Ups
 
-create table field_data_field_app_id (
-  id                        bigint not null,
-  field_app_id_value        varchar(255),
-  constraint pk_field_data_field_app_id primary key (id))
-;
-
 create table linked_account (
   id                        bigint not null,
   user_id                   bigint,
@@ -70,8 +64,6 @@ create table users_user_permission (
   user_permission_id             bigint not null,
   constraint pk_users_user_permission primary key (users_id, user_permission_id))
 ;
-create sequence field_data_field_app_id_seq;
-
 create sequence linked_account_seq;
 
 create sequence security_role_seq;
@@ -101,8 +93,6 @@ alter table users_user_permission add constraint fk_users_user_permission_user_0
 
 SET REFERENTIAL_INTEGRITY FALSE;
 
-drop table if exists field_data_field_app_id;
-
 drop table if exists linked_account;
 
 drop table if exists security_role;
@@ -118,8 +108,6 @@ drop table if exists users_user_permission;
 drop table if exists user_permission;
 
 SET REFERENTIAL_INTEGRITY TRUE;
-
-drop sequence if exists field_data_field_app_id_seq;
 
 drop sequence if exists linked_account_seq;
 
