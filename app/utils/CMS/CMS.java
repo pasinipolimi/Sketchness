@@ -334,7 +334,6 @@ public class CMS {
 		}
 
 		Logger.debug("Task init from CMS end");
-
 	}
 
 	private static void retrieveImages(final Integer tasksToAdd,
