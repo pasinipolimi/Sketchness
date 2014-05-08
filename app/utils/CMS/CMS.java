@@ -95,7 +95,7 @@ public class CMS {
 		response1.close();
 		httpclient.close();
 	}
-	public static void segmentation(final ObjectNode finalTraces, final String username, final Integer session) throws MalformedURLException, IOException, JSONException {
+	public static void segmentation(final ObjectNode finalTraces, final String username, final Integer session) throws Exception {
 		Akka.system().scheduler().scheduleOnce(
 				Duration.create(200, TimeUnit.MILLISECONDS),new Runnable() {
 					@Override
@@ -117,19 +117,13 @@ public class CMS {
 									+ "/segmentation.json";
 							JSONObject actionInfo;
 							try {
-								final F.Promise<WS.Response> returned = WS.url(request)
-										.setContentType("application/x-www-form-urlencoded").setTimeout(20000)
-										.post(urlParameters);
-								actionInfo = new JSONObject(returned.get().getBody());
-								final Integer actionId = Integer.parseInt(actionInfo.get("vid")
-										.toString());
-								Logger.debug("[CMS] Storing segmentation with action " + actionId
-										+ " for image with id " + id + " and tag " + label);
+								WS.url(request).setContentType("application/x-www-form-urlencoded").setTimeout(10000).post(urlParameters);
+								Logger.debug("[CMS] Storing segmentation with action for image with id " + id + " and tag " + label);
 							} catch (final Exception ex) {
-								Logger.error("Unable to save segmentation", ex);
+								Logger.error("Unable to save segmentation, EXC 1", ex);
 							}
 						} catch (final Exception ex) {
-							Logger.error("Unable to save segmentation", ex);
+							Logger.error("Unable to save segmentation, EXC 2", ex);
 						}
 					}
 				}, Akka.system().dispatcher());
@@ -137,7 +131,7 @@ public class CMS {
 
 	public static void textAnnotation(final ObjectNode finalTraces,
 			final String username, final Integer session)
-					throws MalformedURLException, IOException, JSONException {
+					throws Exception {
 		Akka.system().scheduler().scheduleOnce(
 				Duration.create(200, TimeUnit.MILLISECONDS),new Runnable() {
 					@Override
@@ -153,14 +147,8 @@ public class CMS {
 								+ "/textAnnotation.json";
 						final JSONObject actionInfo;
 						try {
-							final F.Promise<WS.Response> returned = WS.url(request)
-									.setContentType("application/x-www-form-urlencoded").setTimeout(120000)
-									.post(urlParameters);
-							actionInfo = new JSONObject(returned.get().getBody());
-							final Integer actionId = Integer.parseInt(actionInfo.get("vid")
-									.toString());
-							Logger.debug("[CMS] Storing textAnnotation with action " + actionId
-									+ " for image with id " + id + " and tag " + label);
+							final F.Promise<WS.Response> returned = WS.url(request).setContentType("application/x-www-form-urlencoded").setTimeout(10000).post(urlParameters);
+							Logger.debug("[CMS] Storing textAnnotation for image with id " + id + " and tag " + label);
 						} catch (final Exception e) {
 							Logger.error("Unable to save annotation.", e);
 						}
