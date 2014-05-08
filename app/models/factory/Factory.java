@@ -30,7 +30,7 @@ public abstract class Factory {
 		final ActorSelection sel = Akka.system().actorSelection(
 				"akka://application/user/" + roomID);
 
-		final Timeout t = new Timeout(100, TimeUnit.SECONDS);
+		final Timeout t = new Timeout(20, TimeUnit.SECONDS);
 		final AskableActorSelection asker = new AskableActorSelection(sel);
 		final scala.concurrent.Future<Object> fut = asker.ask(new Identify(1),
 				t);
@@ -48,7 +48,6 @@ public abstract class Factory {
 		} else {
 			newRoom = ref;
 		}
-
 		return newRoom;
 	}
 
@@ -57,17 +56,29 @@ public abstract class Factory {
 		ActorRef newRoom;
 		final String roomID = module.getSimpleName() + "_"
 				+ room.replaceAll("[^\\w\\s]", "");
+
 		// Try to see if we have already registered this actor in the system, if
 		// it is the case return the reference
-		newRoom = Akka.system().actorFor("akka://application/user/" + roomID);
-		if (newRoom instanceof EmptyLocalActorRef) {
-			@SuppressWarnings("unchecked")
+		final ActorSelection sel = Akka.system().actorSelection(
+				"akka://application/user/" + roomID);
+
+		final Timeout t = new Timeout(5, TimeUnit.SECONDS);
+		final AskableActorSelection asker = new AskableActorSelection(sel);
+		final scala.concurrent.Future<Object> fut = asker.ask(new Identify(1),
+				t);
+		final ActorIdentity ident = (ActorIdentity) Await.result(fut,
+				t.duration());
+		final ActorRef ref = ident.getRef();
+
+		if (ref == null) {
 			final Props properties = new Props(module);
 			// Otherwise create a new actor to the room and subscribe it to the
 			// message channel
 			newRoom = Akka.system().actorOf(properties, roomID);
 			newRoom.tell(new Room(room), newRoom);
 			GameBus.getInstance().subscribe(newRoom, room);
+		} else {
+			newRoom = ref;
 		}
 		return newRoom;
 	}

@@ -29,4 +29,8 @@ public class LoggerUtils {
 	public static void error(final String caller, final String message) {
 		Logger.error("[" + caller + "] ERROR: " + message);
 	}
+        
+        public static void info(final String caller, final String message) {
+		Logger.info("[" + caller + "] INFO: " + message);
+	}
 }

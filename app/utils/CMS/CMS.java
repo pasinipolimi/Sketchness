@@ -1,9 +1,11 @@
 package utils.CMS;
 
+import akka.actor.Cancellable;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -28,7 +29,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import play.Logger;
 import play.Play;
 import play.libs.Akka;
@@ -38,13 +38,10 @@ import play.libs.WS;
 import scala.concurrent.duration.Duration;
 import utils.JsonReader;
 import utils.LanguagePicker;
+import utils.LoggerUtils;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.Room;
-import akka.actor.Cancellable;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 
 /**
@@ -277,26 +274,8 @@ public class CMS {
 		final Cancellable thread = runningThreads.get(roomName);
 		if (thread != null) {
 			thread.cancel();
-			Akka.system()
-			.scheduler()
-			.scheduleOnce(Duration.create(1000, TimeUnit.MILLISECONDS),
-					new Runnable() {
-				@Override
-				public void run() {
-					while (!thread.isCancelled()) {
-						try {
-							Thread.sleep(100);
-						} catch (final Exception ex) {
-							Logger.error("Error in waiting the thread termination\n"
-									+ ex);
-						}
-					}
-					runningThreads.remove(roomName);
-					Logger.info("Thread cancelled and removed.");
-				}
-			}, Akka.system().dispatcher());
+                        runningThreads.remove(roomName);
 		}
-
 	}
 
 	/**

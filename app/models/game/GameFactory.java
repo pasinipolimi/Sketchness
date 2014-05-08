@@ -36,14 +36,14 @@ public class GameFactory extends Factory {
         //Subscribe to lobby messages
         GameBus.getInstance().subscribe(obtained, GameManager.getInstance().getLobby());
         
-        Future<Object> future = Patterns.ask(obtained, new GameMessages.Join(username, out), 30000);
+        Future<Object> future = Patterns.ask(obtained, new GameMessages.Join(username, out), 5000);
         String result;
         // Send the Join message to the room
         try {
             result = (String) Await.result(future, Duration.create(5, SECONDS));
         }
         catch (TimeoutException timeout) {
-            throw new Exception("Game creation failed after 2 trials");
+            throw new Exception("Game creation failed");
         }      
         if ("OK".equals(result)) {
             ChatFactory.createChat(username, room, in, out);
