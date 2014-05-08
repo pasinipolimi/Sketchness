@@ -14,6 +14,9 @@ function visualizzaImgAjax(idselected, mediaLocator){
    var maskCanvas3 = document.getElementById("maskFashion");
    var maskContext3 = maskCanvas3.getContext("2d");
    maskContext3.clearRect(0,0,maskCanvas3.width,maskCanvas3.height);
+   var maskCanvas4 = document.getElementById("draws");
+   var maskContext4 = maskCanvas4.getContext("2d");
+   maskContext4.clearRect(0,0,maskCanvas4.width,maskCanvas4.height);
    //clear buttons
    var maskButtons = $("#maskButtons");
    maskButtons.children().remove();
@@ -95,11 +98,13 @@ function visualizzaImgAjax(idselected, mediaLocator){
                     taskImage.onload = function() {
                                                     taskContext.save();
                                                     taskContext.beginPath();
-                                                    taskCanvas.width=this.width;
-                                                    taskCanvas.height=this.height;
-                                                    canvas.width=this.width;
-                                                    canvas.height=this.height;
-                                                    taskContext.drawImage(taskImage,0,0,this.width,this.height);
+                                                    //taskCanvas.width=this.width;
+                                                    //taskCanvas.height=this.height;
+                                                    //canvas.width=this.width;
+                                                    //canvas.height=this.height;
+													taskCanvas.width = window.innerWidth*0.8/4;
+												    taskCanvas.height = window.innerWidth*0.8/4*this.height/this.width;
+                                                    taskContext.drawImage(taskImage,0,0,taskCanvas.width,taskCanvas.height);
                                                     taskContext.restore();
 													//Clear the mask canvas
 													var maskCanvas = document.getElementById("mask");

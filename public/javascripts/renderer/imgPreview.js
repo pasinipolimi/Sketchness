@@ -30,11 +30,13 @@ function imgPreview(url, idPreview){
         taskImage.onload = function() {
                     taskContext.save();
                     taskContext.beginPath();
-                    taskCanvas.width=this.width;
-                    taskCanvas.height=this.height;
-                    canvas.width=this.width;
-                    canvas.height=this.height;
-                    taskContext.drawImage(taskImage,0,0,this.width,this.height);
+                    //taskCanvas.width=this.width;
+                    //taskCanvas.height=this.height;
+                    //canvas.width=this.width;
+                    //canvas.height=this.height;
+					taskCanvas.width = window.innerWidth*0.8/4;
+					taskCanvas.height = window.innerWidth*0.8/4*this.height/this.width;
+                    taskContext.drawImage(taskImage,0,0,taskCanvas.width,taskCanvas.height);
                     taskContext.restore();
                     //Clear the mask canvas
                     var maskCanvas = document.getElementById("mask");

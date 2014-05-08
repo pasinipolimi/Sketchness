@@ -11,6 +11,9 @@ function newMask(idTag, idImage, tagName){
 	   var maskCanvas3 = document.getElementById("maskFashion");
 	   var maskContext3 = maskCanvas3.getContext("2d");
 	   maskContext3.clearRect(0,0,maskCanvas3.width,maskCanvas3.height);
+	   var maskCanvas4 = document.getElementById("draws");
+	   var maskContext4 = maskCanvas4.getContext("2d");
+       maskContext4.clearRect(0,0,maskCanvas4.width,maskCanvas4.height);
 	   
 	//display quality
 	$("#qualityTable").show();
@@ -61,18 +64,24 @@ function newMask(idTag, idImage, tagName){
                  maskImage.onload = function() {
                                                  maskContext.save();
                                                  maskContext.beginPath();
-                                                 maskCanvas.width=this.width;
-                                                 maskCanvas.height=this.height;
-                                                 canvas.width=this.width;
-                                                 canvas.height=this.height;
-                                                 maskContext.drawImage(taskImage,0,0,this.width,this.height);
+												 maskCanvas.width = window.innerWidth*0.8/4;
+												 maskCanvas.height = window.innerWidth*0.8/4*this.height/this.width;
+												 
+												 
+                                                 //maskCanvas.width=this.width;
+                                                 //maskCanvas.height=this.height;
+                                                 //canvas.width=this.width;
+                                                 //canvas.height=this.height;
+												 //maskCanvas.width=canvas.width;
+                                                 //maskCanvas.height=canvas.height;
+                                                 maskContext.drawImage(taskImage,0,0,maskCanvas.width,maskCanvas.height);
                                                  maskContext.globalCompositeOperation = 'darker';
-                                                 maskContext.drawImage(maskImage,0,0,this.width,this.height);
+                                                 maskContext.drawImage(maskImage,0,0,maskCanvas.width,maskCanvas.height);
                                                  maskContext.restore();
                                                  maskContext.globalCompositeOperation = 'source-over';
-                                                 maskContext.font="bold 30px Arial";
+                                                 maskContext.font="bold 15px Arial";
                                                  maskContext.fillStyle = 'white';
-                                                 maskContext.fillText('Quality: ' + quality, 10,50);
+                                                 maskContext.fillText('Quality: ' + quality, 10,20);
                                              };
                  
              }

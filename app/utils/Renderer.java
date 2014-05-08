@@ -379,48 +379,16 @@ public class Renderer extends UntypedActor {
 		final JsonReader jsonReader = new JsonReader();
 		final JsonNode itemImage = jsonReader.readJsonArrayFromUrl(rootUrl
 				+ "/wsmc/image.json");
-
+		final JsonNode users = jsonReader.readJsonArrayFromUrl(rootUrl
+				+ "/wsmc/cubrikuser/9.json");
+		
 		int last;
 		final JSONObject result = new JSONObject();
 
 		final String totImg = Integer.toString(itemImage.size());
-		String numUsers = "0";
+		String numUsers = Integer.toString(users.size());
 		final JSONArray stats = CMS.retriveStats(itemImage);
 		
-		Connection connection = null;
-		PreparedStatement statement = null;
-		ResultSet rs = null;
-		try {
-			connection = DB.getConnection();
-
-			final String query = "SELECT count(*) as totalUsers FROM USERS";
-			statement = connection.prepareStatement(query);
-			rs = statement.executeQuery();
-
-			if (rs.isBeforeFirst()) {
-				rs.next();
-				numUsers = Integer.toString(rs.getInt("TOTALUSERS"));
-			}
-
-			connection.close();
-		} catch (final SQLException ex) {
-			// the count query failed, numUsers=0
-			Logger.error("Unable to read total number of users", ex);
-		} finally {
-			try {
-				if (rs != null) {
-					rs.close();
-				}
-				if (statement != null)
-					statement.close();
-
-				if (connection != null)
-					connection.close();
-			} catch (final SQLException e) {
-				play.Logger.error("Unable to close a SQL connection.");
-			}
-		}
-
 		String tmp = stats.getJSONObject(0).getString("numTag");
 		tmp = tmp.substring(1);
 		last = tmp.length() - 1;
@@ -467,22 +435,22 @@ public class Renderer extends UntypedActor {
 		JSONObject element; 
 		JsonNode object;
 
-		
-
 		int i=0;
+		
 		while (i < itemApp.size()) {
 			object = itemApp.get(i);
 			element = new JSONObject();
 			element.put("cubrik_userid", object.get("cubrik_userid").toString());
 			element.put("app_id", object.get("app_id").toString());
 			element.put("app_user_id", object.get("app_user_id").toString());
-			element.put("number_of_plays", object.get("number_of_plays").toString());
-			element.put("number_of_annotations", object.get("number_of_annotations").toString());
+			element.put("number_of_plays", object.get("number_of_plays"));
+			element.put("number_of_annotations", object.get("number_of_annotations"));
+			
 			usersInfo.put(element);
 
 			i++;
 			}// fine while
-
+		
 		result.append("usersInfo", usersInfo);
 		final String sendStats = result.toString();
 		return sendStats;

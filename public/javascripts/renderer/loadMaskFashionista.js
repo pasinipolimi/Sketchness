@@ -35,25 +35,32 @@ function loadMaskFashionista(idImage,idTag){
 	                 
 	                 maskImage=new Image();
 	                 maskImage.src= "assets/images/fashionista/"+url;
+					 
 	                 maskImage.onload = function() {
 	                                                 maskContext.save();
 	                                                 maskContext.beginPath();
-	                                                 maskCanvas.width=this.width;
-	                                                 maskCanvas.height=this.height;
-	                                                 canvas.width=this.width;
-	                                                 canvas.height=this.height;
-	                                                 maskContext.drawImage(taskImage,0,0,this.width,this.height);
+	                                                 //maskCanvas.width=this.width;
+	                                                 //maskCanvas.height=this.height;
+	                                                 //canvas.width=this.width;
+	                                                 //canvas.height=this.height;
+													 maskCanvas.width = window.innerWidth*0.8/4;
+													 maskCanvas.height = window.innerWidth*0.8/4*this.height/this.width;
+	                                                 maskContext.drawImage(taskImage,0,0,maskCanvas.width,maskCanvas.height);
 	                                                 maskContext.globalCompositeOperation = 'darker';
-	                                                 maskContext.drawImage(maskImage,0,0,this.width,this.height);
+	                                                 maskContext.drawImage(maskImage,0,0,maskCanvas.width,maskCanvas.height);
 	                                                 maskContext.restore();
 	                                                 maskContext.globalCompositeOperation = 'source-over';
-	                                                 maskContext.font="bold 30px Arial";
-	                                                 maskContext.fillStyle = 'white';
+	                                                 maskContext.font="bold 15px Arial";
+                                                     maskContext.fillStyle = 'white';
 	                                                 if(quality=="u"){
-	                                                	 maskContext.fillText('Quality: unknown', 10,50);
+	                                                	 maskContext.fillText('Quality: unknown', 10,20);
 	                                                 }
+													 else if(quality=="10")
+													 {
+														maskContext.fillText('Quality: 1', 10,20);
+													 }
 	                                                 else{
-	                                                	 maskContext.fillText('Quality: 0.'+quality, 10,50);
+	                                                	 maskContext.fillText('Quality: 0.'+quality, 10,20);
 	                                                 }
 	                                                 
 	                                             };
