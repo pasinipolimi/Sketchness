@@ -181,8 +181,8 @@ public class Renderer extends UntypedActor {
 					toReturn = makeColorTransparent(transparent, Color.WHITE);
 				}
 			} else if (!networkOn) {
-				Logger.error("[AGGREGATOR] Cannot retrieve mask for image "
-						+ imageId + " with tag " + requiredTag);
+				LoggerUtils.error("[AGGREGATOR] Cannot retrieve mask for image "
+						+ imageId + " with tag " + requiredTag,"NOT FOUND");
 				throw new Exception("[AGGREGATOR] Tag " + requiredTag
 						+ " not found for image " + imageId);
 			}
@@ -237,10 +237,10 @@ public class Renderer extends UntypedActor {
 		final File result = (File) Await.result(future,
 				Duration.create(180, SECONDS));
 		if (result instanceof File) {
-			Logger.info("[AGGREGATOR] Retrieved mask for image " + ImageID);
+			LoggerUtils.info("AGGREGATOR","Retrieved mask for image " + ImageID);
 			return result;
 		}
-		Logger.error("[AGGREGATOR] Retrieved mask for image " + ImageID);
+		LoggerUtils.debug("AGGREGATOR","Retrieved mask for image " + ImageID);
 		return null;
 	}
 	
@@ -273,7 +273,7 @@ public class Renderer extends UntypedActor {
 
 	private void createMask(final String id, final String tag)
 			throws IOException, Exception {
-		Logger.info("[AGGREGATOR] Retrieving aggregated mask for image " + id);
+		LoggerUtils.info("AGGREGATOR","Retrieving aggregated mask for image " + id);
 		try {
 			imageId = id;
 			final Image retrieved = aggregate(false, tag, true);
