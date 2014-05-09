@@ -212,7 +212,6 @@ public class UserRegistrationTest {
 			} catch (final SQLException e) {
 				LoggerUtils.error("Unable to close a SQL connection.",e);
 			}
-
 		}
 		return false;
 
