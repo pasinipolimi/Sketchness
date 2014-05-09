@@ -33,7 +33,7 @@ public class Lobby extends UntypedActor {
       try {
         if (message instanceof Room) {
             this.roomChannel = ((Room) message);
-            Logger.info("[LOBBY] " + roomChannel.getRoom() + " created.");
+            LoggerUtils.info("LOBBY", roomChannel.getRoom() + " created.");
         }
         if (message instanceof Join) {
             handleJoin((Join) message);
@@ -83,7 +83,7 @@ public class Lobby extends UntypedActor {
             } else {
                 playersMap.put(message.getUsername(), message.getChannel());
                 getSender().tell("OK", this.getSelf());
-                Logger.debug("[LOBBY] added player " + message.getUsername());
+                LoggerUtils.info("LOBBY", "added player " + message.getUsername());
                 GameManager.getInstance().getCurrentGames();
             }
         }
@@ -100,7 +100,7 @@ public class Lobby extends UntypedActor {
                     //Close the websocket
                     entry.getValue().close();
                     playersMap.remove(quitter);
-                    Logger.debug("[LOBBY] " + quitter + " has disconnected.");
+                    LoggerUtils.debug("LOBBY", quitter + " has disconnected.");
                 }
             }
         }

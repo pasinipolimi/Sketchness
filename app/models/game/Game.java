@@ -143,7 +143,7 @@ public class Game extends GameRoom {
 					maxRound = maxSinglePlayer;
 				missingPlayers = requiredPlayers;
 				newGameSetup();
-				Logger.info("[GAME] " + roomChannel.getRoom() + " created.");
+				LoggerUtils.info("GAME",roomChannel.getRoom() + " created.");
 			}
 			if (message instanceof Join) {
 				playerJoin(((Join) message).getUsername());
@@ -424,7 +424,7 @@ public class Game extends GameRoom {
 				item = new Random().nextInt(size);
 			} catch (final IllegalArgumentException ex) {
 				item = null;
-				Logger.error("[GAME] Failed to retrieve Task Image, retrying.");
+				LoggerUtils.error("Failed to retrieve Task Image, retrying.",ex);
 				trials++;
 				if (trials >= 5) {
 					gameError();
@@ -445,7 +445,7 @@ public class Game extends GameRoom {
 				item = new Random().nextInt(size);
 			} catch (final IllegalArgumentException ex) {
 				item = null;
-				Logger.error("[GAME] Failed to retrieve Task Image, retrying.");
+				LoggerUtils.error("Failed to retrieve Task Image, retrying.",ex);
 				trials++;
 				if (trials >= 5) {
 					gameError();
@@ -482,10 +482,9 @@ public class Game extends GameRoom {
 			// closing
 			// the game
 			catch (final Exception e) {
-				Logger.error("[GAME] Failed to retrieve Task Image, aborting.");
+				LoggerUtils.error("Failed to retrieve Task Image, aborting.",e);
 				gameEnded();
-				throw new Error(
-						"[GAME] Failed to retrieve Task Image, aborting");
+				throw new Error("Failed to retrieve Task Image, aborting");
 			}
 			if (taskImage != null) {
 				final String label = taskImage.get("tag").asText();
@@ -500,14 +499,14 @@ public class Game extends GameRoom {
 				}
 			} // We have no more things to do
 			else {
-				Logger.info("[GAME] Nothing more to do.");
+				LoggerUtils.info("GAME", "Nothing more to do.");
 				gameEnded();
 			}
 		} // We have played all the rounds for the game, inform the users and
 		// the modules
 		// that the match has ended
 		else {
-			Logger.info("[GAME] Round ended, closing the game.");
+			LoggerUtils.info("GAME", "Round ended, closing the game.");
 			gameEnded();
 		}
 
@@ -544,7 +543,7 @@ public class Game extends GameRoom {
 		if (((requiredPlayers - disconnectedPlayers) <= 1) && gameStarted
 				&& requiredPlayers != 1) {
 			// Restart the game
-			Logger.info("[GAME] No more players playing, closing the game.");
+			Logger.info("GAME", "No more players playing, closing the game.");
 			gameEnded();
 		} // There are still players in game
 		else {
@@ -670,22 +669,17 @@ public class Game extends GameRoom {
 							} catch (final Exception ex) {
 								LoggerUtils.error("GAME", ex);
 							}
-							LoggerUtils
-							.error("GAME",
-									"[GAME] Impossible to retrieve the set of image relevant for this game, aborting");
+							LoggerUtils.error("GAME", "Impossible to retrieve the set of image relevant for this game, aborting");
 							return;
 						}
 					}
 				}, Akka.system().dispatcher());
-		Logger.debug("aggiungo fra quelle da cancellare: "
-				+ roomChannel.getRoom());
 		CMS.addInitializationThread(roomChannel.getRoom(), init);
-
-		Logger.info("[GAME] New game started");
+		LoggerUtils.info("GAME", "New game started");
 	}
 
 	private void playerJoin(final String username) throws Exception {
-		Logger.debug("[GAME] Player Joined");
+		LoggerUtils.info("GAME","Player Joined");
 		final Painter painter = new Painter(username, false);
 		// Add the new entered player, it has never been a sketcher in this game
 		// (false)
@@ -693,9 +687,8 @@ public class Game extends GameRoom {
 		getSender().tell("OK", this.getSelf());
 		// publishLobbyEvent(GameEventType.join);
 		publishLobbyEvent();
-		Logger.info("[GAME] added player "
-				+ playersVect.get(playersVect.size() - 1).name);
-		Logger.debug("[GAME] Check Start");
+		Logger.info("GAME","Added player "+ playersVect.get(playersVect.size() - 1).name);
+		Logger.debug("GAME","Check Start");
 		checkStart();
 	}
 
@@ -723,7 +716,7 @@ public class Game extends GameRoom {
 		} catch (final Exception e) {
 			LoggerUtils.error("[GAME]", e);
 		}
-		Logger.info("[GAME] room - " + roomChannel.getRoom()
+		LoggerUtils.info("GAME", "room - " + roomChannel.getRoom()
 				+ " current players - " + playersVect.size()
 				+ " max players - " + requiredPlayers);
 		if (join != null)
@@ -747,7 +740,7 @@ public class Game extends GameRoom {
 				// End the game if there's just one player or less
 				if (((requiredPlayers - disconnectedPlayers) == 1)
 						&& gameStarted) {
-					Logger.info("[GAME] Just one player left, closing the game.");
+					LoggerUtils.info("GAME","Just one player left, closing the game.");
 					gameEnded();
 				} else if (((requiredPlayers - disconnectedPlayers) <= 0)
 						&& gameStarted) {
@@ -757,7 +750,7 @@ public class Game extends GameRoom {
 			}
 		}
 		if (playersVect.isEmpty()) {
-			Logger.info("[GAME] No more players, closing the game.");
+			LoggerUtils.info("GAME","No more players, closing the game.");
 			gameEnded();
 		}
 	}
@@ -891,7 +884,7 @@ public class Game extends GameRoom {
 					statement1.setString(2, painter.name);
 					statement1.executeUpdate();
 				} catch (final SQLException ex) {
-					play.Logger.error("Unable to update total score for user: "
+					LoggerUtils.error("Unable to update total score for user: "
 							+ painter.name, ex);
 				} finally {
 					if (rs != null) {
@@ -906,14 +899,14 @@ public class Game extends GameRoom {
 			}
 		} catch (final SQLException ex) {
 
-			Logger.error("Unable to get a DB connection.");
+			LoggerUtils.error("Unable to get a DB connection.",ex);
 
 		} finally {
 			try {
 				if (connection != null)
 					connection.close();
 			} catch (final SQLException e) {
-				play.Logger.error("Unable to close a SQL connection.");
+				LoggerUtils.error("Unable to close a SQL connection.", e);
 			}
 		}
 		final GameEvent endEvent2 = new GameEvent(

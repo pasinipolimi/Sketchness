@@ -117,10 +117,10 @@ public class CMS {
 								WS.url(request).setContentType("application/x-www-form-urlencoded").setTimeout(10000).post(urlParameters);
 								Logger.debug("[CMS] Storing segmentation with action for image with id " + id + " and tag " + label);
 							} catch (final Exception ex) {
-								Logger.error("Unable to save segmentation, EXC 1", ex);
+								LoggerUtils.error("CMS","Unable to save segmentation, EXC1");
 							}
 						} catch (final Exception ex) {
-							Logger.error("Unable to save segmentation, EXC 2", ex);
+							LoggerUtils.error("CMS","Unable to save segmentation, EXC2");
 						}
 					}
 				}, Akka.system().dispatcher());
@@ -257,19 +257,18 @@ public class CMS {
 		}
 	}
 
-	public static void addInitializationThread(final String roomName,
-			final Cancellable thread) {
+	public static void addInitializationThread(final String roomName, final Cancellable thread) throws Exception {
 		runningThreads.put(roomName, thread);
 	}
 
-	public static boolean getThread(final String roomName) {
+	public static boolean getThread(final String roomName) throws Exception {
 		if (runningThreads.containsKey(roomName))
 			return true;
 		else
 			return false;
 	}
 
-	public static void cancelThread(final String roomName) {
+	public static void cancelThread(final String roomName) throws Exception {
 		Logger.debug("cancello th: "+roomName);
 		final Cancellable thread = runningThreads.get(roomName);
 		if (thread != null) {

@@ -1,10 +1,11 @@
 package models.factory;
 
-import play.Logger;
-import utils.gamebus.GameBus;
 import akka.actor.ActorRef;
 import akka.actor.PoisonPill;
 import akka.actor.UntypedActor;
+import play.Logger;
+import utils.LoggerUtils;
+import utils.gamebus.GameBus;
 
 /**
  * 
@@ -34,12 +35,11 @@ public abstract class GameRoom extends UntypedActor {
 		if (!me.path().toString().endsWith("lobby")) {
                         GameBus.getInstance().unsubscribe(me);
                         me.tell(PoisonPill.getInstance(), me);
-			Logger.info("[" + roomType.getName() + "]: killed room "
-					+ me.path());
+			LoggerUtils.info("GAMEROOM", "Killed room "+ me.path());
 		}
             }
             catch(Exception e){
-                Logger.info("[GameRoom] Poison pill already sent");
+                LoggerUtils.error("Error while sending poison pill",e);
             }
 	}
 }

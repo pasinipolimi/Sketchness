@@ -58,7 +58,7 @@ public class Sketchness extends Controller {
 
 		final User localUser = getLocalUser(session());
 		final String username = localUser.name;
-		Logger.debug("Opening the chatroom for user: " + username);
+		LoggerUtils.debug("SIGNUP","Opening the chatroom for user: " + username);
 
 		String number = "3";
 

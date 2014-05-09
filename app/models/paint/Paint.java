@@ -1,22 +1,20 @@
 package models.paint;
 
-import java.awt.image.BufferedImage;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import models.Painter;
-import models.Point;
-import models.Segment;
-import models.factory.GameRoom;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.awt.image.BufferedImage;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import models.Painter;
+import models.Point;
+import models.Segment;
+import models.factory.GameRoom;
 import org.json.JSONException;
-
 import play.Logger;
 import utils.LanguagePicker;
+import utils.LoggerUtils;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.GameEvent;
@@ -52,7 +50,7 @@ public class Paint extends GameRoom {
 			// We are initializing the room
 			if (message instanceof Room) {
 				this.roomChannel = ((Room) message);
-				Logger.info("[PAINT] " + roomChannel.getRoom() + " created.");
+				LoggerUtils.info("PAINT", roomChannel.getRoom() + " created.");
 			}
 			if (message instanceof Join) {
 				handleJoin((Join) message);
@@ -141,10 +139,10 @@ public class Paint extends GameRoom {
 						}
 					}
 				} else
-					Logger.error("Received null message");
+					LoggerUtils.debug("PAINT","Received null message");
 			}
 		} catch (final Exception ex) {
-			Logger.error(ex.toString());
+			LoggerUtils.error("Message received error:",ex.toString());
 		}
 	}
 
@@ -160,7 +158,7 @@ public class Paint extends GameRoom {
 					.composeImage(id, medialocator, width, height));
                         saveTraces();
 		} catch (final Exception ex) {
-			Logger.error(ex.toString());
+			LoggerUtils.error("Round termination error:",ex.toString());
 		}
 	}
 
@@ -169,7 +167,7 @@ public class Paint extends GameRoom {
 			final String _sketcher = json.get("sketcher").asText();
 			notifyAll(GameMessages.composeRoundBegin(_sketcher));
 		} catch (final Exception ex) {
-			Logger.error(ex.toString());
+			LoggerUtils.error("Round starting error:",ex.toString());
 		}
 	}
 
@@ -209,14 +207,14 @@ public class Paint extends GameRoom {
 				if (entry.getKey().equalsIgnoreCase(quitter)) {
 					entry.getValue().channel.close();
 					painters.remove(quitter);
-					Logger.debug("[PAINT] " + quitter + " has disconnected.");
+					LoggerUtils.debug("PAING", quitter + " has disconnected.");
 					GameBus.getInstance().publish(
 							new GameEvent(GameMessages.composeQuit(quitter),
 									roomChannel));
 				}
 			}
 		} catch (final Exception ex) {
-			Logger.error(ex.toString());
+			LoggerUtils.error("Error in handling quitters",ex.toString());
 		}
 	}
 
@@ -235,7 +233,7 @@ public class Paint extends GameRoom {
 						.get("id").asText(), taskUrl, taskWidth, taskHeight));
 			}
 		} catch (final Exception ex) {
-			Logger.error(ex.toString());
+			LoggerUtils.error("Error in sending tasks",ex.toString());
 		}
 	}
 
@@ -334,7 +332,7 @@ public class Paint extends GameRoom {
 			final Painter painter = new Painter(message.getChannel());
 			painter.name = username;
 			painters.put(username, painter);
-			Logger.debug("[PAINT] added player " + username);
+			LoggerUtils.info("PAINT","Added player " + username);
 			getSender().tell("OK", this.getSelf());
 		} else {
 			getSender().tell(

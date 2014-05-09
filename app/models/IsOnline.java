@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 
 import play.db.DB;
+import utils.LoggerUtils;
 
 /**
  * Created with IntelliJ IDEA. User: Riboni1989 Date: 28/10/13 Time: 14:51 To
@@ -47,7 +48,7 @@ public class IsOnline {
 						statement1.executeUpdate();
 
 					} catch (final SQLException ex) {
-						play.Logger.error("Unable to update status for user:"
+						LoggerUtils.error("Unable to update status for user:"
 								+ rs.getString("NAME"), ex);
 					} finally {
 						if (rs != null) {
@@ -61,7 +62,7 @@ public class IsOnline {
 			}
 
 		} catch (final SQLException ex) {
-			play.Logger.error("Unable to open a SQL connection", ex);
+			LoggerUtils.error("Unable to open a SQL connection", ex);
 		} finally {
 			try {
 				if (rs != null) {
@@ -72,7 +73,7 @@ public class IsOnline {
 				if (connection != null)
 					connection.close();
 			} catch (final SQLException e) {
-				play.Logger.error("Unable to close a SQL connection.");
+				LoggerUtils.error("Unable to close a SQL connection.",e);
 			}
 		}
 	}
@@ -96,7 +97,7 @@ public class IsOnline {
 
 			connection.close();
 		} catch (final SQLException ex) {
-			play.Logger.error("Unable to update user status: " + name, ex);
+			LoggerUtils.error("Unable to update user status: " + name, ex);
 		} finally {
 			try {
 				if (statement != null)
@@ -105,7 +106,7 @@ public class IsOnline {
 				if (connection != null)
 					connection.close();
 			} catch (final SQLException e) {
-				play.Logger.error("Unable to close a SQL connection.");
+				LoggerUtils.error("Unable to close a SQL connection.",e);
 			}
 		}
 	}
@@ -144,7 +145,7 @@ public class IsOnline {
 
             }
         } catch (final SQLException ex) {
-            play.Logger.error("Unable to open a SQL connection", ex);
+            LoggerUtils.error("Unable to open a SQL connection", ex);
         } finally {
             try {
                 if (rs != null) {
@@ -161,7 +162,7 @@ public class IsOnline {
                 if (connection != null)
                     connection.close();
             } catch (final SQLException e) {
-                play.Logger.error("Unable to close a SQL connection.");
+               LoggerUtils.error("Unable to close a SQL connection.",e);
             }
         }
 
@@ -182,7 +183,7 @@ public class IsOnline {
 
 			connection.close();
 		} catch (final SQLException ex) {
-			play.Logger.error("Unable to put offline user:" + name, ex);
+			LoggerUtils.error("Unable to put offline user:" + name, ex);
 		} finally {
 			try {
 				if (statement != null)
@@ -191,7 +192,7 @@ public class IsOnline {
 				if (connection != null)
 					connection.close();
 			} catch (final SQLException e) {
-				play.Logger.error("Unable to close a SQL connection.");
+				LoggerUtils.error("Unable to close a SQL connection.",e);
 			}
 		}
 

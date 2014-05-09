@@ -10,6 +10,7 @@ import play.Routes;
 import play.i18n.Lang;
 import play.mvc.Controller;
 import play.mvc.Result;
+import utils.LoggerUtils;
 
 public class JavascriptController extends Controller {
 
@@ -24,7 +25,7 @@ public class JavascriptController extends Controller {
 			sc = new java.util.Scanner(in);
 			properties = sc.useDelimiter("\\A").next();
 		} catch (final NoSuchElementException e) {
-			Logger.error("[SYSTEM] Failed to read messages file");
+			LoggerUtils.error("SYSTEM","Failed to read messages file");
 		} finally {
 			if (sc != null) {
 				sc.close();
@@ -33,7 +34,7 @@ public class JavascriptController extends Controller {
 				try {
 					in.close();
 				} catch (final IOException e) {
-					Logger.error("Unable to close InputStream", e);
+					LoggerUtils.error("SYSTEM","Unable to close InputStream");
 				}
 			}
 		}
