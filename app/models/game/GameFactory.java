@@ -30,8 +30,8 @@ public class GameFactory extends Factory {
           }
           catch(Exception e) {
               LoggerUtils.error(room, e);
-              Logger.error("GameManager failure, retrying...");
-              throw new Exception("Game creation failed after 2 trials");
+              LoggerUtils.error("GameManager failure, retrying...",e);
+              throw new Exception("Game creation failed");
            }
         //Subscribe to lobby messages
         GameBus.getInstance().subscribe(obtained, GameManager.getInstance().getLobby());

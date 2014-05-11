@@ -39,6 +39,7 @@ require(["Communicator", "Chat", "jquery", "popup", "jscrollpane", "howler"], fu
 		//Popup for the game creation panel
 		var options = { width: 350, height: 350, top: 200, left: 100 };
 		$('.default_popup').popup(options);
+		$('#joinGame').hide();
 
 		var chosenId = undefined;
 
@@ -60,6 +61,11 @@ require(["Communicator", "Chat", "jquery", "popup", "jscrollpane", "howler"], fu
 					.removeClass("highlight");
 				//Highlight the curront row
 				$tr.addClass("highlight");
+				$('#joinGame').show();
+			}
+			else {
+				$('.highlight').removeClass("highlight");
+				$('#joinGame').hide();
 			}
 		});
 

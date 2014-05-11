@@ -3,7 +3,6 @@ package controllers;
 import java.util.concurrent.TimeUnit;
 
 import models.User;
-import play.Logger;
 import play.data.Form;
 import play.i18n.Messages;
 import play.libs.Akka;
@@ -19,13 +18,14 @@ import views.html.sketchness_login;
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
 import com.feth.play.module.pa.user.AuthUser;
+import utils.LoggerUtils;
 
 public class Login extends Controller {
 
 	public static boolean actorActive = false;
 
 	/**
-	 * Retrive the user from the session
+	 * Retrieve the user from the session
 	 */
 	public static User getLocalUser(final Http.Session session) {
 		final AuthUser currentAuthUser = PlayAuthenticate.getUser(session);
@@ -34,7 +34,7 @@ public class Login extends Controller {
 	}
 
 	public static Result login() {
-		Logger.debug("Requested login form");
+		LoggerUtils.debug("LOGIN","Requested login form");
 
 		if (!actorActive) {
 			Akka.system()
@@ -44,7 +44,6 @@ public class Login extends Controller {
 							new Runnable() {
 								@Override
 								public void run() {
-									// Logger.debug("ciao");
 									actorActive = true;
 									models.IsOnline.checkOnline();
 
@@ -53,12 +52,11 @@ public class Login extends Controller {
 		}
 
 		final User localUser = getLocalUser(session());
-                response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 		if (localUser != null) {
-			Logger.debug("User already logged in, enter in the lobby");
+			LoggerUtils.debug("LOGIN","User already logged in, enter in the lobby");
 			return ok(lobby.render(localUser));
 		} else {
-			Logger.debug("User is not already logged in, enter in the login form page");
+			LoggerUtils.debug("LOGIN","User is not already logged in, enter in the login form page");
 			return ok(sketchness_login
 					.render(MyUsernamePasswordAuthProvider.LOGIN_FORM));
 		}
@@ -66,7 +64,7 @@ public class Login extends Controller {
 	}
 
 	public static Result doLogin() {
-		Logger.debug("Performing login");
+		LoggerUtils.debug("LOGIN","Performing login");
 		com.feth.play.module.pa.controllers.Authenticate.noCache(response());
 		final Form<MyLogin> filledForm = MyUsernamePasswordAuthProvider.LOGIN_FORM
 				.bindFromRequest();
@@ -75,20 +73,19 @@ public class Login extends Controller {
 
 		if (filledForm.hasErrors()) {
 			// User did not fill everything properly
-			Logger.debug("User did not fill everything properly in the login form");
+			LoggerUtils.error("LOGIN","User did not fill everything properly in the login form");
 			return badRequest(sketchness_login.render(filledForm));
 		} else {
 			// if there is already someone logged with the same browser prevent
 			// the login
 			if (localUser != null) {
-				Logger.debug("There is already someone logged with the same browser prevent the login, return error");
+				LoggerUtils.error("LOGIN","There is already someone logged with the same browser prevent the login, return error");
 				flash(Application.FLASH_ERROR_KEY,
 						Messages.get("error.userInBrowser"));
 				return badRequest(sketchness_login.render(filledForm));
 			}
 			// Everything was filled and no other users in session
-			Logger.debug("The login form was filled properly, handling login..");
-                        response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
+			LoggerUtils.debug("LOGIN","The login form was filled properly, handling login..");
 			return UsernamePasswordAuthProvider.handleLogin(ctx());
 		}
 	}

@@ -42,7 +42,7 @@ public class GameManager implements GameManagerInterface, Serializable {
 
     @Override
     public void onReceive(Object message, ActorRef ref) {
-        Logger.debug((String) message);
+         LoggerUtils.debug("GAMEMANAGER", (String)message);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class GameManager implements GameManagerInterface, Serializable {
             return instanceId;
         }
         catch (Exception e) {
-            LoggerUtils.error("GAMEMANAGER", e);
+             LoggerUtils.error("Error in adding instance",e);
             return null;
         }
     }

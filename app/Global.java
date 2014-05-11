@@ -1,20 +1,20 @@
-import java.util.Arrays;
-
-import play.*;
-import play.mvc.*;
-import play.mvc.Http.*;
-import play.libs.F.*;
-import models.SecurityRole;
-import play.Logger;
-import views.html.pageNotFound;
-import static play.mvc.Results.*;
-
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.PlayAuthenticate.Resolver;
 import com.feth.play.module.pa.exceptions.AccessDeniedException;
 import com.feth.play.module.pa.exceptions.AuthException;
-
 import controllers.routes;
+import java.util.Arrays;
+import models.SecurityRole;
+
+import play.*;
+import play.Logger;
+import play.libs.F.*;
+import play.libs.F.Promise;
+import play.mvc.*;
+import static play.mvc.Results.*;
+
+import utils.LoggerUtils;
+import views.html.pageNotFound;
 
 public class Global extends GlobalSettings {
 
@@ -25,7 +25,7 @@ public class Global extends GlobalSettings {
 
 	@Override
 	public void onStart(final Application app) {
-		Logger.info("Starting application...");
+		LoggerUtils.info("GLOBAL","Starting application...");
 
 		PlayAuthenticate.setResolver(new Resolver() {
 

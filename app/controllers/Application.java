@@ -27,6 +27,7 @@ import be.objectify.deadbolt.java.actions.Restrict;
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
 import com.feth.play.module.pa.user.AuthUser;
+import utils.LoggerUtils;
 
 public class Application extends Controller {
 
@@ -58,7 +59,7 @@ public class Application extends Controller {
 	}
 
 	public static Result login() {
-		Logger.debug("Requested login form");
+		LoggerUtils.debug("APPLICATION","Requested login form");
 		return ok(login.render(MyUsernamePasswordAuthProvider.LOGIN_FORM));
 	}
 
@@ -66,10 +67,10 @@ public class Application extends Controller {
 		com.feth.play.module.pa.controllers.Authenticate.noCache(response());
 		final Form<MyLogin> filledForm = MyUsernamePasswordAuthProvider.LOGIN_FORM
 				.bindFromRequest();
-		Logger.debug("Requested login, filled form: " + filledForm);
+		LoggerUtils.debug("APPLICATION","Requested login, filled form: " + filledForm);
 		if (filledForm.hasErrors()) {
 			// User did not fill everything properly
-			Logger.debug("The login form has errors: " + filledForm);
+			LoggerUtils.error("APPLICATION","The login form has errors: " + filledForm);
 			return badRequest(login.render(filledForm));
 		} else {
 			// Everything was filled
@@ -79,7 +80,7 @@ public class Application extends Controller {
 	}
 
 	public static Result signup() {
-		Logger.debug("Requested signin form");
+		LoggerUtils.debug("APPLICATION","Requested signin form");
                 response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 		return ok(signup.render(MyUsernamePasswordAuthProvider.SIGNUP_FORM));
 	}
@@ -92,7 +93,7 @@ public class Application extends Controller {
 	}
 
 	public static Result doSignup() {
-		Logger.debug("Doing signup...");
+		LoggerUtils.debug("APPLICATION","Doing signup...");
 		com.feth.play.module.pa.controllers.Authenticate.noCache(response());
 		final Form<MySignup> filledForm = MyUsernamePasswordAuthProvider.SIGNUP_FORM
 				.bindFromRequest();
@@ -114,7 +115,7 @@ public class Application extends Controller {
 		final User localUser = getLocalUser(session());
 
 		if (localUser != null) {
-			Logger.debug("Doing logout for user: " + localUser.name);
+			LoggerUtils.debug("APPLICATION","Doing logout for user: " + localUser.name);
 
 			final String username = localUser.name;
 
@@ -123,30 +124,30 @@ public class Application extends Controller {
 
 			try {
 				connection = DB.getConnection();
-				Logger.debug("Updating user status on DB: " + username);
+				LoggerUtils.debug("APPLICATION","Updating user status on DB: " + username);
 				final String query = "UPDATE USERS SET online = ? WHERE NAME = ? ";
 				statement = connection.prepareStatement(query);
 				statement.setBoolean(1, false);
 				statement.setString(2, username);
 				statement.executeUpdate();
-				Logger.debug("Updated user status on DB: " + username);
+				LoggerUtils.debug("APPLICATION","Updated user status on DB: " + username);
 				com.feth.play.module.pa.controllers.Authenticate.logout();
 
 			} catch (final SQLException ex) {
-				play.Logger.error("Unable to logout user: " + username, ex);
+				LoggerUtils.error("Unable to logout user: " + username, ex);
 				return play.mvc.Results.internalServerError();
 			} finally {
 				try {
 					if (statement != null)
 						statement.close();
 				} catch (final SQLException e) {
-					play.Logger.error("Unable to close a SQL connection.", e);
+					LoggerUtils.error("Unable to close a SQL connection.", e);
 				}
 				try {
 					if (connection != null)
 						connection.close();
 				} catch (final SQLException e) {
-					play.Logger.error("Unable to close a SQL connection.", e);
+					LoggerUtils.error("Unable to close a SQL connection.", e);
 				}
 			}
 

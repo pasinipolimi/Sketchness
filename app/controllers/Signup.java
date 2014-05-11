@@ -27,6 +27,7 @@ import views.html.account.signup.unverified;
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
 import com.feth.play.module.pa.user.AuthUser;
+import utils.LoggerUtils;
 
 public class Signup extends Controller {
 
@@ -79,12 +80,12 @@ public class Signup extends Controller {
 				.bindFromRequest();
 
 		final String newUser = filledForm.field("name").value();
-		Logger.info("Signing up user: " + newUser + " email:"
+		LoggerUtils.info("SIGNUP","Signing up user: " + newUser + " email:"
 				+ filledForm.field("email").value());
 
 		if (filledForm.hasErrors()) {
 			// User did not fill everything properly
-			Logger.warn("The user did not fill everything properly, return an error message:"
+			LoggerUtils.info("SIGNUP","The user did not fill everything properly, return an error message:"
 					+ filledForm.toString());
 			return badRequest(sketchness_signup.render(filledForm));
 		} else {
@@ -101,7 +102,7 @@ public class Signup extends Controller {
 			// with the same browser prevent
 			// the registration of a guest
 			if ((localUser != null) && newUser.equals("Guest")) {
-				Logger.debug("Unable to signup guest user, someone is already logged in: "
+				LoggerUtils.debug("SIGNUP","Unable to signup guest user, someone is already logged in: "
 						+ localUser);
 				flash(Application.FLASH_ERROR_KEY,
 						Messages.get("error.userInBrowser"));
@@ -109,7 +110,7 @@ public class Signup extends Controller {
 			}
             // check if there is already the email registered
             if(User.checkMail(filledForm.field("email").value())){
-                Logger.debug("Email already registered: "
+                LoggerUtils.debug("SIGNUP","Email already registered: "
                         + filledForm.field("email").value());
                 flash(Application.FLASH_ERROR_KEY,
                         Messages.get("error.mailExists"));
@@ -117,7 +118,7 @@ public class Signup extends Controller {
             }
 
             if(User.checkMail(filledForm.field("email").value())){
-                Logger.debug("Email already registered: "
+                LoggerUtils.debug("SIGNUP","Email already registered: "
                         + filledForm.field("email").value());
                 flash(Application.FLASH_ERROR_KEY,
                         Messages.get("error.mailExists"));

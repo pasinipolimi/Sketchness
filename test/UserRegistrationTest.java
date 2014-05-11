@@ -1,21 +1,23 @@
-import static org.fest.assertions.Assertions.assertThat;
-import static play.test.Helpers.fakeApplication;
-import static play.test.Helpers.running;
-import static play.test.Helpers.testServer;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-
+import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.Assertions.assertThat;
 import org.junit.Test;
-
 import play.db.DB;
 import play.libs.F.Promise;
 import play.libs.WS;
 import play.libs.WS.Response;
 import play.libs.WS.WSRequestHolder;
+import static play.test.Helpers.fakeApplication;
+import static play.test.Helpers.running;
+import static play.test.Helpers.running;
+import static play.test.Helpers.testServer;
+import static play.test.Helpers.testServer;
+
+import utils.LoggerUtils;
 
 public class UserRegistrationTest {
 
@@ -163,7 +165,7 @@ public class UserRegistrationTest {
 					if (connection != null)
 						connection.close();
 				} catch (final SQLException e) {
-					play.Logger.error("Unable to close a SQL connection.");
+					LoggerUtils.error("Unable to close a SQL connection.",e);
 				}
 
 				return result;
@@ -208,9 +210,8 @@ public class UserRegistrationTest {
 					statement.close();
 
 			} catch (final SQLException e) {
-				play.Logger.error("Unable to close a SQL connection.");
+				LoggerUtils.error("Unable to close a SQL connection.",e);
 			}
-
 		}
 		return false;
 
