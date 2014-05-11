@@ -37,6 +37,7 @@ import play.libs.WS;
 import scala.concurrent.duration.Duration;
 import utils.JsonReader;
 import utils.LanguagePicker;
+import utils.LoggerUtils;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.Room;
