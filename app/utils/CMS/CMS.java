@@ -1,8 +1,5 @@
 package utils.CMS;
 
-import akka.actor.Cancellable;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -16,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -29,6 +27,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import play.Logger;
 import play.Play;
 import play.libs.Akka;
@@ -38,10 +37,13 @@ import play.libs.WS;
 import scala.concurrent.duration.Duration;
 import utils.JsonReader;
 import utils.LanguagePicker;
-import utils.LoggerUtils;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.Room;
+import akka.actor.Cancellable;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 
 /**
@@ -112,7 +114,7 @@ public class CMS {
 									+ oauthConsumerKey;
 							final String request = rootUrl + "/wsmc/image/" + id
 									+ "/segmentation.json";
-							JSONObject actionInfo;
+							final JSONObject actionInfo;
 							try {
 								WS.url(request).setContentType("application/x-www-form-urlencoded").setTimeout(10000).post(urlParameters);
 								Logger.debug("[CMS] Storing segmentation with action for image with id " + id + " and tag " + label);
@@ -274,7 +276,7 @@ public class CMS {
 		final Cancellable thread = runningThreads.get(roomName);
 		if (thread != null) {
 			thread.cancel();
-                        runningThreads.remove(roomName);
+			runningThreads.remove(roomName);
 		}
 	}
 
@@ -327,12 +329,10 @@ public class CMS {
 			throw new RuntimeException(
 					"[CMS] The request to the CMS is malformed");
 		}
-
 		for (final JsonNode item : retrievedImagesOrdered) {
 			if (item.elements().hasNext()) {
 				// Save information related to the image
 				final String id = item.get("id").asText();
-
 				// final String url = rootUrl +
 				// item.get("mediaLocator").asText();
 				// final Integer width = item.get("width").asInt();
@@ -344,10 +344,10 @@ public class CMS {
 				final ObjectNode guessWord = Json.newObject();
 				guessWord.put("type", "task");
 				guessWord.put("id", id);
-
+				Logger.debug("1guess" + id);
 				// Find the valid tags for this task.
 				if (imageSegments != null) {
-					tags = retrieveTags(imageSegments);
+					tags = retrieveTagsLight(imageSegments);
 				}
 
 				buildGuessWordSegment(guessWord, tags, item);
@@ -363,6 +363,31 @@ public class CMS {
 			}
 		}
 
+	}
+
+	private static HashSet<String> retrieveTagsLight(JsonNode imageSegments) {
+		final HashSet<String> tags = new HashSet<>();
+
+		imageSegments = imageSegments.get("availableTags");
+		if (imageSegments != null) {
+			if (imageSegments.elements().hasNext()) {
+				for (final JsonNode segment : imageSegments) {
+					// Retrieve the content descriptor
+					if (null != segment) {
+						// Logger.debug("send request to retrieve tags "
+						// + segment.get("id").textValue());
+
+						if (segment.get("lang").textValue()
+								.equals(LanguagePicker.retrieveIsoCode())
+								|| LanguagePicker.retrieveIsoCode().equals("")) {
+							tags.add(segment.get("value").textValue());
+						}
+
+					}
+				}
+			}
+		}
+		return tags;
 	}
 
 	private static int retrieveTasks(final Integer maxRound,
