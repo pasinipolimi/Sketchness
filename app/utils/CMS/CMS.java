@@ -344,7 +344,6 @@ public class CMS {
 				final ObjectNode guessWord = Json.newObject();
 				guessWord.put("type", "task");
 				guessWord.put("id", id);
-				Logger.debug("1guess" + id);
 				// Find the valid tags for this task.
 				if (imageSegments != null) {
 					tags = retrieveTagsLight(imageSegments);
