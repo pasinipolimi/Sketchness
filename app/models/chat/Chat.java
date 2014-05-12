@@ -33,7 +33,7 @@ public class Chat extends GameRoom {
         try {
             if (message instanceof Room) {
                 this.roomChannel = ((Room) message);
-                Logger.info("[CHAT] " + roomChannel.getRoom() + " created.");
+                LoggerUtils.info("CHAT", roomChannel.getRoom() + " created.");
             }
             if (message instanceof Join) {
                 handleJoin((Join) message);
@@ -82,11 +82,11 @@ public class Chat extends GameRoom {
                 getSender().tell("OK", this.getSelf());
                 notifySystem(LogLevel.info,message.getUsername()+" "+Messages.get(LanguagePicker.retrieveLocale(), "join"));
                 notifyMemberChange(event);
-                Logger.debug("[CHAT] added player " + message.getUsername());
+                LoggerUtils.info("CHAT","Added player " + message.getUsername());
             }
         }
         catch(Exception e) {
-            Logger.error("[CHAT] "+e.toString());
+            LoggerUtils.error("Impossible to handle join",e);
         }
     }
     
@@ -105,12 +105,12 @@ public class Chat extends GameRoom {
                     JsonNode event = GameMessages.composeQuit(quitter);
                     notifySystem(LogLevel.info,quitter+" "+Messages.get(LanguagePicker.retrieveLocale(), "quit"));
                     notifyMemberChange(event);
-                    Logger.debug("[CHAT] " + quitter + " has disconnected.");
+                    LoggerUtils.info("CHAT",quitter + " has disconnected.");
                 }
             }
         }
         catch(Exception e) {
-            Logger.error("[CHAT] "+e.toString());
+            LoggerUtils.error("Impossible to handle quitter",e);
         }
     }
 

@@ -3,7 +3,6 @@ package utils.CMS;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -38,6 +37,7 @@ import play.libs.WS;
 import scala.concurrent.duration.Duration;
 import utils.JsonReader;
 import utils.LanguagePicker;
+import utils.LoggerUtils;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.Room;
@@ -71,7 +71,7 @@ public class CMS {
 					+ actionId + "/close";
 			WS.url(request).setContentType("application/x-www-form-urlencoded")
 			.put("");
-			Logger.debug("[CMS] Closing uTask " + uTaskID);
+			LoggerUtils.debug("CMS","Closing uTask " + uTaskID);
 		}
 	}
 
@@ -80,7 +80,7 @@ public class CMS {
 			final String request = rootUrl + "/wsmc/task/" + taskID + "/close";
 			WS.url(request).setContentType("application/x-www-form-urlencoded")
 			.put("");
-			Logger.debug("[CMS] Closing Task " + taskID);
+			LoggerUtils.debug("CMS","Closing Task " + taskID);
 		}
 	}
 
@@ -115,15 +115,15 @@ public class CMS {
 									+ oauthConsumerKey;
 							final String request = rootUrl + "/wsmc/image/" + id
 									+ "/segmentation.json";
-							JSONObject actionInfo;
+							final JSONObject actionInfo;
 							try {
 								WS.url(request).setContentType("application/x-www-form-urlencoded").setTimeout(10000).post(urlParameters);
-								Logger.debug("[CMS] Storing segmentation with action for image with id " + id + " and tag " + label);
+								LoggerUtils.debug("CMS","Storing segmentation with action for image with id " + id + " and tag " + label);
 							} catch (final Exception ex) {
-								Logger.error("Unable to save segmentation, EXC 1", ex);
+								LoggerUtils.error("Unable to save segmentation, EXC1",ex);
 							}
 						} catch (final Exception ex) {
-							Logger.error("Unable to save segmentation, EXC 2", ex);
+							LoggerUtils.error("Unable to save segmentation, EXC2",ex);
 						}
 					}
 				}, Akka.system().dispatcher());
@@ -148,7 +148,7 @@ public class CMS {
 						final JSONObject actionInfo;
 						try {
 							final F.Promise<WS.Response> returned = WS.url(request).setContentType("application/x-www-form-urlencoded").setTimeout(10000).post(urlParameters);
-							Logger.debug("[CMS] Storing textAnnotation for image with id " + id + " and tag " + label);
+							LoggerUtils.debug("CMS","Storing textAnnotation for image with id " + id + " and tag " + label);
 						} catch (final Exception e) {
 							Logger.error("Unable to save annotation.", e);
 						}
@@ -158,7 +158,7 @@ public class CMS {
 
 	public static Integer openSession() throws Error {
 		final String request = rootUrl + "/wsmc/session.json";
-		Logger.debug("[CMS] Opening a new session...");
+		LoggerUtils.debug("CMS","Opening a new session...");
 		final F.Promise<WS.Response> returned = WS.url(request)
 				.setContentType("application/x-www-form-urlencoded")
 				.post("oauth_consumer_key=" + oauthConsumerKey);
@@ -166,7 +166,7 @@ public class CMS {
 		String sessionId = returned.get().getBody();
 		sessionId = sessionId.replace("[\"", "");
 		sessionId = sessionId.replace("\"]", "");
-		Logger.debug("[CMS] Retrieved session " + sessionId);
+		LoggerUtils.debug("CMS","Retrieved session " + sessionId);
 		return Integer.valueOf(sessionId);
 	}
 
@@ -174,7 +174,7 @@ public class CMS {
 		final String request = rootUrl + "/wsmc/session/" + sessionId;
 		WS.url(request).setContentType("application/x-www-form-urlencoded")
 		.put("state=0&oauth_consumer_key=" + oauthConsumerKey);
-		Logger.debug("[CMS] Closing session " + sessionId);
+		LoggerUtils.debug("CMS","Closing session " + sessionId);
 	}
 
 	public static void postAction(final Integer sessionId,
@@ -189,7 +189,7 @@ public class CMS {
 				+ oauthConsumerKey + "&action_log=" + log;
 		WS.url(request).setContentType("application/x-www-form-urlencoded")
 		.post(parameters);
-		Logger.debug("[CMS] Action " + actionType + " for session " + sessionId
+		LoggerUtils.debug("CMS","Action " + actionType + " for session " + sessionId
 				+ ": " + log);
 	}
 
@@ -260,43 +260,23 @@ public class CMS {
 		}
 	}
 
-	public static void addInitializationThread(final String roomName,
-			final Cancellable thread) {
+	public static void addInitializationThread(final String roomName, final Cancellable thread) throws Exception {
 		runningThreads.put(roomName, thread);
 	}
 
-	public static boolean getThread(final String roomName) {
+	public static boolean getThread(final String roomName) throws Exception {
 		if (runningThreads.containsKey(roomName))
 			return true;
 		else
 			return false;
 	}
 
-	public static void cancelThread(final String roomName) {
-		Logger.debug("cancello th: "+roomName);
+	public static void cancelThread(final String roomName) throws Exception {
 		final Cancellable thread = runningThreads.get(roomName);
 		if (thread != null) {
 			thread.cancel();
-			Akka.system()
-			.scheduler()
-			.scheduleOnce(Duration.create(1000, TimeUnit.MILLISECONDS),
-					new Runnable() {
-				@Override
-				public void run() {
-					while (!thread.isCancelled()) {
-						try {
-							Thread.sleep(100);
-						} catch (final Exception ex) {
-							Logger.error("Error in waiting the thread termination\n"
-									+ ex);
-						}
-					}
-					runningThreads.remove(roomName);
-					Logger.info("Thread cancelled and removed.");
-				}
-			}, Akka.system().dispatcher());
+			runningThreads.remove(roomName);
 		}
-
 	}
 
 	/**
@@ -320,8 +300,7 @@ public class CMS {
 			retrieveImages(tasksToAdd, queueImages, roomChannel,
 					uploadedTasks > 0);
 		}
-
-		Logger.debug("Task init from CMS end");
+		LoggerUtils.debug("CMS","Task init from CMS end");
 	}
 
 	private static void retrieveImages(final Integer tasksToAdd,
@@ -335,7 +314,7 @@ public class CMS {
 
 		final JsonReader jsonReader = new JsonReader();
 		try {
-			Logger.debug("Requested image list to CMS");
+			LoggerUtils.debug("CMS","Requested image list to CMS");
 			final HashMap<String, String> params = new HashMap<>();
 			params.put("collection", collection);
 			params.put("limit", tasksToAdd.toString());
@@ -343,17 +322,15 @@ public class CMS {
 			// params.put("select", "id");
 			retrievedImagesOrdered = jsonReader.readJsonArrayFromUrl(rootUrl
 					+ "/wsmc/image.json", params);
-			Logger.debug("Requested image list to CMS end");
+			LoggerUtils.debug("CMS","Requested image list to CMS end");
 		} catch (final IllegalArgumentException e) {
 			throw new RuntimeException(
 					"[CMS] The request to the CMS is malformed");
 		}
-
 		for (final JsonNode item : retrievedImagesOrdered) {
 			if (item.elements().hasNext()) {
 				// Save information related to the image
 				final String id = item.get("id").asText();
-
 				// final String url = rootUrl +
 				// item.get("mediaLocator").asText();
 				// final Integer width = item.get("width").asInt();
@@ -365,10 +342,9 @@ public class CMS {
 				final ObjectNode guessWord = Json.newObject();
 				guessWord.put("type", "task");
 				guessWord.put("id", id);
-
 				// Find the valid tags for this task.
 				if (imageSegments != null) {
-					tags = retrieveTags(imageSegments);
+					tags = retrieveTagsLight(imageSegments);
 				}
 
 				buildGuessWordSegment(guessWord, tags, item);
@@ -376,7 +352,7 @@ public class CMS {
 
 				if (!taskSent) {
 					taskSent = true;
-					Logger.debug("Send task aquired for image:" + id
+					LoggerUtils.debug("CMS","Send task aquired for image:" + id
 							+ ", rooomChanel: " + roomChannel);
 					sendTaskAcquired(roomChannel);
 				}
@@ -384,6 +360,31 @@ public class CMS {
 			}
 		}
 
+	}
+
+	private static HashSet<String> retrieveTagsLight(JsonNode imageSegments) {
+		final HashSet<String> tags = new HashSet<>();
+
+		imageSegments = imageSegments.get("availableTags");
+		if (imageSegments != null) {
+			if (imageSegments.elements().hasNext()) {
+				for (final JsonNode segment : imageSegments) {
+					// Retrieve the content descriptor
+					if (null != segment) {
+						// Logger.debug("send request to retrieve tags "
+						// + segment.get("id").textValue());
+
+						if (segment.get("lang").textValue()
+								.equals(LanguagePicker.retrieveIsoCode())
+								|| LanguagePicker.retrieveIsoCode().equals("")) {
+							tags.add(segment.get("value").textValue());
+						}
+
+					}
+				}
+			}
+		}
+		return tags;
 	}
 
 	private static int retrieveTasks(final Integer maxRound,
@@ -397,14 +398,14 @@ public class CMS {
 		final JsonReader jsonReader = new JsonReader();
 		try {
 			// TODO add id...
-			Logger.debug("Requested task list to CMS " + roomChannel);
+			LoggerUtils.debug("CMS","Requested task list to CMS " + roomChannel);
 			final HashMap<String, String> params = new HashMap<>();
 			params.put("collection", collection);
 			params.put("limit", maxRound.toString());
 			params.put("open", "true");
 			final String url = rootUrl + "/wsmc/task.json";
 			retrievedTasks = jsonReader.readJsonArrayFromUrl(url, params);
-			Logger.debug("Requested task list to CMS end" + roomChannel);
+			LoggerUtils.debug("CMS","Requested task list to CMS end" + roomChannel);
 		} catch (final IllegalArgumentException e) {
 			throw new RuntimeException(
 					"[CMS] The request to the CMS is malformed");
@@ -527,7 +528,7 @@ public class CMS {
 	 * Inform the game that at least one task is ready and we can start the game
 	 */
 	private static void sendTaskAcquired(final Room roomChannel) {
-		Logger.debug("CMS sends task aquired... ");
+		LoggerUtils.debug("CMS","CMS sends task aquired... ");
 		GameBus.getInstance().publish(new GameMessages.GameEvent(GameMessages.composeTaskAcquired(),roomChannel));
 	}
 
@@ -541,15 +542,11 @@ public class CMS {
 				for (final JsonNode segment : imageSegments) {
 					// Retrieve the content descriptor
 					if (null != segment) {
-						// Logger.debug("send request to retrieve tags "
-						// + segment.get("id").getTextValue());
 						JsonNode retrieved = jsonReader
 								.readJsonArrayFromUrl(rootUrl
 										+ "/wsmc/content/"
 										+ segment.get("id").textValue()
 										+ ".json");
-						// Logger.debug("send request to retrieve tags end "
-						// + segment.get("id").getTextValue());
 						retrieved = retrieved.get("itemAnnotations").get(0);
 						// If the annotation is a tag and is in the same
 						// language as the one defined in the system, add the

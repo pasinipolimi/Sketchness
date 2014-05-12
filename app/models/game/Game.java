@@ -677,8 +677,7 @@ public class Game extends GameRoom {
 						}
 					}
 				}, Akka.system().dispatcher());
-		Logger.debug("aggiungo fra quelle da cancellare: "
-				+ roomChannel.getRoom());
+
 		CMS.addInitializationThread(roomChannel.getRoom(), init);
 
 		Logger.info("[GAME] New game started");

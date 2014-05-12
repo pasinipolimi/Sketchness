@@ -338,20 +338,22 @@ table.gameList th, table.gameList td {
 }
 
 #name {
+	width: 180px;
 	position: relative;
-	top: 7px;
+	top: -20px;
 	left: 120px;
-	font-weight: bold;
 	font-size: 20px;
+	font-weight: bold;
 }
 
 #points {
 	position: relative;
-	top: -19px;
-	left: 400px;
+	top: -45px;
+	left: 375px;
 	display: flex;
 	font-size: 20px;
 	font-weight: bold;
+	width: 150px;
 }
 
 #leaderboardAvatar {

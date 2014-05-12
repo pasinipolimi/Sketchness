@@ -31,7 +31,7 @@ public class LobbyFactory extends Factory {
             result = (String) Await.result(future, Duration.create(50, SECONDS));
         }
         catch (TimeoutException timeout) {
-            throw new Exception("Lobby creation failed after 5 trials");
+            throw new Exception("Lobby creation failed");
         }  
         if ("OK".equals(result)) {
             ChatFactory.createChat(username, "lobby", in, out);

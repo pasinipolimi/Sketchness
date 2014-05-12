@@ -663,41 +663,51 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 								offsetY += element.offsetTop;
 							} while ((element = element.offsetParent));
 						}
-
-						if(!sk.isMobile) {
-							if(event.originalEvent.type !== "mouseup")
-							  return {
-								x: (event.pageX - offsetX),
-								y: (event.pageY - offsetY),
-								size: elements.size.val(),
-								color: elements.color.spectrum("get").toRgbString()
-							  };
-							else
-							  return {
-								x: (event.pageX - offsetX),
-								y: (event.pageY - offsetY),
-								size: elements.size.val(),
-								color: "end"
-							  };
-						} else {
-							// Touchend does not have the position of when we lifted our finger
-							if(event.originalEvent.type !== "touchend" && event.originalEvent.touches) {
-								return {
-									x: (event.originalEvent.touches[0].pageX - offsetX),
-									y: (event.originalEvent.touches[0].pageY - offsetY),
-									size: elements.size.val(),
-									color: elements.color.spectrum("get").toRgbString()
-								};
-							} else if(event.originalEvent.type == "touchend"){
-								return {
-									x: (event.pageX - offsetX),
-									y: (event.pageY - offsetY),
-									size: elements.size.val(),
-									color: "end"
-								};
+						if(undefined!=event) {
+							if(!sk.isMobile) {
+									if(event.originalEvent.type !== "mouseup")
+									  return {
+										x: (event.pageX - offsetX),
+										y: (event.pageY - offsetY),
+										size: elements.size.val(),
+										color: elements.color.spectrum("get").toRgbString()
+									  };
+									else
+									  return {
+										x: (event.pageX - offsetX),
+										y: (event.pageY - offsetY),
+										size: elements.size.val(),
+										color: "end"
+									  };  
+							} else {
+								// Touchend does not have the position of when we lifted our finger
+								if(event.originalEvent.type !== "touchend" && event.originalEvent.touches) {
+									return {
+										x: (event.originalEvent.touches[0].pageX - offsetX),
+										y: (event.originalEvent.touches[0].pageY - offsetY),
+										size: elements.size.val(),
+										color: elements.color.spectrum("get").toRgbString()
+									};
+								} else if(event.originalEvent.type == "touchend"){
+									return {
+										x: (event.pageX - offsetX),
+										y: (event.pageY - offsetY),
+										size: elements.size.val(),
+										color: "end"
+									};
+								}
+								else
+									return null;
 							}
-							else
-								return null;
+						}
+						else {
+							return {
+										x: 0,
+										y: 0,
+										size: elements.size.val(),
+										color: elements.color.spectrum("get").toRgbString()
+								    
+								    };
 						}
 					};
 
@@ -928,6 +938,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.skip.hide();
 					elements.endSegmentation.hide();
 					elements.hudArea.hide();
+					elements.pen.hide();
+					elements.eraser.hide();
 
 					this.communicator.on({
 						image: function(e, content) {

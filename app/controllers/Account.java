@@ -1,9 +1,15 @@
 package controllers;
 
-import static play.data.Form.form;
+import be.objectify.deadbolt.java.actions.Group;
+import be.objectify.deadbolt.java.actions.Restrict;
+import be.objectify.deadbolt.java.actions.SubjectPresent;
+import com.feth.play.module.pa.PlayAuthenticate;
+import com.feth.play.module.pa.user.AuthUser;
 import models.User;
 import play.Logger;
 import play.data.Form;
+import static play.data.Form.form;
+import static play.data.Form.form;
 import play.data.format.Formats.NonEmpty;
 import play.data.validation.Constraints.MinLength;
 import play.data.validation.Constraints.Required;
@@ -12,18 +18,13 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import providers.MyUsernamePasswordAuthProvider;
 import providers.MyUsernamePasswordAuthUser;
+import utils.LoggerUtils;
 import views.html.account.ask_link;
 import views.html.account.ask_merge;
 import views.html.account.link;
 import views.html.account.name_change;
 import views.html.account.password_change;
 import views.html.account.unverified;
-import be.objectify.deadbolt.java.actions.Group;
-import be.objectify.deadbolt.java.actions.Restrict;
-import be.objectify.deadbolt.java.actions.SubjectPresent;
-
-import com.feth.play.module.pa.PlayAuthenticate;
-import com.feth.play.module.pa.user.AuthUser;
 
 public class Account extends Controller {
 
@@ -104,23 +105,23 @@ public class Account extends Controller {
 
 	@Restrict(@Group(Application.USER_ROLE))
 	public static Result verifyEmail() {
-		Logger.debug("Verifing mail...");
+		LoggerUtils.debug("ACCOUNT","Verifing mail...");
 		com.feth.play.module.pa.controllers.Authenticate.noCache(response());
 		final User user = Application.getLocalUser(session());
 		if (user.emailValidated) {
 			// E-Mail has been validated already
-			Logger.debug("E-Mail has been validated already: " + user.email);
+			LoggerUtils.debug("ACCOUNT","E-Mail has been validated already: " + user.email);
 			flash(Application.FLASH_MESSAGE_KEY,
 					Messages.get("playauthenticate.verify_email.error.already_validated"));
 		} else if (user.email != null && !user.email.trim().isEmpty()) {
-			Logger.debug("E-Mail is not validated yet, sending validation message");
+			LoggerUtils.debug("ACCOUNT","E-Mail is not validated yet, sending validation message");
 			flash(Application.FLASH_MESSAGE_KEY, Messages.get(
 					"playauthenticate.verify_email.message.instructions_sent",
 					user.email));
 			MyUsernamePasswordAuthProvider.getProvider()
 					.sendVerifyEmailMailingAfterSignup(user, ctx());
 		} else {
-			Logger.debug("Error reading email.");
+			LoggerUtils.error("ACCOUNT","Error reading email.");
 			flash(Application.FLASH_MESSAGE_KEY, Messages.get(
 					"playauthenticate.verify_email.error.set_email_first",
 					user.email));
@@ -173,12 +174,12 @@ public class Account extends Controller {
 
 	@Restrict(@Group(Application.USER_ROLE))
 	public static Result doChangeNickname() {
-		Logger.debug("Changing username...");
+		LoggerUtils.debug("ACCOUNT","Changing username...");
 		com.feth.play.module.pa.controllers.Authenticate.noCache(response());
 		final Form<NicknameChange> filledForm = NICKNAME_CHANGE_FORM
 				.bindFromRequest();
 		if (filledForm.hasErrors()) {
-			Logger.debug("Form has errors.");
+			LoggerUtils.error("ACCOUNT","Form has errors.");
 			// User did not select whether to link or not link
 			return badRequest(name_change.render(filledForm));
 		} else {
@@ -206,12 +207,12 @@ public class Account extends Controller {
 
 	@SubjectPresent
 	public static Result askLink() {
-		Logger.debug("Asked link...");
+		LoggerUtils.debug("ACCOUNT","Asked link...");
 		com.feth.play.module.pa.controllers.Authenticate.noCache(response());
 		final AuthUser u = PlayAuthenticate.getLinkUser(session());
 		if (u == null) {
 			// account to link could not be found, silently redirect to login
-			Logger.debug("Account to link could not be found, silently redirect to login");
+			LoggerUtils.info("ACCOUNT","Account to link could not be found, silently redirect to login");
 			return redirect(routes.Application.index());
 		}
 		Logger.debug("Accepted link, login...");
@@ -225,21 +226,21 @@ public class Account extends Controller {
 		final AuthUser u = PlayAuthenticate.getLinkUser(session());
 		if (u == null) {
 			// account to link could not be found, silently redirect to login
-			Logger.debug("Account to link could not be found, silently redirect to login");
+			LoggerUtils.info("ACCOUNT","Account to link could not be found, silently redirect to login");
 			return redirect(routes.Application.index());
 		}
 
 		final Form<Accept> filledForm = ACCEPT_FORM.bindFromRequest();
 		if (filledForm.hasErrors()) {
-			Logger.debug("Link has errors");
+			LoggerUtils.error("ACCOUNT","Link has errors");
 			// User did not select whether to link or not link
 			return badRequest(ask_link.render(filledForm, u));
 		} else {
 			// User made a choice :)
-			Logger.debug("User made a link choice");
+			LoggerUtils.info("ACCOUNT","User made a link choice");
 			final boolean link = filledForm.get().accept;
 			if (link) {
-				Logger.debug("User made a link choice");
+				LoggerUtils.info("ACCOUNT","User made a link choice");
 				flash(Application.FLASH_MESSAGE_KEY,
 						Messages.get("playauthenticate.accounts.link.success"));
 			}

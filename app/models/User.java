@@ -38,6 +38,7 @@ import com.feth.play.module.pa.user.AuthUserIdentity;
 import com.feth.play.module.pa.user.EmailIdentity;
 import com.feth.play.module.pa.user.FirstLastNameIdentity;
 import com.feth.play.module.pa.user.NameIdentity;
+import utils.LoggerUtils;
 
 /**
  * Initial version based on work by Steve Chaloner (steve@objectify.be) for
@@ -162,7 +163,7 @@ public class User extends Model implements Subject {
 	}
 
 	public static User create(final AuthUser authUser) {
-		Logger.debug("Creating a new user...");
+		LoggerUtils.debug("USER","Creating a new user...");
 		final User user = new User();
 		user.roles = Collections.singletonList(SecurityRole
 				.findByRoleName(controllers.Application.USER_ROLE));
@@ -174,7 +175,7 @@ public class User extends Model implements Subject {
 				.create(authUser));
 
 		if (authUser instanceof EmailIdentity) {
-			Logger.debug("Teh user created is an EmailIdentity, setting the new email...");
+			LoggerUtils.debug("USER","The created user is an EmailIdentity, setting the new email...");
 			final EmailIdentity identity = (EmailIdentity) authUser;
 			// Remember, even when getting them from FB & Co., emails should be
 			// verified within the application as a security breach there might
@@ -234,7 +235,7 @@ public class User extends Model implements Subject {
 		}
 
 		user.totalScore = 0;
-		Logger.debug("saving the new user...");
+		LoggerUtils.debug("USER","Saving the new user...");
 		user.save();
 		user.saveManyToManyAssociations("roles");
 		// user.saveManyToManyAssociations("permissions");
@@ -242,7 +243,7 @@ public class User extends Model implements Subject {
 	}
 
 	public String checkNickname(String nickname) {
-		Logger.debug("Checking if the nickname is already been used: "
+		LoggerUtils.debug("USER","Checking if the nickname is already been used: "
 				+ nickname);
 		Connection connection = null;
 		PreparedStatement statement = null;
@@ -259,7 +260,7 @@ public class User extends Model implements Subject {
 				// a user already exists with the same nickname, changing the
 				// new nickname
 
-				Logger.debug("a user already exists with the same nickname, changing the new nickname: "
+				LoggerUtils.debug("USER","A user already exists with the same nickname, changing the new nickname: "
 						+ nickname);
 				final Random randomGeneretor = new Random();
 				int n = randomGeneretor.nextInt(5000);
@@ -267,14 +268,14 @@ public class User extends Model implements Subject {
 				n = n + n2;
 				final String ns = Integer.toString(n);
 				nickname = nickname + ns;
-				Logger.debug("New Nickname: " + nickname);
+				LoggerUtils.debug("USER","New Nickname: " + nickname);
 				checkNickname(nickname);
 			}
 
 		} catch (final SQLException ex) {
 			// FIXME!!! se non sono riuscito a verificare il nickname devo fare
 			// qualcosa!!!!!
-			Logger.error("Unable to verify nickname: " + nickname, ex);
+			LoggerUtils.error("Unable to verify nickname: " + nickname, ex);
 		} finally {
 			try {
 				if (rs != null) {
@@ -286,7 +287,7 @@ public class User extends Model implements Subject {
 				if (connection != null)
 					connection.close();
 			} catch (final SQLException e) {
-				play.Logger.error("Unable to close a SQL connection.");
+				LoggerUtils.error("Unable to close a SQL connection.",e);
 			}
 
 		}
@@ -295,7 +296,7 @@ public class User extends Model implements Subject {
 	}
 
 	public static boolean checkMail(final String email) {
-		Logger.debug("Checking if the mail already exists: " + email);
+		LoggerUtils.debug("USER","Checking if the mail already exists: " + email);
 
 		Boolean mailExists = false;
 		Connection connection = null;
@@ -310,13 +311,13 @@ public class User extends Model implements Subject {
 			rs = statement.executeQuery();
 
 			if (rs.isBeforeFirst()) {
-				Logger.debug("a user has already been registered with the email: "
+				LoggerUtils.debug("USER","A user has already been registered with the email: "
 						+ email);
 				mailExists = true;
 			}
 
 		} catch (final SQLException ex) {
-			Logger.error("Unable to check the email: " + email, ex);
+			LoggerUtils.error("Unable to check the email: " + email, ex);
 		} finally {
 			try {
 				if (rs != null) {
@@ -328,10 +329,9 @@ public class User extends Model implements Subject {
 				if (connection != null)
 					connection.close();
 			} catch (final SQLException e) {
-				play.Logger.error("Unable to close a SQL connection.");
+				LoggerUtils.error("Unable to close a SQL connection.",e);
 			}
 		}
-
 		return mailExists;
 	}
 
@@ -426,7 +426,7 @@ public class User extends Model implements Subject {
 			statement.executeUpdate();
 
 		} catch (final SQLException ex) {
-			Logger.error("Unable to change nickname for user: " + utente);
+			LoggerUtils.error("Unable to change nickname for user: " + utente,ex);
 			throw new Exception("Unable to change nickname for user: " + utente);
 		} finally {
 			try {
@@ -436,11 +436,9 @@ public class User extends Model implements Subject {
 				if (connection != null)
 					connection.close();
 			} catch (final SQLException e) {
-				play.Logger.error("Unable to close a SQL connection.");
+				LoggerUtils.error("Unable to close a SQL connection.",e);
 			}
-
 		}
-
 	}
 
 	public void resetPassword(final UsernamePasswordAuthUser authUser,

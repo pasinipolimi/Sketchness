@@ -1,7 +1,10 @@
 package providers;
 
-import static play.data.Form.form;
-
+import com.feth.play.module.mail.Mailer.Mail.Body;
+import com.feth.play.module.pa.PlayAuthenticate;
+import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
+import com.feth.play.module.pa.providers.password.UsernamePasswordAuthUser;
+import controllers.routes;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -10,9 +13,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import javax.validation.constraints.AssertTrue;
-
 import models.LinkedAccount;
 import models.TokenAction;
 import models.TokenAction.Type;
@@ -20,6 +21,9 @@ import models.User;
 import play.Application;
 import play.Logger;
 import play.data.Form;
+import static play.data.Form.form;
+import static play.data.Form.form;
+
 import play.data.validation.Constraints.Email;
 import play.data.validation.Constraints.MaxLength;
 import play.data.validation.Constraints.MinLength;
@@ -30,13 +34,7 @@ import play.i18n.Lang;
 import play.i18n.Messages;
 import play.mvc.Call;
 import play.mvc.Http.Context;
-
-import com.feth.play.module.mail.Mailer.Mail.Body;
-import com.feth.play.module.pa.PlayAuthenticate;
-import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
-import com.feth.play.module.pa.providers.password.UsernamePasswordAuthUser;
-
-import controllers.routes;
+import utils.LoggerUtils;
 
 public class MyUsernamePasswordAuthProvider
 		extends
@@ -149,18 +147,18 @@ public class MyUsernamePasswordAuthProvider
 	@Override
 	protected com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider.SignupResult signupUser(
 			final MyUsernamePasswordAuthUser user) {
-		Logger.debug("Verify authentication for signup");
+		LoggerUtils.debug("AUTHPROVIDER","Verify authentication for signup");
 		final User u = User.findByUsernamePasswordIdentity(user);
 		if (u != null) {
 			if (u.emailValidated) {
 				// This user exists, has its email validated and is active
-				Logger.debug("The user " + user.getName()
+				LoggerUtils.debug("AUTHPROVIDER","The user " + user.getName()
 						+ " exists, has its email validated and is active");
 				return SignupResult.USER_EXISTS;
 			} else {
 				// this user exists, is active but has not yet validated its
 				// email
-				Logger.debug("The user "
+				LoggerUtils.debug("AUTHPROVIDER","The user "
 						+ user.getName()
 						+ " exists, is active but has not yet validated its email");
 				return SignupResult.USER_EXISTS_UNVERIFIED;
@@ -168,7 +166,7 @@ public class MyUsernamePasswordAuthProvider
 		}
 		// The user either does not exist or is inactive - create a new one
 
-		Logger.debug("The user " + user.getName()
+		LoggerUtils.debug("AUTHPROVIDER","The user " + user.getName()
 				+ " either does not exist or is inactive - create a new one");
 
 		final User newUser = User.create(user);
@@ -235,7 +233,7 @@ public class MyUsernamePasswordAuthProvider
 									// FIXME!!! fare qualcosa se non riesco a
 									// aggiornare il db, non posso semplicemente
 									// dire che è loggato e ignorare l'errore
-									Logger.error("Unable to login: " + u.id);
+									LoggerUtils.error("Unable to login: " + u.id,ex);
 									return LoginResult.NOT_FOUND;
 								} finally {
 									try {
@@ -412,7 +410,7 @@ public class MyUsernamePasswordAuthProvider
 		try {
 			cls = Class.forName(template + "_" + langCode);
 		} catch (final ClassNotFoundException e) {
-			Logger.warn("Template: '"
+			LoggerUtils.debug("AUTHPROVIDER","Template: '"
 					+ template
 					+ "_"
 					+ langCode
@@ -423,9 +421,9 @@ public class MyUsernamePasswordAuthProvider
 				cls = Class.forName(template + "_"
 						+ EMAIL_TEMPLATE_FALLBACK_LANGUAGE);
 			} catch (final ClassNotFoundException e) {
-				Logger.error("Fallback template: '" + template + "_"
+				LoggerUtils.error("Fallback template: '" + template + "_"
 						+ EMAIL_TEMPLATE_FALLBACK_LANGUAGE
-						+ "' was not found either!");
+						+ "' was not found either!",e);
 			}
 		}
 		if (cls != null) {
@@ -470,7 +468,7 @@ public class MyUsernamePasswordAuthProvider
 
 	public void sendVerifyEmailMailingAfterSignup(final User user,
 			final Context ctx) {
-		Logger.debug("Sending verify mail to: " + user.email);
+		LoggerUtils.debug("AUTHPROVIDER","Sending verify mail to: " + user.email);
 		final String subject = getVerifyEmailMailingSubjectAfterSignup(user,
 				ctx);
 		final String token = generateVerificationRecord(user);
