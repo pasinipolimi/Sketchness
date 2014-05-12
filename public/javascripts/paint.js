@@ -393,7 +393,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				onentertagInsertion: function() {
 					var elements = this.elements;
 					console.log("[BEGIN] TagInsertion");
-					elements.main.addClass("sketcher");
+					elements.pen.hide();
+					elements.eraser.hide();
 					this.write.top($.i18n.prop("asktagsketcher"));
 					//this.write.warnTag($.i18n.prop("warnTag"));
 					elements.skip.show();
@@ -466,7 +467,6 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				onleavetagInsertion: function() {
 					var elements = this.elements;
 					console.log("[END] TagInsertion");
-					elements.main.removeClass("sketcher");
 					this.write.top();
 					//this.write.warnTag();
 					this.write.time();
