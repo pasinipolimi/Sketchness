@@ -1,10 +1,15 @@
 package controllers;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.StringTokenizer;
 
+import javax.imageio.ImageIO;
+
 import com.fasterxml.jackson.databind.JsonNode;
+
 import org.json.JSONException;
 
 import play.Play;
@@ -30,6 +35,23 @@ public class Utilities extends Controller {
 	public static Result retrieveMask(final String imageID, final String tag) {
 		try {
 			final File result = Renderer.retrieveMask(imageID, tag);
+			if (null != result) {
+				return ok(result);
+			} else {
+				return ok("[AGGREGATOR] Cannot retrieve the mask for image "
+						+ imageID + " and tag " + tag);
+			}
+		} catch (final Exception e) {
+			return ok("[AGGREGATOR] " + e.toString());
+		}
+	}
+	
+	public static Result retrieveMaskImage(final String imageID, final String tag) {
+		
+		try {
+			final BufferedImage img = Renderer.retrieveMaskImage(imageID, tag);
+			File result = new File("Mask_"+imageID+"_"+tag+".png");
+			ImageIO.write(img, "png", result);
 			if (null != result) {
 				return ok(result);
 			} else {

@@ -59,29 +59,57 @@ function newMask(idTag, idImage, tagName){
                  ,taskImage=new Image();
                  taskImage.src=mediaimg;
                  
+                 var canvasmasknew = document.createElement("canvas");
+                 canvasmasknew.id = "maskNewCont";
+                 canvasmasknew.style.visibility  = "hidden";
+                 document.body.appendChild(canvasmasknew);
+
+                 maskCanvasCont = document.getElementById("maskNewCont");
+                 maskContextCont = maskCanvasCont.getContext("2d");
+                 
                  maskImage=new Image();
-                 maskImage.src=media;
+                 maskImage.src="/retrieveMaskImage?imageID="+idImage+"&tag="+idTag;
+                 //maskImage.src=media;
                  maskImage.onload = function() {
-                                                 maskContext.save();
-                                                 maskContext.beginPath();
-												 maskCanvas.width = window.innerWidth*0.8/4;
-												 maskCanvas.height = window.innerWidth*0.8/4*this.height/this.width;
+                                                 
+                	 							maskCanvasCont.width = window.innerWidth*0.8/4;
+                	 							maskCanvasCont.height = window.innerWidth*0.8/4*this.height/this.width;
+                	 							maskCanvas.width = window.innerWidth*0.8/4;
+                	 							maskCanvas.height = window.innerWidth*0.8/4*this.height/this.width;
+												
+                	 							maskContextCont.drawImage(maskImage,0,0,maskCanvasCont.width,maskCanvasCont.height);
+												 var imdata = maskContextCont.getImageData(0, 0, maskCanvasCont.width, maskCanvasCont.height);
+												 var r,g,b,a;
+												 for (var p=0;p<imdata.data.length;p+=4) {
+
+												  r = imdata.data[p];
+												  g = imdata.data[p+1];
+												  b = imdata.data[p+2];
+												  
+												  if((r==0)&&(g==0)&&(b==0))
+												  {
+													  imdata.data[p+3] = 170;
+
+												  }
+												  else
+												  {
+													  imdata.data[p+3] = 255;
+
+												  }
+
+												 }
 												 
-												 
-                                                 //maskCanvas.width=this.width;
-                                                 //maskCanvas.height=this.height;
-                                                 //canvas.width=this.width;
-                                                 //canvas.height=this.height;
-												 //maskCanvas.width=canvas.width;
-                                                 //maskCanvas.height=canvas.height;
-                                                 maskContext.drawImage(taskImage,0,0,maskCanvas.width,maskCanvas.height);
-                                                 maskContext.globalCompositeOperation = 'darker';
-                                                 maskContext.drawImage(maskImage,0,0,maskCanvas.width,maskCanvas.height);
-                                                 maskContext.restore();
-                                                 maskContext.globalCompositeOperation = 'source-over';
+												 maskContextCont.putImageData(imdata,0,0);
+												 maskContext.globalCompositeOperation = "copy";
+												 maskContext.drawImage(maskCanvasCont, 0, 0);
+												 maskContext.globalCompositeOperation = 'darker';
+												 maskContext.drawImage(taskImage,0,0,maskCanvas.width,maskCanvas.height);
+												 maskContext.globalCompositeOperation = 'source-over';
                                                  maskContext.font="bold 15px Arial";
                                                  maskContext.fillStyle = 'white';
                                                  maskContext.fillText('Quality: ' + quality, 10,20);
+
+                                               
                                              };
                  
              }

@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -243,6 +244,26 @@ public class Renderer extends UntypedActor {
 		Logger.error("[AGGREGATOR] Retrieved mask for image " + ImageID);
 		return null;
 	}
+	
+	public static BufferedImage retrieveMaskImage(final String ImageID,
+			final String tag) throws Exception {
+
+		BufferedImage img = null;
+		try {
+			URL url = new URL("http://localhost/cms/sites/default/files/images/Mask_"+ImageID+"_"+tag+".png");
+			img = ImageIO.read(url);
+		} catch (IOException e) {
+			Logger.error("[AGGREGATOR] " + e);
+		}
+		
+		if (img instanceof Image) {
+			Logger.info("[AGGREGATOR] Retrieved mask for image " + ImageID);
+			return img;
+		}
+		Logger.error("[AGGREGATOR] Retrieved mask for image " + ImageID);
+		return null;
+	}
+	
 	
 
 	public static synchronized JsonNode retrieveImages() throws Exception {
@@ -759,6 +780,8 @@ public class Renderer extends UntypedActor {
 		*/
 		return images;
 	}
+	
+	
 
 
 }
