@@ -66,6 +66,7 @@
 		<div id="createGamePopUp" class="alertBox" style="display:none">
                 <form  method="POST" action="@routes.Sketchness.gameRoom()">
 				<p style="text-align:center">
+                    <strong>Room Name</strong>
                <!--     <input id="username" name="username" class="input-small" type="hidden" value="@localUser.name" />       -->
 				</p>
 				<input id="username" name="username" class="input-small" type="hidden" value="@localUser.name" />
@@ -74,7 +75,13 @@
 				<p style="text-align:center">
 					<strong>Number of Players</strong>
 				</p>
-				<input type="number" name="nPlayers" min="2" max="4" step="1" value="3" />
+
+                <div id="gameNumberSlider" class="noUi-base">
+                </div>
+                <p style="text-align:center">
+                    <br/>
+				    <input type="number" id="nPlayers" name="nPlayers" min="2" max="4" step="1" value="3" readonly="readonly"/>
+                </p>
 				<button id="createGamePopUp" type="submit"></button>
 			</form>
 		</div>

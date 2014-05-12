@@ -1,4 +1,4 @@
-require(["Communicator", "Chat", "jquery", "popup", "jscrollpane", "howler"], function(Communicator, Chat, $) {
+require(["Communicator", "Chat", "jquery","nouislider", "popup", "jscrollpane", "howler"], function(Communicator, Chat, $, noUiSlider) {
 
 	$(function() {
 	
@@ -10,6 +10,26 @@ require(["Communicator", "Chat", "jquery", "popup", "jscrollpane", "howler"], fu
 			players: {},
 			myself: $('#currentNickname').text()
 		};
+
+        $("#gameNumberSlider").noUiSlider({
+        	start: [ 3 ],
+            step: 1,
+            range: {
+                'min': [  2 ],
+                'max': [ 4 ]
+            },
+
+            serialization: {
+                format: {
+            		decimals: 0
+            	}
+            }
+        });
+
+        $("#gameNumberSlider").on( "change", function(){
+            $('#nPlayers').val($("#gameNumberSlider").val());
+        });
+
 
 		// Show error message
 		var setError = function(message) {
