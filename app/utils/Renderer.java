@@ -14,22 +14,11 @@ import java.awt.image.RGBImageFilter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
-
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,7 +26,6 @@ import org.json.JSONObject;
 
 import play.Logger;
 import play.Play;
-import play.db.DB;
 import play.libs.Akka;
 import play.libs.F;
 import play.mvc.WebSocket;
@@ -52,7 +40,13 @@ import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.pattern.Patterns;
 
-import java.util.StringTokenizer;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class Renderer extends UntypedActor {
 
@@ -63,7 +57,7 @@ public class Renderer extends UntypedActor {
 
 	public static synchronized void createRenderer(final String imageID,
 			final WebSocket.In<JsonNode> in, final WebSocket.Out<JsonNode> out)
-			throws Exception {
+					throws Exception {
 
 		final Props properties = new Props(Renderer.class);
 		final ActorRef finalRoom = Akka.system().actorOf(properties);
@@ -146,8 +140,8 @@ public class Renderer extends UntypedActor {
 								final ObjectMapper mapper = new ObjectMapper();
 								final JsonFactory factory = mapper
 										.getJsonFactory(); // since 2.1 use
-															// mapper.getFactory()
-															// instead
+								// mapper.getFactory()
+								// instead
 								final String toParse = result.asText().replace(
 										"\\", "");
 								final JsonParser jp = factory
@@ -171,7 +165,7 @@ public class Renderer extends UntypedActor {
 			}
 			if (found && !networkOn) {
 				final String[] toAggregateString = new String[toAggregate
-						.size()];
+				                                              .size()];
 				for (int i = 0; i < toAggregate.size(); i++) {
 					toAggregateString[i] = toAggregate.get(i);
 				}
@@ -244,18 +238,20 @@ public class Renderer extends UntypedActor {
 		LoggerUtils.debug("AGGREGATOR","Retrieved mask for image " + ImageID);
 		return null;
 	}
-	
+
 	public static BufferedImage retrieveMaskImage(final String ImageID,
 			final String tag) throws Exception {
 
 		BufferedImage img = null;
 		try {
-			URL url = new URL("http://localhost/cms/sites/default/files/images/Mask_"+ImageID+"_"+tag+".png");
+			final URL url = new URL(rootUrl
+					+ "/sites/default/files/images/Mask_" + ImageID + "_" + tag
+					+ ".png");
 			img = ImageIO.read(url);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			Logger.error("[AGGREGATOR] " + e);
 		}
-		
+
 		if (img instanceof Image) {
 			Logger.info("[AGGREGATOR] Retrieved mask for image " + ImageID);
 			return img;
@@ -263,8 +259,8 @@ public class Renderer extends UntypedActor {
 		Logger.error("[AGGREGATOR] Retrieved mask for image " + ImageID);
 		return null;
 	}
-	
-	
+
+
 
 	public static synchronized JsonNode retrieveImages() throws Exception {
 
@@ -402,14 +398,14 @@ public class Renderer extends UntypedActor {
 				+ "/wsmc/image.json");
 		final JsonNode users = jsonReader.readJsonArrayFromUrl(rootUrl
 				+ "/wsmc/cubrikuser/9.json");
-		
+
 		int last;
 		final JSONObject result = new JSONObject();
 
 		final String totImg = Integer.toString(itemImage.size());
-		String numUsers = Integer.toString(users.size());
+		final String numUsers = Integer.toString(users.size());
 		final JSONArray stats = CMS.retriveStats(itemImage);
-		
+
 		String tmp = stats.getJSONObject(0).getString("numTag");
 		tmp = tmp.substring(1);
 		last = tmp.length() - 1;
@@ -437,7 +433,7 @@ public class Renderer extends UntypedActor {
 		final String sendStats = result.toString();
 		return sendStats;
 	}
-	
+
 	/**
 	 * Load the stats of the users
 	 * 
@@ -445,19 +441,19 @@ public class Renderer extends UntypedActor {
 	 * @throws JSONException
 	 */
 	public static String loadUsersStats() throws JSONException {
-		
+
 		final JsonReader jsonReader = new JsonReader();
 		final JsonNode itemApp = jsonReader.readJsonArrayFromUrl(rootUrl
-					+ "/wsmc/cubrikuser/9.json");
+				+ "/wsmc/cubrikuser/9.json");
 
 		final JSONObject result = new JSONObject();
 
 		final JSONArray usersInfo = new JSONArray();
-		JSONObject element; 
+		JSONObject element;
 		JsonNode object;
 
 		int i=0;
-		
+
 		while (i < itemApp.size()) {
 			object = itemApp.get(i);
 			element = new JSONObject();
@@ -466,17 +462,17 @@ public class Renderer extends UntypedActor {
 			element.put("app_user_id", object.get("app_user_id").toString());
 			element.put("number_of_plays", object.get("number_of_plays"));
 			element.put("number_of_annotations", object.get("number_of_annotations"));
-			
+
 			usersInfo.put(element);
 
 			i++;
-			}// fine while
-		
+		}// fine while
+
 		result.append("usersInfo", usersInfo);
 		final String sendStats = result.toString();
 		return sendStats;
-		
-		
+
+
 	}
 
 
@@ -500,7 +496,7 @@ public class Renderer extends UntypedActor {
 
 		return info;
 	}
-	
+
 	/**
 	 * Load more details of a particular mask such as the medialocator
 	 * 
@@ -521,7 +517,7 @@ public class Renderer extends UntypedActor {
 		final String info = CMS.retriveMaskInfo(item);
 		return info;
 	}
-	
+
 	/**
 	 * Retrieve the file name of the fashionista mask, given imageId and tagId
 	 * 
@@ -534,49 +530,49 @@ public class Renderer extends UntypedActor {
 	 */
 	public static String maskFashionistaAjaxCall(final String imageId, final String tagId)
 			throws JSONException {
-		
-		
-		    final JSONObject result = new JSONObject();
-		    final JSONArray info = new JSONArray();
 
-		    
-			String url = "";
-			String img = "";
-			String tag = "";
-			String qual = "";
-			String temp = "";
-			String quality = "";
 
-		    java.io.File folder = play.Play.application().getFile("public/images/fashionista");
+		final JSONObject result = new JSONObject();
+		final JSONArray info = new JSONArray();
 
-		    File[] files = folder.listFiles();
-		    
-		    if (files != null) {
-			    for (File file : files) {
-			    		temp = file.getName();
-			    		StringTokenizer st = new StringTokenizer(temp, "_");
-			    		String mask = (String) st.nextElement();
-			    		img = (String) st.nextElement();
-			    		tag = (String) st.nextElement();
-			    		qual = (String) st.nextElement();
-			    		
-			    		if(img.equals(imageId)&&tag.equals(tagId))
-			    		{
-			    			url = file.getName();
-			    			StringTokenizer st2 = new StringTokenizer(qual, ".png");
-			    			quality = (String) st2.nextElement();
-			    		}	
-			    }
-		    }
 
-		    result.append("url", url);
-		    result.append("quality", quality);
-		    info.put(result);
-		    return info.toString();
+		String url = "";
+		String img = "";
+		String tag = "";
+		String qual = "";
+		String temp = "";
+		String quality = "";
+
+		final java.io.File folder = play.Play.application().getFile("public/images/fashionista");
+
+		final File[] files = folder.listFiles();
+
+		if (files != null) {
+			for (final File file : files) {
+				temp = file.getName();
+				final StringTokenizer st = new StringTokenizer(temp, "_");
+				final String mask = (String) st.nextElement();
+				img = (String) st.nextElement();
+				tag = (String) st.nextElement();
+				qual = (String) st.nextElement();
+
+				if(img.equals(imageId)&&tag.equals(tagId))
+				{
+					url = file.getName();
+					final StringTokenizer st2 = new StringTokenizer(qual, ".png");
+					quality = (String) st2.nextElement();
+				}
+			}
+		}
+
+		result.append("url", url);
+		result.append("quality", quality);
+		info.put(result);
+		return info.toString();
 
 	}
-	
-	
+
+
 
 	/**
 	 * Load the list of microTask of a particular task
@@ -592,12 +588,12 @@ public class Renderer extends UntypedActor {
 		final JsonReader jsonReader = new JsonReader();
 		//final JsonNode itemTask = jsonReader.readJsonArrayFromUrl(rootUrl
 		//		+ "/wsmc/task.json"); // TODO possible speed increment, directly
-										// download need task and not all task +
-										// loacal search
-		
+		// download need task and not all task +
+		// loacal search
+
 		final JsonNode itemTask = jsonReader.readJsonArrayFromUrl(rootUrl
 				+ "/wsmc/task/" + selection + ".json");
-		
+
 		//final String info = CMS.retriveTaskInfo(itemTask, selection);
 		final String info = CMS.retriveTaskInfo(itemTask);
 
@@ -616,7 +612,7 @@ public class Renderer extends UntypedActor {
 	public static void closeTask(final String selection) throws IOException {
 		CMS.closeTask2(selection);
 	}
-	
+
 	/**
 	 * Invalidate tag
 	 */
@@ -662,12 +658,12 @@ public class Renderer extends UntypedActor {
 		return info;
 	}
 
-    /**
-     * Retrive stats needed to deploy first graph: Number of images with X annotations
-     *
-     * @return          the string with data
-     * @throws JSONException
-     */
+	/**
+	 * Retrive stats needed to deploy first graph: Number of images with X annotations
+	 *
+	 * @return          the string with data
+	 * @throws JSONException
+	 */
 	public static String loadFirstGraph() throws JSONException {
 
 		final JsonReader jsonReader = new JsonReader();
@@ -679,12 +675,12 @@ public class Renderer extends UntypedActor {
 		return result;
 	}
 
-    /**
-     *  Retrive stats needed to deploy first graph: Number of users that have annotated X images
-     *
-     * @return          the string with data
-     * @throws JSONException
-     */
+	/**
+	 *  Retrive stats needed to deploy first graph: Number of users that have annotated X images
+	 *
+	 * @return          the string with data
+	 * @throws JSONException
+	 */
 	public static String loadSecondGraph() throws JSONException {
 
 		final JsonReader jsonReader = new JsonReader();
@@ -695,18 +691,18 @@ public class Renderer extends UntypedActor {
 		final String result = info.toString();
 		return result;
 	}
-	
-	
 
-    /**
-     * Generate a json file with User Data
-     *
-     * @return      the string with data
-     * @throws JSONException
-     */
+
+
+	/**
+	 * Generate a json file with User Data
+	 *
+	 * @return      the string with data
+	 * @throws JSONException
+	 */
 	public static String downloadStats1() throws JSONException {
 		final JsonReader jsonReader = new JsonReader();
-		
+
 		final JsonNode itemAction = jsonReader.readJsonArrayFromUrl(rootUrl
 				+ "/wsmc/action.json");
 
@@ -715,12 +711,12 @@ public class Renderer extends UntypedActor {
 		return result;
 	}
 
-    /**
-     * Generate a json file with Images Data
-     *
-     * @return      the string with data
-     * @throws JSONException
-     */
+	/**
+	 * Generate a json file with Images Data
+	 *
+	 * @return      the string with data
+	 * @throws JSONException
+	 */
 	public static String downloadStats2() throws JSONException {
 		final JsonReader jsonReader = new JsonReader();
 		final JsonNode itemAction = jsonReader.readJsonArrayFromUrl(rootUrl
@@ -730,8 +726,8 @@ public class Renderer extends UntypedActor {
 		final String result = info.toString();
 		return result;
 	}
-	
-	
+
+
 	/**
 	 * Load the list of collections of images
 	 * 
@@ -744,17 +740,17 @@ public class Renderer extends UntypedActor {
 		final JsonReader jsonReader = new JsonReader();
 		final JsonNode itemCollection = jsonReader.readJsonArrayFromUrl(rootUrl
 				+ "/wsmc/collection.json");
-		
+
 		JSONArray collections = new JSONArray();
 		collections = CMS.retriveCollectionInfo(itemCollection);
-		
+
 		final JSONObject result = new JSONObject();
 		result.append("collections", collections);
 		final String options = result.toString();
 		return options;
 
 	}
-	
+
 	/**
 	 * Load the images of a collection
 	 * 
@@ -771,17 +767,17 @@ public class Renderer extends UntypedActor {
 				+ "/wsmc/collection/" + collectionId + ".json");
 
 		//JSONArray images = new JSONArray();
-		String images = CMS.retriveCollImages(item);
+		final String images = CMS.retriveCollImages(item);
 		/*
 		final JSONObject result = new JSONObject();
 		result.append("images", images);
 		final String options = result.toString();
 		return options;
-		*/
+		 */
 		return images;
 	}
-	
-	
+
+
 
 
 }
