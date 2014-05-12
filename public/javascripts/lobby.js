@@ -167,7 +167,7 @@ require(["Communicator", "Chat", "jquery","nouislider", "popup", "jscrollpane", 
 						$gameInstance.html(html);
 					}
 				} else { //Otherwise add a new game to the list
-					if(data.visible != false) {
+					if(data.visible != false && data.maxPlayers != 1) {
 						var html = '';
 						html += '<tr id=' + data.id + ' name=' + data.roomName + '><td>' + data.roomName + '</td><td>' + data.currentPlayers + '/' + data.maxPlayers + '</td></tr>';
 						var paneApi = $("#gameListBody").data('jsp');
