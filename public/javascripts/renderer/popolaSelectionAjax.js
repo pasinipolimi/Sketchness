@@ -41,7 +41,7 @@ function popolaSelectionAjax(){
                     	
                     });
                     
-                    $("#slider").replaceWith("Num. Annotations <input id='slider' type='range' name='range' min='1' max='"+maxAnn+"' value='"+maxAnn/2+"' onchange='numberAnnotations();'><output id='range'> "+maxAnn/2+"</output>");
+                    $("#slider").replaceWith("Num. Annotations <input id='slider' type='range' name='range' min='1' max='"+maxAnn+"' value='"+Math.round(maxAnn/2)+"' onchange='numberAnnotations();'><output id='range'> "+Math.round(maxAnn/2)+"</output>");
                     $("#maxAnn").val(maxAnn);
                     
                 }
