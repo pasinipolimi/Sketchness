@@ -236,8 +236,8 @@ public class Utilities extends Controller {
 	
 	public static Result maskFashionistaAjaxCall() throws JSONException {
 		final String imageId = request().getHeader("idImage");
-		final String tagId = request().getHeader("idTag");
-		final String result = Renderer.maskFashionistaAjaxCall(imageId,tagId);
+		final String tagName = request().getHeader("tagName");
+		final String result = Renderer.maskFashionistaAjaxCall(imageId,tagName);
 		return ok(result);
 	}
 	

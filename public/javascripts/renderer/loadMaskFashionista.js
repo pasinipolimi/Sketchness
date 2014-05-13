@@ -1,11 +1,11 @@
-function loadMaskFashionista(idImage,idTag){
+function loadMaskFashionista(idImage,tagName){
 	
 
 	$.jAjax({
 	     url: "MaskAjaxFashionista",
 	     headers : {
 	         "idImage" : idImage,
-	         "idTag" : idTag
+	         "tagName" : tagName
 	     },
 	     onComplete: function(xhr,status){
 	         if(xhr.readyState === 4){
