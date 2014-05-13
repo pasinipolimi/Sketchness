@@ -532,7 +532,7 @@ public class Renderer extends UntypedActor {
 	 * @return the image url
 	 * @throws JSONException
 	 */
-	public static String maskFashionistaAjaxCall(final String imageId, final String tagId)
+	public static String maskFashionistaAjaxCall(final String imageId, final String tagName)
 			throws JSONException {
 		
 		
@@ -560,7 +560,7 @@ public class Renderer extends UntypedActor {
 			    		tag = (String) st.nextElement();
 			    		qual = (String) st.nextElement();
 			    		
-			    		if(img.equals(imageId)&&tag.equals(tagId))
+			    		if(img.equals(imageId)&&tag.equals(tagName))
 			    		{
 			    			url = file.getName();
 			    			StringTokenizer st2 = new StringTokenizer(qual, ".png");
