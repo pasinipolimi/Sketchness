@@ -709,7 +709,6 @@ public class Game extends GameRoom {
 	 * destroyed, update status
 	 * 
 	 */
-	// @param type the type of the event to publish: room created, room
 
 	private void publishLobbyEvent() throws Exception {
 		final ObjectNode status = new ObjectNode(JsonNodeFactory.instance);
@@ -810,18 +809,12 @@ public class Game extends GameRoom {
 			}
 			if (!guessedWord) {
 				// Send the time change once just a player has guessed
-				// GameEvent timeEvent = new GameEvent(roomChannel,
-				// GameEventType.timerChange);
 				GameEvent timeEvent;
 				// If we are in single player mode, don't wait
 				if (requiredPlayers == 1) {
-					// timeEvent.setObject(timerChange(0,
-					// CountdownTypes.round));
 					timeEvent = new GameEvent(GameMessages.composeTimer(0),
 							roomChannel);
 				} else {
-					// timeEvent.setObject(timerChange(remainingTimeOnGuess,
-					// CountdownTypes.round));
 					timeEvent = new GameEvent(
 							GameMessages.composeTimer(remainingTimeOnGuess),
 							roomChannel);
@@ -831,23 +824,10 @@ public class Game extends GameRoom {
 		}
 		if (numberGuessed == (playersVect.size() - 1)) {
 			// Send the message to change the time for everyone to end the round
-			// GameEvent timeEvent = new GameEvent(roomChannel,
-			// GameEventType.timerChange);
-			// timeEvent.setObject(timerChange(remainingTimeOnAllGuess,
-			// CountdownTypes.round));
 			final GameEvent timeEvent = new GameEvent(
 					GameMessages.composeTimer(remainingTimeOnAllGuess),
 					roomChannel);
 			GameBus.getInstance().publish(timeEvent);
-
-//			id = taskImage.get("id").asText();
-//			medialocator = taskImage.get("image").asText();
-//			width = taskImage.get("width").asInt();
-//			height = taskImage.get("height").asInt();
-//			GameBus.getInstance().publish(
-//					new GameEvent(GameMessages.composeRoundEnd(
-//							taskImage.get("tag").asText(), id, medialocator,
-//							width, height), roomChannel));
 		}
 		guessedWord = true;
 	}
