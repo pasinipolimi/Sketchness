@@ -530,7 +530,10 @@ public class Renderer extends UntypedActor {
 	 */
 	public static String maskFashionistaAjaxCall(final String imageId, final String tagName)
 			throws JSONException {
-<<<<<<< HEAD
+
+
+
+
 
 
 		final JSONObject result = new JSONObject();
@@ -557,7 +560,7 @@ public class Renderer extends UntypedActor {
 				tag = (String) st.nextElement();
 				qual = (String) st.nextElement();
 
-				if(img.equals(imageId)&&tag.equals(tagId))
+				if(img.equals(imageId)&&tag.equals(tagName))
 				{
 					url = file.getName();
 					final StringTokenizer st2 = new StringTokenizer(qual, ".png");
@@ -574,51 +577,7 @@ public class Renderer extends UntypedActor {
 	}
 
 
-=======
-		
-		
-		    final JSONObject result = new JSONObject();
-		    final JSONArray info = new JSONArray();
 
-		    
-			String url = "";
-			String img = "";
-			String tag = "";
-			String qual = "";
-			String temp = "";
-			String quality = "";
-
-		    java.io.File folder = play.Play.application().getFile("public/images/fashionista");
-
-		    File[] files = folder.listFiles();
-		    
-		    if (files != null) {
-			    for (File file : files) {
-			    		temp = file.getName();
-			    		StringTokenizer st = new StringTokenizer(temp, "_");
-			    		String mask = (String) st.nextElement();
-			    		img = (String) st.nextElement();
-			    		tag = (String) st.nextElement();
-			    		qual = (String) st.nextElement();
-			    		
-			    		if(img.equals(imageId)&&tag.equals(tagName))
-			    		{
-			    			url = file.getName();
-			    			StringTokenizer st2 = new StringTokenizer(qual, ".png");
-			    			quality = (String) st2.nextElement();
-			    		}	
-			    }
-		    }
-
-		    result.append("url", url);
-		    result.append("quality", quality);
-		    info.put(result);
-		    return info.toString();
-
-	}
-	
-	
->>>>>>> FETCH_HEAD
 
 	/**
 	 * Load the list of microTask of a particular task
