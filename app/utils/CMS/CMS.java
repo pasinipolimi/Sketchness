@@ -145,7 +145,6 @@ public class CMS {
 								+ "&oauth_consumer_key=" + oauthConsumerKey;
 						final String request = rootUrl + "/wsmc/image/" + id
 								+ "/textAnnotation.json";
-						final JSONObject actionInfo;
 						try {
 							final F.Promise<WS.Response> returned = WS.url(request).setContentType("application/x-www-form-urlencoded").setTimeout(10000).post(urlParameters);
 							LoggerUtils.debug("CMS","Storing textAnnotation for image with id " + id + " and tag " + label);

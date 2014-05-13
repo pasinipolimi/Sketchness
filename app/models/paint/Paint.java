@@ -123,6 +123,9 @@ public class Paint extends GameRoom {
 							case "point":
 								notifyPoint(event.get("content"));
 								break;
+                                                        case "image":
+								notifyImage(event.get("content"));
+								break;
 							case "endPath":
 								notifyEndPath();
 								break;
@@ -132,7 +135,7 @@ public class Paint extends GameRoom {
 							case "trace":
 								addTrace(event.get("content"));
 								break;
-							case "roundEndS":
+							case "roundEnd":
 								roundEnd(event.get("content"));
 								break;
 							}
@@ -284,6 +287,11 @@ public class Paint extends GameRoom {
 		notifyAll(GameMessages.composePoint(x, y));
 
 	}
+        
+        private void notifyImage(final JsonNode task) throws Exception {
+		ObjectNode message = GameMessages.composeImage(task.get("user").asText(),task.get("id").asText(),task.get("url").asText(),task.get("width").asInt(),task.get("height").asInt());
+		notifySingle(message,task.get("user").asText());
+	}
 
 	private void notifyTimer(final JsonNode task) throws Exception {
 		final int time = task.get("time").asInt();
@@ -315,6 +323,13 @@ public class Paint extends GameRoom {
 
 	private void notifyAll(final JsonNode json) {
 		for (final Painter painter : painters.values()) {
+			painter.channel.write(json);
+		}
+	}
+        
+        private void notifySingle(final JsonNode json, String user) {
+		for (final Painter painter : painters.values()) {
+                    if(painter.name.equals(user))
 			painter.channel.write(json);
 		}
 	}
