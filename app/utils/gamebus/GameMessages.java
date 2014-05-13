@@ -244,7 +244,7 @@ public class GameMessages {
 		content.put("url", url);
 		content.put("width", width);
 		content.put("height", height);
-		final ObjectNode event = composeJsonMessage("roundEndS", content);
+		final ObjectNode event = composeJsonMessage("roundEnd", content);
 		return event;
 	}
 
