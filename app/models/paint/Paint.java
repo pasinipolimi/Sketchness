@@ -136,7 +136,7 @@ public class Paint extends GameRoom {
 								addTrace(event.get("content"));
 								break;
 							case "roundEnd":
-								roundEnd(event.get("content"));
+                                                            roundEnd(event.get("content"));
 								break;
 							}
 						}

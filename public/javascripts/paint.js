@@ -22,8 +22,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 		};
 
 		var constants = {
-			tagTime: 10,
-			taskTime: 10,
+			tagTime: 30,
+			taskTime: 120,
 			solutionTime: 3,
 			minSendRate: 50
 		};
