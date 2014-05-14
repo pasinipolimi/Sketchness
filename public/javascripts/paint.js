@@ -167,7 +167,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						write = this.write,
 						sk = this.sketchness;
 
-					write.top($.i18n.prop('waiting'));
+					
 					write.score('0');
 					console.log("[BEGIN] PlayersWait");
 					elements.pen.hide();
@@ -195,7 +195,12 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						},
 						loading: function() {
 						    console.log("[RECEIVED MESSAGE] loading");
+						   	write.top($.i18n.prop('matchstarting'));
 							that.load();
+						},
+						waiting: function() {
+							console.log("[RECEIVED MESSAGE] waiting");
+							write.top($.i18n.prop('waiting'));
 						},
 						roundBegin: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] roundBegin");
@@ -216,7 +221,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * Tear down of wait players state
 				 */
 				onleaveplayersWait: function() {
-					this.write.top();
+					write.top($.i18n.prop('matchstarting'));
 					this.communicator.off("join leave loading roundBegin leaderboard");
 					console.log("[LEAVE] PlayerWait");
 				},
@@ -283,6 +288,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				beginRound: function(sketcher) {
 					var sk = this.sketchness;
 					sk.sketcher = sketcher;
+					write.top($.i18n.prop('matchstarting'));
 					if(sk.sketcher === sk.myself) {
 						this.beSketcher();
 					} else {

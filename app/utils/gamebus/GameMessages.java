@@ -215,6 +215,11 @@ public class GameMessages {
 		event.put("message", structure);
 		return event;
 	}
+        
+        public static ObjectNode composeWaiting() {
+		final ObjectNode event = composeJsonMessage("waiting", Json.newObject());
+		return event;
+	}
 
 	public static ObjectNode composeLoading() {
 		final ObjectNode event = composeJsonMessage("loading", Json.newObject());

@@ -12,7 +12,6 @@ import models.Point;
 import models.Segment;
 import models.factory.GameRoom;
 import org.json.JSONException;
-import play.Logger;
 import utils.LanguagePicker;
 import utils.LoggerUtils;
 import utils.gamebus.GameBus;
@@ -66,6 +65,9 @@ public class Paint extends GameRoom {
 							case "matchEnd":
 								killActor();
 								gameStarted = false;
+								break;
+                                                        case "waiting":
+                                                                waitingPlayers();
 								break;
 							case "loading":
 								gameLoading();
@@ -339,6 +341,10 @@ public class Paint extends GameRoom {
 	 */
 	private void handleJoin(final Join message) {
 		final String username = message.getUsername();
+                if(roomChannel.getRequiredPlayers()>1)
+                    GameBus.getInstance().publish(new GameEvent(GameMessages.composeWaiting(),roomChannel));
+                else
+                    GameBus.getInstance().publish(new GameEvent(GameMessages.composeLoading(),roomChannel));
 		if (painters.containsKey(username)) {
 			getSender().tell(
 					play.i18n.Messages.get(LanguagePicker.retrieveLocale(),
@@ -365,6 +371,12 @@ public class Paint extends GameRoom {
 			entry.getValue().channel.write(GameMessages.composeLoading());
 		}
 	}
+        
+        private void waitingPlayers() {
+		for (final Map.Entry<String, Painter> entry : painters.entrySet()) {
+			entry.getValue().channel.write(GameMessages.composeWaiting());
+		}
+	}
 
 	private void noTag() {
 		for (final Map.Entry<String, Painter> entry : painters.entrySet()) {
@@ -388,8 +400,4 @@ public class Paint extends GameRoom {
 		// Send to the users the information about their role
 		notifyAll(GameMessages.composeRoundBegin(sketcher));
 	}
-}
-
-enum JsonNodeType {
-	segment, change, trace, roundended, move, skiptask, endsegmentation, changeTool, beginPath, point, endPath
 }

@@ -318,25 +318,11 @@ public class Game extends GameRoom {
 			// players
 		{
 			final int nPlayers = playersVect.size();
-			if (requiredPlayers - nPlayers > 1) {
+                       if (requiredPlayers - nPlayers > 1) {
 				GameBus.getInstance()
-				.publish(
-						new GameEvent(
-								GameMessages
-								.composeLogMessage(
-										LogLevel.info,
-										Messages.get(
-												LanguagePicker
-												.retrieveLocale(),
-												"waitingfor")
-												+ " "
-												+ (requiredPlayers - nPlayers)
-												+ " "
-												+ Messages.get(
-														LanguagePicker
-														.retrieveLocale(),
-														"playerstostart")),
-														roomChannel));
+				.publish(new GameEvent(GameMessages.composeLogMessage(
+                                        LogLevel.info,Messages.get(LanguagePicker.retrieveLocale(),"waitingfor")+ " "+ (requiredPlayers - nPlayers)+ " "+ Messages.get(LanguagePicker.retrieveLocale(),"playerstostart"))
+                                ,roomChannel));
 			} else if (requiredPlayers - nPlayers == 1) {
 				GameBus.getInstance()
 				.publish(
@@ -368,14 +354,14 @@ public class Game extends GameRoom {
 			// //publishLobbyEvent(GameEventType.matchStart);
 			if (taskAcquired) {
 				if (!loadingAlreadySent) {
+                                        GameBus.getInstance().publish(
+							new GameEvent(GameMessages.composeLoading(),
+									roomChannel));
 					GameBus.getInstance().publish(
 							new GameEvent(GameMessages.composeLogMessage(
 									LogLevel.info, Messages.get(
 											LanguagePicker.retrieveLocale(),
 											"acquiring")), roomChannel));
-					GameBus.getInstance().publish(
-							new GameEvent(GameMessages.composeLoading(),
-									roomChannel));
 					loadingAlreadySent = true;
 				}
 
@@ -400,15 +386,14 @@ public class Game extends GameRoom {
 				}
 			} else {
 				loadingAlreadySent = true;
+                                GameBus.getInstance().publish(
+						new GameEvent(GameMessages.composeLoading(),
+								roomChannel));
 				GameBus.getInstance().publish(
 						new GameEvent(GameMessages.composeLogMessage(
 								LogLevel.info, Messages.get(
 										LanguagePicker.retrieveLocale(),
 										"acquiring")), roomChannel));
-				GameBus.getInstance().publish(
-						new GameEvent(GameMessages.composeLoading(),
-								roomChannel));
-
 			}
 			return true;
 		}

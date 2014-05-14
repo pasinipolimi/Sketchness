@@ -47,7 +47,7 @@ public class GameFactory extends Factory {
         }      
         if ("OK".equals(result)) {
             ChatFactory.createChat(username, room, in, out);
-            PaintFactory.createPaint(username, room, in, out);
+            PaintFactory.createPaint(username, room, maxPlayers, in, out);
             //Define the actions to be performed on the websockets
             in.onMessage(new F.Callback<JsonNode>() {
                 @Override
