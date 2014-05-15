@@ -35,8 +35,8 @@ function filter(){
 		
 		//reset annotations filter
 		var maxAnn = $("#maxAnn").val();
-		$("#slider").replaceWith("<input id='slider' type='range' name='range' min='1' max='"+maxAnn+"' value='"+maxAnn/2+"' onchange='numberAnnotations();'>");
-		$("#range").replaceWith("<output id='range'> "+maxAnn/2+"</output>");
+		$("#slider").replaceWith("<input id='slider' type='range' name='range' min='1' max='"+maxAnn+"' value='"+maxAnn+"' onchange='numberAnnotations();'>");
+		$("#range").replaceWith("<output id='range'> "+maxAnn+"</output>");
 	
 		var idElements = $('.imageId');
 		$(".cbp-rfgrid").children().hide();
@@ -56,8 +56,8 @@ function visualizzaCollection(){
 
 	//reset annotations filter
 	var maxAnn = $("#maxAnn").val();
-	$("#slider").replaceWith("<input id='slider' type='range' name='range' min='1' max='"+maxAnn+"' value='"+maxAnn/2+"' onchange='numberAnnotations();'>");
-	$("#range").replaceWith("<output id='range'> "+maxAnn/2+"</output>");
+	$("#slider").replaceWith("<input id='slider' type='range' name='range' min='1' max='"+maxAnn+"' value='"+maxAnn+"' onchange='numberAnnotations();'>");
+	$("#range").replaceWith("<output id='range'> "+maxAnn+"</output>");
 	//reset image id filter
 	$("input:text[name=imageIdSearch]").each(function()
 			{

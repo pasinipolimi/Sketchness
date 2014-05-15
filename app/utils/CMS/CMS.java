@@ -733,11 +733,13 @@ public class CMS {
 		JsonNode itemTag;
 		JsonNode segmentArr, object2, tagId, valid, lang, annotationId;
 		JsonNode descObj;
-		JsonNode tagArr;
+		JsonNode tagArr, annotArr;
 		JSONObject element;
 		final JSONArray tags = new JSONArray();
 		int numSegment = 0;
 		int j = 0;
+		int count = 0;
+		int k = 0;
 		String tmpTag;
 		JsonNode media, width, height;
 
@@ -756,6 +758,24 @@ public class CMS {
 							+ "/wsmc/content/" + tmpTag + ".json");
 					object2 = itemTag.get("itemAnnotations").get(0)
 							.get("value");
+					//count number of annotations for that given tag
+					
+					if (descObj.has("tagging")) {
+						annotArr = descObj.get("tagging");
+						
+						count = 0;
+						k = 0;
+						
+						while (k < annotArr.size()) {
+							if(annotArr.get(k).get("annotation_value").asText().equals(itemTag.get("itemAnnotations").get(0).get("value").asText()))
+							{
+								count++;
+							}
+							k++;
+						}
+						
+					}
+					
 					lang = itemTag.get("itemAnnotations").get(0)
 							.get("language");
 					annotationId = itemTag.get("itemAnnotations").get(0)
@@ -764,6 +784,7 @@ public class CMS {
 					element = new JSONObject();
 					element.put("tagId", tmpTag);
 					element.put("tag", object2);
+					element.put("numAnnotations", count);
 					element.put("valid", valid);
 					element.put("lang", lang);
 					element.put("annotationId", annotationId);
@@ -914,6 +935,7 @@ public class CMS {
 			element = new JSONObject();
 			object = jsonCollection.get("collections").get(i);
 			element.put("id", object.get("id"));
+			element.put("name", object.get("name"));
 			collectionIds.put(element);
 			i++;
 		}

@@ -60,7 +60,7 @@ function popolaSelectionAjaxTasks(){
 	                    var collIds = result.collections[0];
 	                    $.each(collIds, function(i,d){
 						
-	                    		selectionCollection.append("<label><input type='checkbox' name='collection' value='"+d.id.substring(1, d.id.length -1)+"'> Collection "+d.id.substring(1, d.id.length -1)+"</input></label>");
+	                    		selectionCollection.append("<label><input type='checkbox' name='collection' value='"+d.id.substring(1, d.id.length -1)+"'> Collection: "+d.name.substring(1, d.name.length -1)+"</input></label>");
 		
 	                    });
 	          

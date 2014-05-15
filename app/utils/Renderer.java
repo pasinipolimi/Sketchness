@@ -444,12 +444,12 @@ public class Renderer extends UntypedActor {
 
 		final JsonReader jsonReader = new JsonReader();
 		final JsonNode itemApp = jsonReader.readJsonArrayFromUrl(rootUrl
-				+ "/wsmc/cubrikuser/9.json");
+					+ "/wsmc/cubrikuser/9.json");
 
 		final JSONObject result = new JSONObject();
 
 		final JSONArray usersInfo = new JSONArray();
-		JSONObject element;
+		JSONObject element; 
 		JsonNode object;
 
 		int i=0;
@@ -462,11 +462,13 @@ public class Renderer extends UntypedActor {
 			element.put("app_user_id", object.get("app_user_id").toString());
 			element.put("number_of_plays", object.get("number_of_plays"));
 			element.put("number_of_annotations", object.get("number_of_annotations"));
+			
+			
 
 			usersInfo.put(element);
 
 			i++;
-		}// fine while
+			}// fine while
 
 		result.append("usersInfo", usersInfo);
 		final String sendStats = result.toString();
