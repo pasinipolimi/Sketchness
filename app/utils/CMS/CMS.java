@@ -663,15 +663,17 @@ public class CMS {
 		JsonNode object;
 		JSONObject element;
 		int i = 0;
+		if (jsonTask.get("task") != null) {
 
-		while (i < jsonTask.get("task").size()) {
-			element = new JSONObject();
-			object = jsonTask.get("task").get(i);
-			element.put("id", object.get("id"));
-			element.put("taskType", object.get("taskType"));
-			element.put("status", object.get("status"));
-			taskIds.put(element);
-			i++;
+			while (i < jsonTask.get("task").size()) {
+				element = new JSONObject();
+				object = jsonTask.get("task").get(i);
+				element.put("id", object.get("id"));
+				element.put("taskType", object.get("taskType"));
+				element.put("status", object.get("status"));
+				taskIds.put(element);
+				i++;
+			}
 		}
 		return taskIds;
 	}
@@ -759,13 +761,13 @@ public class CMS {
 					object2 = itemTag.get("itemAnnotations").get(0)
 							.get("value");
 					//count number of annotations for that given tag
-					
+
 					if (descObj.has("tagging")) {
 						annotArr = descObj.get("tagging");
-						
+
 						count = 0;
 						k = 0;
-						
+
 						while (k < annotArr.size()) {
 							if(annotArr.get(k).get("annotation_value").asText().equals(itemTag.get("itemAnnotations").get(0).get("value").asText()))
 							{
@@ -773,9 +775,9 @@ public class CMS {
 							}
 							k++;
 						}
-						
+
 					}
-					
+
 					lang = itemTag.get("itemAnnotations").get(0)
 							.get("language");
 					annotationId = itemTag.get("itemAnnotations").get(0)
