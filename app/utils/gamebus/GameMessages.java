@@ -345,10 +345,14 @@ public class GameMessages {
 		return event;
 	}
 
-	public static ObjectNode composeTask(final String word, final String id) {
+	public static ObjectNode composeTask(final String word, final String id, final Integer width, final Integer height, final String url) {
+
 		final ObjectNode content = Json.newObject();
 		content.put("id", id);
 		content.put("word", word);
+		content.put("url", url);
+		content.put("width", width);
+		content.put("height", height);
 		final ObjectNode event = composeJsonMessage("task", content);
 		return event;
 	}

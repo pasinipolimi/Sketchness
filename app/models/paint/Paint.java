@@ -233,7 +233,7 @@ public class Paint extends GameRoom {
 			// Send to the users the information about their role
 			for (final Map.Entry<String, Painter> entry : painters.entrySet()) {
 				entry.getValue().channel.write(GameMessages
-						.composeTask(guessWord, taskId));
+						.composeTask(guessWord, taskId, taskWidth, taskHeight, taskUrl));
 				entry.getValue().channel.write(GameMessages.composeImage(task
 						.get("id").asText(), taskUrl, taskWidth, taskHeight));
 			}

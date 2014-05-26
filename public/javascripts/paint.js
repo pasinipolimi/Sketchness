@@ -22,6 +22,13 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			traceNum: 1,
 			isMobile: /ipad|iphone|android/i.test(navigator.userAgent)
 		};
+		
+		var currentImage = {
+			id: null,
+			url: null,
+			width: null,
+			height: null
+		};
 
 		var constants = {
 			tagTime: 30,
@@ -406,6 +413,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						},
 						task: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] task");
+						    currentImage.id = content.id;
+						    currentImage.url = content.url;
+						    currentImage.height = content.height;
+						    currentImage.width = content.width;
 							that.taskBot(content.word);
 						},
 						leaderboard: function(e, content) {
@@ -444,7 +455,11 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						},
 						task: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] task");
-						    sketchness.image = content.id;
+						    //sketchness.image = content.id;
+						    currentImage.id = content.id;
+						    currentImage.url = content.url;
+						    currentImage.height = content.height;
+						    currentImage.width = content.width;
 							that.taskBot();
 						},
 						leaderboard: function(e, content) {
@@ -1318,7 +1333,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
 
 					//painter.setName(sk.players[sk.sketcher].name);
-					drawSegmentation(sk.image, that, sk);
+					//drawSegmentation(sk.image, that, sk);
+					drawSegmentation(currentImage.id, that, sk);
 
 					wordInput.on("keypress", function(event) {
 						if (event.which === 13) {
@@ -1487,7 +1503,9 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.hudArea.hide();
 					elements.pen.hide();
 					elements.eraser.hide();
-
+					
+					that.painter.showImage(currentImage.url, currentImage.width, currentImage.height);
+					/*
 					this.communicator.on({
 						image: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] image");
@@ -1507,6 +1525,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							that.errorEvent();
 						}
 					});
+					*/
 				},
 
 				/**
@@ -1520,7 +1539,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					this.painter.hideImage();
 
-					this.communicator.off("image leave leaderboard");
+					//this.communicator.off("image leave leaderboard");
 				},
 
 				/**
