@@ -319,6 +319,7 @@ public class CMS {
 			params.put("limit", tasksToAdd.toString());
 			params.put("nocache", String.valueOf(System.currentTimeMillis()));
 			// params.put("select", "id");
+			params.put("select", "light");
 			retrievedImagesOrdered = jsonReader.readJsonArrayFromUrl(rootUrl
 					+ "/wsmc/image.json", params);
 			LoggerUtils.debug("CMS","Requested image list to CMS end");
@@ -736,13 +737,13 @@ public class CMS {
 		JsonNode segmentArr, object2, tagId, valid, lang, annotationId;
 		JsonNode descObj;
 		JsonNode tagArr;
-		final JsonNode annotArr;
+		JsonNode annotArr;
 		JSONObject element;
 		final JSONArray tags = new JSONArray();
 		int numSegment = 0;
 		int j = 0;
-		final int count = 0;
-		final int k = 0;
+		int count = 0;
+		int k = 0;
 		String tmpTag;
 		JsonNode media, width, height;
 
@@ -763,21 +764,25 @@ public class CMS {
 							.get("value");
 					//count number of annotations for that given tag
 
-					// if (descObj.has("tagging")) {
-					// annotArr = descObj.get("tagging");
-					//
-					// count = 0;
-					// k = 0;
-					//
-					// while (k < annotArr.size()) {
-					// if(annotArr.get(k).get("annotation_value").asText().equals(itemTag.get("itemAnnotations").get(0).get("value").asText()))
-					// {
-					// count++;
-					// }
-					// k++;
-					// }
-					//
-					// }
+					if (descObj.has("segmentation")) {
+						annotArr = descObj.get("segmentation");
+
+						count = 0;
+						k = 0;
+
+						while (k < annotArr.size()) {
+							if (annotArr
+									.get(k)
+									.get("annotation_value")
+									.asText()
+									.equals(itemTag.get("itemAnnotations")
+											.get(0).get("value").asText())) {
+								count++;
+							}
+							k++;
+						}
+
+					}
 
 					lang = itemTag.get("itemAnnotations").get(0)
 							.get("language");
