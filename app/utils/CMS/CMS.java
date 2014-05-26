@@ -735,13 +735,14 @@ public class CMS {
 		JsonNode itemTag;
 		JsonNode segmentArr, object2, tagId, valid, lang, annotationId;
 		JsonNode descObj;
-		JsonNode tagArr, annotArr;
+		JsonNode tagArr;
+		final JsonNode annotArr;
 		JSONObject element;
 		final JSONArray tags = new JSONArray();
 		int numSegment = 0;
 		int j = 0;
-		int count = 0;
-		int k = 0;
+		final int count = 0;
+		final int k = 0;
 		String tmpTag;
 		JsonNode media, width, height;
 
@@ -762,21 +763,21 @@ public class CMS {
 							.get("value");
 					//count number of annotations for that given tag
 
-					if (descObj.has("tagging")) {
-						annotArr = descObj.get("tagging");
-
-						count = 0;
-						k = 0;
-
-						while (k < annotArr.size()) {
-							if(annotArr.get(k).get("annotation_value").asText().equals(itemTag.get("itemAnnotations").get(0).get("value").asText()))
-							{
-								count++;
-							}
-							k++;
-						}
-
-					}
+					// if (descObj.has("tagging")) {
+					// annotArr = descObj.get("tagging");
+					//
+					// count = 0;
+					// k = 0;
+					//
+					// while (k < annotArr.size()) {
+					// if(annotArr.get(k).get("annotation_value").asText().equals(itemTag.get("itemAnnotations").get(0).get("value").asText()))
+					// {
+					// count++;
+					// }
+					// k++;
+					// }
+					//
+					// }
 
 					lang = itemTag.get("itemAnnotations").get(0)
 							.get("language");
