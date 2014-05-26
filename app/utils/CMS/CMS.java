@@ -194,7 +194,7 @@ public class CMS {
 
 	public static void fixGroundTruth(final Integer sessionId,
 			final List<ObjectNode> priorityTaskHashSet,
-			final List<ObjectNode> queueImages, final Room roomChannel) {
+			final List<ObjectNode> queueImages, final Room roomChannel, final Integer requiredPlayers) {
 		final JsonReader jsonReader = new JsonReader();
 		JsonNode retrievedImages;
 		final HashMap<String, ObjectNode> temporary = new HashMap<>();
@@ -289,10 +289,10 @@ public class CMS {
 	public static void taskSetInitialization(
 			final List<ObjectNode> priorityTaskHashSet,
 			final List<ObjectNode> queueImages, final Room roomChannel,
-			final Integer maxRound) throws Error, JSONException {
+			final Integer maxRound, final Integer requiredPlayers) throws Error, JSONException {
 
 		final int uploadedTasks = retrieveTasks(maxRound, priorityTaskHashSet,
-				roomChannel);
+				roomChannel, requiredPlayers);
 
 		final int tasksToAdd = maxRound - uploadedTasks;
 		if (tasksToAdd > 0) {
@@ -388,7 +388,7 @@ public class CMS {
 
 	private static int retrieveTasks(final Integer maxRound,
 			final List<ObjectNode> priorityTaskHashSet,
-			final Room roomChannel) {
+			final Room roomChannel, final Integer requiredPlayers) {
 		boolean taskSent = false;
 
 		int uploadedTasks = 0;
@@ -434,48 +434,51 @@ public class CMS {
 									// FIXME non necessario, ho gia tutto
 									// quello
 									// che mi serve
-
-									final ObjectNode guessWord = Json.newObject();
-									guessWord.put("type", "task");
-									guessWord.put("id", imageId);
-									// Change the task to assign based on
-									// the kind of task that has to be
-									// performed
-									// for now just tagging and segmentation
-									// are supported for the images.
-									switch (utask.get("utaskType").asText()) {
-									case "tagging":
-										buildGuessWordTagging(guessWord, image,
-												utask, taskId);
-
-										priorityTaskHashSet.add(guessWord);
-										uploadedTasks++;
-										if (!taskSent) {
-											taskSent = true;
-											sendTaskAcquired(roomChannel);
-										}
-										break;
-									case "segmentation":
-										HashSet<String> tags;
-										// Get all the segments that have
-										// been stored for the image
-										final JsonNode imageSegments = image
-												.get("descriptions");
-										if (imageSegments != null) {
-											tags = retrieveTags(imageSegments);
-											buildGuessWordSegmentTask(guessWord,
-													tags, image, taskId, utask);
-
+									
+									//if(!((requiredPlayers==1)&&(utask.get("utaskType").asText().equals("tagging")))){
+										
+										final ObjectNode guessWord = Json.newObject();
+										guessWord.put("type", "task");
+										guessWord.put("id", imageId);
+										// Change the task to assign based on
+										// the kind of task that has to be
+										// performed
+										// for now just tagging and segmentation
+										// are supported for the images.
+										switch (utask.get("utaskType").asText()) {
+										case "tagging":
+											buildGuessWordTagging(guessWord, image,
+													utask, taskId);
+	
 											priorityTaskHashSet.add(guessWord);
 											uploadedTasks++;
 											if (!taskSent) {
 												taskSent = true;
 												sendTaskAcquired(roomChannel);
 											}
+											break;
+										case "segmentation":
+											HashSet<String> tags;
+											// Get all the segments that have
+											// been stored for the image
+											final JsonNode imageSegments = image
+													.get("descriptions");
+											if (imageSegments != null) {
+												tags = retrieveTags(imageSegments);
+												buildGuessWordSegmentTask(guessWord,
+														tags, image, taskId, utask);
+	
+												priorityTaskHashSet.add(guessWord);
+												uploadedTasks++;
+												if (!taskSent) {
+													taskSent = true;
+													sendTaskAcquired(roomChannel);
+												}
+											}
+											break;
 										}
 										break;
-									}
-									break;
+									//}
 								}
 							}
 						}

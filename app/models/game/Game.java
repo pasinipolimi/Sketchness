@@ -121,6 +121,9 @@ public class Game extends GameRoom {
 	Boolean askTag = false;
 	String askTagSketcher;
 	Boolean loadingAlreadySent = false;
+	
+	//single player variables
+	String singlePlayerName;
 
 	public Game() {
 		super(Game.class);
@@ -255,6 +258,45 @@ public class Game extends GameRoom {
 		sketcherPainter = null;
 		final int currentPlayers = requiredPlayers - disconnectedPlayers;
 		int count = 0;
+		
+///////////////////////////////////////////////////////////////////////////////////
+		
+		if (requiredPlayers == 1)
+		{
+			if(playersVect.get(0).hasBeenSketcher == true)
+			{
+				playersVect.get(0).role = "GUESSER";
+				sketcherPainter = playersVect.get(0);
+				playersVect.get(0).hasBeenSketcher = false;
+				sketcherPainter.name = "bot";
+				Logger.info("[GIO] " + "has been sketcher --> Now guesser");
+
+			}
+			else
+			{
+				playersVect.get(0).role = "SKETCHER";
+				sketcherPainter = playersVect.get(0);
+				sketcherPainter.role = "SKETCHER";
+				sketcherPainter.hasBeenSketcher = true;
+				sketcherPainter.name = singlePlayerName;
+				playersVect.get(0).hasBeenSketcher = true;
+				Logger.info("[GIO] " + "has NOT been sketcher --> Now sketcher");
+			}
+			GameBus.getInstance().publish(
+					new GameEvent(GameMessages.composeLogMessage(
+							LogLevel.info,
+							Messages.get(LanguagePicker.retrieveLocale(),
+									"thesketcheris") + " " + sketcherPainter.name),
+									roomChannel));
+			GameBus.getInstance().publish(
+					new GameEvent(GameMessages
+							.composeRoundBegin(sketcherPainter.name), roomChannel));
+			return sketcherPainter.name;
+		}
+
+////////////////////////////////////////////////////////////////////////////////////
+		
+		
 		// Publish system messages to inform that a new round is starting and
 		// the roles are being chosen
 		GameBus.getInstance().publish(
@@ -481,6 +523,7 @@ public class Game extends GameRoom {
 					// one
 				{
 					currentGuess = label;
+					Logger.info("[GIO] word: "+currentGuess);
 					sendTask(false);
 				}
 			} // We have no more things to do
@@ -596,6 +639,7 @@ public class Game extends GameRoom {
                                             areWeAsking = false;
                                             nextRound();
                                     } else if (!shownImages) {
+
                                             shownImages = true;
                                             final String id = taskImage.get("id").asText();
                                             final String medialocator = taskImage.get("image")
@@ -637,11 +681,11 @@ public class Game extends GameRoom {
 									CMS.taskSetInitialization(
 											priorityTaskQueue,
 											queueImages, roomChannel,
-											maxRound);
+											maxRound, requiredPlayers);
 								else
 									CMS.fixGroundTruth(groundTruthId,
 											priorityTaskQueue,
-											queueImages, roomChannel);
+											queueImages, roomChannel, requiredPlayers);
 								completed = true;
 							} catch (final Exception ex) {
 								try {
@@ -684,6 +728,11 @@ public class Game extends GameRoom {
 		Logger.info("[GAME] added player "
 				+ playersVect.get(playersVect.size() - 1).name);
 		Logger.debug("[GAME] Check Start");
+		
+		if(requiredPlayers == 1){
+			singlePlayerName = playersVect.get(0).name;
+		}
+		
 		checkStart();
 	}
 
@@ -918,6 +967,7 @@ public class Game extends GameRoom {
 						+ " "
 						+ Messages.get(LanguagePicker.retrieveLocale(),
 								"skiptask")), roomChannel));
+
 		nextRound();
 	}
 

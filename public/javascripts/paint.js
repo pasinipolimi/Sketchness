@@ -16,6 +16,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			task: null,
 			word: null,
 			points: [],
+			image: null,
+			stopDrawing: false,
 			lastSent: 0,
 			traceNum: 1,
 			isMobile: /ipad|iphone|android/i.test(navigator.userAgent)
@@ -23,7 +25,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 		var constants = {
 			tagTime: 30,
-			taskTime: 120,
+			//taskTime: 120,
+			taskTime: 5,
 			solutionTime: 3,
 			minSendRate: 50
 		};
@@ -286,20 +289,40 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * @param sketcher :String The sketcher ID
 				 */
 				beginRound: function(sketcher) {
+					//alert((Object.size(this.sketchness.players)));
 					var sk = this.sketchness;
 					sk.sketcher = sketcher;
 					write.top($.i18n.prop('matchstarting'));
+					if((sk.sketcher === sk.myself)&&((Object.size(this.sketchness.players))==1)) {
+						//alert("sketcher bot");
+						this.beSketcherBot();
+					}
+					else if(sk.sketcher === sk.myself) {
+						//alert("sketcher");
+						this.beSketcher();
+					} 
+					else if((sk.sketcher != sk.myself)&&((Object.size(this.sketchness.players))==1)) {
+						//alert("guesser bot");
+						this.beGuesserBot();
+					} 
+					else {
+						//alert("guesser");
+						this.beGuesser();
+					}
+					/*
 					if(sk.sketcher === sk.myself) {
 						this.beSketcher();
 					} else {
 						this.beGuesser();
 					}
+					*/
 				},
 
 				/**
 				 * Setup of sketcher state
 				 */
 				onenterSketcher: function() {
+
 					var that = this;
 					console.log("[BEGIN] Sketcher");
 					this.communicator.on({
@@ -326,6 +349,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * Tear down of sketcher state
 				 */
 				onleaveSketcher: function() {
+
 					this.communicator.off("tag task leaderboard");
 					this.painter.hideImage();
 					console.log("[LEAVE] Sketcher");
@@ -335,6 +359,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * Setup of guesser state
 				 */
 				onenterGuesser: function() {
+
 					var that = this;
 					that.painter.hideImage();
 					console.log("[BEGIN] Guesser");
@@ -362,8 +387,84 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * Tear down of guesser state
 				 */
 				onleaveGuesser: function() {
+
 					this.communicator.off("tag task leaderboard");
 					console.log("[LEAVE] Guesser");
+				},
+				
+				/**
+				 * Setup of sketcher BOT state
+				 */
+				onenterSketcherBot: function() {
+
+					var that = this;
+					console.log("[BEGIN] SketcherBot");
+					this.communicator.on({
+						tag: function() {
+						    console.log("[RECEIVED MESSAGE] tag");
+							that.tag();
+						},
+						task: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] task");
+							that.taskBot(content.word);
+						},
+						leaderboard: function(e, content) {
+						        console.log("[RECEIVED MESSAGE] leaderboard");
+								that.quit(content);
+						},
+						error: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] error");
+							that.errorEvent();
+						}
+					});
+				},
+
+				/**
+				 * Tear down of sketcher BOT state
+				 */
+				onleaveSketcherBot: function() {
+
+					this.communicator.off("tag task leaderboard");
+					this.painter.hideImage();
+					console.log("[LEAVE] SketcherBot");
+				},
+
+				/**
+				 * Setup of guesser BOT state
+				 */
+				onenterGuesserBot: function() {
+
+					var that = this;
+					that.painter.hideImage();
+					console.log("[BEGIN] GuesserBot");
+					this.communicator.on({
+						tag: function() {
+						    console.log("[RECEIVED MESSAGE] tag");
+							that.tag();
+						},
+						task: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] task");
+						    sketchness.image = content.id;
+							that.taskBot();
+						},
+						leaderboard: function(e, content) {
+						        console.log("[RECEIVED MESSAGE] leaderboard");
+								that.quit(content);
+						},
+						error: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] error");
+							that.errorEvent();
+						}
+					});
+				},
+
+				/**
+				 * Tear down of guesser BOT state
+				 */
+				onleaveGuesserBot: function() {
+
+					this.communicator.off("tag task leaderboard");
+					console.log("[LEAVE] GuesserBot");
 				},
 
 				/**
@@ -371,10 +472,15 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * message to the server
 				 */
 				timeUp: function() {
+
+					if(sketchness.sketcher == "bot"){
+						sketchness.stopDrawing = true;
+					}
 					if(Object.size(this.sketchness.players)==1) {
-						this.skipRound();
-						console.log("[SENDING MESSAGE] skip");
-						this.communicator.send("skip", {});
+						//this.skipRound();
+						//console.log("[SENDING MESSAGE] skip");
+						//this.communicator.send("skip", {});
+						this.nextRound();
 					}
 					else{
 					    console.log("[SENDING MESSAGE] timer");
@@ -397,6 +503,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * Setup of tag insertion state
 				 */
 				onentertagInsertion: function() {
+
 					var elements = this.elements;
 					console.log("[BEGIN] TagInsertion");
 					elements.pen.hide();
@@ -471,6 +578,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * Tear down of tag insertion state
 				 */
 				onleavetagInsertion: function() {
+
 					var elements = this.elements;
 					console.log("[END] TagInsertion");
 					this.write.top();
@@ -493,6 +601,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * Setup of tag wait state
 				 */
 				onentertagWait: function() {
+
 					this.write.top($.i18n.prop('asktag'));
 					this.write.canvasMessage($.i18n.prop('sketchertagging'));
 					console.log("[BEGIN] TagWait");
@@ -536,6 +645,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * Tear down of tag wait state
 				 */
 				onleavetagWait: function() {
+
 					this.write.top();
 					this.write.canvasMessage();
 					this.write.time();
@@ -561,6 +671,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * Setup of task drawing state
 				 */
 				onentertaskDrawing: function() {
+
 					var elements = this.elements;
 					elements.main.addClass("sketcher");
 					this.write.top($.i18n.prop("draw"), this.sketchness.word);
@@ -787,6 +898,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * Tear down of task drawing state
 				 */
 				onleavetaskDrawing: function() {
+
 					var elements = this.elements;
 					elements.main.removeClass('sketcher');
 					this.write.top();
@@ -815,6 +927,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * Setup of task guessing state
 				 */
 				onentertaskGuessing: function() {
+
 					var that = this,
 						sk = this.sketchness,
 						wordInput = this.elements.wordInput,
@@ -912,9 +1025,387 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * Tear down of task guessing state
 				 */
 				onleavetaskGuessing: function() {
+
 					this.write.top();
 					this.write.time();
 					console.log("[END] TaskGuessing");
+					this.elements.wordInput.hide().off("keypress");
+
+					this.clock.clearCountdown("task");
+
+					this.communicator.off("timer changeTool beginPath point endPath guess guessed score leave leaderboard roundEnd skipTask");
+				},
+				
+				/**
+				 * Setup of task drawing BOT state
+				 */
+				onentertaskDrawingBot: function() {
+
+					var elements = this.elements;
+					elements.main.addClass("sketcher");
+					this.write.top($.i18n.prop("draw"), this.sketchness.word);
+					toolChange();
+					elements.skip.show();
+					elements.pen.show();
+					elements.eraser.show();
+					elements.hudArea.show();
+					elements.endSegmentation.hide();
+					this.chat.disable();
+					console.log("[BEGIN] TaskDrawingBot");
+					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
+					
+					var that = this,
+						painter = this.painter,
+						sk = this.sketchness;
+
+					painter.setName(sk.players[sk.sketcher].name);
+
+					this.communicator.on({
+						image: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] image");
+						    var canvas = document.getElementById("draws");
+		                	var ctx = canvas.getContext("2d");
+		                	ctx.clearRect(0,0,canvas.width,canvas.height);
+		                	sk.stopDrawing = false;
+							painter.showImage(content.url, content.width, content.height);
+							guessTag(content.id,that,sk);
+						},
+						timer: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] timer");
+							that.clock.changeCountdown("task", content.time * Time.second);
+						},
+						guess: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] guess");
+							that.chat.guess(sk.players[content.user].name, content.word, content.affinity, content.user == sk.myself);
+						},
+						score: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] score");
+							sk.players[content.user].score += content.score;
+
+							if(content.user == sk.myself) {
+								that.write.score(sk.players[content.user].score);
+							}
+						},
+						leave: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] leave");
+                            delete sk.players[content.user];
+                            write.players(sk.players);
+                        },
+                        leaderboard: function(e, content) {
+                            console.log("[RECEIVED MESSAGE] leaderboard");
+                            that.quit(content);
+                        },
+						roundEnd: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] roundEnd");
+						    sk.word = content.word;
+							that.endRound(content.word);
+						},
+						skipTask: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] skipTask");
+							that.skipRound();
+						},
+						endSegmentationC: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] endSegmentationC");
+							that.nextRound();
+						},
+						error: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] error");
+							that.errorEvent();
+						}
+					});
+
+					elements.skip.on("click", function() {
+					    console.log("[SENDING MESSAGE] skip");
+						that.communicator.send("skip", {});
+					});
+					
+					elements.pen.on("click", function() {
+						elements.tool = "pen";
+						elements.eraser.css('background-image', 'url(assets/images/UI/controls/eraserD.png)'); 
+						elements.pen.css('background-image', 'url(assets/images/UI/controls/pencil.png)'); 
+						toolChange();
+					});
+					
+					elements.eraser.on("click", function() {
+						elements.tool = "eraser";
+						elements.eraser.css('background-image', 'url(assets/images/UI/controls/eraser.png)'); 
+						elements.pen.css('background-image', 'url(assets/images/UI/controls/pencilD.png)'); 
+						toolChange();
+					});
+
+					/*
+					if(Object.size(this.sketchness.players)==1) {
+						elements.endSegmentation.show();
+						elements.endSegmentation.on("click", function() {
+						    console.log("[SENDING MESSAGE] endSegmentation");
+							that.communicator.send("endSegmentation", {user: sk.myself});
+						});
+					}
+					*/
+
+					var started = false;
+
+					var relativePosition = function(event, element) {
+						element = element[0];
+						var offsetX = 0, offsetY = 0;
+
+						// Compute the total offset
+						if (element.offsetParent !== undefined) {
+							do {
+								offsetX += element.offsetLeft;
+								offsetY += element.offsetTop;
+							} while ((element = element.offsetParent));
+						}
+						if(undefined!=event) {
+							if(!sk.isMobile) {
+									if(event.originalEvent.type !== "mouseup")
+									  return {
+										x: (event.pageX - offsetX),
+										y: (event.pageY - offsetY),
+										size: elements.size.val(),
+										color: elements.color.spectrum("get").toRgbString()
+									  };
+									else
+									  return {
+										x: (event.pageX - offsetX),
+										y: (event.pageY - offsetY),
+										size: elements.size.val(),
+										color: "end"
+									  };  
+							} else {
+								// Touchend does not have the position of when we lifted our finger
+								if(event.originalEvent.type !== "touchend" && event.originalEvent.touches) {
+									return {
+										x: (event.originalEvent.touches[0].pageX - offsetX),
+										y: (event.originalEvent.touches[0].pageY - offsetY),
+										size: elements.size.val(),
+										color: elements.color.spectrum("get").toRgbString()
+									};
+								} else if(event.originalEvent.type == "touchend"){
+									return {
+										x: (event.pageX - offsetX),
+										y: (event.pageY - offsetY),
+										size: elements.size.val(),
+										color: "end"
+									};
+								}
+								else
+									return null;
+							}
+						}
+						else {
+							return {
+										x: 0,
+										y: 0,
+										size: elements.size.val(),
+										color: elements.color.spectrum("get").toRgbString()
+								    
+								    };
+						}
+					};
+
+					var setPoint = function(event) {
+						var point = relativePosition(event, elements.viewport);
+
+						if (point != null && point.x > 0 && point.x < elements.viewport.width() && point.y > 0 && point.y < elements.viewport.height()) {
+							painter.setPoint(point);
+							++(sketchness.traceNum);
+							addPoint(point.x, point.y, point.size, point.color);
+							that.communicator.send("point", point);
+						}
+					};
+					
+					var addPoint = function(x, y, size, color) {
+						sketchness.points.push({
+							x: x,
+							y: y,
+							size: size,
+							color: color
+						});
+					};
+					
+					var canSendNow = function() {
+							return Date.now() - sketchness.lastSent > constants.minSendRate;
+					};
+					
+					var sendPoints = function() {
+						sketchness.lastSent = Date.now(); //Refresh the countdown timer
+						var toBeSent = {
+							points: sketchness.points,
+							num: sketchness.traceNum,
+							name: sketchness.sketcher,
+							time: clock.getTimer("round")
+						};
+						communicator.send("trace",toBeSent);
+						sketchness.points = [];
+					};
+
+					elements.viewport.on((sk.isMobile ? "touchstart" : "mousedown"), function(e) {
+						if(!started) {
+							painter.beginPath();
+							started=true;
+							setPoint(e);
+							that.communicator.send("beginPath", {});
+						}
+					});
+
+					elements.viewport.on((sk.isMobile ? "touchmove" : "mousemove"), function(e) {
+						e.preventDefault();
+						setPoint(e);
+						if (canSendNow()) 
+							sendPoints();
+					});
+
+					$(document).on((sk.isMobile ? "touchend" : "mouseup"), function(e) {
+						if(started) {
+							setPoint(e);
+							var point = relativePosition(e, elements.viewport);
+							addPoint(point.x, point.y, point.size, "end");
+							sendPoints();
+							started=false;
+							that.communicator.send("endPath", {});
+							painter.endPath();
+						}
+					});
+
+				},
+
+				/**
+				 * Tear down of task drawing BOT state
+				 */
+				onleavetaskDrawingBot: function() {
+
+					var elements = this.elements;
+					elements.main.removeClass('sketcher');
+					this.write.top();
+					this.write.time();
+					elements.skip.hide();
+					elements.endSegmentation.hide();
+					elements.hudArea.hide();
+					this.chat.enable();
+					console.log("[END] TaskDrawingBot");
+					this.clock.clearCountdown("task");
+
+					elements.skip.off("click");
+					elements.endSegmentation.off("click");
+
+					elements.viewport.off(this.isMobile ? "touchstart" : "mousedown");
+					elements.viewport.off(this.isMobile ? "touchmove" : "mousemove");
+					$(document).trigger(this.isMobile ? "touchend" : "mouseup");
+					$(document).off(this.isMobile ? "touchend" : "mouseup");
+
+					this.painter.hideImage();
+
+					this.communicator.off("image timer guess score leave leaderboard roundEnd skipTask endSegmentationC");
+				},
+
+				/**
+				 * Setup of task guessing BOT state
+				 */
+				onentertaskGuessingBot: function() {
+
+					var that = this,
+						sk = this.sketchness,
+						wordInput = this.elements.wordInput,
+						painter = this.painter;
+						
+					elements.pen.hide();
+					elements.eraser.hide();
+					this.write.top($.i18n.prop('guess'));
+					that.painter.hideImage();
+					wordInput.show();
+					console.log("[BEGIN] TaskGuessingBot");
+					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
+
+					//painter.setName(sk.players[sk.sketcher].name);
+					drawSegmentation(sk.image, that, sk);
+
+					wordInput.on("keypress", function(event) {
+						if (event.which === 13) {
+							event.preventDefault();
+                            console.log("[SENDING MESSAGE] guessAttempt");
+							that.communicator.send("guessAttempt", {
+							    user: sk.myself,
+								word: $(this).val()
+							});
+
+							$(this).val("");
+						}
+					});
+
+					this.communicator.on({
+						timer: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] timer");
+							that.clock.changeCountdown("task", content.time * Time.second);
+						},
+						changeTool: function(e, tool) {
+						    console.log("[RECEIVED MESSAGE] changeTool");
+							painter.setTool(tool);
+						},
+						beginPath: function() {
+							painter.beginPath();
+						},
+						point: function(e, point) {
+							painter.setPoint(point);
+						},
+						endPath: function() {
+							painter.endPath();
+						},
+						guess: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] guess");
+							that.chat.guess(sk.players[content.user].name, content.word, content.affinity, content.user == sk.myself);
+						},
+						guessed: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] guessed");
+						    //sk.stopDrawing = true;
+						    if(sk.myself == content.user){
+                                sk.word = content.word;
+                                that.write.top($.i18n.prop('guessed'), sk.word);
+                                wordInput.hide().off("keypress");
+                                this.one("image", function(e, content) {
+                                    painter.showImage(content.url, content.width, content.height);
+                                });
+							}
+						},
+						score: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] score");
+							sk.players[content.user].score += content.score;
+
+							if(content.user == sk.myself) {
+								that.write.score(sk.players[content.user].score);
+							}
+						},
+						leave: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] leave");
+                            delete sk.players[content.user];
+                            write.players(sk.players);
+                        },
+                        leaderboard: function(e, content) {
+                            console.log("[RECEIVED MESSAGE] leaderboard");
+                            that.quit(content);
+                        },
+						roundEnd: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] roundEnd");
+							that.endRound(content.word);
+						},
+						skipTask: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] skipTask");
+							that.skipRound();
+						},
+						error: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] error");
+							that.errorEvent();
+						}
+					});
+				},
+
+				/**
+				 * Tear down of task guessing BOT state
+				 */
+				onleavetaskGuessingBot: function() {
+					this.write.top();
+					this.write.time();
+					console.log("[END] TaskGuessingBot");
 					this.elements.wordInput.hide().off("keypress");
 
 					this.clock.clearCountdown("task");
@@ -975,6 +1466,56 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.write.top();
 					this.write.time();
 					console.log("[END] ImageViewing");
+					this.clock.clearCountdown("solution");
+
+					this.painter.hideImage();
+
+					this.communicator.off("image leave leaderboard");
+				},
+				
+				/**
+				 * Setup of image viewing BOT state
+				 */
+				onenterimageViewingBot: function() {
+					this.write.top($.i18n.prop('solution'), this.sketchness.word);
+					this.clock.setCountdown("solution", this.constants.solutionTime * Time.second, Time.second, this.write.time.bind(this.write), this.nextRoundCall.bind(this));
+					console.log("[BEGIN] ImageViewingBot");
+					var that = this;
+					var elements = that.elements;
+					elements.skip.hide();
+					elements.endSegmentation.hide();
+					elements.hudArea.hide();
+					elements.pen.hide();
+					elements.eraser.hide();
+
+					this.communicator.on({
+						image: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] image");
+							that.painter.showImage(content.url, content.width, content.height);
+						},
+						leave: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] leave");
+                            delete sk.players[content.user];
+                            write.players(sk.players);
+                        },
+						leaderboard: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] leaderboard");
+							that.quit(content);
+						},
+						error: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] error");
+							that.errorEvent();
+						}
+					});
+				},
+
+				/**
+				 * Tear down of image viewing BOT state
+				 */
+				onleaveimageViewingBot: function() {
+					this.write.top();
+					this.write.time();
+					console.log("[END] ImageViewingBot");
 					this.clock.clearCountdown("solution");
 
 					this.painter.hideImage();
@@ -1068,15 +1609,21 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				{ name: "load", from: ["none", "playersWait"], to: "loading" },
 				{ name: "beSketcher", from: ["loading", "playersWait", "waitRole", "tagInsertion", "tagWait" ], to: "Sketcher" },
 				{ name: "beGuesser", from: ["loading", "playersWait", "waitRole", "tagInsertion", "tagWait" ], to: "Guesser" },
-				{ name: "nextRound", from: ["imageViewing", "taskDrawing",  "tagInsertion", "tagWait"], to: "waitRole"},
-				{ name: "skipRound", from: ["taskGuessing", "taskDrawing", "tagInsertion"], to: "waitRole" },
+				{ name: "beSketcherBot", from: ["loading", "playersWait", "waitRole", "tagInsertion", "tagWait" ], to: "SketcherBot" },
+				{ name: "beGuesserBot", from: ["loading", "playersWait", "waitRole", "tagInsertion", "tagWait" ], to: "GuesserBot" },
+				//{ name: "nextRound", from: ["imageViewing", "taskDrawing", "taskDrawingBot", "taskGuessingBot",  "tagInsertion", "tagWait"], to: "waitRole"},
+				{ name: "nextRound", from: ["imageViewing", "imageViewingBot", "taskDrawing", "tagInsertion", "tagWait"], to: "waitRole"},
+				{ name: "nextRound", from: ["taskDrawingBot", "taskGuessingBot"], to: "imageViewingBot"},
+				{ name: "skipRound", from: ["taskGuessing", "taskGuessingBot", "taskDrawing", "taskDrawingBot", "tagInsertion"], to: "waitRole" },
 				{ name: "tag", from: "Sketcher", to: "tagInsertion" },
 				{ name: "tag", from: "Guesser", to: "tagWait" },
 				{ name: "task", from: ["Sketcher", "tagInsertion"], to: "taskDrawing" },
 				{ name: "task", from: ["Guesser", "tagWait"], to: "taskGuessing" },
-				{ name: "endRound", from: ["taskGuessing", "taskDrawing"], to: "imageViewing" },
-				{ name: "quit", from: ["imageViewing", "tagInsertion", "taskDrawing", "taskGuessing", "tagWait", "waitRole", "loading", "Sketcher", "Guesser"], to: "leaderboard" },
-				{ name: "errorEvent", from: ["imageViewing", "tagInsertion", "taskDrawing", "taskGuessing", "tagWait", "waitRole", "loading", "Sketcher", "Guesser", "playersWait"], to: "handleError" },
+				{ name: "taskBot", from: ["SketcherBot", "tagInsertion"], to: "taskDrawingBot" },
+				{ name: "taskBot", from: ["GuesserBot", "tagWait"], to: "taskGuessingBot" },
+				{ name: "endRound", from: ["taskGuessing", "taskGuessingBot", "taskDrawing", "taskDrawingBot"], to: "imageViewing" },
+				{ name: "quit", from: ["imageViewing", "tagInsertion", "taskDrawing", "taskDrawingBot",  "taskGuessing", "taskGuessingBot", "tagWait", "waitRole", "loading", "Sketcher", "SketcherBot", "Guesser", "GuesserBot"], to: "leaderboard" },
+				{ name: "errorEvent", from: ["imageViewing", "tagInsertion", "taskDrawing", "taskDrawingBot", "taskGuessing", "taskGuessingBot", "tagWait", "waitRole", "loading", "Sketcher", "SketcherBot", "Guesser", "GuesserBot", "playersWait"], to: "handleError" },
 				{ name: "toLobby", from: "leaderboard", to: "lobby" }
 			]
 		});
@@ -1095,3 +1642,213 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 });
 
 
+function drawSegmentation(idselected, that, sk) {
+
+	$.jAjax({
+        url: "segmentationImage",
+        headers : {"selected" : idselected},
+        onComplete: function(xhr,status){
+            if(xhr.readyState === 4){
+                if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
+                    result = JSON.parse(xhr.responseText);
+                    //get image size
+                    var imageW = result[0].width;
+                    var imageH = result[0].height;
+   
+                    //get polyline
+                    var listPoints = result[0].polyline;
+                    var obj = JSON.parse(listPoints);
+
+                    //variables to compute delay in drawing
+                    var time, timeNext, delta, increment, numPoints;
+                    //point parameters
+                    var x, y, color, size, ts;
+                    
+                    var canvas = document.getElementById("draws");
+                	var ctx = canvas.getContext("2d");
+                	
+                	ctx.beginPath();
+                	
+                	//canvas.width = imageW;
+                	//canvas.height = imageH;
+
+                	var points = [];
+                	
+                	//retrieve timestamps of each set of points
+                	var timestamps = [];
+                	var j = 0;
+                	for (var key in obj) {
+                		timestamps[j] = obj[key].time;
+                		j++;
+                	}
+
+                	var h = 0;
+                    for (var key in obj) {
+                    	
+                    	//retrieve timestamp of the current set of points
+                    	time = timestamps[h];
+                    	//retrieve timestamp of the next set of points
+                    	timeNext = timestamps[h+1];
+                    	//compute time to draw the entire set of points
+                    	delta = timeNext - time;
+                    	
+                    	//retrieve number of points
+                    	numPoints = Object.keys(obj[key].points).length;
+                    	
+                    	//compute ts value for singular point
+                    	increment = Math.round(delta/numPoints);
+                    	
+                    	//build points array
+                    	for(var i = 0; i < numPoints; i++)
+                    	{
+                    		    if(obj[key].points[i].color!='end')
+                    		    {
+                    		    	x = obj[key].points[i].x;
+                        			y = obj[key].points[i].y;
+                    		    	color=obj[key].points[i].color;
+                    		    	size = obj[key].points[i].size;
+                    		    	ts = time+increment*i;
+                    		    	points.push({ts : ts, x : x, y : y, size : size, color: color})
+
+                    		    }
+
+                    	}
+
+						h++;
+                    }
+                    
+                    
+                    //Start drawing
+                    ctx.lineJoin = "round";
+	           	   	ctx.beginPath(); 
+	           	   	var drawable=true;
+	           	   	ctx.moveTo(points[0].x, points[0].y);
+
+	           	   	//variable to change color when points will be erased
+	           	   	var eraser = false;
+	           	   	
+	           	   	//variables to check consecutive points positions
+	           	   	var previousX = -100;
+	           	   	var previousY = -100;
+	           	   	
+	           	   	//recursive function to draw each point using timestamp
+	           	   	var drawPoint = function(){
+	           	   		//retrieve point coordinates, color, size, timestamp
+                    	var p = points.shift();
+                    	
+                    	//check if consecutive points are in the same neighborhood, otherwise new path
+                    	if(!(inRange(p.x, p.y, previousX, previousY, 15))){
+                    		drawable = false;
+                    	}
+                    	
+                    	//if eraser
+                    	if(p.color=='rgba(255,255,255,1.0)')
+                    	{
+                    		//if first point of eraser
+                    		if(eraser==false)
+                    		{	//start new path
+                    			drawable = false;
+                    		}
+                    		eraser=true;
+                    		
+                    	}
+                    	else{
+                    		//if point before was eraser
+                    		if(eraser==true)
+                    		{	//start new path
+                    			eraser = false;
+                    			drawable = false;
+                    		}
+                    	}
+                    	
+                    	if(p.color!='end')
+	           	    	 {
+	           	    		 if(!drawable)
+	           	    		 {
+	           	    			 drawable=true;
+	           	    			 ctx.beginPath();
+	           	    			 ctx.moveTo(p.x,p.y);
+	           	    		 }
+	           	    		 //store point 
+	           	    		 previousX = p.x;
+	           	    		 previousY = p.y;
+	           	    		 //draw point
+	           	    		 ctx.strokeStyle=p.color;
+	           	    		 ctx.lineWidth = p.size;
+	           	    		 ctx.lineTo(p.x, p.y);
+	           	    		 ctx.stroke();
+	           	    	 }
+                    	
+	           	    	 else
+	           	    	 {
+	           	    		 if(drawable)
+	           	    		 {
+	           	    			 ctx.stroke();
+	           	    			 drawable=false;
+	           	    		 }
+	           	    	 }
+                           
+                    	//end of points array
+                    	if ((points.length == 0)||sk.stopDrawing == true){
+                    		//that.communicator.send("endSegmentation", {user: sk.myself});
+                    		sk.stopDrawing = false;
+                    		
+                    		return;
+                    	}
+                    	//recursive call passing time delay for the next point to draw
+                    	setTimeout(drawPoint , points[0].ts - p.ts);
+                    }
+	           	   	//first call of drawPoint
+                    setTimeout(drawPoint, 0);
+                    
+                }
+                else{
+                    alert("Request was unsuccesfull: "+ xhr.status);
+                }
+            }
+        }
+    });
+
+
+}
+
+//check if consecutive points (x,y) and (cx,cy) are in the same neighborhood
+function inRange(cx, cy, x, y, size) {
+    //Check to see the distance between the point and the center of the circle
+    var d = Math.sqrt(Math.pow((x - cx), 2) + Math.pow((y - cy), 2));
+    if (d <= (size / 2)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function guessTag(idselected, that, sk){
+	
+	$.jAjax({
+	    url: "taggingImage",
+	    headers : {"selected" : idselected},
+	    onComplete: function(xhr,status){
+	        if(xhr.readyState === 4){
+	            if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
+
+	                result = JSON.parse(xhr.responseText);
+
+	                var tag = result[0].tag;
+	                that.chat.guess(sk.players[sk.myself].name, tag, "hot", true);
+	                //that.communicator.send("endSegmentation", {user: sk.myself});
+	                /*
+	                that.communicator.send("guessAttempt", {
+					    user: sk.myself,
+						word: $(this).val()
+					});
+					*/
+
+	            }
+	            else{
+	                alert("Request was unsuccesfull: "+ xhr.status);
+	            }
+	        }
+	    }
+	});
+}

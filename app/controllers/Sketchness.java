@@ -2,6 +2,8 @@ package controllers;
 
 import java.util.Map;
 
+import org.json.JSONException;
+
 import models.User;
 import models.game.GameFactory;
 import models.lobby.LobbyFactory;
@@ -16,6 +18,7 @@ import play.mvc.Result;
 import play.mvc.WebSocket;
 import utils.LanguagePicker;
 import utils.LoggerUtils;
+import utils.Renderer;
 import utils.gamemanager.GameManager;
 import views.html.gameRoom;
 import views.html.leaderboard;
@@ -26,6 +29,7 @@ import be.objectify.deadbolt.java.actions.Restrict;
 
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.user.AuthUser;
+
 import static play.mvc.Controller.flash;
 import static play.mvc.Results.redirect;
 
@@ -234,6 +238,33 @@ public class Sketchness extends Controller {
                 }
 		return ok();
 	}
+	
+	/**
+	 * Retrieve segmentations of an image to simulate sketcher (bot)
+	 * @return the first polyline segmentation of the image
+	 * @throws JSONException
+	 */
+	public static Result segmentationImageCall() throws JSONException {
+		
+		final String imageId = request().getHeader("selected");
+		final String result = Renderer.segmentationImageCall(imageId);
+		return ok(result);
+
+	}		
+
+	/**
+	 * Retrieve tags of an image to simulate guesser (bot)
+	 * @return the first tag of the image
+	 * @throws JSONException
+	 */
+	public static Result taggingImageCall() throws JSONException {
+		
+		final String imageId = request().getHeader("selected");
+		final String result = Renderer.taggingImageCall(imageId);
+		return ok(result);
+
+		
+	}	
 
 
 }

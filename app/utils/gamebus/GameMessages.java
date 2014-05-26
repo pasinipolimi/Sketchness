@@ -4,11 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+
 import models.Painter;
+import play.Logger;
 import play.libs.Json;
 import play.mvc.WebSocket;
 
@@ -342,8 +345,9 @@ public class GameMessages {
 		return event;
 	}
 
-	public static ObjectNode composeTask(final String word) {
+	public static ObjectNode composeTask(final String word, final String id) {
 		final ObjectNode content = Json.newObject();
+		content.put("id", id);
 		content.put("word", word);
 		final ObjectNode event = composeJsonMessage("task", content);
 		return event;

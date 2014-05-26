@@ -65,7 +65,9 @@
 		<div id="paintWebSocket" data-ws="@routes.Sketchness.gameStream(room,players).webSocketURL()"></div>
 
 		<script type="text/javascript" src="/assets/javascripts/paint.js"></script>
-                
+		<script src="@routes.Assets.at("javascripts/renderer/jquery/jquery-1.10.2.min.js")"></script>
+    	<script src="@routes.Assets.at("javascripts/renderer/jquery/jquery.dropkick-min.js")"></script>
+    	<script src="@routes.Assets.at("javascripts/renderer/jquery/jAjax.js")"></script>
         <script type="text/javascript" src="@routes.JavascriptController.javascriptRoutes"></script>
 
 		<!-- DISABLE THE REFRESH BUTTON-->

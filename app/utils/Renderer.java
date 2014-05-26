@@ -783,6 +783,111 @@ public class Renderer extends UntypedActor {
 		 */
 		return images;
 	}
+	
+	/**
+	 * Retrieve the first segmentation of an image
+	 * 
+	 * @param imageId
+	 *            the id of the image
+	 * @return the info that i retrieved
+	 * @throws JSONException
+	 */
+	public static String segmentationImageCall(final String imageId)
+			throws JSONException {
+
+		final JsonReader jsonReader = new JsonReader();
+		JsonNode imageSegments = jsonReader.readJsonArrayFromUrl(rootUrl
+				+ "/wsmc/image/" + imageId + ".json");
+		
+		final Integer imWidth = imageSegments.get("width").asInt();
+		final Integer imHeight = imageSegments.get("height").asInt();
+		final String media = imageSegments.get("mediaLocator").asText();
+
+		imageSegments = imageSegments.get("descriptions").get("segmentation");
+		
+		JSONObject pointsContainer = null;
+
+		if (null != imageSegments) {
+
+				final JsonNode current = imageSegments.get(0);
+				JsonNode annotation = jsonReader.readJsonArrayFromUrl(rootUrl
+						+ "/wsmc/content/" + current.get("id").asText()
+						+ ".json");
+
+						annotation = annotation.get("mediaSegment");
+						String polyline="";
+						String polyresult="";
+						pointsContainer = new JSONObject();
+						for (JsonNode result : annotation) {
+							if(result.get("name").asText().equals("result"))
+							{
+								polyresult = result.get("polyline").asText();
+								pointsContainer.put("polyresult", polyresult);
+								
+							}
+							if (result.get("name").asText().equals("history")) {
+								
+								polyline = result.get("polyline").asText();
+								pointsContainer.put("polyline", polyline);
+							}
+						}
+						
+
+		}
+		pointsContainer.put("width", imWidth);
+		pointsContainer.put("height", imHeight);
+		pointsContainer.put("media", media);
+		final JSONArray info = new JSONArray();
+		info.put(pointsContainer);
+		final String result = info.toString();
+		return result;
+	}
+	
+	/**
+	 * Retrieve the first tag of an image
+	 * 
+	 * @param imageId
+	 *            the id of the image
+	 * @return the info that i retrieved
+	 * @throws JSONException
+	 */
+	public static String taggingImageCall(final String imageId)
+			throws JSONException {
+
+		final JsonReader jsonReader = new JsonReader();
+		JsonNode imageTags = jsonReader.readJsonArrayFromUrl(rootUrl
+				+ "/wsmc/image/" + imageId + ".json");
+		
+		
+		final Integer imWidth = imageTags.get("width").asInt();
+		final Integer imHeight = imageTags.get("height").asInt();
+		final String media = imageTags.get("mediaLocator").asText();
+
+
+		imageTags = imageTags.get("descriptions").get("tagging");
+
+		
+		JSONObject tagsContainer =  new JSONObject();
+
+		if (null != imageTags) {
+				
+				final JsonNode current = imageTags.get(0);
+
+				String tag = current.get("annotation_value").asText();
+				tagsContainer.put("tag", tag);
+
+				
+		}
+		
+		tagsContainer.put("width", imWidth);
+		tagsContainer.put("height", imHeight);
+		tagsContainer.put("media", media);
+		final JSONArray info = new JSONArray();
+		info.put(tagsContainer);
+		final String result = info.toString();
+		return result;
+		
+	}
 
 
 
