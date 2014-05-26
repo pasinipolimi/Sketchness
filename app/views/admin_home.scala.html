@@ -23,7 +23,8 @@ and open the template in the editor.
 		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap-responsive.min.css")">
 		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/ResponsiveFullWidthGrid/default.css")" >
 		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/ResponsiveFullWidthGrid/component.css")">
-		<script src="js/modernizr.custom.js"></script>
+		<script src="@routes.Assets.at("javascripts/lib/modernizr.custom.js")"></script>
+		<script src="@routes.Assets.at("javascripts/lib/bootstrap.min.js")"></script>
     </head>
     <body class="cf">
     @header(title = "Images") {
@@ -130,9 +131,6 @@ and open the template in the editor.
     <script src="@routes.Assets.at("javascripts/renderer/newMask.js")?nocache=@(new Date().getTime())"></script>
     <script src="@routes.Assets.at("javascripts/renderer/loadMaskFashionista.js")"></script>
     <script src="https://www.google.com/jsapi"></script>
-    <script src="@routes.Assets.at("javascripts/renderer/bootstrap/boostrap.js")"></script>
-    <script src="@routes.Assets.at("javascripts/renderer/bootstrap/boostrap.min.js")"></script>
-    <script src="@routes.Assets.at("javascripts/renderer/ResponsiveFullWidthGrid/modernizr.custom.js")"></script>
     <script>google.load('visualization', '1', {'packages':['corechart']});</script>
     <script>
 
