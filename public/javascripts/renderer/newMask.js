@@ -74,16 +74,12 @@ function newMask(idTag, idImage, tagName, numAnnotations){
 taskImage.onload = function() {
              taskContext.save();
              taskContext.beginPath();
-             //taskCanvas.width=this.width;
-             //taskCanvas.height=this.height;
              imageW=this.width;
              imageH=this.height;
-			 canvas.width=window.innerWidth*0.8/4;
-			 canvas.height=window.innerWidth*0.8/4*this.height/this.width;
-			 taskCanvas.width = window.innerWidth*0.8/4;
-			 taskCanvas.height = window.innerWidth*0.8/4*this.height/this.width;
-			 //canvas.width = window.innerWidth*0.8/4;
-			 //canvas.height = window.innerWidth*0.8/4*this.height/this.width;
+      			 canvas.width=window.innerWidth*0.8/4;
+      			 canvas.height=window.innerWidth*0.8/4*this.height/this.width;
+      			 taskCanvas.width = window.innerWidth*0.8/4;
+      			 taskCanvas.height = window.innerWidth*0.8/4*this.height/this.width;
              taskContext.drawImage(taskImage,0,0,taskCanvas.width,taskCanvas.height);
              taskContext.restore();
              //Clear the mask canvas
@@ -95,8 +91,7 @@ taskImage.onload = function() {
 
 try {
 var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
-socket = new WS("ws://localhost:9000/rendererStream?imageID="+selectionimg);
-// socket = new WS("ws://www.sketchness.com/rendererStream?imageID="+selectionimg);
+socket = new WS("ws://"+window.location.host+"/rendererStream?imageID="+selectionimg);
 
       socket.onmessage = onSocketMessage;
 
