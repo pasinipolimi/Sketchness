@@ -62,6 +62,8 @@ public class CMS {
 
 	private final static String collection = Play.application().configuration()
 			.getString("collection");
+	private static final String POLICY = Play.application().configuration()
+			.getString("policy");
 
 	private static HashMap<String, Cancellable> runningThreads = new HashMap<String, Cancellable>();
 
@@ -320,6 +322,7 @@ public class CMS {
 			params.put("nocache", String.valueOf(System.currentTimeMillis()));
 			// params.put("select", "id");
 			params.put("select", "light");
+			params.put("policy", POLICY);
 			retrievedImagesOrdered = jsonReader.readJsonArrayFromUrl(rootUrl
 					+ "/wsmc/image.json", params);
 			LoggerUtils.debug("CMS","Requested image list to CMS end");
