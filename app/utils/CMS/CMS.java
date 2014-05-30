@@ -774,14 +774,19 @@ public class CMS {
 						k = 0;
 
 						while (k < annotArr.size()) {
-							if (annotArr
-									.get(k)
-									.get("annotation_value")
-									.asText()
-									.equals(itemTag.get("itemAnnotations")
-											.get(0).get("value").asText())) {
-								count++;
-							}
+                                                        try{
+                                                            if (annotArr
+                                                                            .get(k)
+                                                                            .get("annotation_value")
+                                                                            .asText()
+                                                                            .equals(itemTag.get("itemAnnotations")
+                                                                                            .get(0).get("value").asText())) {
+                                                                    count++;
+                                                            }
+                                                        }
+                                                        catch(Exception e) {
+                                                            LoggerUtils.error("CMS","Could not retrieve annotation value for"+annotArr.get(k));
+                                                        }
 							k++;
 						}
 
