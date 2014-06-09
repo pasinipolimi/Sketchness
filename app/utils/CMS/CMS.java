@@ -9,6 +9,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -46,7 +48,6 @@ import akka.actor.Cancellable;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-
 /**
  * Wrapper for the CMS API
  * 
@@ -73,7 +74,7 @@ public class CMS {
 					+ actionId + "/close";
 			WS.url(request).setContentType("application/x-www-form-urlencoded")
 			.put("");
-			LoggerUtils.debug("CMS","Closing uTask " + uTaskID);
+			LoggerUtils.debug("CMS", "Closing uTask " + uTaskID);
 		}
 	}
 
@@ -82,11 +83,11 @@ public class CMS {
 			final String request = rootUrl + "/wsmc/task/" + taskID + "/close";
 			WS.url(request).setContentType("application/x-www-form-urlencoded")
 			.put("");
-			LoggerUtils.debug("CMS","Closing Task " + taskID);
+			LoggerUtils.debug("CMS", "Closing Task " + taskID);
 		}
 	}
 
-	public static void invalidateTag(final String tagID) throws IOException{
+	public static void invalidateTag(final String tagID) throws IOException {
 		final CloseableHttpClient httpclient = HttpClients.createDefault();
 		final HttpPut httpPut = new HttpPut(rootUrl + "/wsmc/content/" + tagID
 				+ "/invalidate");
@@ -97,69 +98,115 @@ public class CMS {
 		response1.close();
 		httpclient.close();
 	}
-	public static void segmentation(final ObjectNode finalTraces, final String username, final Integer session) throws Exception {
-		Akka.system().scheduler().scheduleOnce(
-				Duration.create(200, TimeUnit.MILLISECONDS),new Runnable() {
-					@Override
-					public void run() {
-						try {
-							final String id = finalTraces.get("id").textValue();
-							final String label = finalTraces.get("label").textValue();
-							textAnnotation(finalTraces, username, session);
-							final String traces = finalTraces.get("traces").toString();
-							final String history = finalTraces.get("history").toString();
 
-							final String urlParameters = "ta_name=tag&ta_val=" + label
-									+ "&content_type=segmentation&&user_id=" + username
-									+ "&language=" + LanguagePicker.retrieveIsoCode()
-									+ "&session_id=" + session + "&polyline_r=" + traces
-									+ "&polyline_h=" + history + "&oauth_consumer_key="
-									+ oauthConsumerKey;
-							final String request = rootUrl + "/wsmc/image/" + id
-									+ "/segmentation.json";
-							final JSONObject actionInfo;
-							try {
-								WS.url(request).setContentType("application/x-www-form-urlencoded").setTimeout(10000).post(urlParameters);
-								LoggerUtils.debug("CMS","Storing segmentation with action for image with id " + id + " and tag " + label);
-							} catch (final Exception ex) {
-								LoggerUtils.error("Unable to save segmentation, EXC1",ex);
-							}
-						} catch (final Exception ex) {
-							LoggerUtils.error("Unable to save segmentation, EXC2",ex);
-						}
+	public static void segmentation(final ObjectNode finalTraces,
+			final String username, final Integer session) throws Exception {
+		Akka.system()
+		.scheduler()
+		.scheduleOnce(Duration.create(200, TimeUnit.MILLISECONDS),
+				new Runnable() {
+			@Override
+			public void run() {
+				try {
+					final String id = finalTraces.get("id")
+							.textValue();
+					final String label = finalTraces.get(
+							"label").textValue();
+					textAnnotation(finalTraces, username,
+							session);
+					final String traces = finalTraces.get(
+							"traces").toString();
+					final String history = finalTraces.get(
+							"history").toString();
+
+					final String urlParameters = "ta_name=tag&ta_val="
+							+ label
+							+ "&content_type=segmentation&&user_id="
+							+ username
+							+ "&language="
+							+ LanguagePicker.retrieveIsoCode()
+							+ "&session_id="
+							+ session
+							+ "&polyline_r="
+							+ traces
+							+ "&polyline_h="
+							+ history
+							+ "&oauth_consumer_key="
+							+ oauthConsumerKey;
+					final String request = rootUrl
+							+ "/wsmc/image/" + id
+							+ "/segmentation.json";
+					final JSONObject actionInfo;
+					try {
+						WS.url(request)
+						.setContentType(
+								"application/x-www-form-urlencoded")
+								.setTimeout(10000)
+								.post(urlParameters);
+						LoggerUtils.debug("CMS",
+								"Storing segmentation with action for image with id "
+										+ id + " and tag "
+										+ label);
+					} catch (final Exception ex) {
+						LoggerUtils
+						.error("Unable to save segmentation, EXC1",
+								ex);
 					}
-				}, Akka.system().dispatcher());
+				} catch (final Exception ex) {
+					LoggerUtils
+					.error("Unable to save segmentation, EXC2",
+							ex);
+				}
+			}
+		}, Akka.system().dispatcher());
 	}
 
 	public static void textAnnotation(final ObjectNode finalTraces,
-			final String username, final Integer session)
-					throws Exception {
-		Akka.system().scheduler().scheduleOnce(
-				Duration.create(200, TimeUnit.MILLISECONDS),new Runnable() {
-					@Override
-					public void run() {
-						final String label = finalTraces.get("label").textValue();
-						final String id = finalTraces.get("id").textValue();
+			final String username, final Integer session) throws Exception {
+		Akka.system()
+		.scheduler()
+		.scheduleOnce(Duration.create(200, TimeUnit.MILLISECONDS),
+				new Runnable() {
+			@Override
+			public void run() {
+				final String label = finalTraces.get("label")
+						.textValue();
+				final String id = finalTraces.get("id")
+						.textValue();
 
-						final String urlParameters = "ta_name=tag&ta_val=" + label
-								+ "&content_type=tagging&&user_id=" + username + "&language="
-								+ LanguagePicker.retrieveIsoCode() + "&session_id=" + session
-								+ "&oauth_consumer_key=" + oauthConsumerKey;
-						final String request = rootUrl + "/wsmc/image/" + id
-								+ "/textAnnotation.json";
-						try {
-							final F.Promise<WS.Response> returned = WS.url(request).setContentType("application/x-www-form-urlencoded").setTimeout(10000).post(urlParameters);
-							LoggerUtils.debug("CMS","Storing textAnnotation for image with id " + id + " and tag " + label);
-						} catch (final Exception e) {
-							Logger.error("Unable to save annotation.", e);
-						}
-					}
-				}, Akka.system().dispatcher());
+				final String urlParameters = "ta_name=tag&ta_val="
+						+ label
+						+ "&content_type=tagging&&user_id="
+						+ username
+						+ "&language="
+						+ LanguagePicker.retrieveIsoCode()
+						+ "&session_id="
+						+ session
+						+ "&oauth_consumer_key="
+						+ oauthConsumerKey;
+				final String request = rootUrl + "/wsmc/image/"
+						+ id + "/textAnnotation.json";
+				try {
+					final F.Promise<WS.Response> returned = WS
+							.url(request)
+							.setContentType(
+									"application/x-www-form-urlencoded")
+									.setTimeout(10000)
+									.post(urlParameters);
+					LoggerUtils.debug("CMS",
+							"Storing textAnnotation for image with id "
+									+ id + " and tag " + label);
+				} catch (final Exception e) {
+					Logger.error("Unable to save annotation.",
+							e);
+				}
+			}
+		}, Akka.system().dispatcher());
 	}
 
 	public static Integer openSession() throws Error {
 		final String request = rootUrl + "/wsmc/session.json";
-		LoggerUtils.debug("CMS","Opening a new session...");
+		LoggerUtils.debug("CMS", "Opening a new session...");
 		final F.Promise<WS.Response> returned = WS.url(request)
 				.setContentType("application/x-www-form-urlencoded")
 				.post("oauth_consumer_key=" + oauthConsumerKey);
@@ -167,7 +214,7 @@ public class CMS {
 		String sessionId = returned.get().getBody();
 		sessionId = sessionId.replace("[\"", "");
 		sessionId = sessionId.replace("\"]", "");
-		LoggerUtils.debug("CMS","Retrieved session " + sessionId);
+		LoggerUtils.debug("CMS", "Retrieved session " + sessionId);
 		return Integer.valueOf(sessionId);
 	}
 
@@ -175,7 +222,7 @@ public class CMS {
 		final String request = rootUrl + "/wsmc/session/" + sessionId;
 		WS.url(request).setContentType("application/x-www-form-urlencoded")
 		.put("state=0&oauth_consumer_key=" + oauthConsumerKey);
-		LoggerUtils.debug("CMS","Closing session " + sessionId);
+		LoggerUtils.debug("CMS", "Closing session " + sessionId);
 	}
 
 	public static void postAction(final Integer sessionId,
@@ -190,8 +237,8 @@ public class CMS {
 				+ oauthConsumerKey + "&action_log=" + log;
 		WS.url(request).setContentType("application/x-www-form-urlencoded")
 		.post(parameters);
-		LoggerUtils.debug("CMS","Action " + actionType + " for session " + sessionId
-				+ ": " + log);
+		LoggerUtils.debug("CMS", "Action " + actionType + " for session "
+				+ sessionId + ": " + log);
 	}
 
 	public static void fixGroundTruth(final Integer sessionId,
@@ -227,7 +274,7 @@ public class CMS {
 					}
 					// Add one tag among the ones that have been retrieved
 					// following a particular policy
-					guessWord.put("tag", chooseTag(tags));
+					guessWord.put("tag", chooseTag(tags, null));
 					guessWord.put("lang", LanguagePicker.retrieveIsoCode());
 					guessWord.put("image", url);
 					guessWord.put("width", width);
@@ -261,7 +308,8 @@ public class CMS {
 		}
 	}
 
-	public static void addInitializationThread(final String roomName, final Cancellable thread) throws Exception {
+	public static void addInitializationThread(final String roomName,
+			final Cancellable thread) throws Exception {
 		runningThreads.put(roomName, thread);
 	}
 
@@ -292,16 +340,19 @@ public class CMS {
 			final List<ObjectNode> priorityTaskHashSet,
 			final List<ObjectNode> queueImages, final Room roomChannel,
 			final Integer maxRound) throws Error, JSONException {
-
-		final int uploadedTasks = retrieveTasks(maxRound, priorityTaskHashSet,
-				roomChannel);
-
+		int uploadedTasks = 0;
+		try {
+			uploadedTasks = retrieveTasks(maxRound, priorityTaskHashSet,
+					roomChannel);
+		} catch (final Exception e) {
+			LoggerUtils.error("CMS", "Unable to read tasks");
+		}
 		final int tasksToAdd = maxRound - uploadedTasks;
 		if (tasksToAdd > 0) {
 			retrieveImages(tasksToAdd, queueImages, roomChannel,
 					uploadedTasks > 0);
 		}
-		LoggerUtils.debug("CMS","Task init from CMS end");
+		LoggerUtils.debug("CMS", "Task init from CMS end");
 	}
 
 	private static void retrieveImages(final Integer tasksToAdd,
@@ -315,17 +366,17 @@ public class CMS {
 
 		final JsonReader jsonReader = new JsonReader();
 		try {
-			LoggerUtils.debug("CMS","Requested image list to CMS");
+			LoggerUtils.debug("CMS", "Requested image list to CMS");
 			final HashMap<String, String> params = new HashMap<>();
 			params.put("collection", collection);
 			params.put("limit", tasksToAdd.toString());
 			params.put("nocache", String.valueOf(System.currentTimeMillis()));
 			// params.put("select", "id");
-			params.put("select", "light");
+			params.put("select", "all");
 			params.put("policy", POLICY);
 			retrievedImagesOrdered = jsonReader.readJsonArrayFromUrl(rootUrl
 					+ "/wsmc/image.json", params);
-			LoggerUtils.debug("CMS","Requested image list to CMS end");
+			LoggerUtils.debug("CMS", "Requested image list to CMS end");
 		} catch (final IllegalArgumentException e) {
 			throw new RuntimeException(
 					"[CMS] The request to the CMS is malformed");
@@ -342,27 +393,58 @@ public class CMS {
 				// Get all the segments that have been stored for the image
 				final JsonNode imageSegments = item.get("descriptions");
 				HashSet<String> tags = new HashSet<>();
+				HashMap<String, Integer> tagsCount = new HashMap<>();
 				final ObjectNode guessWord = Json.newObject();
 				guessWord.put("type", "task");
 				guessWord.put("id", id);
 				// Find the valid tags for this task.
 				if (imageSegments != null) {
 					tags = retrieveTagsLight(imageSegments);
+					tagsCount = retrieveTagsCount(tags, imageSegments);
 				}
 
-				buildGuessWordSegment(guessWord, tags, item);
-				queueImages.add(guessWord);
+				buildGuessWordSegment(guessWord, tags, item, tagsCount);
+				if (guessWord != null) {
 
-				if (!taskSent) {
-					taskSent = true;
-					LoggerUtils.debug("CMS","Send task aquired for image:" + id
-							+ ", rooomChanel: " + roomChannel);
-					sendTaskAcquired(roomChannel);
+					queueImages.add(guessWord);
+
+					if (!taskSent) {
+						taskSent = true;
+						LoggerUtils.debug("CMS", "Send task aquired for image:"
+								+ id + ", rooomChanel: " + roomChannel);
+						sendTaskAcquired(roomChannel);
+					}
 				}
-
 			}
 		}
 
+	}
+
+	private static HashMap<String, Integer> retrieveTagsCount(
+			final HashSet<String> tagsList, JsonNode imageSegments) {
+		final HashMap<String, Integer> tags = new HashMap<>();
+		for (final String tag : tagsList) {
+			tags.put(tag, 0);
+		}
+
+		imageSegments = imageSegments.get("segmentation");
+		if (imageSegments != null) {
+			if (imageSegments.elements().hasNext()) {
+				for (final JsonNode segment : imageSegments) {
+					// Retrieve the content descriptor
+					if (null != segment) {
+
+						final String tag = segment.get("annotation_value")
+								.textValue();
+						if (tags.get(tag) != null) {
+							tags.put(tag, tags.get(tag) + 1);
+						}
+
+					}
+				}
+			}
+		}
+		return tags;
 	}
 
 	private static HashSet<String> retrieveTagsLight(JsonNode imageSegments) {
@@ -391,8 +473,7 @@ public class CMS {
 	}
 
 	private static int retrieveTasks(final Integer maxRound,
-			final List<ObjectNode> priorityTaskHashSet,
-			final Room roomChannel) {
+			final List<ObjectNode> priorityTaskHashSet, final Room roomChannel) {
 		boolean taskSent = false;
 
 		int uploadedTasks = 0;
@@ -401,14 +482,16 @@ public class CMS {
 		final JsonReader jsonReader = new JsonReader();
 		try {
 			// TODO add id...
-			LoggerUtils.debug("CMS","Requested task list to CMS " + roomChannel);
+			LoggerUtils.debug("CMS", "Requested task list to CMS "
+					+ roomChannel);
 			final HashMap<String, String> params = new HashMap<>();
 			params.put("collection", collection);
 			params.put("limit", maxRound.toString());
 			params.put("open", "true");
 			final String url = rootUrl + "/wsmc/task.json";
 			retrievedTasks = jsonReader.readJsonArrayFromUrl(url, params);
-			LoggerUtils.debug("CMS","Requested task list to CMS end" + roomChannel);
+			LoggerUtils.debug("CMS", "Requested task list to CMS end"
+					+ roomChannel);
 		} catch (final IllegalArgumentException e) {
 			throw new RuntimeException(
 					"[CMS] The request to the CMS is malformed");
@@ -417,7 +500,7 @@ public class CMS {
 		// Fill the set of task to be performed with the task that has been
 		// explicitly declared
 		try {
-			if (retrievedTasks != null && retrievedTasks.size()!=0) {
+			if (retrievedTasks != null && retrievedTasks.size() != 0) {
 				retrievedTasks = retrievedTasks.get("task");
 				for (final JsonNode item : retrievedTasks) {
 					if (item.elements().hasNext()) {
@@ -439,7 +522,8 @@ public class CMS {
 									// quello
 									// che mi serve
 
-									final ObjectNode guessWord = Json.newObject();
+									final ObjectNode guessWord = Json
+											.newObject();
 									guessWord.put("type", "task");
 									guessWord.put("id", imageId);
 									// Change the task to assign based on
@@ -467,8 +551,9 @@ public class CMS {
 												.get("descriptions");
 										if (imageSegments != null) {
 											tags = retrieveTags(imageSegments);
-											buildGuessWordSegmentTask(guessWord,
-													tags, image, taskId, utask);
+											buildGuessWordSegmentTask(
+													guessWord, tags, image,
+													taskId, utask);
 
 											priorityTaskHashSet.add(guessWord);
 											uploadedTasks++;
@@ -487,18 +572,24 @@ public class CMS {
 					}
 				}
 			}
-		}
-		catch(final Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException("[CMS] Data malformed");
 		}
 		return uploadedTasks;
 	}
 
-	private static void buildGuessWordSegment(final ObjectNode guessWord,
-			final HashSet<String> tags, final JsonNode image) {
+	private static void buildGuessWordSegment(ObjectNode guessWord,
+			final HashSet<String> tags, final JsonNode image,
+			final HashMap<String, Integer> tagsCount) {
 		// Add one tag among the ones that have been retrieved following
 		// a particular policy
-		guessWord.put("tag", chooseTag(tags));
+		final String tag = chooseTag(tags, tagsCount);
+		if (tag == null) {
+			// non ci sono piu tag disponibili per questa immagine, smetto di
+			// processarla
+			guessWord = null;
+		}
+		guessWord.put("tag", chooseTag(tags, tagsCount));
 		guessWord.put("lang", LanguagePicker.retrieveIsoCode());
 		guessWord.put("image", rootUrl + image.get("mediaLocator").asText());
 		guessWord.put("width", image.get("width").asInt());
@@ -509,7 +600,7 @@ public class CMS {
 	private static void buildGuessWordSegmentTask(final ObjectNode guessWord,
 			final HashSet<String> tags, final JsonNode image,
 			final String taskId, final JsonNode utask) {
-		buildGuessWordSegment(guessWord, tags, image);
+		buildGuessWordSegment(guessWord, tags, image, null);
 		guessWord.put("utaskid", utask.get("id").asInt());
 		guessWord.put("taskid", taskId);
 
@@ -517,7 +608,7 @@ public class CMS {
 
 	private static void buildGuessWordTagging(final ObjectNode guessWord,
 			final JsonNode image, final JsonNode utask, final String taskId) {
-		guessWord.put("tag", chooseTag(null));
+		guessWord.put("tag", chooseTag(null, null));
 		guessWord.put("lang", LanguagePicker.retrieveIsoCode());
 		guessWord.put("image", rootUrl + image.get("mediaLocator").asText());
 		guessWord.put("width", image.get("width").asInt());
@@ -531,8 +622,10 @@ public class CMS {
 	 * Inform the game that at least one task is ready and we can start the game
 	 */
 	private static void sendTaskAcquired(final Room roomChannel) {
-		LoggerUtils.debug("CMS","CMS sends task aquired... ");
-		GameBus.getInstance().publish(new GameMessages.GameEvent(GameMessages.composeTaskAcquired(),roomChannel));
+		LoggerUtils.debug("CMS", "CMS sends task aquired... ");
+		GameBus.getInstance().publish(
+				new GameMessages.GameEvent(GameMessages.composeTaskAcquired(),
+						roomChannel));
 	}
 
 	public static HashSet<String> retrieveTags(JsonNode imageSegments) {
@@ -651,7 +744,6 @@ public class CMS {
 		return imageIds;
 	}
 
-
 	/**
 	 * Retrive all the tasks' ids that are stored in the system
 	 * 
@@ -765,7 +857,7 @@ public class CMS {
 							+ "/wsmc/content/" + tmpTag + ".json");
 					object2 = itemTag.get("itemAnnotations").get(0)
 							.get("value");
-					//count number of annotations for that given tag
+					// count number of annotations for that given tag
 
 					if (descObj.has("segmentation")) {
 						annotArr = descObj.get("segmentation");
@@ -865,7 +957,8 @@ public class CMS {
 	 *         its microtask (id, type, status)
 	 * @throws JSONException
 	 */
-	public static String retriveTaskInfo(final JsonNode jsonTasks) throws JSONException {
+	public static String retriveTaskInfo(final JsonNode jsonTasks)
+			throws JSONException {
 
 		final JSONArray info = new JSONArray();
 		final JsonNode utaskId;
@@ -875,7 +968,6 @@ public class CMS {
 		final JSONArray utasks = new JSONArray();
 		final int j = 0;
 		String tmpUtask, status, utaskType;
-
 
 		if (jsonTasks.has("utasks")) {
 
@@ -927,8 +1019,6 @@ public class CMS {
 		 * final String result = info.toString(); return result;
 		 */
 	}
-
-
 
 	/**
 	 * Retrive the list of collections id
@@ -992,23 +1082,17 @@ public class CMS {
 			}
 		}// if se c'è campo images
 		/*
-			while (i < jsonCollection.get("images").size()) {
-				element = new JSONObject();
-				object = jsonCollection.get("images").get(i);
-				element.put("id", object.get("id"));
-				imageIds.put(element);
-				i++;
-			}
+		 * while (i < jsonCollection.get("images").size()) { element = new
+		 * JSONObject(); object = jsonCollection.get("images").get(i);
+		 * element.put("id", object.get("id")); imageIds.put(element); i++; }
 		 */
 		finalElement = new JSONObject();
 		finalElement.put("images", imageIds);
 		info.put(finalElement);
 		final String result = info.toString();
 		return result;
-		//return imageIds;
+		// return imageIds;
 	}
-
-
 
 	/**
 	 * Close a particulr task
@@ -1313,8 +1397,10 @@ public class CMS {
 			if (object.get("type").asText().equals("segmentation")) {
 				if (object.has("user")) {
 					if (object.get("user").has("cubrik_userid")) {
-						sorting = new SortObject() {};
-						sorting.setIdU(object.get("user").get("cubrik_userid").asInt());
+						sorting = new SortObject() {
+						};
+						sorting.setIdU(object.get("user").get("cubrik_userid")
+								.asInt());
 						sorting.setIdTmp(object.get("id").asInt());
 						sorting.setImgTmp(object.get("imageid").asInt());
 						tempList.add(j, sorting);
@@ -1511,16 +1597,55 @@ public class CMS {
 	 * 
 	 * @return String retrieved tag following a policy
 	 */
-	private static String chooseTag(final HashSet<String> tags) {
+	private static String chooseTag(final HashSet<String> tags,
+			final HashMap<String, Integer> tagsCount) {
 		if (tags != null && tags.size() > 0) {
-			final Object[] stringTags = tags.toArray();
-			final String toReturn = (String) stringTags[(new Random()
-			.nextInt(tags.size()))];
-			return toReturn;
+			if (tagsCount == null) {
+
+				final Object[] stringTags = tags.toArray();
+				final String toReturn = (String) stringTags[(new Random()
+				.nextInt(tags.size()))];
+				return toReturn;
+			} else {
+				final Map<String, Integer> sorted = sortByValue(tagsCount);
+				final Iterator<String> it = sorted.keySet().iterator();
+				while (it.hasNext()) {
+					final String tag = it.next();
+					if (sorted.get(tag) > 2) {
+						return null;
+					}
+					if (tags.contains(tag)) {
+						return tag;
+					}
+				}
+				final Object[] stringTags = tags.toArray();
+				final String toReturn = (String) stringTags[(new Random()
+				.nextInt(tags.size()))];
+				return toReturn;
+
+			}
 		} else {
 			return "";
 		}
 	}
 
+	public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(
+			final Map<K, V> map) {
+		final List<Map.Entry<K, V>> list = new LinkedList<Map.Entry<K, V>>(
+				map.entrySet());
+		Collections.sort(list, new Comparator<Map.Entry<K, V>>() {
+			@Override
+			public int compare(final Map.Entry<K, V> o1,
+					final Map.Entry<K, V> o2) {
+				return (o1.getValue()).compareTo(o2.getValue());
+			}
+		});
+
+		final Map<K, V> result = new LinkedHashMap<K, V>();
+		for (final Map.Entry<K, V> entry : list) {
+			result.put(entry.getKey(), entry.getValue());
+		}
+		return result;
+	}
 
 }
