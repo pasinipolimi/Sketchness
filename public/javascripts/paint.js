@@ -763,10 +763,12 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					});
 
 					elements.viewport.on((sk.isMobile ? "touchmove" : "mousemove"), function(e) {
-						e.preventDefault();
-						setPoint(e);
-						if (canSendNow()) 
-							sendPoints();
+						if(started) {
+							e.preventDefault();
+							setPoint(e);
+							if (canSendNow()) 
+								sendPoints();
+						}
 					});
 
 					$(document).on((sk.isMobile ? "touchend" : "mouseup"), function(e) {
