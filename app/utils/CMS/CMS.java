@@ -352,13 +352,10 @@ public class CMS {
 			retrieveImages(tasksToAdd, queueImages, roomChannel,
 					uploadedTasks > 0);
 		}
-<<<<<<< HEAD
 		LoggerUtils.debug("CMS","Task init from CMS end");
 	}                                      
-=======
-		LoggerUtils.debug("CMS", "Task init from CMS end");
-	}
->>>>>>> ef306f2630d2081a9bfdb4844595c80228fc0161
+
+
 
 	private static void retrieveImages(final Integer tasksToAdd,
 			final List<ObjectNode> queueImages, final Room roomChannel,
