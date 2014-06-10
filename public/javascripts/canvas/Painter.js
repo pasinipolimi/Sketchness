@@ -78,6 +78,15 @@ define(["Class", "./Image", "./Path", "./Position"], function(Class, Image, Path
 			},
 
 			/**
+			 * Set the current position
+			 *
+			 * @param point :paper.Point The x y coordinates of the point
+			 */
+			setPosition: function(point) {
+				this.position.draw(point);
+			},
+
+			/**
 			 * Hides the position from the canvas.
 			 */
 			hidePosition: function() {

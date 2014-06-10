@@ -26,7 +26,7 @@ public class LanguagePicker {
                 platformLang = "undefined";
                 langCode = 0;
         }
-        playLang = new Lang(play.api.i18n.Lang.apply(retrieved.language()));
+        playLang = new Lang(play.api.i18n.Lang.apply("en"));
     }
 
     public static String retrieveIsoCode() {

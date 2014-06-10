@@ -302,7 +302,7 @@ public class CMS {
 					uploadedTasks > 0);
 		}
 		LoggerUtils.debug("CMS","Task init from CMS end");
-	}
+	}                                      
 
 	private static void retrieveImages(final Integer tasksToAdd,
 			final List<ObjectNode> queueImages, final Room roomChannel,
