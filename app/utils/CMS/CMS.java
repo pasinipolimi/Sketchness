@@ -274,7 +274,7 @@ public class CMS {
 					}
 					// Add one tag among the ones that have been retrieved
 					// following a particular policy
-					guessWord.put("tag", chooseTag(tags, null));
+					guessWord.put("tag", chooseTag(tags));
 					guessWord.put("lang", LanguagePicker.retrieveIsoCode());
 					guessWord.put("image", url);
 					guessWord.put("width", width);
@@ -373,7 +373,7 @@ public class CMS {
 			params.put("nocache", String.valueOf(System.currentTimeMillis()));
 			// params.put("select", "id");
 			params.put("select", "all");
-			params.put("policy", POLICY);
+			params.put("policy", "fashionista");
 			retrievedImagesOrdered = jsonReader.readJsonArrayFromUrl(rootUrl
 					+ "/wsmc/image.json", params);
 			LoggerUtils.debug("CMS", "Requested image list to CMS end");
@@ -385,36 +385,31 @@ public class CMS {
 			if (item.elements().hasNext()) {
 				// Save information related to the image
 				final String id = item.get("id").asText();
-				// final String url = rootUrl +
-				// item.get("mediaLocator").asText();
-				// final Integer width = item.get("width").asInt();
-				// final Integer height = item.get("height").asInt();
 
 				// Get all the segments that have been stored for the image
 				final JsonNode imageSegments = item.get("descriptions");
 				HashSet<String> tags = new HashSet<>();
-				HashMap<String, Integer> tagsCount = new HashMap<>();
 				final ObjectNode guessWord = Json.newObject();
 				guessWord.put("type", "task");
 				guessWord.put("id", id);
 				// Find the valid tags for this task.
 				if (imageSegments != null) {
 					tags = retrieveTagsLight(imageSegments);
-					tagsCount = retrieveTagsCount(tags, imageSegments);
 				}
 
-				buildGuessWordSegment(guessWord, tags, item, tagsCount);
-				if (guessWord != null) {
+				buildGuessWordSegment(
+						guessWord, tags, item);
 
-					queueImages.add(guessWord);
 
-					if (!taskSent) {
-						taskSent = true;
-						LoggerUtils.debug("CMS", "Send task aquired for image:"
-								+ id + ", rooomChanel: " + roomChannel);
-						sendTaskAcquired(roomChannel);
-					}
+				queueImages.add(guessWord);
+
+				if (!taskSent) {
+					taskSent = true;
+					LoggerUtils.debug("CMS", "Send task aquired for image:"
+							+ id + ", rooomChanel: " + roomChannel);
+					sendTaskAcquired(roomChannel);
 				}
+
 			}
 		}
 
@@ -451,24 +446,25 @@ public class CMS {
 		final HashSet<String> tags = new HashSet<>();
 
 		imageSegments = imageSegments.get("availableTags");
-		if (imageSegments != null) {
-			if (imageSegments.elements().hasNext()) {
-				for (final JsonNode segment : imageSegments) {
-					// Retrieve the content descriptor
-					if (null != segment) {
-						// Logger.debug("send request to retrieve tags "
-						// + segment.get("id").textValue());
-
-						if (segment.get("lang").textValue()
-								.equals(LanguagePicker.retrieveIsoCode())
-								|| LanguagePicker.retrieveIsoCode().equals("")) {
-							tags.add(segment.get("value").textValue());
-						}
-
-					}
-				}
-			}
-		}
+		tags.add(imageSegments.textValue());
+		// if (imageSegments != null) {
+		// if (imageSegments.elements().hasNext()) {
+		// for (final JsonNode segment : imageSegments) {
+		// // Retrieve the content descriptor
+		// if (null != segment) {
+		// // Logger.debug("send request to retrieve tags "
+		// // + segment.get("id").textValue());
+		//
+		// if (segment.get("lang").textValue()
+		// .equals(LanguagePicker.retrieveIsoCode())
+		// || LanguagePicker.retrieveIsoCode().equals("")) {
+		// tags.add(segment.get("value").textValue());
+		// }
+		//
+		// }
+		// }
+		// }
+		// }
 		return tags;
 	}
 
@@ -578,18 +574,13 @@ public class CMS {
 		return uploadedTasks;
 	}
 
-	private static void buildGuessWordSegment(ObjectNode guessWord,
-			final HashSet<String> tags, final JsonNode image,
-			final HashMap<String, Integer> tagsCount) {
+	private static void buildGuessWordSegment(final ObjectNode guessWord,
+			final HashSet<String> tags, final JsonNode image) {
 		// Add one tag among the ones that have been retrieved following
 		// a particular policy
-		final String tag = chooseTag(tags, tagsCount);
-		if (tag == null) {
-			// non ci sono piu tag disponibili per questa immagine, smetto di
-			// processarla
-			guessWord = null;
-		}
-		guessWord.put("tag", chooseTag(tags, tagsCount));
+		final String tag = chooseTag(tags);
+
+		guessWord.put("tag", tag);
 		guessWord.put("lang", LanguagePicker.retrieveIsoCode());
 		guessWord.put("image", rootUrl + image.get("mediaLocator").asText());
 		guessWord.put("width", image.get("width").asInt());
@@ -600,7 +591,7 @@ public class CMS {
 	private static void buildGuessWordSegmentTask(final ObjectNode guessWord,
 			final HashSet<String> tags, final JsonNode image,
 			final String taskId, final JsonNode utask) {
-		buildGuessWordSegment(guessWord, tags, image, null);
+		buildGuessWordSegment(guessWord, tags, image);
 		guessWord.put("utaskid", utask.get("id").asInt());
 		guessWord.put("taskid", taskId);
 
@@ -608,7 +599,7 @@ public class CMS {
 
 	private static void buildGuessWordTagging(final ObjectNode guessWord,
 			final JsonNode image, final JsonNode utask, final String taskId) {
-		guessWord.put("tag", chooseTag(null, null));
+		guessWord.put("tag", chooseTag(null));
 		guessWord.put("lang", LanguagePicker.retrieveIsoCode());
 		guessWord.put("image", rootUrl + image.get("mediaLocator").asText());
 		guessWord.put("width", image.get("width").asInt());
@@ -866,19 +857,19 @@ public class CMS {
 						k = 0;
 
 						while (k < annotArr.size()) {
-                                                        try{
-                                                            if (annotArr
-                                                                            .get(k)
-                                                                            .get("annotation_value")
-                                                                            .asText()
-                                                                            .equals(itemTag.get("itemAnnotations")
-                                                                                            .get(0).get("value").asText())) {
-                                                                    count++;
-                                                            }
-                                                        }
-                                                        catch(Exception e) {
-                                                            LoggerUtils.error("CMS","Could not retrieve annotation value for"+annotArr.get(k));
-                                                        }
+							try{
+								if (annotArr
+										.get(k)
+										.get("annotation_value")
+										.asText()
+										.equals(itemTag.get("itemAnnotations")
+												.get(0).get("value").asText())) {
+									count++;
+								}
+							}
+							catch(final Exception e) {
+								LoggerUtils.error("CMS","Could not retrieve annotation value for"+annotArr.get(k));
+							}
 							k++;
 						}
 
@@ -1597,33 +1588,14 @@ public class CMS {
 	 * 
 	 * @return String retrieved tag following a policy
 	 */
-	private static String chooseTag(final HashSet<String> tags,
-			final HashMap<String, Integer> tagsCount) {
+	private static String chooseTag(final HashSet<String> tags) {
 		if (tags != null && tags.size() > 0) {
-			if (tagsCount == null) {
 
-				final Object[] stringTags = tags.toArray();
-				final String toReturn = (String) stringTags[(new Random()
-				.nextInt(tags.size()))];
-				return toReturn;
-			} else {
-				final Map<String, Integer> sorted = sortByValue(tagsCount);
-				final Iterator<String> it = sorted.keySet().iterator();
-				while (it.hasNext()) {
-					final String tag = it.next();
-					if (sorted.get(tag) > 2) {
-						return null;
-					}
-					if (tags.contains(tag)) {
-						return tag;
-					}
-				}
-				final Object[] stringTags = tags.toArray();
-				final String toReturn = (String) stringTags[(new Random()
-				.nextInt(tags.size()))];
-				return toReturn;
+			final Object[] stringTags = tags.toArray();
+			final String toReturn = (String) stringTags[(new Random()
+			.nextInt(tags.size()))];
+			return toReturn;
 
-			}
 		} else {
 			return "";
 		}
