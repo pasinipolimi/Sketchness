@@ -88,6 +88,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			showPaletteOnly: true,
 			showPalette:true,
 			color: 'red',
+			preferredFormat: 'rgb',
 			palette: [
 				['red', 'yellow', 'green', 'blue']
 			],
@@ -727,6 +728,15 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							that.communicator.send("point", point);
 						}
 					};
+
+					var setPosition = function(event) {
+						var point = relativePosition(event, elements.viewport);
+
+						if (point != null && point.x > 0 && point.x < elements.viewport.width() && point.y > 0 && point.y < elements.viewport.height()) {
+							painter.setPosition(point);
+							that.communicator.send("point", point);
+						}
+					};
 					
 					var addPoint = function(x, y, size, color) {
 						sketchness.points.push({
@@ -769,6 +779,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							if (canSendNow()) 
 								sendPoints();
 						}
+						setPosition(e);
 					});
 
 					$(document).on((sk.isMobile ? "touchend" : "mouseup"), function(e) {

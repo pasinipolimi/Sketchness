@@ -33,7 +33,7 @@ define(["Class", "paper"], function(Class, paper) {
 
 			this.group = new paper.Group({
 				children: [this.circle, this.pointText],
-				visible: false
+				visible: true
 			});
 
 			this.changed = false;
@@ -47,7 +47,32 @@ define(["Class", "paper"], function(Class, paper) {
 			 */
 			setSize: function(size) {
 				this.bounds.setSize(new paper.Size(size, size));
+				this.setRadius(this.circle,size/2);
 				this.changed = true;
+			},
+
+
+			/**
+			 * Get the radius of a shape.
+			 *
+			 * @param path :paper.Path the path from which retrieve the radius
+			 */
+			getRadius: function(path) {
+				return path.bounds.width / 2 + path.strokeWidth / 2;
+				// or return path.strokeBounds.width / 2; 
+			},
+
+			/**
+			 * Set the radius of a shape.
+			 *
+			 * @param path :paper.Path the path from which retrieve the radius, radius :Number
+			 */
+			setRadius: function(path, radius) {
+				// figure out what the new radius should be without the stroke
+				var newRadiusWithoutStroke = radius - path.strokeWidth / 2;
+				// figure out what the current radius is without the stroke 
+				var oldRadiusWithoutStroke = path.bounds.width / 2;
+				path.scale(newRadiusWithoutStroke / oldRadiusWithoutStroke);
 			},
 
 			/**
@@ -77,12 +102,13 @@ define(["Class", "paper"], function(Class, paper) {
 			 */
 			draw: function(position) {
 				if(this.changed) {
+					//this.circle = new paper.Path.Circle(new paper.Point(position.x, position.y), 50);
 					this.circle.setStrokeColor(this.color);
 					this.pointText.setFillColor(this.color);
 
 					this.bounds.setCenter(position);
 
-					this.circle.fitBounds(this.bounds);
+					this.circle.setPosition(position.x,position.y);
 
 					this.pointText.setContent(this.text);
 					this.pointText.setPosition(this.bounds.topCenter.subtract([0, this.pointText.bounds.height]));
