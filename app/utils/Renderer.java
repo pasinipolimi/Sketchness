@@ -12,6 +12,7 @@ import java.awt.image.ImageFilter;
 import java.awt.image.ImageProducer;
 import java.awt.image.RGBImageFilter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import compgeom.RLineSegment2D;
 import compgeom.RPoint2D;
 import compgeom.algorithms.BentleyOttmann;
@@ -962,7 +964,7 @@ public class Renderer extends UntypedActor {
 					String y2 = p2y[0];
 					point1 = new RPoint2D(Integer.parseInt(x1),Integer.parseInt(y1));
 					point2 = new RPoint2D(Integer.parseInt(x2),Integer.parseInt(y2));
-					for(int t=0;t<vertices.size();t++){
+					for(int t=0;t<vertices.size()-1;t++){
 						if((vertices.get(t).equals(point1))&&(vertices.get(t+1).equals(point2))){
 							finalVertices.add(t+1,key);
 							indices.add(t+1);
@@ -1061,9 +1063,7 @@ public class Renderer extends UntypedActor {
 		return sendPoints;
 
 	}
-
-
-
+	
 
 }
 

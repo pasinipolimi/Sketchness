@@ -17,6 +17,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			word: null,
 			points: [],
 			pointsList: [],
+			ratio: 0,
+			area: 0,
 			image: null,
 			stopDrawing: false,
 			stopCheckingArea: false,
@@ -1068,6 +1070,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					var that = this,
 					painter = this.painter,
 					sk = this.sketchness;
+					var area_polygon = 0;
 					
 					areaFunction = setInterval(function(){checkArea()}, 5000);
 
@@ -1075,7 +1078,9 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 						if(sk.pointsList.length>1){
 							
-							checkAreaBentley(sk.pointsList);
+							checkAreaBentley(sk);
+							alert(sk.area);
+
 						}
 						
 					}                    
@@ -1103,6 +1108,29 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						    var canvas = document.getElementById("draws");
 		                	var ctx = canvas.getContext("2d");
 		                	ctx.clearRect(0,0,canvas.width,canvas.height);
+		                	//compute scaling factor to compute area
+		                	
+		                	var image_original_width = content.width;
+		        			var image_original_height = content.height;
+
+		        			if(image_original_width >= image_original_height){
+
+		        				var image_scaled_width = canvas.width;
+		        				var image_scaled_height = canvas.width * image_original_height / image_original_width;
+		        			}
+		        			else{
+		        				var image_scaled_width = canvas.height * image_original_width / image_original_height;
+		        				var image_scaled_height = canvas.height;
+
+		        			}
+
+		        			if(image_original_width>image_scaled_width){
+		        				sk.ratio = image_scaled_width/image_original_width;
+		        			}
+		        			else{
+		        				sk.ratio = image_original_width/image_scaled_width;
+		        			}
+
 		                	sk.stopDrawing = false;
 							painter.showImage(content.url, content.width, content.height);
 							guessTag(content.id,that,sk);
@@ -1916,9 +1944,11 @@ function guessTag(idselected, that, sk){
 }
 
 
-function checkAreaBentley(pointsList){
+function checkAreaBentley(sk){
 
 	var total_area = 0;
+	var pointsList = sk.pointsList;
+	var ratio = sk.ratio;
 
 	function polygonArea(X, Y, numPoints) 
 	{ 
@@ -1936,7 +1966,7 @@ function checkAreaBentley(pointsList){
 	  else{
 		  final_area = area/2;
 	  }
-	  
+	 
 	  total_area = total_area + final_area;
 
 	}
@@ -1968,7 +1998,8 @@ function checkAreaBentley(pointsList){
 	                	polygonArea(Xarray, Yarray, Xarray.length);
 	                	
 	                });
-
+	                //Scaling "square law"
+	                sk.area = total_area * ratio * ratio;
 	            }
 	            else{
 	                alert("Request was unsuccesfull: "+ xhr.status);
@@ -1976,7 +2007,7 @@ function checkAreaBentley(pointsList){
 	        }
 	    }
 	});
-	
+
 	
 }
 
