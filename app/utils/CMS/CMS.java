@@ -434,8 +434,6 @@ public class CMS {
 									// FIXME non necessario, ho gia tutto
 									// quello
 									// che mi serve
-									
-									//if(!((requiredPlayers==1)&&(utask.get("utaskType").asText().equals("tagging")))){
 										
 										final ObjectNode guessWord = Json.newObject();
 										guessWord.put("type", "task");
@@ -447,15 +445,18 @@ public class CMS {
 										// are supported for the images.
 										switch (utask.get("utaskType").asText()) {
 										case "tagging":
-											buildGuessWordTagging(guessWord, image,
-													utask, taskId);
-	
-											priorityTaskHashSet.add(guessWord);
-											uploadedTasks++;
-											if (!taskSent) {
-												taskSent = true;
-												sendTaskAcquired(roomChannel);
+											if(!((requiredPlayers==1)&&(utask.get("utaskType").asText().equals("tagging")))){
+												buildGuessWordTagging(guessWord, image,
+														utask, taskId);
+		
+												priorityTaskHashSet.add(guessWord);
+												uploadedTasks++;
+												if (!taskSent) {
+													taskSent = true;
+													sendTaskAcquired(roomChannel);
+												}
 											}
+											
 											break;
 										case "segmentation":
 											HashSet<String> tags;
@@ -478,7 +479,6 @@ public class CMS {
 											break;
 										}
 										break;
-									//}
 								}
 							}
 						}

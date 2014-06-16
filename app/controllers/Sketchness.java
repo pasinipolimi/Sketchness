@@ -1,5 +1,6 @@
 package controllers;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.json.JSONException;
@@ -8,7 +9,11 @@ import models.User;
 import models.game.GameFactory;
 import models.lobby.LobbyFactory;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import play.Logger;
 import play.i18n.Lang;
@@ -267,6 +272,32 @@ public class Sketchness extends Controller {
 	}	
 
 
+	public static Result bentleyOttmann() throws JSONException {
+		
+		final String points = request().getHeader("points");
+
+		
+		ObjectMapper mapper = new ObjectMapper();
+		JsonFactory factory = mapper.getJsonFactory();
+		JsonParser jp;
+		JsonNode actualObj = null;
+		try {
+			jp = factory.createJsonParser(points);
+			actualObj = mapper.readTree(jp);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String finalPoints = Renderer.retrievePoints(actualObj);
+		
+		return ok(finalPoints);
+
+	}
+	
 }
 
 //}

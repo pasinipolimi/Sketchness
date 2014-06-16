@@ -505,6 +505,16 @@ public class Game extends GameRoom {
 			// not, ask for a new one
 			try {
 				taskImage = retrieveTaskImage();
+				String lab = taskImage.get("tag").asText();
+				if(requiredPlayers==1){
+					while((lab.equals(""))&&taskImage!=null){
+						taskImage = retrieveTaskImage();
+						lab = taskImage.get("tag").asText();
+					}
+					
+				}
+				
+				
 			} // We cannot recover the task to be done, recover the error by
 			// closing
 			// the game

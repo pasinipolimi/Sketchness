@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
@@ -47,6 +49,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import compgeom.RLineSegment2D;
+import compgeom.RPoint2D;
+import compgeom.algorithms.BentleyOttmann;
 
 public class Renderer extends UntypedActor {
 
@@ -887,6 +892,174 @@ public class Renderer extends UntypedActor {
 		final String result = info.toString();
 		return result;
 		
+	}
+	
+	public static String retrievePoints(final JsonNode jsonPoints) throws JSONException {
+
+		
+		int i = 0;
+		JsonNode object;
+		Integer x,y;
+		RPoint2D tempPoint;
+		ArrayList<RPoint2D> vertices = new ArrayList<RPoint2D>();
+		ArrayList<RPoint2D> finalVertices = new ArrayList<RPoint2D>();
+		
+		
+		while (i < jsonPoints.size()) {
+			object = jsonPoints.get(i);
+			if (object.has("x")) {
+				x = object.get("x").asInt();
+				y = object.get("y").asInt();
+				tempPoint = new RPoint2D(x,y);
+				finalVertices.add(tempPoint);
+				vertices.add(tempPoint);
+			}
+			i++;
+		}// fine while
+		
+		RLineSegment2D seg;
+		Set<RLineSegment2D> segments = new HashSet<RLineSegment2D>();
+		
+		for(int j=0;j<vertices.size()-1;j++){
+			seg = new RLineSegment2D(vertices.get(j), vertices.get(j+1));
+			segments.add(seg);
+		}
+		//add segment to close polygon
+		seg = new RLineSegment2D(vertices.get(vertices.size()-1), vertices.get(0));
+		segments.add(seg);
+
+		
+		Set<RLineSegment2D> segmentsInters;
+		Map<RPoint2D, Set<RLineSegment2D>> map = BentleyOttmann.intersectionsMap(segments);
+		
+		String segment;
+		RPoint2D point1,point2;
+		
+		final JSONObject result = new JSONObject();
+		final JSONArray polygons = new JSONArray();
+		JSONArray polygon = new JSONArray();
+		JSONObject ver;
+		//JSONObject first;
+		RPoint2D vertex;
+		String v;
+		ArrayList<Integer> indices = new ArrayList<Integer>();
+
+		for ( RPoint2D key : map.keySet() ) {
+			segmentsInters = new HashSet<RLineSegment2D>();
+			if(!vertices.contains(key)){
+				segmentsInters = map.get(key);
+				for(RLineSegment2D s : segmentsInters){
+					segment = s.toString();
+					//retrieve x,y
+					String[] p = segment.split("\\(");
+					String[] p1 = p[1].split(",");
+					String x1 = p1[0];
+					String[] p1y = p1[1].split("\\)");
+					String y1 = p1y[0];
+					String[] p2 = p[2].split(",");
+					String x2 = p2[0];
+					String[] p2y = p2[1].split("\\)");
+					String y2 = p2y[0];
+					point1 = new RPoint2D(Integer.parseInt(x1),Integer.parseInt(y1));
+					point2 = new RPoint2D(Integer.parseInt(x2),Integer.parseInt(y2));
+					for(int t=0;t<vertices.size();t++){
+						if((vertices.get(t).equals(point1))&&(vertices.get(t+1).equals(point2))){
+							finalVertices.add(t+1,key);
+							indices.add(t+1);
+						}
+					}
+
+				}
+			}
+			
+		}
+
+		for(int j=0;j<indices.size();j++){
+			if(j==0){
+				polygon = new JSONArray();
+
+				for(int k=0;k<=indices.get(j);k++){
+					vertex = finalVertices.get(k);
+					v = vertex.toString();
+					String[] p = v.split("\\(");
+					String[] p1 = p[1].split(",");
+					String x1 = p1[0];
+					String[] p1y = p1[1].split("\\)");
+					String y1 = p1y[0];
+					ver = new JSONObject();
+					ver.put("x",x1);
+					ver.put("y", y1);
+					polygon.put(ver);
+				
+				}
+
+				polygons.put(polygon);
+				
+			}
+			else{
+				polygon = new JSONArray();
+
+				for(int k=indices.get(j-1);k<indices.get(j);k++){
+					vertex = finalVertices.get(k);
+					v = vertex.toString();
+					String[] p = v.split("\\(");
+					String[] p1 = p[1].split(",");
+					String x1 = p1[0];
+					String[] p1y = p1[1].split("\\)");
+					String y1 = p1y[0];
+					ver = new JSONObject();
+					ver.put("x",x1);
+					ver.put("y", y1);
+					polygon.put(ver);
+	
+				}
+
+				polygons.put(polygon);
+			}
+		}
+		//add remaining points as last polygon
+		polygon = new JSONArray();
+
+		if(indices.size()!=0){
+
+			for(int k=indices.get(indices.size()-1);k<finalVertices.size();k++){
+				vertex = finalVertices.get(k);
+				v = vertex.toString();
+				String[] p = v.split("\\(");
+				String[] p1 = p[1].split(",");
+				String x1 = p1[0];
+				String[] p1y = p1[1].split("\\)");
+				String y1 = p1y[0];
+				ver = new JSONObject();
+				ver.put("x",x1);
+				ver.put("y", y1);
+				polygon.put(ver);
+
+			}
+
+			polygons.put(polygon);
+		}
+		else{
+			for(int k=0; k<finalVertices.size();k++){
+				vertex = finalVertices.get(k);
+				v = vertex.toString();
+				String[] p = v.split("\\(");
+				String[] p1 = p[1].split(",");
+				String x1 = p1[0];
+				String[] p1y = p1[1].split("\\)");
+				String y1 = p1y[0];
+				ver = new JSONObject();
+				ver.put("x",x1);
+				ver.put("y", y1);
+				polygon.put(ver);
+			}
+			polygons.put(polygon);
+		}
+
+		result.append("polygons", polygons);
+		final String sendPoints = result.toString();
+		return sendPoints;
+
 	}
 
 

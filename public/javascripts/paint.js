@@ -16,8 +16,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			task: null,
 			word: null,
 			points: [],
+			pointsList: [],
 			image: null,
 			stopDrawing: false,
+			stopCheckingArea: false,
 			lastSent: 0,
 			traceNum: 1,
 			isMobile: /ipad|iphone|android/i.test(navigator.userAgent)
@@ -33,7 +35,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 		var constants = {
 			tagTime: 30,
 			//taskTime: 120,
-			taskTime: 5,
+			taskTime: 30,
 			solutionTime: 3,
 			minSendRate: 50
 		};
@@ -67,6 +69,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 		};
 		
 		var write = new Writer(elements, sketchness.myself);
+		
+		var areaFunction;
 		
 		var communicator = new Communicator(elements.websocket.data('ws'));
 		$(communicator.websocket).on({
@@ -495,6 +499,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						//this.skipRound();
 						//console.log("[SENDING MESSAGE] skip");
 						//this.communicator.send("skip", {});
+						clearInterval(areaFunction);
+						sketchness.pointsList = [];
 						this.nextRound();
 					}
 					else{
@@ -861,6 +867,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							size: size,
 							color: color
 						});
+					
 					};
 					
 					var canSendNow = function() {
@@ -889,10 +896,12 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					});
 
 					elements.viewport.on((sk.isMobile ? "touchmove" : "mousemove"), function(e) {
-						e.preventDefault();
-						setPoint(e);
-						if (canSendNow()) 
-							sendPoints();
+						if(started) {
+							e.preventDefault();
+							setPoint(e);
+							if (canSendNow()) 
+								sendPoints();
+						}
 					});
 
 					$(document).on((sk.isMobile ? "touchend" : "mouseup"), function(e) {
@@ -1056,6 +1065,21 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 */
 				onentertaskDrawingBot: function() {
 
+					var that = this,
+					painter = this.painter,
+					sk = this.sketchness;
+					
+					areaFunction = setInterval(function(){checkArea()}, 5000);
+
+					function checkArea() {
+
+						if(sk.pointsList.length>1){
+							
+							checkAreaBentley(sk.pointsList);
+						}
+						
+					}                    
+
 					var elements = this.elements;
 					elements.main.addClass("sketcher");
 					this.write.top($.i18n.prop("draw"), this.sketchness.word);
@@ -1069,9 +1093,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					console.log("[BEGIN] TaskDrawingBot");
 					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
 					
-					var that = this,
-						painter = this.painter,
-						sk = this.sketchness;
+					
 
 					painter.setName(sk.players[sk.sketcher].name);
 
@@ -1237,6 +1259,25 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							size: size,
 							color: color
 						});
+						if(sketchness.pointsList.length==0){
+							sketchness.pointsList.push({
+								x: x,
+								y: y,
+								size: size,
+								color: color
+							});
+						}
+						else{
+							if((sketchness.pointsList[sketchness.pointsList.length - 1].x != x)&&(sketchness.pointsList[sketchness.pointsList.length - 1].y != y)){
+								sketchness.pointsList.push({
+									x: x,
+									y: y,
+									size: size,
+									color: color
+								});
+							}
+						}
+
 					};
 					
 					var canSendNow = function() {
@@ -1265,10 +1306,12 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					});
 
 					elements.viewport.on((sk.isMobile ? "touchmove" : "mousemove"), function(e) {
-						e.preventDefault();
-						setPoint(e);
-						if (canSendNow()) 
-							sendPoints();
+						if(started) {
+							e.preventDefault();
+							setPoint(e);
+							if (canSendNow()) 
+								sendPoints();
+						}
 					});
 
 					$(document).on((sk.isMobile ? "touchend" : "mouseup"), function(e) {
@@ -1871,3 +1914,72 @@ function guessTag(idselected, that, sk){
 	    }
 	});
 }
+
+
+function checkAreaBentley(pointsList){
+
+	var total_area = 0;
+
+	function polygonArea(X, Y, numPoints) 
+	{ 
+	  area = 0;         // Accumulates area in the loop
+	  j = numPoints-1;  // The last vertex is the 'previous' one to the first
+
+	  for (i=0; i<numPoints; i++)
+	    { 
+		  area = area +  (X[j]+X[i]) * (Y[j]-Y[i]); 
+	      j = i;  //j is previous vertex to i
+	    }
+	  if(area<0){
+		  final_area = - area/2;
+	  }
+	  else{
+		  final_area = area/2;
+	  }
+	  
+	  total_area = total_area + final_area;
+
+	}
+	
+	var pointsJson = JSON.stringify(pointsList);
+
+	$.jAjax({
+	    url: "bentleyOttmann",
+	    headers : {"points" : pointsJson},
+	    onComplete: function(xhr,status){
+	        if(xhr.readyState === 4){
+	            if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
+
+	                var result = JSON.parse(xhr.responseText);
+	                var polygons = result.polygons[0];
+	                
+	                $.each(polygons, function(i,d){
+	                	
+	                	var Xarray = [];
+	                	var Yarray = [];
+
+	                	 $.each(d, function(j,k){
+
+	                		 Xarray.push(parseInt(k.x));
+	                 		 Yarray.push(parseInt(k.y));
+
+	                	 });
+
+	                	polygonArea(Xarray, Yarray, Xarray.length);
+	                	
+	                });
+
+	            }
+	            else{
+	                alert("Request was unsuccesfull: "+ xhr.status);
+	            }
+	        }
+	    }
+	});
+	
+	
+}
+
+
+
+

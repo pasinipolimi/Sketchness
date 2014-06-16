@@ -49,6 +49,7 @@ GET     /retrieveMaskImage                controllers.Utilities.retrieveMaskImag
 
 GET		/segmentationImage				  controllers.Sketchness.segmentationImageCall
 GET		/taggingImage					  controllers.Sketchness.taggingImageCall
+GET		/bentleyOttmann					  controllers.Sketchness.bentleyOttmann
 
 
 # Map static resources from the /public folder to the /assets URL path
