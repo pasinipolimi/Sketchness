@@ -326,6 +326,7 @@ public class CMS {
 			throw new RuntimeException(
 					"[CMS] The request to the CMS is malformed");
 		}
+		Logger.info(String.valueOf(retrievedImagesOrdered.size()));
 		for (final JsonNode item : retrievedImagesOrdered) {
 			if (item.elements().hasNext()) {
 				// Save information related to the image

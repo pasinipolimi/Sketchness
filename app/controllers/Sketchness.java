@@ -300,7 +300,21 @@ public class Sketchness extends Controller {
 
 	}
 	
+	public static Result poseClassifier() throws JSONException {
+		
+		final String pose = request().getHeader("pose");
+		final String ratio = request().getHeader("ratio");
+		final String result = Renderer.poseClassifier(pose, ratio);
+		return ok(result);
+	}		
 	
+	public static Result getPose() throws JSONException {
+
+		final String image_id = request().getHeader("idselected");
+		final String result = Renderer.getPose(image_id);
+		return ok(result);
+
+	}
 	
 }
 

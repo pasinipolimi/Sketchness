@@ -509,7 +509,9 @@ public class Game extends GameRoom {
 				if(requiredPlayers==1){
 					while((lab.equals(""))&&taskImage!=null){
 						taskImage = retrieveTaskImage();
-						lab = taskImage.get("tag").asText();
+						if(taskImage!=null){
+							lab = taskImage.get("tag").asText();
+						}
 					}
 					
 				}
@@ -955,6 +957,9 @@ public class Game extends GameRoom {
 		final ObjectNode leaderboard = new ObjectNode(factory);
 		leaderboard.put("type", "leaderboard");
 		leaderboard.put("playersNumber", playersVect.size());
+		if(requiredPlayers == 1){
+			leaderboard.put("singlePlayerName", singlePlayerName);
+		}
 		final Painter[] sorted = playersVect.toArray(new Painter[0]);
 		Arrays.sort(sorted);
 		final ArrayNode playersOrder = new ArrayNode(factory);

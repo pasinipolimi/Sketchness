@@ -12,6 +12,7 @@ import java.awt.image.ImageFilter;
 import java.awt.image.ImageProducer;
 import java.awt.image.RGBImageFilter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
@@ -38,6 +39,12 @@ import scala.concurrent.duration.Duration;
 import utils.CMS.CMS;
 import utils.aggregator.ContourAggregator;
 import utils.gamebus.GameMessages.Join;
+import weka.classifiers.functions.MultilayerPerceptron;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SerializationHelper;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
@@ -1062,6 +1069,115 @@ public class Renderer extends UntypedActor {
 		final String sendPoints = result.toString();
 		return sendPoints;
 
+	}
+	
+public static String poseClassifier(final String pose, final String ratio) throws JSONException{
+		
+
+		MultilayerPerceptron mpClassifier = null;
+		String result = "";
+		try {
+			//mpClassifier = (MultilayerPerceptron) SerializationHelper.read(new FileInputStream("C:/Users/Giorgia/multilayerPerceptronClassifier.model"));
+			mpClassifier = (MultilayerPerceptron) SerializationHelper.read(new FileInputStream("multilayerPerceptronClassifier.model"));
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+
+		}
+         
+        // Declare a nominal attribute along with its values
+        FastVector fvNominalVal = new FastVector(24);
+
+        fvNominalVal.addElement("socks");
+        fvNominalVal.addElement("skirt");
+        fvNominalVal.addElement("shirt");
+        fvNominalVal.addElement("bag");
+        fvNominalVal.addElement("shoes");
+        fvNominalVal.addElement("glasses");
+        fvNominalVal.addElement("hair");
+        fvNominalVal.addElement("skin");
+        fvNominalVal.addElement("necklace");
+        fvNominalVal.addElement("belt");
+        fvNominalVal.addElement("pants");
+        fvNominalVal.addElement("scarf");
+        fvNominalVal.addElement("hat");
+        fvNominalVal.addElement("bracelet");
+        fvNominalVal.addElement("watch");
+        fvNominalVal.addElement("dress");
+        fvNominalVal.addElement("accessories");
+        fvNominalVal.addElement("tie");
+        fvNominalVal.addElement("earrings");
+        fvNominalVal.addElement("bodysuit");
+        fvNominalVal.addElement("gloves");
+        fvNominalVal.addElement("wallet");
+        fvNominalVal.addElement("intimate");
+        fvNominalVal.addElement("blue");
+        
+        Attribute Attribute1 = new Attribute("label", fvNominalVal);
+        
+        // Declare a nominal attribute along with its values
+        FastVector fvNominalVal2 = new FastVector(5);
+
+        fvNominalVal2.addElement("feet");
+        fvNominalVal2.addElement("legs");
+        fvNominalVal2.addElement("torso");
+        fvNominalVal2.addElement("arms");
+        fvNominalVal2.addElement("head");
+        
+        Attribute Attribute2 = new Attribute("pose", fvNominalVal2);
+        
+        // Declare numeric attribute
+        Attribute Attribute3 = new Attribute("rapporto");
+         
+        // Declare the feature vector
+        FastVector fvWekaAttributes = new FastVector(3);
+        fvWekaAttributes.addElement(Attribute1);    
+        fvWekaAttributes.addElement(Attribute2);    
+        fvWekaAttributes.addElement(Attribute3);   
+        
+        // Create an empty training set
+        Instances instances = new Instances("Rel", fvWekaAttributes, 1);       
+         
+        // Set class index
+        instances.setClassIndex(0);
+        
+        // Create the instance
+        double ratioDouble = Double.parseDouble(ratio);
+        Instance i = new Instance(4);
+        i.setMissing(0);     
+        i.setValue((Attribute)fvWekaAttributes.elementAt(1), pose);      
+        i.setValue((Attribute)fvWekaAttributes.elementAt(2), ratioDouble);
+
+        // add the instance
+        instances.add(i);
+
+        // Classification/prediction
+        for (int k = 0; k < instances.numInstances(); k++) {
+			double clsLabel = 0;
+			try {
+				clsLabel = mpClassifier.classifyInstance(instances.instance(k));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			result = instances.classAttribute().value((int) clsLabel);
+			
+		}
+        final JSONObject res = new JSONObject();
+		res.append("cloth", result);
+		final String sendResult = res.toString();
+
+		return sendResult;
+	}
+
+	public static String getPose(final String image_id) throws JSONException{
+		final JsonReader jsonReader = new JsonReader();
+		JsonNode image = jsonReader.readJsonArrayFromUrl("http://localhost/cms/wsmc/image/"+image_id+".json");
+		String pose = image.get("pose").toString();
+		pose = pose.toString().replace("\\","");
+		pose = pose.substring(1, pose.length()-1);
+		return pose;
 	}
 	
 

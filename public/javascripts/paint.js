@@ -19,9 +19,11 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			pointsList: [],
 			ratio: 0,
 			area: 0,
+			currentPosition: null,
 			image: null,
 			stopDrawing: false,
 			stopCheckingArea: false,
+			singlePlayerName: "",
 			lastSent: 0,
 			traceNum: 1,
 			isMobile: /ipad|iphone|android/i.test(navigator.userAgent)
@@ -33,6 +35,35 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			width: null,
 			height: null
 		};
+		
+		var pose = {
+				head_x0: 0,
+				head_y0: 0,
+				head_x1: 0,
+				head_y1: 0,
+				torso_x0: 0,
+				torso_y0: 0,
+				torso_x1: 0,
+				torso_y1: 0,
+				left_arm_x0: 0,
+				left_arm_y0: 0,
+				left_arm_x1: 0,
+				left_arm_y1: 0,
+				right_arm_x0: 0,
+				right_arm_y0: 0,
+				right_arm_x1: 0,
+				right_arm_y1: 0,
+				legs_x0: 0,
+				legs_y0: 0,
+				legs_x1: 0,
+				legs_y1: 0,
+				feet_x0: 0,
+				feet_y0: 0,
+				feet_x1: 0,
+				feet_y1: 0,
+				area: 0
+					
+		}
 
 		var constants = {
 			tagTime: 30,
@@ -1072,14 +1103,15 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					sk = this.sketchness;
 					var area_polygon = 0;
 					
-					areaFunction = setInterval(function(){checkArea()}, 5000);
+					areaFunction = setInterval(function(){checkArea()}, 3000);
 
 					function checkArea() {
 
 						if(sk.pointsList.length>1){
 							
-							checkAreaBentley(sk);
-							alert(sk.area);
+							//checkAreaBentley(sk);
+		
+							getCurrentPosition(sk.pointsList[sk.pointsList.length-1],pose, sk, currentImage);
 
 						}
 						
@@ -1112,6 +1144,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 		                	
 		                	var image_original_width = content.width;
 		        			var image_original_height = content.height;
+		        			currentImage.width = content.width;
+		        			currentImage.height = content.height;
 
 		        			if(image_original_width >= image_original_height){
 
@@ -1124,13 +1158,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 		        			}
 
-		        			if(image_original_width>image_scaled_width){
-		        				sk.ratio = image_scaled_width/image_original_width;
-		        			}
-		        			else{
-		        				sk.ratio = image_original_width/image_scaled_width;
-		        			}
-
+		        			sk.ratio = image_scaled_width/image_original_width;
+		        			getPose(content.id, pose);
 		                	sk.stopDrawing = false;
 							painter.showImage(content.url, content.width, content.height);
 							guessTag(content.id,that,sk);
@@ -1157,6 +1186,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
                             write.players(sk.players);
                         },
                         leaderboard: function(e, content) {
+                        	sk.singlePlayerName = content.singlePlayerName;
                             console.log("[RECEIVED MESSAGE] leaderboard");
                             that.quit(content);
                         },
@@ -1468,6 +1498,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
                             write.players(sk.players);
                         },
                         leaderboard: function(e, content) {
+                        	sk.singlePlayerName = content.singlePlayerName;
                             console.log("[RECEIVED MESSAGE] leaderboard");
                             that.quit(content);
                         },
@@ -1576,18 +1607,15 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.eraser.hide();
 					
 					that.painter.showImage(currentImage.url, currentImage.width, currentImage.height);
-					/*
+					
 					this.communicator.on({
-						image: function(e, content) {
-						    console.log("[RECEIVED MESSAGE] image");
-							that.painter.showImage(content.url, content.width, content.height);
-						},
 						leave: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] leave");
                             delete sk.players[content.user];
                             write.players(sk.players);
                         },
 						leaderboard: function(e, content) {
+							sk.singlePlayerName = content.singlePlayerName;
 						    console.log("[RECEIVED MESSAGE] leaderboard");
 							that.quit(content);
 						},
@@ -1596,7 +1624,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							that.errorEvent();
 						}
 					});
-					*/
+					
 				},
 
 				/**
@@ -1634,7 +1662,20 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					for (var i = 0; i < this.scores.playerList.length; i++) {
 						results += ":" + this.scores.playerList[i].name + ":" + this.scores.playerList[i].points;
 					}
-
+					
+					if((Object.size(this.sketchness.players))==1){
+						sk.players[sk.myself].name = sk.singlePlayerName;
+					}
+					else{
+						jsRoutes.controllers.Sketchness.leaderboard(sk.players[sk.myself].name, results).ajax({
+							success: function(data) {
+								that.elements.main.html(data);
+							},
+							error: function() {
+								that.write.error("Error!");
+							}
+						});
+					}
 					jsRoutes.controllers.Sketchness.leaderboard(sk.players[sk.myself].name, results).ajax({
 						success: function(data) {
 							that.elements.main.html(data);
@@ -2011,6 +2052,176 @@ function checkAreaBentley(sk){
 	
 }
 
+function poseClassifier(pose, ratio){
+	//var pose = "feet";
+	//var ratio = 0.168619;
+
+	$.jAjax({
+	    url: "poseClassifier",
+	    headers : {
+	        "pose" : pose,
+	        "ratio" : ratio
+	    },
+	    onComplete: function(xhr,status){
+	        if(xhr.readyState === 4){
+	            if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
+
+	                var result = JSON.parse(xhr.responseText);
+	                alert(result.cloth);
+	            }
+	            else{
+	                alert("Request was unsuccesfull: "+ xhr.status);
+	            }
+	        }
+	    }
+	});
+}
+
+
+function getPose(idselected, pose){
+
+
+	$.jAjax({
+	    url: "getPose",
+	    headers : {"idselected" : idselected},
+	    onComplete: function(xhr,status){
+	        if(xhr.readyState === 4){
+	            if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
+	            	
+	            	var result = JSON.parse(xhr.responseText);
+                    var obj;
+                    var x0,x1,y0,y1,location;
+                    var minX = Number.MAX_VALUE;
+	            	var maxX = Number.MIN_VALUE;
+	            	var minY = Number.MAX_VALUE;
+	            	var maxY = Number.MIN_VALUE;
+
+	            	for(var key in result){
+
+                    	obj = result[key];
+                    	location = obj.location;
+
+                    	pose[location + "_x0"] = obj.x0;
+                    	if(pose[location + "_x0"]>maxX)
+                    		maxX = pose[location + "_x0"];
+                    	if(pose[location + "_x0"]<minX)
+                    		minX = pose[location + "_x0"];
+                
+                    	pose[location + "_x1"] = obj.x1;
+                    	if(pose[location + "_x1"]>maxX)
+                    		maxX = pose[location + "_x1"];
+                    	if(pose[location + "_x1"]<minX)
+                    		minX = pose[location + "_x1"];
+                    	
+                    	pose[location + "_y0"] = obj.y0;
+                    	if(pose[location + "_y0"]>maxY)
+                    		maxY = pose[location + "_y0"];
+                    	if(pose[location + "_y0"]<minY)
+                    		minY = pose[location + "_y0"];
+                    	
+                    	pose[location + "_y1"] = obj.y1;
+                    	if(pose[location + "_y1"]>maxY)
+                    		maxY = pose[location + "_y1"];
+                    	if(pose[location + "_y1"]<minY)
+                    		minY = pose[location + "_y1"];
+						
+                    }
+	            	pose["area"] = (maxY - minY) * (maxX - minX);
+	            	
+	            }
+	            else{
+	                alert("Request was unsuccesfull: "+ xhr.status);
+	            }
+	        }
+	    }
+	});
+}
+
+function getCurrentPosition(point, pose, sk, currentImage){
+
+
+	var x = Math.round(point.x/sk.ratio);
+	var y = Math.round(point.y/sk.ratio);
+
+	/*
+	//head
+	//var xMin = Math.min(pose.head_x0, pose.head_x1);
+	//var xMax = Math.max(pose.head_x0, pose.head_x1);
+	var yMax = Math.max(pose.head_y0, pose.head_y1);
+	if((y<yMax)){
+		alert("head");
+	}
+	
+	//left_arm
+	var xMax = Math.max(pose.left_arm_x0, pose.left_arm_x1);
+	var yMin = Math.min(pose.left_arm_y0, pose.left_arm_y1);
+	var yMax = Math.max(pose.left_arm_y0, pose.left_arm_y1);
+	if((x<xMax)&&(y>yMin)&&(y<yMax)){
+		alert("left arm");
+	}
+	
+	//right_arm
+	var xMin = Math.min(pose.right_arm_x0, pose.right_arm_x1);
+	var yMin = Math.min(pose.right_arm_y0, pose.right_arm_y1);
+	var yMax = Math.max(pose.right_arm_y0, pose.right_arm_y1);
+	if((x>xMin)&&(y>yMin)&&(y<yMax)){
+		alert("right arm");
+	}
+	
+	//feet
+	var yMin = Math.min(pose.feet_y0, pose.feet_y1);
+	if(y>yMin){
+		alert("feet");
+	}
+	
+	//torso
+	var xMin = Math.min(pose.torso_x0, pose.torso_x1);
+	var xMax = Math.max(pose.torso_x0, pose.torso_x1);
+	var yMin = Math.min(pose.torso_y0, pose.torso_y1);
+	var yMax = Math.max(pose.torso_y0, pose.torso_y1);
+	if((x>xMin)&&(x<xMax)&&(y>yMin)&&(y<yMax)){
+		alert("torso");
+	}
+	//feet
+	var xMin = Math.min(pose.legs_x0, pose.legs_x1);
+	var xMax = Math.max(pose.legs_x0, pose.legs_x1);
+	var yMin = Math.min(pose.legs_y0, pose.legs_y1);
+	var yMax = Math.max(pose.legs_y0, pose.legs_y1);
+	if((x>xMin)&&(x<xMax)&&(y>yMin)&&(y<yMax)){
+		alert("legs");
+	}
+	
+	*/
+	var r_s_x = pose.head_x1;
+	var r_s_y = pose.torso_y1;
+	var l_s_x = pose.head_x0;
+	var l_h_y = pose.legs_x0;
+	var r_a_y = pose.feet_y1;
+	
+	if((y<r_s_y)){
+		alert("head");
+	}
+	//else if((y<l_h_y)&&(y>r_s_y)&&(x<l_s_x)&&(x>r_s_x)){
+	else if((y<l_h_y)&&(y>r_s_y)){
+		alert("torso");
+	}
+	//else if((y<r_a_y)&&(y>l_h_y)&&(x<l_s_x)&&(x>r_s_x)){
+	else if((y<r_a_y)&&(y>l_h_y)){
+		alert("legs");
+	}
+	else if((y>r_a_y)){
+		alert("feet");
+	}
+	else{
+		alert("arms");
+	}
+	
+	
+	
+	
+	
+	
+}
 
 
 
