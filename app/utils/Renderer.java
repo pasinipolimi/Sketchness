@@ -40,6 +40,7 @@ import utils.CMS.CMS;
 import utils.aggregator.ContourAggregator;
 import utils.gamebus.GameMessages.Join;
 import weka.classifiers.functions.MultilayerPerceptron;
+import weka.classifiers.trees.RandomTree;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -1073,7 +1074,126 @@ public class Renderer extends UntypedActor {
 	
 public static String poseClassifier(final String pose, final String ratio) throws JSONException{
 		
+	
+	RandomTree mpClassifier = null;
+	String result = "";
+	try {
+		String modelName = pose + "_randomTree_model.model";
+		//mpClassifier = (MultilayerPerceptron) SerializationHelper.read(new FileInputStream("C:/Users/Giorgia/multilayerPerceptronClassifier.model"));
+		mpClassifier = (RandomTree) SerializationHelper.read(new FileInputStream(modelName));
 
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+
+	}
+
+	
+    // Declare a nominal attribute along with its values
+	
+	FastVector fvNominalVal = null;
+    // Declare a nominal attribute along with its values
+	if(pose.equals("head")){
+		 fvNominalVal = new FastVector(5);
+
+	     fvNominalVal.addElement("glasses");
+	     fvNominalVal.addElement("necklace");
+	     fvNominalVal.addElement("scarf");
+	     fvNominalVal.addElement("hat");
+	     fvNominalVal.addElement("earrings");
+	}
+	if(pose.equals("torso")){
+		 fvNominalVal = new FastVector(7);
+
+	     fvNominalVal.addElement("shirt");
+	     fvNominalVal.addElement("bag");
+	     fvNominalVal.addElement("dress");
+	     fvNominalVal.addElement("tie");
+	     fvNominalVal.addElement("bodysuit");
+	     fvNominalVal.addElement("wallet");
+	     fvNominalVal.addElement("intimate");
+
+	}
+	if(pose.equals("arms")){
+		 fvNominalVal = new FastVector(4);
+
+	     fvNominalVal.addElement("bracelet");
+	     fvNominalVal.addElement("watch");
+	     fvNominalVal.addElement("ring");
+	     fvNominalVal.addElement("gloves");
+
+	}
+	
+	if(pose.equals("legs")){
+		 fvNominalVal = new FastVector(5);
+
+	     fvNominalVal.addElement("shorts");
+	     fvNominalVal.addElement("skirt");
+	     fvNominalVal.addElement("belt");
+	     fvNominalVal.addElement("pants");
+	     fvNominalVal.addElement("jeans");
+
+	}
+	
+	if(pose.equals("feet")){
+		 fvNominalVal = new FastVector(2);
+
+	     fvNominalVal.addElement("socks");
+	     fvNominalVal.addElement("shoes");
+
+	}
+    
+    Attribute Attribute1 = new Attribute("label", fvNominalVal);
+    
+    
+    // Declare numeric attribute
+    Attribute Attribute2 = new Attribute("rapporto");
+     
+    // Declare the feature vector
+    FastVector fvWekaAttributes = new FastVector(2);
+    fvWekaAttributes.addElement(Attribute1);    
+    fvWekaAttributes.addElement(Attribute2);    
+  
+    
+    // Create an empty training set
+    Instances instances = new Instances("Rel", fvWekaAttributes, 1);       
+     
+    // Set class index
+    instances.setClassIndex(0);
+    
+    // Create the instance
+    double ratioDouble = Double.parseDouble(ratio);
+    Instance i = new Instance(2);
+    i.setMissing(0);          
+    i.setValue((Attribute)fvWekaAttributes.elementAt(1), ratioDouble);
+
+    // add the instance
+    instances.add(i);
+
+    // Classification/prediction
+    for (int k = 0; k < instances.numInstances(); k++) {
+		double clsLabel = 0;
+		try {
+			clsLabel = mpClassifier.classifyInstance(instances.instance(k));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		result = instances.classAttribute().value((int) clsLabel);
+		
+	}
+
+    /*
+    final JSONObject res = new JSONObject();
+	res.append("cloth", result);
+	final String sendResult = res.toString();
+
+	return sendResult;
+	*/
+    return result;
+
+	/////////////////////////////////////////////////////////////////////////////multilayerPerceptronClassifier
+	/*
 		MultilayerPerceptron mpClassifier = null;
 		String result = "";
 		try {
@@ -1085,8 +1205,10 @@ public static String poseClassifier(final String pose, final String ratio) throw
 			e.printStackTrace();
 
 		}
-         
+
+		
         // Declare a nominal attribute along with its values
+		
         FastVector fvNominalVal = new FastVector(24);
 
         fvNominalVal.addElement("socks");
@@ -1169,6 +1291,7 @@ public static String poseClassifier(final String pose, final String ratio) throw
 		final String sendResult = res.toString();
 
 		return sendResult;
+		*/
 	}
 
 	public static String getPose(final String image_id) throws JSONException{

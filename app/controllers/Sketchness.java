@@ -304,6 +304,7 @@ public class Sketchness extends Controller {
 		
 		final String pose = request().getHeader("pose");
 		final String ratio = request().getHeader("ratio");
+
 		final String result = Renderer.poseClassifier(pose, ratio);
 		return ok(result);
 	}		

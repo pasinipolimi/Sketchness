@@ -1029,24 +1029,28 @@ public class Game extends GameRoom {
 					GameBus.getInstance().publish(
 							new GameEvent(GameMessages.composeGuessed(username,
 									text), roomChannel));
+					Logger.info("[GIO] GUESSED");
 					break;
 				case 1:
 					GameBus.getInstance().publish(
 							new GameMessages.GameEvent(GameMessages
 									.composeGuess(username, text, "hot"),
 									roomChannel));
+					Logger.info("[GIO] HOT GUESS: " + text);
 					break;
 				case 2:
 					GameBus.getInstance().publish(
 							new GameMessages.GameEvent(GameMessages
 									.composeGuess(username, text, "warm"),
 									roomChannel));
+					Logger.info("[GIO] WARM GUESS: " + text);
 					break;
 				default:
 					GameBus.getInstance().publish(
 							new GameMessages.GameEvent(GameMessages
 									.composeGuess(username, text, "cold"),
 									roomChannel));
+					Logger.info("[GIO] COLD GUESS: " + text);
 					break;
 				}
 			}
