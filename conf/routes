@@ -49,7 +49,7 @@ GET     /retrieveMaskImage                controllers.Utilities.retrieveMaskImag
 
 GET		/segmentationImage				  controllers.Sketchness.segmentationImageCall
 GET		/taggingImage					  controllers.Sketchness.taggingImageCall
-GET		/bentleyOttmann					  controllers.Sketchness.bentleyOttmann
+POST	/bentleyOttmann					  controllers.Sketchness.bentleyOttmann
 GET		/poseClassifier					  controllers.Sketchness.poseClassifier
 GET		/getPose						  controllers.Sketchness.getPose
 

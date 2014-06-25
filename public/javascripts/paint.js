@@ -82,7 +82,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 		var constants = {
 			tagTime: 30,
 			//taskTime: 120,
-			taskTime: 30,
+			taskTime: 15,
 			solutionTime: 3,
 			minSendRate: 50
 		};
@@ -1053,7 +1053,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							that.chat.guess(sk.players[content.user].name, content.word, content.affinity, content.user == sk.myself);
 						},
 						guessed: function(e, content) {
-							sk.stopGuessing = true;
+							
 						    console.log("[RECEIVED MESSAGE] guessed");
 						    if(sk.myself == content.user){
                                 sk.word = content.word;
@@ -1120,7 +1120,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					painter = this.painter,
 					sk = this.sketchness;
 					var area_polygon = 0;
-					
+					guesses = [];
 					areaFunction = setInterval(function(){checkArea()}, 5000);
 					
 					function checkArea() {
@@ -1179,6 +1179,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					
 						},
 						timer: function(e, content) {
+							sk.stopGuessing = true;
 						    console.log("[RECEIVED MESSAGE] timer");
 							that.clock.changeCountdown("task", content.time * Time.second);
 						},
@@ -1189,6 +1190,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						    that.chat.guess("bot", content.word, content.affinity, false);
 						},
 						score: function(e, content) {
+							sk.stopGuessing = true;
 						    console.log("[RECEIVED MESSAGE] score");
 							sk.players[content.user].score += content.score;
 
@@ -1921,6 +1923,13 @@ function drawSegmentation(idselected, that, sk) {
 	           	    		 previousX = p.x;
 	           	    		 previousY = p.y;
 	           	    		 //draw point
+	           	    		 
+	           	    		 if(p.color=='rgba(255,255,255,1.0)'){
+	           	    			ctx.strokeStyle = "rgb(255, 255, 255)";
+	           	    			ctx.globalCompositeOperation = "copy";  
+	           	    			p.color = "rgba(255,255,255,0)";
+	           	    		 }
+	           	    		 
 	           	    		 ctx.strokeStyle=p.color;
 	           	    		 ctx.lineWidth = p.size;
 	           	    		 ctx.lineTo(p.x, p.y);
@@ -2364,7 +2373,7 @@ function guessWordBot(point, pose, sk, currentImage, that, possibleGuesses, gues
 
 	            	var cloth = xhr.responseText;
 	            	
-	            	if(guesses.indexOf(cloth) == -1){
+	            	if((guesses.indexOf(cloth) == -1)&&(!sk.stopGuessing)){
 	            		guesses.push(cloth);
 	            		console.log("[GUESS 1] " + cloth);
 	            		that.communicator.send("guessAttempt", {
@@ -2375,8 +2384,48 @@ function guessWordBot(point, pose, sk, currentImage, that, possibleGuesses, gues
 	            	else{
 	            		console.log("[REPEATED GUESS 1] " + cloth);
 	            	}
-	                
+	                /*
+	            	//finish all possibilities for that bodypart --> guess last word: "bracelet","watch","ring","gloves"
+	            	if((possibleGuesses[cloth].length + possibleGuesses[bodyPart].length) == guesses.length){
+	            		
+	            		var temps = 0;
+						var max_index = possibleGuesses["last"].length -1;
+						var possGuesses = possibleGuesses["last"];
+						//shuffle array
+						for (var g = possGuesses.length - 1; g > 0; g--) {
+							var h = Math.floor(Math.random() * (g + 1));
+							var temp = possGuesses[g];
+							possGuesses[g] = possGuesses[h];
+							possGuesses[h] = temp;
+						}
+						
+						var nextGuess = function(){
+							temps ++;
 
+							var next_guess = possGuesses[temps];
+							if(guesses.indexOf(next_guess) == -1){
+								guesses.push(next_guess);
+								if(next_guess != undefined){
+									console.log("[GUESS LAST] " + next_guess);
+									that.communicator.send("guessAttempt", {
+										user: "bot",
+										word: next_guess
+									});
+								}
+								
+							}
+							
+							if ((temps == max_index)||(sk.stopGuessing)){
+								return;
+							}
+							//recursive call passing time delay for the next guess
+							setTimeout(nextGuess , 1000);
+						}
+						//first call of nextGuess
+						setTimeout(nextGuess, 0);
+	            	}
+	            	*/
+	            	//GUESS SYNONYMOUS OR SIMILAR CLOTHS (coat/shirt)
 	            	if(possibleGuesses[cloth]!== undefined){
 						
 						var temps = 0;
@@ -2394,7 +2443,7 @@ function guessWordBot(point, pose, sk, currentImage, that, possibleGuesses, gues
 							temps ++;
 
 							var next_guess = possGuesses[temps];
-							if(guesses.indexOf(next_guess) == -1){
+							if((guesses.indexOf(next_guess) == -1)&&(!sk.stopGuessing)){
 								guesses.push(next_guess);
 								if(next_guess != undefined){
 									console.log("[GUESS 2] " + next_guess);
@@ -2405,8 +2454,11 @@ function guessWordBot(point, pose, sk, currentImage, that, possibleGuesses, gues
 								}
 								
 							}
+							else{
+								console.log("[REPETED GUESS 2] " + next_guess);
+							}
 							
-							if ((temps == max_index)||(stopGuessing)){
+							if ((temps == max_index)||(sk.stopGuessing)){
 								return;
 							}
 							//recursive call passing time delay for the next guess
@@ -2415,6 +2467,7 @@ function guessWordBot(point, pose, sk, currentImage, that, possibleGuesses, gues
 						//first call of nextGuess
 						setTimeout(nextGuess, 0);
 	            	}
+	            	//GUESS CLOTH OF SAME BODY PART (belt/skirt/shorts)
 	            	else{
 						var temps = 0;
 						var max_index = possibleGuesses[bodyPart].length -1;
@@ -2430,17 +2483,20 @@ function guessWordBot(point, pose, sk, currentImage, that, possibleGuesses, gues
 							temps ++;
 
 							var next_guess = possGuesses[temps];
-							if(guesses.indexOf(next_guess) == -1){
+							if((guesses.indexOf(next_guess) == -1)&&(!sk.stopGuessing)){
 								guesses.push(next_guess);
 								console.log("[GUESS 3] " + next_guess);
 									that.communicator.send("guessAttempt", {
 										user: "bot",
 										word: next_guess
 									});
-								return;
+								//return;
+							}
+							else{
+								console.log("[REPETED GUESS 3] " + next_guess);
 							}
 							
-							if ((temps == max_index)||(stopGuessing)){
+							if ((temps == max_index)||(sk.stopGuessing)){
 								return;
 							}
 							//recursive call passing time delay for the next guess

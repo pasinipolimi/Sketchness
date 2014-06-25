@@ -280,7 +280,6 @@ public class Sketchness extends Controller {
 		//final String points = request().getHeader("points");
 		Http.RequestBody body = request().body();	        
         JsonNode p = body.asJson();
-        Logger.info(p.toString());
         final String points = p.toString();
 		
 		ObjectMapper mapper = new ObjectMapper();
