@@ -906,7 +906,7 @@ public class Renderer extends UntypedActor {
 	
 	public static String retrievePoints(final JsonNode jsonPoints) throws JSONException {
 
-		
+
 		int i = 0;
 		JsonNode object;
 		Integer x,y;

@@ -811,6 +811,7 @@ public class Game extends GameRoom {
 	}
 
 	private void guessed(final String guesser) throws Exception {
+
 		String id;
 		String medialocator;
 		int width;
@@ -818,7 +819,7 @@ public class Game extends GameRoom {
 		for (final Painter painter : playersVect) {
 			// If the current painter is the guesser, has not guessed before and
 			// it is not the sketcher, update his points
-			if (painter.name.equals(guesser) && painter.guessed == false) {
+			if ((painter.name.equals(guesser) && painter.guessed == false)||(requiredPlayers == 1)) {
 				numberGuessed++;
 				painter.setPoints(painter.getPoints() + guesserPointsRemaining);
 				painter.setCorrectGuess();
@@ -1029,28 +1030,24 @@ public class Game extends GameRoom {
 					GameBus.getInstance().publish(
 							new GameEvent(GameMessages.composeGuessed(username,
 									text), roomChannel));
-					Logger.info("[GIO] GUESSED");
 					break;
 				case 1:
 					GameBus.getInstance().publish(
 							new GameMessages.GameEvent(GameMessages
 									.composeGuess(username, text, "hot"),
 									roomChannel));
-					Logger.info("[GIO] HOT GUESS: " + text);
 					break;
 				case 2:
 					GameBus.getInstance().publish(
 							new GameMessages.GameEvent(GameMessages
 									.composeGuess(username, text, "warm"),
 									roomChannel));
-					Logger.info("[GIO] WARM GUESS: " + text);
 					break;
 				default:
 					GameBus.getInstance().publish(
 							new GameMessages.GameEvent(GameMessages
 									.composeGuess(username, text, "cold"),
 									roomChannel));
-					Logger.info("[GIO] COLD GUESS: " + text);
 					break;
 				}
 			}

@@ -22,7 +22,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			currentPosition: null,
 			image: null,
 			stopDrawing: false,
-			stopCheckingArea: false,
+			stopGuessing: false,
 			singlePlayerName: "",
 			lastSent: 0,
 			traceNum: 1,
@@ -70,7 +70,11 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				shirt: ["coat","cardigan","cape","hoodie","jacket","jumper","blazer","blouse","bodysuit","suit", "sweater", "sweatshirt", "t-shirt", "top", "vest"],
 				socks: ["leggings", "stockings", "tights"],
 				shoes: ["boots", "flats", "clogs", "heels", "loafers","pumps","sandals","sneakers","wedges"],
-				bag: ["handbag", "purse"]
+				bag: ["handbag", "purse"],
+				head: ["glasses","necklace","scarf","hat","earrings"],
+				torso: ["shirt","bag","dress","tie","bodysuit","wallet","intimate"],
+				legs: ["shorts","skirt","belt","pants","jeans"],
+				feet: ["socks", "shoes"]
 		}
 		
 		var guesses = [];
@@ -464,6 +468,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						    currentImage.url = content.url;
 						    currentImage.height = content.height;
 						    currentImage.width = content.width;
+						    sketchness.word = content.word;
 							that.taskBot(content.word);
 						},
 						leaderboard: function(e, content) {
@@ -507,6 +512,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						    currentImage.url = content.url;
 						    currentImage.height = content.height;
 						    currentImage.width = content.width;
+						    sketchness.word = content.word;
 							that.taskBot();
 						},
 						leaderboard: function(e, content) {
@@ -777,6 +783,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							}
 						},
 						leave: function(e, content) {
+							alert("leave");
 						    console.log("[RECEIVED MESSAGE] leave");
                             delete sk.players[content.user];
                             write.players(sk.players);
@@ -1046,6 +1053,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							that.chat.guess(sk.players[content.user].name, content.word, content.affinity, content.user == sk.myself);
 						},
 						guessed: function(e, content) {
+							sk.stopGuessing = true;
 						    console.log("[RECEIVED MESSAGE] guessed");
 						    if(sk.myself == content.user){
                                 sk.word = content.word;
@@ -1113,16 +1121,14 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					sk = this.sketchness;
 					var area_polygon = 0;
 					
-					areaFunction = setInterval(function(){checkArea()}, 7000);
-
+					areaFunction = setInterval(function(){checkArea()}, 5000);
+					
 					function checkArea() {
 
 						if(sk.pointsList.length>1){
-							
 							//checkAreaBentley(sk);
-		
 							//getCurrentPosition(sk.pointsList[sk.pointsList.length-1],pose, sk, currentImage);
-							guessWordBot(sk.pointsList[sk.pointsList.length-1],pose, sk, currentImage, that, possibleGuesses, guesses)
+							guessWordBot(sk.pointsList[sk.pointsList.length-1], pose, sk, currentImage, that, possibleGuesses, guesses);
 						}
 						
 					}                    
@@ -1140,7 +1146,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					console.log("[BEGIN] TaskDrawingBot");
 					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
 
-					painter.setName(sk.players[sk.sketcher].name);
+					//painter.setName(sk.players[sk.sketcher].name);
 
 					this.communicator.on({
 						image: function(e, content) {
@@ -1479,20 +1485,22 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							painter.endPath();
 						},
 						guess: function(e, content) {
+
 						    console.log("[RECEIVED MESSAGE] guess");
 							that.chat.guess(sk.players[content.user].name, content.word, content.affinity, content.user == sk.myself);
 						},
 						guessed: function(e, content) {
+
 						    console.log("[RECEIVED MESSAGE] guessed");
 						    //sk.stopDrawing = true;
-						    if(sk.myself == content.user){
+						    //if(sk.myself == content.user){
                                 sk.word = content.word;
                                 that.write.top($.i18n.prop('guessed'), sk.word);
                                 wordInput.hide().off("keypress");
                                 this.one("image", function(e, content) {
                                     painter.showImage(content.url, content.width, content.height);
                                 });
-							}
+							//}
 						},
 						score: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] score");
@@ -1503,7 +1511,6 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							}
 						},
 						leave: function(e, content) {
-						    console.log("[RECEIVED MESSAGE] leave");
                             delete sk.players[content.user];
                             write.players(sk.players);
                         },
@@ -2270,6 +2277,41 @@ function guessWordBot(point, pose, sk, currentImage, that, possibleGuesses, gues
 	
 	var pointsJson = JSON.stringify(pointsList);
 
+	$.ajax({type:"POST",url:"bentleyOttmann",
+
+		  //data:'{"points":'+pointsJson+'}',
+		  data:pointsJson,
+		  dataType:"json",
+
+		  contentType:"application/json",
+
+		success:function(d){
+			
+			 var result = d;
+             var polygons = result.polygons[0];
+             
+             $.each(polygons, function(i,d){
+             	
+             	var Xarray = [];
+             	var Yarray = [];
+
+             	 $.each(d, function(j,k){
+
+             		 Xarray.push(parseInt(k.x));
+              		 Yarray.push(parseInt(k.y));
+
+             	 });
+
+             	polygonArea(Xarray, Yarray, Xarray.length);
+             	
+             });
+             //Scaling "square law"
+             sk.currentArea = total_area * ratio * ratio;
+		},
+		error:function(e){console.log("err : ", e);
+		}
+	});
+	/*
 	$.jAjax({
 	    url: "bentleyOttmann",
 	    headers : {"points" : pointsJson},
@@ -2304,7 +2346,7 @@ function guessWordBot(point, pose, sk, currentImage, that, possibleGuesses, gues
 	        }
 	    }
 	});
-	
+	*/
 	var areasRatio = sk.currentArea / pose.bodyArea;
 	
 	
@@ -2321,45 +2363,93 @@ function guessWordBot(point, pose, sk, currentImage, that, possibleGuesses, gues
 	            if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
 
 	            	var cloth = xhr.responseText;
-	             
+	            	
 	            	if(guesses.indexOf(cloth) == -1){
 	            		guesses.push(cloth);
+	            		console.log("[GUESS 1] " + cloth);
 	            		that.communicator.send("guessAttempt", {
 						    user: "bot",
 							word: cloth
 						});
             		}
+	            	else{
+	            		console.log("[REPEATED GUESS 1] " + cloth);
+	            	}
 	                
 
-	                if(possibleGuesses[cloth]!== undefined){
-	                	
-	                	var temps = 0;
-	   
-	                	var nextGuess = function(){
-	                		temps ++;
-	                		var max_index = possibleGuesses[cloth].length;
-	                		var possGuesses = possibleGuesses[cloth];
-	                		var randomNumber = Math.floor((Math.random() * max_index) + 1);
-	                		var next_guess = possGuesses[randomNumber];
-	                		if(guesses.indexOf(next_guess) == -1){
-	                			guesses.push(next_guess);
-	                			that.communicator.send("guessAttempt", {
-		    					    user: "bot",
-		    						word: next_guess
-		    					});
-	                		}
-	                		
-	                    	if (temps == 2){
-	                    		return;
-	                    	}
-	                    	//recursive call passing time delay for the next guess
-	                    	setTimeout(nextGuess , 2000);
-	                    }
-		           	   	//first call of nextGuess
-	                    setTimeout(nextGuess, 0);
-	                	
-	                }
-	                
+	            	if(possibleGuesses[cloth]!== undefined){
+						
+						var temps = 0;
+						var max_index = possibleGuesses[cloth].length -1;
+						var possGuesses = possibleGuesses[cloth];
+						//shuffle array
+						for (var g = possGuesses.length - 1; g > 0; g--) {
+							var h = Math.floor(Math.random() * (g + 1));
+							var temp = possGuesses[g];
+							possGuesses[g] = possGuesses[h];
+							possGuesses[h] = temp;
+						}
+						
+						var nextGuess = function(){
+							temps ++;
+
+							var next_guess = possGuesses[temps];
+							if(guesses.indexOf(next_guess) == -1){
+								guesses.push(next_guess);
+								if(next_guess != undefined){
+									console.log("[GUESS 2] " + next_guess);
+									that.communicator.send("guessAttempt", {
+										user: "bot",
+										word: next_guess
+									});
+								}
+								
+							}
+							
+							if ((temps == max_index)||(stopGuessing)){
+								return;
+							}
+							//recursive call passing time delay for the next guess
+							setTimeout(nextGuess , 1000);
+						}
+						//first call of nextGuess
+						setTimeout(nextGuess, 0);
+	            	}
+	            	else{
+						var temps = 0;
+						var max_index = possibleGuesses[bodyPart].length -1;
+						var possGuesses = possibleGuesses[bodyPart];
+						//shuffle array
+						for (var g = possGuesses.length - 1; g > 0; g--) {
+							var h = Math.floor(Math.random() * (g + 1));
+							var temp = possGuesses[g];
+							possGuesses[g] = possGuesses[h];
+							possGuesses[h] = temp;
+						}
+						var nextGuessBodyPart = function(){
+							temps ++;
+
+							var next_guess = possGuesses[temps];
+							if(guesses.indexOf(next_guess) == -1){
+								guesses.push(next_guess);
+								console.log("[GUESS 3] " + next_guess);
+									that.communicator.send("guessAttempt", {
+										user: "bot",
+										word: next_guess
+									});
+								return;
+							}
+							
+							if ((temps == max_index)||(stopGuessing)){
+								return;
+							}
+							//recursive call passing time delay for the next guess
+							setTimeout(nextGuessBodyPart , 1000);
+						}
+						//first call of nextGuess
+						setTimeout(nextGuessBodyPart, 0);
+						
+					}
 	            }
 	            else{
 	                alert("Request was unsuccesfull: "+ xhr.status);

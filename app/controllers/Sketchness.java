@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import play.Logger;
 import play.i18n.Lang;
+import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -273,11 +274,14 @@ public class Sketchness extends Controller {
 		
 	}	
 
-
+	@BodyParser.Of(BodyParser.Json.class)
 	public static Result bentleyOttmann() throws JSONException {
 		
-		final String points = request().getHeader("points");
-
+		//final String points = request().getHeader("points");
+		Http.RequestBody body = request().body();	        
+        JsonNode p = body.asJson();
+        Logger.info(p.toString());
+        final String points = p.toString();
 		
 		ObjectMapper mapper = new ObjectMapper();
 		JsonFactory factory = mapper.getJsonFactory();
@@ -293,6 +297,7 @@ public class Sketchness extends Controller {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		
 		String finalPoints = Renderer.retrievePoints(actualObj);
 		
