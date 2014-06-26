@@ -541,6 +541,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 */
 				timeUp: function() {
 
+					console.log("[TIMEUP]");
 					if(sketchness.sketcher == "bot"){
 						sketchness.stopDrawing = true;
 					}
@@ -548,6 +549,9 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						//this.skipRound();
 						//console.log("[SENDING MESSAGE] skip");
 						//this.communicator.send("skip", {});
+						if(sketchness.sketcher != "bot"){
+							sketchness.stopGuessing = true;
+						}
 						clearInterval(areaFunction);
 						sketchness.pointsList = [];
 						this.nextRound();
@@ -1121,11 +1125,21 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					sk = this.sketchness;
 					var area_polygon = 0;
 					guesses = [];
-					areaFunction = setInterval(function(){checkArea()}, 5000);
+					sk.stopGuessing = false;
+					
+					//first call to guessWordBot after 5 seconds to start immediatly with guesses
+					setTimeout(function(){
+						if((sk.pointsList.length>1)&&(!sk.stopGuessing)){
+							guessWordBot(sk.pointsList[sk.pointsList.length-1], pose, sk, currentImage, that, possibleGuesses, guesses)
+						}
+					},5000);
+
+					//loop of calls to guessWordBot evrey 10 seconds
+					areaFunction = setInterval(function(){checkArea()}, 10000);
 					
 					function checkArea() {
 
-						if(sk.pointsList.length>1){
+						if((sk.pointsList.length>1)&&(!sk.stopGuessing)){
 							//checkAreaBentley(sk);
 							//getCurrentPosition(sk.pointsList[sk.pointsList.length-1],pose, sk, currentImage);
 							guessWordBot(sk.pointsList[sk.pointsList.length-1], pose, sk, currentImage, that, possibleGuesses, guesses);
@@ -1179,7 +1193,9 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					
 						},
 						timer: function(e, content) {
+							
 							sk.stopGuessing = true;
+							console.log("[TIMER] stopguessing " + sk.stopGuessing);
 						    console.log("[RECEIVED MESSAGE] timer");
 							that.clock.changeCountdown("task", content.time * Time.second);
 						},
@@ -1191,6 +1207,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						},
 						score: function(e, content) {
 							sk.stopGuessing = true;
+							console.log("[SCORE] stopguessing " + sk.stopGuessing);
 						    console.log("[RECEIVED MESSAGE] score");
 							sk.players[content.user].score += content.score;
 
@@ -1419,15 +1436,13 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.chat.enable();
 					console.log("[END] TaskDrawingBot");
 					this.clock.clearCountdown("task");
-
 					elements.skip.off("click");
 					elements.endSegmentation.off("click");
 
 					elements.viewport.off(this.isMobile ? "touchstart" : "mousedown");
 					elements.viewport.off(this.isMobile ? "touchmove" : "mousemove");
-					$(document).trigger(this.isMobile ? "touchend" : "mouseup");
+					//$(document).trigger(this.isMobile ? "touchend" : "mouseup");
 					$(document).off(this.isMobile ? "touchend" : "mouseup");
-
 					this.painter.hideImage();
 
 					this.communicator.off("image timer guess score leave leaderboard roundEnd skipTask endSegmentationC");
@@ -1453,7 +1468,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 					//painter.setName(sk.players[sk.sketcher].name);
 					//drawSegmentation(sk.image, that, sk);
-					drawSegmentation(currentImage.id, that, sk);
+					if(!sk.stopDrawing){
+						drawSegmentation(currentImage.id, that, sk);
+					}
+					
 
 					wordInput.on("keypress", function(event) {
 						if (event.which === 13) {
@@ -1492,7 +1510,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							that.chat.guess(sk.players[content.user].name, content.word, content.affinity, content.user == sk.myself);
 						},
 						guessed: function(e, content) {
-
+							sk.stopDrawing = true;
 						    console.log("[RECEIVED MESSAGE] guessed");
 						    //sk.stopDrawing = true;
 						    //if(sk.myself == content.user){
@@ -1614,9 +1632,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				 * Setup of image viewing BOT state
 				 */
 				onenterimageViewingBot: function() {
+					console.log("[BEGIN] ImageViewingBot");
 					this.write.top($.i18n.prop('solution'), this.sketchness.word);
 					this.clock.setCountdown("solution", this.constants.solutionTime * Time.second, Time.second, this.write.time.bind(this.write), this.nextRoundCall.bind(this));
-					console.log("[BEGIN] ImageViewingBot");
+					
 					var that = this;
 					var elements = that.elements;
 					elements.skip.hide();
@@ -1791,7 +1810,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 	});
 });
 
-
+/**
+* SKETCHER BOT 
+* Simulate the sketcher replicating the best segmentation for a given image (idselected)
+*/
 function drawSegmentation(idselected, that, sk) {
 
 	$.jAjax({
@@ -1982,100 +2004,10 @@ function inRange(cx, cy, x, y, size) {
 
 
 
-
-function checkAreaBentley(sk){
-
-	var total_area = 0;
-	var pointsList = sk.pointsList;
-	var ratio = sk.ratio;
-
-	function polygonArea(X, Y, numPoints) 
-	{ 
-	  area = 0;         // Accumulates area in the loop
-	  j = numPoints-1;  // The last vertex is the 'previous' one to the first
-
-	  for (i=0; i<numPoints; i++)
-	    { 
-		  area = area +  (X[j]+X[i]) * (Y[j]-Y[i]); 
-	      j = i;  //j is previous vertex to i
-	    }
-	  if(area<0){
-		  final_area = - area/2;
-	  }
-	  else{
-		  final_area = area/2;
-	  }
-	 
-	  total_area = total_area + final_area;
-
-	}
-	
-	var pointsJson = JSON.stringify(pointsList);
-
-	$.jAjax({
-	    url: "bentleyOttmann",
-	    headers : {"points" : pointsJson},
-	    onComplete: function(xhr,status){
-	        if(xhr.readyState === 4){
-	            if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
-
-	                var result = JSON.parse(xhr.responseText);
-	                var polygons = result.polygons[0];
-	                
-	                $.each(polygons, function(i,d){
-	                	
-	                	var Xarray = [];
-	                	var Yarray = [];
-
-	                	 $.each(d, function(j,k){
-
-	                		 Xarray.push(parseInt(k.x));
-	                 		 Yarray.push(parseInt(k.y));
-
-	                	 });
-
-	                	polygonArea(Xarray, Yarray, Xarray.length);
-	                	
-	                });
-	                //Scaling "square law"
-	                sk.currentArea = total_area * ratio * ratio;
-	            }
-	            else{
-	                alert("Request was unsuccesfull: "+ xhr.status);
-	            }
-	        }
-	    }
-	});
-
-	
-}
-
-function poseClassifier(pose, ratio){
-	//var pose = "feet";
-	//var ratio = 0.168619;
-
-	$.jAjax({
-	    url: "poseClassifier",
-	    headers : {
-	        "pose" : pose,
-	        "ratio" : ratio
-	    },
-	    onComplete: function(xhr,status){
-	        if(xhr.readyState === 4){
-	            if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
-
-	                var result = JSON.parse(xhr.responseText);
-	                alert(result.cloth);
-	            }
-	            else{
-	                alert("Request was unsuccesfull: "+ xhr.status);
-	            }
-	        }
-	    }
-	});
-}
-
-
+/**
+* GUESSER BOT 
+* Retrieve the pose for a given image and save it in pose object
+*/
 function getPose(idselected, pose){
 
 
@@ -2135,89 +2067,21 @@ function getPose(idselected, pose){
 	});
 }
 
-function getCurrentPosition(point, pose, sk, currentImage){
 
-
-	var x = Math.round(point.x/sk.ratio);
-	var y = Math.round(point.y/sk.ratio);
-
-	/*
-	//head
-	//var xMin = Math.min(pose.head_x0, pose.head_x1);
-	//var xMax = Math.max(pose.head_x0, pose.head_x1);
-	var yMax = Math.max(pose.head_y0, pose.head_y1);
-	if((y<yMax)){
-		alert("head");
-	}
-	
-	//left_arm
-	var xMax = Math.max(pose.left_arm_x0, pose.left_arm_x1);
-	var yMin = Math.min(pose.left_arm_y0, pose.left_arm_y1);
-	var yMax = Math.max(pose.left_arm_y0, pose.left_arm_y1);
-	if((x<xMax)&&(y>yMin)&&(y<yMax)){
-		alert("left arm");
-	}
-	
-	//right_arm
-	var xMin = Math.min(pose.right_arm_x0, pose.right_arm_x1);
-	var yMin = Math.min(pose.right_arm_y0, pose.right_arm_y1);
-	var yMax = Math.max(pose.right_arm_y0, pose.right_arm_y1);
-	if((x>xMin)&&(y>yMin)&&(y<yMax)){
-		alert("right arm");
-	}
-	
-	//feet
-	var yMin = Math.min(pose.feet_y0, pose.feet_y1);
-	if(y>yMin){
-		alert("feet");
-	}
-	
-	//torso
-	var xMin = Math.min(pose.torso_x0, pose.torso_x1);
-	var xMax = Math.max(pose.torso_x0, pose.torso_x1);
-	var yMin = Math.min(pose.torso_y0, pose.torso_y1);
-	var yMax = Math.max(pose.torso_y0, pose.torso_y1);
-	if((x>xMin)&&(x<xMax)&&(y>yMin)&&(y<yMax)){
-		alert("torso");
-	}
-	//feet
-	var xMin = Math.min(pose.legs_x0, pose.legs_x1);
-	var xMax = Math.max(pose.legs_x0, pose.legs_x1);
-	var yMin = Math.min(pose.legs_y0, pose.legs_y1);
-	var yMax = Math.max(pose.legs_y0, pose.legs_y1);
-	if((x>xMin)&&(x<xMax)&&(y>yMin)&&(y<yMax)){
-		alert("legs");
-	}
-	
-	*/
-	var r_s_x = pose.head_x1;
-	var r_s_y = pose.torso_y1;
-	var l_s_x = pose.head_x0;
-	var l_h_y = pose.legs_x0;
-	var r_a_y = pose.feet_y1;
-	
-	if((y<r_s_y)){
-		alert("head");
-	}
-	//else if((y<l_h_y)&&(y>r_s_y)&&(x<l_s_x)&&(x>r_s_x)){
-	else if((y<l_h_y)&&(y>r_s_y)){
-		alert("torso");
-	}
-	//else if((y<r_a_y)&&(y>l_h_y)&&(x<l_s_x)&&(x>r_s_x)){
-	else if((y<r_a_y)&&(y>l_h_y)){
-		alert("legs");
-	}
-	else if((y>r_a_y)){
-		alert("feet");
-	}
-	else{
-		alert("arms");
-	}
-	
-	
-}
-
-
+/**
+* GUESSER BOT 
+* 1)	Retrieve the current drawing position to find current bodypart
+* 2)	Compute the current area, given the points list, using the bentley ottmann algorithm:
+* 			2.1) find intersections among segments and split in different polygons
+* 			2.2) compute areas of different polygons and sum them
+* 3)	Compute ratio between between current_area and total_body_area (given by the pose object)
+* 4)	Call the classifier with parameters: pose (bodypart), ratio --> return class (cloth to guess)
+* 
+* Keep all guesses saved to avoid duplicates and to have the possibility to
+* 	- use synonymous
+* 	- use related cloths (same body part)
+* 	- use "last cloths" when stationary (sketcher is not drawing anymore)
+*/
 
 function guessWordBot(point, pose, sk, currentImage, that, possibleGuesses, guesses){
 	
@@ -2234,27 +2098,22 @@ function guessWordBot(point, pose, sk, currentImage, that, possibleGuesses, gues
 	
 	var bodyPart;
 
-	
+	//classify current position to find current bodypart
 	if((y<r_s_y)){
-		//head
 		bodyPart = "head";
 	}
 	//else if((y<l_h_y)&&(y>r_s_y)&&(x<l_s_x)&&(x>r_s_x)){
 	else if((y<l_h_y)&&(y>r_s_y)){
-		//torso
 		bodyPart = "torso";
 	}
 	//else if((y<r_a_y)&&(y>l_h_y)&&(x<l_s_x)&&(x>r_s_x)){
 	else if((y<r_a_y)&&(y>l_h_y)){
-		//legs
 		bodyPart = "legs";
 	}
 	else if((y>r_a_y)){
-		//feet
 		bodyPart = "feet";
 	}
 	else{
-		//arms
 		bodyPart = "arms";
 	}
 	
@@ -2284,8 +2143,10 @@ function guessWordBot(point, pose, sk, currentImage, that, possibleGuesses, gues
 
 	}
 	
+	//list of points, without consecutive duplicates
 	var pointsJson = JSON.stringify(pointsList);
 
+	//call bentley ottmann algorithm to split polygons when there are intersections
 	$.ajax({type:"POST",url:"bentleyOttmann",
 
 		  //data:'{"points":'+pointsJson+'}',
@@ -2320,47 +2181,55 @@ function guessWordBot(point, pose, sk, currentImage, that, possibleGuesses, gues
 		error:function(e){console.log("err : ", e);
 		}
 	});
-	/*
-	$.jAjax({
-	    url: "bentleyOttmann",
-	    headers : {"points" : pointsJson},
-	    onComplete: function(xhr,status){
-	        if(xhr.readyState === 4){
-	            if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
-
-	                var result = JSON.parse(xhr.responseText);
-	                var polygons = result.polygons[0];
-	                
-	                $.each(polygons, function(i,d){
-	                	
-	                	var Xarray = [];
-	                	var Yarray = [];
-
-	                	 $.each(d, function(j,k){
-
-	                		 Xarray.push(parseInt(k.x));
-	                 		 Yarray.push(parseInt(k.y));
-
-	                	 });
-
-	                	polygonArea(Xarray, Yarray, Xarray.length);
-	                	
-	                });
-	                //Scaling "square law"
-	                sk.currentArea = total_area * ratio * ratio;
-	            }
-	            else{
-	                alert("Request was unsuccesfull: "+ xhr.status);
-	            }
-	        }
-	    }
-	});
-	*/
+	
+	//compute areas ratio (parameter needed by classifier)
 	var areasRatio = sk.currentArea / pose.bodyArea;
 	
+	//function called to guess synonymous, similar cloths or cloths of same body part	
+	function guessCloth(sk, possibleGuesses, name){
+		
+		var temps = 0;
+		var max_index = possibleGuesses[name].length -1;
+		var possGuesses = possibleGuesses[name];
+		//shuffle array
+		for (var g = possGuesses.length - 1; g > 0; g--) {
+			var h = Math.floor(Math.random() * (g + 1));
+			var temp = possGuesses[g];
+			possGuesses[g] = possGuesses[h];
+			possGuesses[h] = temp;
+		}
+		
+		var nextGuess = function(){
+			temps ++;
+
+			var next_guess = possGuesses[temps];
+			if(guesses.indexOf(next_guess) == -1){
+				guesses.push(next_guess);
+				if(next_guess != undefined){
+					that.communicator.send("guessAttempt", {
+						user: "bot",
+						word: next_guess
+					});
+				}
+				
+			}
+			
+			if ((temps == max_index)||(sk.stopGuessing)){
+				return;
+			}
+			//recursive call passing random time delay (between 1 and 4 seconds) for the next guess
+			var maximum = 4;
+			var minimum = 1;
+			var randomnumber = Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
+			//setTimeout(nextGuess , 1000);
+			setTimeout(nextGuess , randomnumber*1000);
+		}
+		//first call of nextGuess
+		setTimeout(nextGuess, 1000);
+	}
 	
 	
-	
+	//call the classifier to retrieve next cloth guess
 	$.jAjax({
 	    url: "poseClassifier",
 	    headers : {
@@ -2376,6 +2245,7 @@ function guessWordBot(point, pose, sk, currentImage, that, possibleGuesses, gues
 	            	if((guesses.indexOf(cloth) == -1)&&(!sk.stopGuessing)){
 	            		guesses.push(cloth);
 	            		console.log("[GUESS 1] " + cloth);
+
 	            		that.communicator.send("guessAttempt", {
 						    user: "bot",
 							word: cloth
@@ -2383,128 +2253,21 @@ function guessWordBot(point, pose, sk, currentImage, that, possibleGuesses, gues
             		}
 	            	else{
 	            		console.log("[REPEATED GUESS 1] " + cloth);
+	            		guesses.push(cloth);
+	            		console.log("[CHECK REPEATED] " + cloth + " " + guesses[guesses.length-2]);
+	            		if((guesses[guesses.length-2]==cloth)){
+	            			guessCloth(sk, possibleGuesses, "last");
+	            		}
 	            	}
-	                /*
-	            	//finish all possibilities for that bodypart --> guess last word: "bracelet","watch","ring","gloves"
-	            	if((possibleGuesses[cloth].length + possibleGuesses[bodyPart].length) == guesses.length){
-	            		
-	            		var temps = 0;
-						var max_index = possibleGuesses["last"].length -1;
-						var possGuesses = possibleGuesses["last"];
-						//shuffle array
-						for (var g = possGuesses.length - 1; g > 0; g--) {
-							var h = Math.floor(Math.random() * (g + 1));
-							var temp = possGuesses[g];
-							possGuesses[g] = possGuesses[h];
-							possGuesses[h] = temp;
-						}
-						
-						var nextGuess = function(){
-							temps ++;
-
-							var next_guess = possGuesses[temps];
-							if(guesses.indexOf(next_guess) == -1){
-								guesses.push(next_guess);
-								if(next_guess != undefined){
-									console.log("[GUESS LAST] " + next_guess);
-									that.communicator.send("guessAttempt", {
-										user: "bot",
-										word: next_guess
-									});
-								}
-								
-							}
-							
-							if ((temps == max_index)||(sk.stopGuessing)){
-								return;
-							}
-							//recursive call passing time delay for the next guess
-							setTimeout(nextGuess , 1000);
-						}
-						//first call of nextGuess
-						setTimeout(nextGuess, 0);
-	            	}
-	            	*/
-	            	//GUESS SYNONYMOUS OR SIMILAR CLOTHS (coat/shirt)
+	               
+	            	//GUESS SYNONYMOUS OR SIMILAR CLOTHS (ex. coat/shirt)
 	            	if(possibleGuesses[cloth]!== undefined){
-						
-						var temps = 0;
-						var max_index = possibleGuesses[cloth].length -1;
-						var possGuesses = possibleGuesses[cloth];
-						//shuffle array
-						for (var g = possGuesses.length - 1; g > 0; g--) {
-							var h = Math.floor(Math.random() * (g + 1));
-							var temp = possGuesses[g];
-							possGuesses[g] = possGuesses[h];
-							possGuesses[h] = temp;
-						}
-						
-						var nextGuess = function(){
-							temps ++;
-
-							var next_guess = possGuesses[temps];
-							if((guesses.indexOf(next_guess) == -1)&&(!sk.stopGuessing)){
-								guesses.push(next_guess);
-								if(next_guess != undefined){
-									console.log("[GUESS 2] " + next_guess);
-									that.communicator.send("guessAttempt", {
-										user: "bot",
-										word: next_guess
-									});
-								}
-								
-							}
-							else{
-								console.log("[REPETED GUESS 2] " + next_guess);
-							}
-							
-							if ((temps == max_index)||(sk.stopGuessing)){
-								return;
-							}
-							//recursive call passing time delay for the next guess
-							setTimeout(nextGuess , 1000);
-						}
-						//first call of nextGuess
-						setTimeout(nextGuess, 0);
+	            		guessCloth(sk, possibleGuesses, cloth);
 	            	}
-	            	//GUESS CLOTH OF SAME BODY PART (belt/skirt/shorts)
+	            	//GUESS CLOTH OF SAME BODY PART (ex. belt/skirt/shorts)
 	            	else{
-						var temps = 0;
-						var max_index = possibleGuesses[bodyPart].length -1;
-						var possGuesses = possibleGuesses[bodyPart];
-						//shuffle array
-						for (var g = possGuesses.length - 1; g > 0; g--) {
-							var h = Math.floor(Math.random() * (g + 1));
-							var temp = possGuesses[g];
-							possGuesses[g] = possGuesses[h];
-							possGuesses[h] = temp;
-						}
-						var nextGuessBodyPart = function(){
-							temps ++;
-
-							var next_guess = possGuesses[temps];
-							if((guesses.indexOf(next_guess) == -1)&&(!sk.stopGuessing)){
-								guesses.push(next_guess);
-								console.log("[GUESS 3] " + next_guess);
-									that.communicator.send("guessAttempt", {
-										user: "bot",
-										word: next_guess
-									});
-								//return;
-							}
-							else{
-								console.log("[REPETED GUESS 3] " + next_guess);
-							}
-							
-							if ((temps == max_index)||(sk.stopGuessing)){
-								return;
-							}
-							//recursive call passing time delay for the next guess
-							setTimeout(nextGuessBodyPart , 1000);
-						}
-						//first call of nextGuess
-						setTimeout(nextGuessBodyPart, 0);
-						
+	            		guesses.push(cloth);
+	            		guessCloth(sk, possibleGuesses, bodyPart);
 					}
 	            }
 	            else{

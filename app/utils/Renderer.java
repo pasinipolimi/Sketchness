@@ -1094,20 +1094,22 @@ public static String poseClassifier(final String pose, final String ratio) throw
 	FastVector fvNominalVal = null;
     // Declare a nominal attribute along with its values
 	if(pose.equals("head")){
-		 fvNominalVal = new FastVector(5);
+		 fvNominalVal = new FastVector(6);
 
 	     fvNominalVal.addElement("glasses");
+	     fvNominalVal.addElement("hair");
 	     fvNominalVal.addElement("necklace");
 	     fvNominalVal.addElement("scarf");
 	     fvNominalVal.addElement("hat");
 	     fvNominalVal.addElement("earrings");
 	}
 	if(pose.equals("torso")){
-		 fvNominalVal = new FastVector(7);
+		 fvNominalVal = new FastVector(8);
 
 	     fvNominalVal.addElement("shirt");
 	     fvNominalVal.addElement("bag");
 	     fvNominalVal.addElement("dress");
+	     fvNominalVal.addElement("accessories");
 	     fvNominalVal.addElement("tie");
 	     fvNominalVal.addElement("bodysuit");
 	     fvNominalVal.addElement("wallet");
@@ -1117,7 +1119,8 @@ public static String poseClassifier(final String pose, final String ratio) throw
 	if(pose.equals("arms")){
 		 fvNominalVal = new FastVector(4);
 
-	     fvNominalVal.addElement("bracelet");
+	     fvNominalVal.addElement("skin");
+		 fvNominalVal.addElement("bracelet");
 	     fvNominalVal.addElement("watch");
 	     fvNominalVal.addElement("ring");
 	     fvNominalVal.addElement("gloves");

@@ -579,6 +579,7 @@ public class Game extends GameRoom {
 	 * the current round and start a new one
 	 */
 	private void playerTimeExpired(final String name) throws Exception {
+
 		// If all the players have disconnected during a game, start a new one
 		// if it's not a single player game
 		if (((requiredPlayers - disconnectedPlayers) <= 1) && gameStarted
@@ -610,6 +611,7 @@ public class Game extends GameRoom {
 					if (guessedWord) {
 						// GameBus.getInstance().publish(new
 						// GameEvent(roomChannel, GameEventType.saveTraces));
+						Logger.info("[GIO] playerstimeexpired if guessedWord 1");
 						GameBus.getInstance().publish(new GameEvent(GameMessages.composeSaveTraces(), roomChannel));
 					}
 
