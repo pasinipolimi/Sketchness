@@ -55,3 +55,5 @@ dist
 *.orig
 *.orig
 *.sql
+
+hs_err_pid81011.log

@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class JsonReader {
 
+
 	/*
 	 * Method that returns a Json object from a request sent to the CMS
 	 * 
@@ -72,4 +73,7 @@ public class JsonReader {
 					"The URL that has been provided is not valid");
 		}
 	}
+
+
+
 }
