@@ -1,30 +1,27 @@
 package controllers;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import org.json.JSONException;
 
-import play.Play;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.WebSocket;
-import utils.JsonReader;
 import utils.LoggerUtils;
 import utils.Renderer;
-import views.html.newRenderer;
-import views.html.renderer;
+import utils.CMS.CMS;
+import utils.CMS.CMSException;
 import views.html.admin_home;
-import views.html.tasks;
+import views.html.renderer;
 import views.html.systemInfo;
+import views.html.tasks;
 import views.html.userInfo;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * 
@@ -45,12 +42,22 @@ public class Utilities extends Controller {
 			return ok("[AGGREGATOR] " + e.toString());
 		}
 	}
-	
+
+	public static Result testCMS() {
+		try {
+			CMS.test();
+		} catch (final CMSException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return ok("ok");
+	}
+
 	public static Result retrieveMaskImage(final String imageID, final String tag) {
-		
+
 		try {
 			final BufferedImage img = Renderer.retrieveMaskImage(imageID, tag);
-			File result = new File("Mask_"+imageID+"_"+tag+".png");
+			final File result = new File("Mask_"+imageID+"_"+tag+".png");
 			ImageIO.write(img, "png", result);
 			if (null != result) {
 				return ok(result);
@@ -62,7 +69,7 @@ public class Utilities extends Controller {
 			return ok("[AGGREGATOR] " + e.toString());
 		}
 	}
-	
+
 
 	public static Result retrieveTags(final String imageID) {
 		try {
@@ -116,7 +123,7 @@ public class Utilities extends Controller {
 		final String result = Renderer.loadStats();
 		return ok(result);
 	}
-	
+
 	public static Result usersStatsAjaxCall() throws JSONException {
 		final String result = Renderer.loadUsersStats();
 		return ok(result);
@@ -135,14 +142,15 @@ public class Utilities extends Controller {
 		return ok(result);
 	}
 
-	public static Result closeTaskCall() throws IOException {
+	public static Result closeTaskCall() throws IOException, CMSException {
 		final String selectionTask = request().getHeader("selectionTask");
 		Renderer.closeTask(selectionTask);
 		final String result = "ok";
 		return ok(result);
 	}
 
-	public static Result addTaskCall() throws IOException, JSONException {
+	public static Result addTaskCall() throws IOException, JSONException,
+	CMSException {
 		String newId;
 		final String taskType = request().getHeader("taskType");
 		final String selectionimg = request().getHeader("selectionimg");
@@ -150,7 +158,8 @@ public class Utilities extends Controller {
 		return ok(newId);
 	}
 
-	public static Result addUTaskCall() throws IOException, JSONException {
+	public static Result addUTaskCall() throws IOException, JSONException,
+			CMSException {
 		String newId;
 		final String taskType = request().getHeader("taskType");
 		final String selectionTask = request().getHeader("selectionTask");
@@ -193,54 +202,56 @@ public class Utilities extends Controller {
 			}
 		};
 	}
-	
-	public static Result invalidateTag() throws IOException {
+
+	public static Result invalidateTag() throws IOException, CMSException {
 		final String tagId = request().getHeader("tagId");
-		Renderer.invalidateTag(tagId);
+		// TODO aff imageId in the UI!!
+		final String imageId = request().getHeader("imageId");
+		Renderer.invalidateTag(tagId, imageId);
 		final String result = "ok";
 		return ok(result);
 	}
-	
+
 	public static Result tasksPageCall() {
 		return ok(tasks.render());
 	}
-	
+
 	public static Result systemInfoPageCall() {
 		return ok(systemInfo.render());
 	}
-	
+
 	public static Result usersInfoPageCall() {
 		return ok(userInfo.render());
 	}
-	
+
 	public static Result collectionAjaxCall() throws JSONException {
 		final String result = Renderer.collectionAjaxCall();
 		return ok(result);
 	}
-	
+
 	public static Result collectionImagesAjaxCall() throws JSONException {
 		final String collectionId = request().getHeader("selected");
 		final String result = Renderer.collectionImagesAjaxCall(collectionId);
 		return ok(result);
 	}
-	
+
 	public static Result maskAjaxCall() throws JSONException {
-		
-		
+
+
 		final String imageId = request().getHeader("idImage");
 		final String tagId = request().getHeader("idTag");
 		final String result = Renderer.maskAjaxCall(imageId,tagId);
 		return ok(result);
-		
+
 	}
-	
+
 	public static Result maskFashionistaAjaxCall() throws JSONException {
 		final String imageId = request().getHeader("idImage");
 		final String tagName = request().getHeader("tagName");
 		final String result = Renderer.maskFashionistaAjaxCall(imageId,tagName);
 		return ok(result);
 	}
-	
+
 
 
 

@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,6 +26,7 @@ import utils.LanguagePicker;
 import utils.LoggerUtils;
 import utils.levenshteinDistance;
 import utils.CMS.CMS;
+import utils.CMS.models.Action;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameEventType;
 import utils.gamebus.GameMessages;
@@ -111,6 +113,8 @@ public class Game extends GameRoom {
 	private final List<ObjectNode> priorityTaskQueue = Collections
 			.synchronizedList(new LinkedList<ObjectNode>());
 
+	private final HashMap<String, Integer> openActions = new HashMap<>();
+
 	private ObjectNode taskImage;
 	private Integer sessionId;
 
@@ -176,8 +180,9 @@ public class Game extends GameRoom {
 						tagReceived(event.get("content").get("word").asText());
 						break;
 					case "finalTraces":
-						CMS.segmentation((ObjectNode) event.get("content"),
-								sketcherPainter.name, sessionId);
+						CMS.postSegmentationOnAkka(
+								(ObjectNode) event.get("content"),
+								sketcherPainter.name, sessionId, openActions);
 						break;
 					case "endSegmentation":
 						endSegmentation(event.get("content").get("user")
@@ -227,6 +232,16 @@ public class Game extends GameRoom {
 
 			if (queueImages.size() > 0) {
 				guessObject = queueImages.remove(0);
+
+
+				final Integer user = CMS.postUser(sketcherPainter.name);
+				final Integer image = guessObject.get("id").asInt();
+				final Integer tag = guessObject.get("tag").asInt();
+				final Integer actionid = CMS.postAction(Action
+						.createSegmentationAction(image, sessionId, tag, user,
+								true));
+				openActions.put(String.valueOf(image) + String.valueOf(tag),
+						actionid);
 			}
 
 		}
@@ -637,11 +652,12 @@ public class Game extends GameRoom {
 									CMS.taskSetInitialization(
 											priorityTaskQueue,
 											queueImages, roomChannel,
-											maxRound);
+											maxRound, openActions);
 								else
-									CMS.fixGroundTruth(groundTruthId,
-											priorityTaskQueue,
-											queueImages, roomChannel);
+									// CMS.fixGroundTruth(groundTruthId,
+									// priorityTaskQueue,
+									// queueImages, roomChannel);
+									Logger.debug("CMS.fixGroundTruth removed");
 								completed = true;
 							} catch (final Exception ex) {
 								// try {
@@ -671,8 +687,10 @@ public class Game extends GameRoom {
 							try {
 								gameEnded();
 							} catch (final Exception e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+										LoggerUtils
+												.error("GAME",
+														"[GAME] Impossible to close the game, aborting");
+										return;
 							}
 						}
 					}
@@ -921,7 +939,10 @@ public class Game extends GameRoom {
 	}
 
 	private void skipTask() throws Exception {
-		CMS.postAction(sessionId, "skiptask", sketcherPainter.name, "");
+		//TODO skip action
+		final Integer userid = CMS.postUser(sketcherPainter.name);
+		CMS.postAction(Action.createSkipAction(sessionId, userid,
+				true));
 		GameBus.getInstance().publish(
 				new GameEvent(GameMessages.composeLogMessage(
 						LogLevel.info,
