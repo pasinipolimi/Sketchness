@@ -619,7 +619,7 @@ public class Game extends GameRoom {
 					shownImages = false;
 					// Start a new round
 					missingPlayers = requiredPlayers;
-                                        nextRound();
+                    nextRound();
 				}
                                 else// If the solution has been given or a tag has not been
 				// chosen, start a new round

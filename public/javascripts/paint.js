@@ -1790,9 +1790,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				{ name: "task", from: ["Guesser", "tagWait"], to: "taskGuessing" },
 				{ name: "taskBot", from: ["SketcherBot", "tagInsertion"], to: "taskDrawingBot" },
 				{ name: "taskBot", from: ["GuesserBot", "tagWait"], to: "taskGuessingBot" },
-				{ name: "endRound", from: ["taskGuessing", "taskGuessingBot", "taskDrawing", "taskDrawingBot"], to: "imageViewing" },
-				{ name: "quit", from: ["imageViewing", "tagInsertion", "taskDrawing", "taskDrawingBot",  "taskGuessing", "taskGuessingBot", "tagWait", "waitRole", "loading", "Sketcher", "SketcherBot", "Guesser", "GuesserBot"], to: "leaderboard" },
-				{ name: "errorEvent", from: ["imageViewing", "tagInsertion", "taskDrawing", "taskDrawingBot", "taskGuessing", "taskGuessingBot", "tagWait", "waitRole", "loading", "Sketcher", "SketcherBot", "Guesser", "GuesserBot", "playersWait"], to: "handleError" },
+				{ name: "endRound", from: ["taskGuessing", "taskDrawing"], to: "imageViewing" },
+				{ name: "endRound", from: ["taskGuessingBot","taskDrawingBot"], to: "imageViewingBot" },
+				{ name: "quit", from: ["imageViewing", "imageViewingBot","tagInsertion", "taskDrawing", "taskDrawingBot",  "taskGuessing", "taskGuessingBot", "tagWait", "waitRole", "loading", "Sketcher", "SketcherBot", "Guesser", "GuesserBot"], to: "leaderboard" },
+				{ name: "errorEvent", from: ["imageViewing", "imageViewingBot","tagInsertion", "taskDrawing", "taskDrawingBot", "taskGuessing", "taskGuessingBot", "tagWait", "waitRole", "loading", "Sketcher", "SketcherBot", "Guesser", "GuesserBot", "playersWait"], to: "handleError" },
 				{ name: "toLobby", from: "leaderboard", to: "lobby" }
 			]
 		});
@@ -2096,6 +2097,14 @@ function guessWordBot(point, pose, sk, currentImage, that, possibleGuesses, gues
 	var l_h_y = pose.legs_x0;
 	var r_a_y = pose.feet_y1;
 	
+	//NEW
+	/*
+	var r_s_x = pose.head_x0;
+	var r_s_y = pose.head_y0;
+	var l_s_x = pose.head_x1;
+	var l_h_y = pose.torso_y0;
+	var r_a_y = pose.feet_y0;
+	*/
 	var bodyPart;
 
 	//classify current position to find current bodypart
@@ -2254,7 +2263,6 @@ function guessWordBot(point, pose, sk, currentImage, that, possibleGuesses, gues
 	            	else{
 	            		console.log("[REPEATED GUESS 1] " + cloth);
 	            		guesses.push(cloth);
-	            		console.log("[CHECK REPEATED] " + cloth + " " + guesses[guesses.length-2]);
 	            		if((guesses[guesses.length-2]==cloth)){
 	            			guessCloth(sk, possibleGuesses, "last");
 	            		}
