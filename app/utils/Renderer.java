@@ -14,9 +14,13 @@ import java.awt.image.RGBImageFilter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
 
@@ -28,6 +32,10 @@ import play.Logger;
 import play.Play;
 import play.libs.Akka;
 import play.libs.F;
+import play.libs.WS;
+import play.libs.F.Promise;
+import play.libs.WS.Response;
+import play.libs.WS.WSRequestHolder;
 import play.mvc.WebSocket;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -51,8 +59,9 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 public class Renderer extends UntypedActor {
 
-	private final static String rootUrl = Play.application().configuration()
-			.getString("cmsUrl");
+	//private final static String rootUrl = Play.application().configuration().getString("cmsUrl");
+	private final static String rootUrl = "http://localhost:3000";
+	private final static Integer timeout = Play.application().configuration().getInt("cmsTimeout");
 	private WebSocket.Out<JsonNode> channel;
 	String imageId;
 
@@ -309,13 +318,21 @@ public class Renderer extends UntypedActor {
 	 * 
 	 * @return the list of images' ids and task' ids in the system
 	 * @throws JSONException
+	 * @throws CMSException 
 	 */
-	public static String webToolAjax() throws JSONException {
+	public static String webToolAjax(final String max_id, final String count) throws JSONException, CMSException {
 
 		List<utils.CMS.models.Image> images;
 		final List<utils.CMS.models.Task> tasks;
+		final HashMap<String, String> params = new HashMap<String,String>();
+
+		if(!max_id.equals("null")){
+			params.put("max_id", max_id);
+			params.put("count", count);
+		}
+	
 		try {
-			images = CMS.getImages();
+			images = CMS.getObjs(utils.CMS.models.Image.class, "image", params, "images");
 			tasks = CMS.getTasks();
 		} catch (final CMSException e) {
 			Logger.error("Unable to read images and tasks from cms", e);
@@ -345,10 +362,53 @@ public class Renderer extends UntypedActor {
 			element.append("taskType", "");
 			tasksJ.put(element);
 		}
-
-		result.append("image", images);
-		result.append("task", tasks);
+		result.append("image", imagesJ);
+		result.append("task", tasksJ);
 		result.append("check", check);
+		
+		//GET next result: max_id, count
+		final String service = "image";
+		final String response = "search_metadata";
+		
+		Promise<WS.Response> res;
+		final WSRequestHolder wsurl = WS.url(rootUrl + "/" + service).setHeader("Accept", "application/json").setTimeout(timeout);
+		if (params != null) {
+				final Iterator<Entry<String, String>> it = params.entrySet()
+						.iterator();
+				while (it.hasNext()) {
+					final Map.Entry<java.lang.String, java.lang.String> param = it
+							.next();
+					wsurl.setQueryParameter(param.getKey(), param.getValue());
+				}
+		}
+
+		res = wsurl.get();
+		String new_max_id = "";
+		String new_count = "";
+		if (res != null) {
+			final Response result2 = res.get(1000000L);
+			final JsonNode json = result2.asJson();
+			// with a system out i can see that the json is parsed correctly
+			JsonNode node = null;
+			if (json.get("status").asText().equals("OK")) {
+				node = json.get(response);
+				if(node.has("next_results")){
+					String nextResult = node.get("next_results").asText();
+					String[] tokens = nextResult.split("=");
+					new_max_id = tokens[1].split("&")[0];
+					new_count = tokens[2];
+				}
+			} else {
+				throw new CMSException(
+						"Internal Server Error while invoking CMS: "
+								+ json.get("error"));
+			}
+		} else {
+			throw new IllegalStateException("CMS response timeout.");
+		}
+		result.append("max_id", new_max_id);
+		result.append("count", new_count);
+
 		final String options = result.toString();
 		return options;
 	}

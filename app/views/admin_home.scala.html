@@ -26,6 +26,9 @@ and open the template in the editor.
 		<script src="@routes.Assets.at("javascripts/lib/jquery.js")"></script>
 		<script src="@routes.Assets.at("javascripts/lib/modernizr.custom.js")"></script>
 		<script src="@routes.Assets.at("javascripts/lib/bootstrap.min.js")"></script>
+
+
+
     </head>
     <body class="cf">
     @header(title = "Images") {
@@ -104,7 +107,10 @@ and open the template in the editor.
 								<a class='btn' onclick="visualizzaCollection();"><i class='icon-search'></i><strong> Filter collection</strong></a>
       						</span>
 					<ul id="imageList" class="cbp-rfgrid"></ul>  
+					<span id="images_scroll" style="float:left;">Loading...</span>
         </div>
+        
+        
 
   	}
 
@@ -113,7 +119,6 @@ and open the template in the editor.
     <script src="@routes.Assets.at("javascripts/renderer/loadMask.js")?nocache=@(new Date().getTime())"></script>
 	<script src="@routes.Assets.at("javascripts/renderer/invalidateTag.js")?nocache=@(new Date().getTime())"></script>
     <script src="@routes.Assets.at("javascripts/renderer/jquery/jquery.dropkick-min.js")"></script>
-    <script src="@routes.Assets.at("javascripts/renderer/jquery/jAjax.js")"></script>
     <script src="@routes.Assets.at("javascripts/renderer/visualizzaImg.js")"></script>
     <script src="@routes.Assets.at("javascripts/renderer/popolaSelectionAjax.js")?nocache=@(new Date().getTime())"></script>
 	<script src="@routes.Assets.at("javascripts/renderer/visualizzaImgAjax.js")?nocache=@(new Date().getTime())"></script>
@@ -132,13 +137,22 @@ and open the template in the editor.
     <script src="@routes.Assets.at("javascripts/renderer/newMask.js")?nocache=@(new Date().getTime())"></script>
     <script src="@routes.Assets.at("javascripts/renderer/loadMaskFashionista.js")"></script>
     <script src="https://www.google.com/jsapi"></script>
-    <script>google.load('visualization', '1', {'packages':['corechart']});</script>
+    <script>google.load('visualization', '1', {'packages':['corechart']});</script> 
+    <script src="@routes.Assets.at("javascripts/renderer/jquery/jquery-1.10.2.min.js")"></script>
+	<script src="@routes.Assets.at("javascripts/renderer/jquery/jquery.inview.js")"></script>
+
+	<script src="@routes.Assets.at("javascripts/renderer/jquery/jAjax.js")"></script>
     <script>
 
         window.onload = function(){
-            popolaSelectionAjax();
+
+            popolaSelectionAjax(null,100);
 
         };
+
+
+        
+        
     </script>
     
 </html>

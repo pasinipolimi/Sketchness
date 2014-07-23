@@ -8,6 +8,7 @@ import javax.imageio.ImageIO;
 
 import org.json.JSONException;
 
+import play.Logger;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.WebSocket;
@@ -108,8 +109,13 @@ public class Utilities extends Controller {
 
 	}
 
-	public static Result webToolAjaxCall() throws JSONException {
-		final String result = Renderer.webToolAjax();
+	public static Result webToolAjaxCall() throws JSONException, CMSException {
+
+		final String max_id = request().getHeader("max_id");
+		//Logger.info("[GIO] max_id" + max_id);
+		final String count = request().getHeader("count");
+		//Logger.info("[GIO] count" + count);
+		final String result = Renderer.webToolAjax(max_id, count);
 		return ok(result);
 	}
 

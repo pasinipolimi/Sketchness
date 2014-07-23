@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import play.Logger;
 import play.Play;
 import play.libs.F.Promise;
 import play.libs.WS;

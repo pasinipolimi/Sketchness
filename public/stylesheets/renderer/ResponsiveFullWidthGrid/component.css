@@ -11,8 +11,8 @@
 	float: left;
 	overflow: hidden;
 	width: 16.6666667%; /* Fallback */
-	width: -webkit-calc(100% / 6);
-	width: calc(100% / 6);
+	width: -webkit-calc(100% / 5);
+	width: calc(100% / 5);
 
 }
 
