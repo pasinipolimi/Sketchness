@@ -550,9 +550,10 @@ public class Renderer extends UntypedActor {
 	public static String webInfoAjax(final String selection)
 			throws JSONException {
 
+
 		final utils.CMS.models.Image image;
 		try {
-			image = CMS.getImage(Integer.getInteger(selection));
+			image = CMS.getImage(Integer.parseInt(selection));
 		} catch (final CMSException e) {
 			Logger.error("Unable to read images from CMS", e);
 			throw new net.sf.json.JSONException();

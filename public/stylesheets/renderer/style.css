@@ -665,7 +665,7 @@ li {
 }
 
 .range{
-	margin-left:8%;
+	margin-left:4%;
 }
 
 #filterFormImage{
@@ -708,3 +708,9 @@ li {
 	margin-right:3%;
 }
 
+#slider{
+	width: 30%;
+	display: inline-block;
+	margin-left: 2%;
+	margin-right: 2%;
+}

@@ -114,7 +114,7 @@ public class CMSUtilities {
 		Integer width;
 		Integer height;
 
-		media = image.getMediaLocator();
+		media = rootUrl + image.getMediaLocator();
 		width = image.getWidth();
 		height = image.getHeight();
 

@@ -9,7 +9,7 @@ and open the template in the editor.
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width">
         <title>Sketchness AdminUI</title>
-       
+        
         <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/style.css")">
         <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/dropkick.css")">
         <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/blank_theme.css")">
@@ -23,17 +23,17 @@ and open the template in the editor.
 		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap-responsive.min.css")">
 		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/ResponsiveFullWidthGrid/default.css")" >
 		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/ResponsiveFullWidthGrid/component.css")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/jquery.nouislider.css")">
 		<script src="@routes.Assets.at("javascripts/lib/jquery.js")"></script>
 		<script src="@routes.Assets.at("javascripts/lib/modernizr.custom.js")"></script>
 		<script src="@routes.Assets.at("javascripts/lib/bootstrap.min.js")"></script>
-
-
+		<script src="@routes.Assets.at("javascripts/renderer/bootstrap/bootstrap-slider.js")"></script>
 
     </head>
     <body class="cf">
     @header(title = "Images") {
     
-
+		
   		<input type="text" id="ImgAttivattiva" style="display:none;"/>
         <input type="text" id="TaskAttivo" style="display:none;"/>
         <input type="text" id="mediaLocator" style="display:none;"/>
@@ -93,21 +93,28 @@ and open the template in the editor.
 					<form action="#" method="get" id="filterFormImage" >
 						<div class="input-group">
 							<input id="system-search" type='text' name="imageIdSearch" placeholder='Image Id'> 
-							<a class='btn' onclick="filter();"><i class='icon-search'></i><strong> Search</strong></a>
+							<a class='btn' onclick="filter();"><strong>Search</strong></a>
 							<span class="range"> 
+								<!--  
 								<input id="slider" type="range" name="range" min="1" max="100" value="50" onchange="numberAnnotations();"> 
-								<input type="text" id="maxAnn" style="display:none;"/>
+								
+								-->
+								<span>Num Annotations</span>
+								<div id="slider"></div>
+								<span id="resSlider">0:100</span>
+								<input type="text" id="maxAnn" value="0" style="display:none;"/>
 							</span>
-							<a class='btn' id="reset" onclick="repopolate();"><i class='icon-remove-circle'></i><strong> Reset</strong></a>
+							
+							<a class='btn' id="reset" onclick="repopolate();"><strong>Reset</strong></a>
 						</div>
 					</form>
 					
 					<div id="collectionList" class="checkbox"></div>
       						<span class="input-group-btn">
-								<a class='btn' onclick="visualizzaCollection();"><i class='icon-search'></i><strong> Filter collection</strong></a>
+								<a class='btn' onclick="visualizzaCollection();"><strong>Filter collection</strong></a>
       						</span>
 					<ul id="imageList" class="cbp-rfgrid"></ul>  
-					<span id="images_scroll" style="float:left;">Loading...</span>
+					<span id="images_scroll" style="float:left;color: rgb(255,255,255);">Loading...</span>
         </div>
         
         
@@ -140,19 +147,16 @@ and open the template in the editor.
     <script>google.load('visualization', '1', {'packages':['corechart']});</script> 
     <script src="@routes.Assets.at("javascripts/renderer/jquery/jquery-1.10.2.min.js")"></script>
 	<script src="@routes.Assets.at("javascripts/renderer/jquery/jquery.inview.js")"></script>
-
 	<script src="@routes.Assets.at("javascripts/renderer/jquery/jAjax.js")"></script>
+	<script src="@routes.Assets.at("javascripts/renderer/jquery/jquery.nouislider.min.js")"></script>
     <script>
 
         window.onload = function(){
 
-            popolaSelectionAjax(null,100);
+            popolaSelectionAjax(null,100,true);
 
         };
 
-
-        
-        
     </script>
     
 </html>

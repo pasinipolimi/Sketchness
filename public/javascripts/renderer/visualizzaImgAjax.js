@@ -24,7 +24,8 @@ function visualizzaImgAjax(idselected, mediaLocator){
 
    
    var tagContainer = $(".tag.listBody")
-       ,url= "http://54.228.220.100/"
+       //,url= "http://54.228.220.100/"
+   	   ,url= "http://localhost:3000"
        ,taskImage
        ,canvas = document.getElementById("draws")
        ,ctx = canvas.getContext("2d")
@@ -51,8 +52,8 @@ function visualizzaImgAjax(idselected, mediaLocator){
                     $(".infoTable").show();
                     $("#imageAnnotations").text(annotations);
                     $("#imageId").text(idselected);
-                    $("#imageWidth").text(width.substring(1, width.length -1)+" px");
-                    $("#imageHeight").text(height.substring(1, height.length -1)+" px");
+                    $("#imageWidth").text(width + " px");
+                    $("#imageHeight").text(height+" px");
                     
                     
                     var tagList = $("#imageTags");
@@ -62,27 +63,31 @@ function visualizzaImgAjax(idselected, mediaLocator){
 					tagList.append(tr);
 					tr.innerHTML = "<td class='infoLabel'>Image Tags:</td>";
                     
-                    if(tags.length === 0)
-                    	tagList.append("<tr>No tags available</tr>");
+                    if(tags.length === 0){
+                    	var tr = document.createElement("tr");
+     					tagList.append(tr);
+     					tr.innerHTML = "no tags available";
+                    }
+                    	
                     
                     $.each(tags,function(i,d){
                     	if(d.valid.substring(1, d.valid.length -1)=="1"){
                     		tagList.append("<tr><td class='infoValue' onclick=\"newMask('"+d.annotationId.substring(1, d.annotationId.length -1)+"','"+idselected+"','"+d.tag.substring(1, d.tag.length -1)+"','"+d.numAnnotations+"')\">"+ d.tag.substring(1, d.tag.length -1) +" ( "+d.lang.substring(1, d.lang.length -1)+" )"+"</td>"+
-                    				"<td class='infoValue' ><a href='#' class='btn' onclick=\"invalidateTag('"+d.tagId+"')\"><i class='icon-remove-circle'></i> <strong>Invalidate</strong></a></td></tr>");
+                    				"<td class='infoValue' ><a href='#' class='btn' onclick=\"invalidateTag('"+d.tagId+"')\"><strong>Invalidate</strong></a></td></tr>");
                     			
                     		
                     	}
                     });
                     
-                    
+                    /*
    					$(".createTask").show();
    					var createTask = $(".createTask");
    					createTask.children().remove();
    					createTask.append("<div class='span12' id='statsButton'>"+
-   									"<a id='newUtask' class='btn' onclick=\"nuovoTask('"+"segmentation"+"','"+idselected+"')\"><i class='icon-plus'></i> <strong>New Segmentation Task</strong></a>"+
-   									"<a id='newUtask' class='btn' onclick=\"nuovoTask('"+"tagging"+"','"+idselected+"')\"><i class='icon-plus'></i> <strong>New Tagging Task</strong></a>"
+   									"<a id='newUtask' class='btn' onclick=\"nuovoTask('"+"segmentation"+"','"+idselected+"')\"><strong>New Segmentation Task</strong></a>"+
+   									"<a id='newUtask' class='btn' onclick=\"nuovoTask('"+"tagging"+"','"+idselected+"')\"><strong>New Tagging Task</strong></a>"
    									+"</div>");
-                    
+                    */
                     
                     url += result[0].medialocator.substring(1, result[0].medialocator.length -1);
                     taskImage=new Image();
