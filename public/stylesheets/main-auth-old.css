@@ -248,28 +248,9 @@ input[type=submit]#submit-ok  {
 /* Login style */
 
 #login-form{
-    margin-top: 440px;
-    margin-left: 0px;
-    position:absolute;
-    background:url("../images/login/login-bg.png") 0 0 no-repeat;
-    width: 406px; height: 78px;
-}
-
-input[type="submit"]#submit-login{
-    top:-2px;left:15px;
-    background: url("../images/login/bt-login.png") no-repeat 0;
-    position: relative;
-    width:125px;
-    height:70px;
-    border: none;
-}
-
-input[type="submit"]#submit-login:hover{
-    background: url("../images/login/bt-login-on.png") no-repeat 0;
-}
-
-input[type="submit"]#submit-login:active{
-    background: url("../images/login/bt-login-on.png") no-repeat 0;
+	margin-top: 500px;
+	margin-left: 450px;
+	position:absolute;
 }
 
 /* Div username */
@@ -371,7 +352,27 @@ input[type="submit"]#submit-login:active{
 }
 
 
+input[type="submit"]#submit-login{
+	top:0px;left:0px;
+	background: url("../images/login/login.png") no-repeat -246px -648px;
+	position: absolute;
+	width:186px;
+	height:66px;
+	border: none;
+	margin-left: 10px;
+	margin-top: 440px;
+}
 
+input[type="submit"]#submit-login:hover{
+	top:0px;left:0px;
+	background: url("../images/login/login.png") no-repeat -246px -714px;
+}
+
+input[type="submit"]#submit-login:active{
+	top:4px;left:4px;
+	width:181px;height:46px;
+	background: url("../images/login/login.png") no-repeat -428px -783px;
+}
 
 #login-form .help-inline{
 	margin-left: 10px;

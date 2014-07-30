@@ -15,10 +15,23 @@
     </p>
     }
     <div id="login-form">
-        <div class="""
-        <input type="submit" id="submit-login" class="login-submit" value="">
-    </div>
+        <div id="username-container-login" class="div-input-username-login">
+            @inputText(
+            loginForm("email"),
+            '_id -> "email-input",
+            'placeholder -> "E-mail"
+            )
+        </div>
 
+        <div id="password-container-login" class="div-input-password-login">
+            @inputPassword(
+            loginForm("password"),
+            '_showConstraints -> false,
+            'placeholder -> "Password"
+            )
+        </div>
+    </div>
+    <input type="submit" id="submit-login" class="login-submit" value="">
 
     <div id="provider-container" class="provider-container">
         @* Display list of available providers *@

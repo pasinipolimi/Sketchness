@@ -23,7 +23,9 @@ dist
 /lib
 /assets
 /public/taskImages
-/public/images
+/public/images/icons
+/public/images/UI
+public/images/ui-icons*
 /public/javascripts/lib
 /public/stylesheets/lib
 /public/sounds/effects
@@ -46,8 +48,8 @@ dist
 *.jar
 *.zip
 *.psd
-*.jpg
-*.png
+#*.jpg
+#*.png
 *.db
 *.db
 
