@@ -255,10 +255,53 @@ input[type=submit]#submit-ok  {
     width: 406px; height: 78px;
 }
 
+#login-form .input-login-container{
+    position: absolute;
+    left:150px;
+    top:24px;
+    width: 228px;
+    height: 30px;
+    background: url("../images/login/bg-input.png") no-repeat 0;
+}
+
+#login-form .input-login-container #email-input{
+    left: 6px;
+    top: 5px;
+    width: 102px;
+    height: 20px;
+    overflow: hidden;
+    position: absolute;
+}
+
+#login-form .input-login-container #password_field{
+    left: 114px;
+    top: 5px;
+    width: 102px;
+    height: 20px;
+    overflow: hidden;
+    position: absolute;
+}
+
+
+#login-form .input-login-container #email-input label,
+#login-form .input-login-container #password_field label{display: none}
+#login-form .input-login-container #email-input .input,
+#login-form .input-login-container #password_field .input {
+    width: 100%;
+    height:100%
+}
+#login-form .input-login-container #email-input .input input[type=text]#email,
+#login-form .input-login-container #password_field .input input[type=password]#password{
+    width: 100%;
+    height: 100%;
+    padding:5px 0 0 5px;
+    margin:0;
+}
+
 input[type="submit"]#submit-login{
     top:-2px;left:15px;
     background: url("../images/login/bt-login.png") no-repeat 0;
-    position: relative;
+    position: absolute;
     width:125px;
     height:70px;
     border: none;
@@ -273,13 +316,14 @@ input[type="submit"]#submit-login:active{
 }
 
 /* Div username */
+/*
 .div-input-username-login{
 	position: absolute;
 	height:33px ;
 	width:133px;
 	background:url("../images/login/login.png") no-repeat -486px -601px;
 }
-
+*/
 /* Hide Label div */
 .div-input-username-login label{
 	display: none;

@@ -15,7 +15,20 @@
     </p>
     }
     <div id="login-form">
-        <div class="""
+        <div class="input-login-container">
+            @inputText(
+                loginForm("email"),
+                '_id -> "email-input",
+                'placeholder -> "E-mail"
+            )
+
+            @inputPassword(
+                loginForm("password"),
+                '_showConstraints -> false,
+                'placeholder -> "Password"
+            )
+
+        </div>
         <input type="submit" id="submit-login" class="login-submit" value="">
     </div>
 
