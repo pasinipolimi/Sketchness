@@ -1,21 +1,16 @@
 package utils.CMS.models;
 
 public class Point {
-	public Point(final Integer x, final Integer y, final String color,
-			final Boolean removed, final Integer size) {
+	public Point(final Integer x, final Integer y, final Boolean removed) {
 		super();
 		this.x = x;
 		this.y = y;
-		this.color = color;
-		this.removed = removed;
-		this.size = size;
+		this.end = removed;
 	}
 
 	private Integer x;
 	private Integer y;
-	private Integer size;
-	private String color;
-	private Boolean removed;
+	private Boolean end;
 
 	public Integer getX() {
 		return x;
@@ -33,28 +28,15 @@ public class Point {
 		this.y = y;
 	}
 
-	public String getColor() {
-		return color;
-	}
 
-	public void setColor(final String color) {
-		this.color = color;
-	}
 
 	public Boolean getRemoved() {
-		return removed;
+		return end;
 	}
 
 	public void setRemoved(final Boolean removed) {
-		this.removed = removed;
+		this.end = removed;
 	}
 
-	public Integer getSize() {
-		return size;
-	}
-
-	public void setSize(final Integer size) {
-		this.size = size;
-	}
 
 }

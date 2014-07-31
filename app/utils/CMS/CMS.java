@@ -53,8 +53,7 @@ public class CMS {
 	private final static Integer collection = Play.application()
 			.configuration().getInt("collection");
 
-	private final static String policy = Play.application()
-			.configuration()
+	private final static String policy = Play.application().configuration()
 			.getString("policy");
 
 	private static HashMap<String, Cancellable> runningThreads = new HashMap<String, Cancellable>();
@@ -215,7 +214,6 @@ public class CMS {
 		return lista;
 	}
 
-
 	private static <T extends CMSObject> List<T> getObjs(final Class<T> claz,
 			final String service, final Integer count, final Integer max_id,
 			final Integer since_id, final Boolean populate,
@@ -248,9 +246,6 @@ public class CMS {
 
 		return getObjs(claz, service, null, response);
 	}
-
-
-
 
 	public static void closeUTask(final Integer uTaskID, final Integer actionId)
 			throws CMSException {
@@ -309,8 +304,6 @@ public class CMS {
 			final ArrayNode traces = (ArrayNode) finalTraces.get("traces");
 			final JsonNode history = finalTraces.get("history");
 
-
-
 			final List<utils.CMS.models.Point> points = readTraces(traces);
 
 			final List<History> historyPoints = readHistory(history);
@@ -329,7 +322,7 @@ public class CMS {
 						historyPoints);
 				postObj2(stc, "action/" + action.getId());
 
-			}else{
+			} else {
 				postAction(action);
 			}
 
@@ -348,10 +341,9 @@ public class CMS {
 			final ArrayNode traces) {
 
 		final List<utils.CMS.models.Point> points = new ArrayList<>();
-		for(final JsonNode trace:traces){
-			points.add(new utils.CMS.models.Point(trace.get("x").asInt(),
-					trace.get("y").asInt(), trace.get("color").asText(), false,
-					trace.get("size").asInt()));
+		for (final JsonNode trace : traces) {
+			points.add(new utils.CMS.models.Point(trace.get("x").asInt(), trace
+					.get("y").asInt(), false));
 
 		}
 
@@ -361,8 +353,7 @@ public class CMS {
 
 	private static Integer saveTag(final String label) throws CMSException {
 
-		return postObj2(
-				new utils.CMS.models.Tag(label), "tag");
+		return postObj2(new utils.CMS.models.Tag(label), "tag");
 		// final utils.CMS.models.Tag tag = postObj(
 		// new utils.CMS.models.Tag(label), "tag",
 		// utils.CMS.models.Tag.class);
@@ -402,8 +393,8 @@ public class CMS {
 			final Integer session, final String image, final Integer tagId)
 					throws CMSException {
 
-		final Action action = Action.createTagAction(Integer.valueOf(image), session, tagId,
-				userId, true);
+		final Action action = Action.createTagAction(Integer.valueOf(image),
+				session, tagId, userId, true);
 		return postAction(action);
 
 	}
@@ -423,8 +414,7 @@ public class CMS {
 	}
 
 	public static void postActionSkip(final Integer sessionId,
-			final String actionType, final String username)
-					throws CMSException {
+			final String actionType, final String username) throws CMSException {
 		final Integer userId = postUser(username);
 		final Action action = Action.createSkipAction(sessionId, userId, true);
 
@@ -483,8 +473,7 @@ public class CMS {
 		try {
 			LoggerUtils.debug("CMS", "Requested image list to CMS");
 
-			imgtgs = CMS.getChoose(collection,
-					tasksToAdd.toString());
+			imgtgs = CMS.getChoose(collection, tasksToAdd.toString());
 
 			LoggerUtils.debug("CMS", "Requested image list to CMS end");
 		} catch (final Exception e) {
@@ -501,7 +490,6 @@ public class CMS {
 			guessWord.put("id", String.valueOf(id));
 			// Find the valid tags for this task.
 
-
 			try {
 				buildGuessWordSegment(guessWord, imgtg.getTag(),
 						CMS.getImage(id));
@@ -511,11 +499,10 @@ public class CMS {
 
 			queueImages.add(guessWord);
 
-
 			if (!taskSent) {
 				taskSent = true;
-				LoggerUtils.debug("CMS", "Send task aquired for image:"
-						+ id + ", rooomChanel: " + roomChannel);
+				LoggerUtils.debug("CMS", "Send task aquired for image:" + id
+						+ ", rooomChanel: " + roomChannel);
 				sendTaskAcquired(roomChannel);
 			}
 
@@ -639,8 +626,7 @@ public class CMS {
 	}
 
 	private static void buildGuessWordSegmentTask(final ObjectNode guessWord,
-			final Integer tagId, final Image image,
-			final String taskId,
+			final Integer tagId, final Image image, final String taskId,
 			final MicroTask utask) throws CMSException {
 		buildGuessWordSegment(guessWord, tagId, image);
 		guessWord.put("utaskid", utask.getId());
@@ -855,7 +841,6 @@ public class CMS {
 		// final List<Task> s = CMS.getTaskCollection(1);
 		// CMS.closeSession(8);
 
-
 		final Integer s = CMS.postUser("pippo");
 
 		// System.out.println("ciao" + sd);
@@ -885,7 +870,6 @@ public class CMS {
 		// invalidateTag
 		// closeTask
 		// closeUTask
-
 
 	}
 
