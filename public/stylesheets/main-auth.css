@@ -261,8 +261,8 @@ input[type=submit]#submit-ok  {
 /* Login style */
 
 #login-form{
-    margin-top: 440px;
-    margin-left: 0px;
+    top: 440px;
+    left: 0px;
     position:absolute;
     background:url("../images/login/login-bg.png") 0 0 no-repeat;
     width: 410px; height: 80px;
