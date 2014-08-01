@@ -1,7 +1,11 @@
 package controllers;
 
+import com.feth.play.module.pa.PlayAuthenticate;
+import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
+import com.feth.play.module.pa.user.AuthUser;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import models.User;
 import play.data.Form;
 import play.i18n.Messages;
@@ -9,16 +13,13 @@ import play.libs.Akka;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
+import play.data.validation.ValidationError;
 import providers.MyUsernamePasswordAuthProvider;
 import providers.MyUsernamePasswordAuthProvider.MyLogin;
 import scala.concurrent.duration.Duration;
+import utils.LoggerUtils;
 import views.html.lobby;
 import views.html.sketchness_login;
-
-import com.feth.play.module.pa.PlayAuthenticate;
-import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
-import com.feth.play.module.pa.user.AuthUser;
-import utils.LoggerUtils;
 
 public class Login extends Controller {
 
@@ -72,6 +73,11 @@ public class Login extends Controller {
 		final User localUser = getLocalUser(session());
 
 		if (filledForm.hasErrors()) {
+                        Map<java.lang.String,java.util.List<ValidationError>> found = filledForm.errors();
+                        for (Map.Entry<String, List<ValidationError>> entry : found.entrySet()) {
+                            String string = entry.getKey();
+                            flash().put(string, "error");
+                        }
 			// User did not fill everything properly
 			LoggerUtils.error("LOGIN","User did not fill everything properly in the login form");
 			return badRequest(sketchness_login.render(filledForm));
