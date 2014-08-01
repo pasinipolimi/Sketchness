@@ -1,19 +1,33 @@
 @(loginForm: Form[_])
 
 @import helper._
-@import helper.twitterBootstrap._
+
+@implicitField = @{ FieldConstructor(twitterConstructorCustom.f) }
 
 @main2(Messages("Login")) {
 
 <div class="backgroundimage-login">
     @helper.form(routes.Login.doLogin, 'id -> "loginForm") {
 
-    @if(loginForm.hasGlobalErrors) {
-
-    <p class="error">
-        <span class="label label-important">@loginForm.globalError.message</span>
-    </p>
+    @if(flash.get("email")) {
+        <!-- TO BE MODIFIED HERE -->
+        <div class="alert-message error">
+            <p>
+                <strong>Oops!</strong>
+            </p>
+        </div>
     }
+    
+    @if(flash.get("password")) {
+        <!-- TO BE MODIFIED HERE -->
+        <div class="alert-message error">
+            <p>
+                <strong>Oops!</strong>
+            </p>
+        </div>
+    }
+
+
     <div id="login-form">
         <div class="input-login-container">
             @inputText(
