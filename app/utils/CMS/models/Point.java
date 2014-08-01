@@ -1,11 +1,21 @@
 package utils.CMS.models;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Point {
-	public Point(final Integer x, final Integer y, final Boolean removed) {
+	public Point(final Integer x, final Integer y, final Boolean end) {
 		super();
 		this.x = x;
 		this.y = y;
-		this.end = removed;
+		this.setEnd(end);
+	}
+
+	public Point(final Integer x, final Integer y) {
+		super();
+		this.x = x;
+		this.y = y;
+		this.setEnd(end);
 	}
 
 	private Integer x;
@@ -28,15 +38,14 @@ public class Point {
 		this.y = y;
 	}
 
-
-
-	public Boolean getRemoved() {
+	public Boolean getEnd() {
 		return end;
 	}
 
-	public void setRemoved(final Boolean removed) {
-		this.end = removed;
+	public void setEnd(final Boolean end) {
+		this.end = end;
 	}
+
 
 
 }

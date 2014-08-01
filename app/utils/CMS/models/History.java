@@ -2,6 +2,9 @@ package utils.CMS.models;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class History {
 
 	private Integer size;
@@ -28,7 +31,7 @@ public class History {
 		return size;
 	}
 
-	public void setSize(Integer size) {
+	public void setSize(final Integer size) {
 		this.size = size;
 	}
 
@@ -36,7 +39,7 @@ public class History {
 		return color;
 	}
 
-	public void setColor(String color) {
+	public void setColor(final String color) {
 		this.color = color;
 	}
 

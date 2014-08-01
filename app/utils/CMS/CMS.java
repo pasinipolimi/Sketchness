@@ -27,6 +27,7 @@ import utils.CMS.models.History;
 import utils.CMS.models.Image;
 import utils.CMS.models.Mask;
 import utils.CMS.models.MicroTask;
+import utils.CMS.models.Point;
 import utils.CMS.models.SegmentToClose;
 import utils.CMS.models.Segmentation;
 import utils.CMS.models.Tag;
@@ -333,8 +334,38 @@ public class CMS {
 	}
 
 	private static List<History> readHistory(final JsonNode history) {
-		final List<History> h = new ArrayList<>();
-		return h;
+		final List<History> hs = new ArrayList<>();
+
+		final Iterator<JsonNode> histoPezzi = history.elements();
+		int i = 0;
+		while (histoPezzi.hasNext()) {
+			final JsonNode histoPezzo = histoPezzi.next();
+			final History h = new History();
+			final ArrayNode jpoints = (ArrayNode) histoPezzo.get("points");
+			final JsonNode first = jpoints.get(0);
+
+			h.setColor(first.get("color").asText());
+			final List<Point> points = readHistoPoints(histoPezzo);
+			h.setPoints(points);
+			h.setSize(first.get("size").asInt());
+			// h.setTime(histoPezzo.get("time").asInt());
+			h.setTime(i++);
+			hs.add(h);
+
+		}
+
+		return hs;
+	}
+
+	private static List<Point> readHistoPoints(final JsonNode histoPezzo) {
+		final List<Point> ps = new ArrayList<>();
+		final ArrayNode jpoints = (ArrayNode) histoPezzo.get("points");
+		for (final JsonNode jpoint : jpoints) {
+			ps.add(new utils.CMS.models.Point(jpoint.get("x").asInt(), jpoint
+					.get("y").asInt()));
+
+		}
+		return ps;
 	}
 
 	private static List<utils.CMS.models.Point> readTraces(
@@ -343,7 +374,8 @@ public class CMS {
 		final List<utils.CMS.models.Point> points = new ArrayList<>();
 		for (final JsonNode trace : traces) {
 			points.add(new utils.CMS.models.Point(trace.get("x").asInt(), trace
-					.get("y").asInt(), false));
+					.get("y").asInt(), trace.get("color").asText()
+					.equals("end")));
 
 		}
 
@@ -351,7 +383,7 @@ public class CMS {
 
 	}
 
-	private static Integer saveTag(final String label) throws CMSException {
+	public static Integer saveTag(final String label) throws CMSException {
 
 		return postObj2(new utils.CMS.models.Tag(label), "tag");
 		// final utils.CMS.models.Tag tag = postObj(

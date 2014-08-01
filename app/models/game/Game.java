@@ -236,7 +236,8 @@ public class Game extends GameRoom {
 
 				final Integer user = CMS.postUser(sketcherPainter.name);
 				final Integer image = guessObject.get("id").asInt();
-				final Integer tag = guessObject.get("tag").asInt();
+				final String tagName = guessObject.get("tag").asText();
+				final Integer tag = CMS.saveTag(tagName);
 				final Integer actionid = CMS.postAction(Action
 						.createSegmentationAction(image, sessionId, tag, user,
 								true));
@@ -687,10 +688,10 @@ public class Game extends GameRoom {
 							try {
 								gameEnded();
 							} catch (final Exception e) {
-										LoggerUtils
-												.error("GAME",
-														"[GAME] Impossible to close the game, aborting");
-										return;
+								LoggerUtils
+								.error("GAME",
+										"[GAME] Impossible to close the game, aborting");
+								return;
 							}
 						}
 					}
