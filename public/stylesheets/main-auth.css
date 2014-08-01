@@ -265,13 +265,13 @@ input[type=submit]#submit-ok  {
     margin-left: 0px;
     position:absolute;
     background:url("../images/login/login-bg.png") 0 0 no-repeat;
-    width: 406px; height: 78px;
+    width: 410px; height: 80px;
 }
 
 #login-form .input-login-container{
     position: absolute;
-    left:150px;
-    top:24px;
+    left:160px;
+    top:22px;
     width: 228px;
     height: 30px;
     background: url("../images/login/bg-input.png") no-repeat 0;
@@ -307,25 +307,27 @@ input[type=submit]#submit-ok  {
 #login-form .input-login-container #password_field .input input[type=password]#password{
     width: 100%;
     height: 100%;
-    padding:5px 0 0 5px;
+    padding:0;
     margin:0;
 }
 
 input[type="submit"]#submit-login{
-    top:-2px;left:15px;
-    background: url("../images/login/bt-login.png") no-repeat 0;
+    left: 25px;
+    background-color: transparent;
     position: absolute;
-    width:125px;
-    height:70px;
+    width: 125px;
+    height: 70px;
     border: none;
+    padding: 0;
+    margin: 0;
 }
 
 input[type="submit"]#submit-login:hover{
-    background: url("../images/login/bt-login-on.png") no-repeat 0;
+
 }
 
 input[type="submit"]#submit-login:active{
-    background: url("../images/login/bt-login-on.png") no-repeat 0;
+
 }
 
 /* Div username */
@@ -372,8 +374,8 @@ input[type="submit"]#submit-login:active{
 }
 
 .play-as-guest-container{
-	top:0px;left:0px;
-	width:246px;height:68px;background: url("../images/login/login.png") no-repeat -0px -736px;
+	top:500px;left:0px;
+	width:270px;height:80px;background: url("../images/login/bg-guest.png") no-repeat 0;
 	position: absolute;
 	margin-left: 470px;
 	margin-top: 10px;
@@ -381,13 +383,13 @@ input[type="submit"]#submit-login:active{
 
 
 .play-as-guest-container:hover{
-	top:0px;left:0px;
-	width:246px;height:68px;background: url("../images/login/login.png") no-repeat -0px -600px;
+    background: url("../images/login/bg-guest-on.png") no-repeat 0;
+
 }
 
 .play-as-guest-container:active{
-	top:4px;left:4px;
-	width:241px;height:48px;background: url("../images/login/login.png") no-repeat -246px -600px;
+    background: url("../images/login/bg-guest-on.png") no-repeat 0;
+
 }
 
 .provider-container{
@@ -401,31 +403,30 @@ input[type="submit"]#submit-login:active{
 
 .register-container{
 	top:0px;left:0px;
-	width:182px;height:69px;background: url("../images/login/login.png") no-repeat -614px -714px;
+	width:200px;height:80px;background: url("../images/login/bg-register.png") no-repeat 0;
 	position: absolute;
 	margin-left: 10px;
 	margin-top: 370px;
 	border: none;
+    cursor: pointer;
 }
 .register-container:hover{
-	top:0px;left:0px;
-	background: url("../images/login/login.png") no-repeat -432px -714px;
+    background: url("../images/login/bg-register-on.png") no-repeat 0;
 }
 .register-container:active{
-	top:0px;left:0px;
-	background: url("../images/login/login.png") no-repeat -246px -780px;
+
 }
 
 #facebookLike {
 	width: 300px;
-	top: 530px;
+	top: 10px;
 	position: absolute;
 	right: 10px;
 }
 
 #twitterFollow {
 	width: 300px;
-	top: 560px;
+	top: 40px;
 	position: absolute;
 	right: 10px;
 }
@@ -434,23 +435,27 @@ input[type="submit"]#submit-login:active{
 
 
 #login-form .help-inline{
+    display: none;
 	margin-left: 10px;
  	margin-top: 10px;
 }
 
 
 .providers{
-	list-style:none;
-	margin: 0;
-	width: 100px;
-	height: 50px;
+    list-style: none;
+    margin: 0;
+    width: 155px;
+    height: 50px;
     position: relative;
-    top: 30px;
-    left: 280px;
+    top: 16px;
+    left: 170px;
 }
 
 div#provider-container ul li{
-	display: inline;
+    display: inline-block;
+    width: 55px;
+    height: 55px;
+    margin-right: -10px;
 }
 
 

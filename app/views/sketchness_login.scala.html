@@ -30,6 +30,15 @@
 
         </div>
         <input type="submit" id="submit-login" class="login-submit" value="">
+        <script type="text/javascript">
+            $(function(){
+                $('#submit-login').mouseenter(function(){
+                   $('#login-form').css("background-image","url(/assets/images/login/login-bg-on.png)");
+                }).mouseleave(function(){
+                   $('#login-form').css("background-image","url(/assets/images/login/login-bg.png)");
+                });
+            });
+        </script>
     </div>
 
 
