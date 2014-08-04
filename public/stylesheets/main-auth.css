@@ -322,12 +322,75 @@ input[type="submit"]#submit-login{
     margin: 0;
 }
 
-input[type="submit"]#submit-login:hover{
-
+#error-section{
+    position: fixed;
+    top:0;
+    left:0;
+    z-index:1000;
+    background: url('../images/login/bg-error.png') 0 0 repeat;
+    height: 100%;
+    width: 100%;
 }
 
-input[type="submit"]#submit-login:active{
+#error-section #error-wrap{
+    width: 450px;
+    height: 300px;
+    position:absolute;
+    margin-left:-225px;
+    margin-top: -150px;
+    left:50%;
+    top: 50%;
+    background-color: #fff;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    display: none;
+}
 
+#error-section #error-wrap #error-container {
+    position: relative;
+    padding:15px;
+}
+
+#error-container #error-title{
+    text-align: center;
+    width: 100%;
+    font-size: 24px;
+    line-height: 24px;
+    padding:0;
+    margin:0;
+    color: #ff0000;
+    position: absolute;
+    top: 20px;
+    left: 0;
+    width: 100%;
+}
+
+#error-container #close{
+    width: 32px;
+    height: 32px;
+    position: absolute;
+    top: 5px;
+    left: 410px;
+    border: none;
+    background: url('../images/login/close-error.png') 0 0 no-repeat;
+    cursor: pointer;
+}
+
+#error-container #error-message{
+    padding-top: 50px;
+}
+
+#error-container #error-message ul{
+    list-style: none;
+    list-style-position: inside;
+    margin:10px 0 0 0;
+    padding:0;
+}
+
+#error-container #error-message ul li {
+    padding: 0;
+    margin: 5px 0 0px 0;
 }
 
 /* Div username */

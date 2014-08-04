@@ -8,26 +8,51 @@
 
 <div class="backgroundimage-login">
     @helper.form(routes.Login.doLogin, 'id -> "loginForm") {
+        <!-- PopUp on error -->
+        @if(flash.get("email") || flash.get("password")) {
+            <div id="error-section">
+                <div id="error-wrap">
+                    <div id="error-container">
+                        <div id="close"></div>
+                        <h1 id="error-title">Error: </h1>
+                        <div id="error-message">
+                            Check these fields to resolve the error:
+                            <ul>
+                                @if(flash.get("email")) {
+                                <li>Invalid <strong>eMail</strong></li>
+                                }
+                                @if(flash.get("password")) {
+                                <li>Invalid <strong>Password</strong></li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <script type="text/javascript">
+            var winHeight = $(window).height();
+            var windWidth = $(window).width();
 
-    @if(flash.get("email")) {
-        <!-- TO BE MODIFIED HERE -->
-        <div class="alert-message error">
-            <p>
-                <strong>Oops!</strong>
-            </p>
-        </div>
+            $(function(){
+
+                $('#close').click(function(){
+                    $('#error-section').fadeOut();
+                });
+
+                $('#error-section').css({
+                    width: windWidth,
+                    height: winHeight
+                });
+
+
+                $('#error-wrap').fadeOut(function(){
+                    $('#error-wrap').css({
+                        top: (($(window).height()-$().height('#error-wrap'))/2)+'px'
+                    }).fadeIn(500);
+                });
+            });
+        </script>
     }
-    
-    @if(flash.get("password")) {
-        <!-- TO BE MODIFIED HERE -->
-        <div class="alert-message error">
-            <p>
-                <strong>Oops!</strong>
-            </p>
-        </div>
-    }
-
-
     <div id="login-form">
         <div class="input-login-container">
             @inputText(
