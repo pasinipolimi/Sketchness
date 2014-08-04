@@ -12,10 +12,16 @@ import java.awt.image.ImageFilter;
 import java.awt.image.ImageProducer;
 import java.awt.image.RGBImageFilter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
@@ -28,6 +34,7 @@ import play.Logger;
 import play.Play;
 import play.libs.Akka;
 import play.libs.F;
+import play.libs.Json;
 import play.mvc.WebSocket;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
@@ -35,11 +42,19 @@ import scala.concurrent.duration.Duration;
 import utils.CMS.CMS;
 import utils.CMS.CMSException;
 import utils.CMS.CMSUtilities;
+import utils.CMS.SortObjectAction;
 import utils.CMS.models.Collection;
 import utils.CMS.models.Mask;
+import utils.CMS.models.Pose;
 import utils.CMS.models.Task;
 import utils.CMS.models.User;
 import utils.gamebus.GameMessages.Join;
+import weka.classifiers.trees.RandomTree;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SerializationHelper;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
@@ -49,10 +64,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
+import compgeom.RLineSegment2D;
+import compgeom.RPoint2D;
+import compgeom.algorithms.BentleyOttmann;
+
 public class Renderer extends UntypedActor {
 
-	private final static String rootUrl = Play.application().configuration()
-			.getString("cmsUrl");
+	private final static String rootUrl = Play.application().configuration().getString("cmsUrl");
+	//private final static String rootUrl = "http://localhost:3000";
 	private WebSocket.Out<JsonNode> channel;
 	String imageId;
 
@@ -758,6 +777,395 @@ public class Renderer extends UntypedActor {
 		final String images = CMSUtilities.retriveCollImages(c);
 
 		return images;
+	}
+	
+	/**
+	 * Retrieve the best segmentation of an image
+	 * 
+	 * @param imageId
+	 *            the id of the image
+	 * @param tagId
+	 *            the id of the tag
+	 * @return the info that i retrieved
+	 * @throws JSONException
+	 * @throws CMSException 
+	 */
+	public static String segmentationImageCall(final String imageId, final String tagId)
+			throws JSONException, CMSException {
+		
+		//choice of best segmentation among the "randomN" best ones
+		int randomN = 3;
+		
+		JSONArray result = new JSONArray();
+		List<utils.CMS.models.Action> actions;
+		try {
+			actions = CMS.getBestSegmentation(Integer.valueOf(imageId),Integer.valueOf(tagId));
+		} catch (final CMSException e) {
+			Logger.error("Unable to read segmentation for image " + imageId, e);
+			throw new JSONException("Unable to read segmentation from cms");
+		}
+		
+		JsonNode history = null;
+		SortObjectAction sorting;
+		final ArrayList<SortObjectAction> tempList = new ArrayList<>();
+
+		if ((actions != null)&&(actions.size()>0)) {
+			for (int j = 0; j < actions.size(); j++) {
+				final utils.CMS.models.Action a = actions.get(j);
+				Logger.info("[GIO] " + a.getSegmentation().getQuality());
+				if(a.getSegmentation().getQuality()!=null){
+					sorting = new SortObjectAction() {};
+					sorting.setQuality(a.getSegmentation().getQuality());
+					sorting.setId(String.valueOf(a.getId()));
+					tempList.add(sorting);
+				}
+
+			}
+
+			Collections.sort(tempList, new Comparator<SortObjectAction>() {
+				@Override
+				public int compare(final SortObjectAction o1, final SortObjectAction o2) {
+					if (o1.getQuality() > o2.getQuality()) {
+						return -1;
+					} else if (o1.getQuality() < o2.getQuality()) {
+						return 1;
+					}
+					return 0;
+				}
+
+			});
+			
+			if(tempList.size()-1<randomN){
+				randomN = tempList.size()-1;
+			}
+
+		    int randomNum = (int)(Math.random() * (randomN + 1));
+		    Integer action_id = Integer.valueOf(tempList.get(randomNum).getId());
+		    utils.CMS.models.Action action = CMS.getAction(action_id);
+			history = Json.toJson(action.getSegmentation().getHistory());
+			JSONObject obj = new JSONObject();
+			obj.put("history", history);
+			utils.CMS.models.Image image = CMS.getImage(Integer.valueOf(imageId));
+			obj.put("width", image.getWidth());
+			obj.put("height", image.getHeight());
+			result.put(obj);
+
+		}
+		
+		return result.toString();
+	}
+	
+	
+	
+	public static String retrievePoints(final JsonNode jsonPoints) throws JSONException {
+
+
+		int i = 0;
+		JsonNode object;
+		Integer x,y;
+		RPoint2D tempPoint;
+		ArrayList<RPoint2D> vertices = new ArrayList<RPoint2D>();
+		ArrayList<RPoint2D> finalVertices = new ArrayList<RPoint2D>();
+		
+		
+		while (i < jsonPoints.size()) {
+			object = jsonPoints.get(i);
+			if (object.has("x")) {
+				x = object.get("x").asInt();
+				y = object.get("y").asInt();
+				tempPoint = new RPoint2D(x,y);
+				finalVertices.add(tempPoint);
+				vertices.add(tempPoint);
+			}
+			i++;
+		}// fine while
+		
+		RLineSegment2D seg;
+		Set<RLineSegment2D> segments = new HashSet<RLineSegment2D>();
+		
+		for(int j=0;j<vertices.size()-1;j++){
+			seg = new RLineSegment2D(vertices.get(j), vertices.get(j+1));
+			segments.add(seg);
+		}
+		//add segment to close polygon
+		seg = new RLineSegment2D(vertices.get(vertices.size()-1), vertices.get(0));
+		segments.add(seg);
+
+		
+		Set<RLineSegment2D> segmentsInters;
+		Map<RPoint2D, Set<RLineSegment2D>> map = BentleyOttmann.intersectionsMap(segments);
+		
+		String segment;
+		RPoint2D point1,point2;
+		
+		final JSONObject result = new JSONObject();
+		final JSONArray polygons = new JSONArray();
+		JSONArray polygon = new JSONArray();
+		JSONObject ver;
+		//JSONObject first;
+		RPoint2D vertex;
+		String v;
+		ArrayList<Integer> indices = new ArrayList<Integer>();
+
+		for ( RPoint2D key : map.keySet() ) {
+			segmentsInters = new HashSet<RLineSegment2D>();
+			if(!vertices.contains(key)){
+				segmentsInters = map.get(key);
+				for(RLineSegment2D s : segmentsInters){
+					segment = s.toString();
+					//retrieve x,y
+					String[] p = segment.split("\\(");
+					String[] p1 = p[1].split(",");
+					String x1 = p1[0];
+					String[] p1y = p1[1].split("\\)");
+					String y1 = p1y[0];
+					String[] p2 = p[2].split(",");
+					String x2 = p2[0];
+					String[] p2y = p2[1].split("\\)");
+					String y2 = p2y[0];
+					point1 = new RPoint2D(Integer.parseInt(x1),Integer.parseInt(y1));
+					point2 = new RPoint2D(Integer.parseInt(x2),Integer.parseInt(y2));
+					for(int t=0;t<vertices.size()-1;t++){
+						if((vertices.get(t).equals(point1))&&(vertices.get(t+1).equals(point2))){
+							finalVertices.add(t+1,key);
+							indices.add(t+1);
+						}
+					}
+
+				}
+			}
+			
+		}
+
+		for(int j=0;j<indices.size();j++){
+			if(j==0){
+				polygon = new JSONArray();
+
+				for(int k=0;k<=indices.get(j);k++){
+					vertex = finalVertices.get(k);
+					v = vertex.toString();
+					String[] p = v.split("\\(");
+					String[] p1 = p[1].split(",");
+					String x1 = p1[0];
+					String[] p1y = p1[1].split("\\)");
+					String y1 = p1y[0];
+					ver = new JSONObject();
+					ver.put("x",x1);
+					ver.put("y", y1);
+					polygon.put(ver);
+				
+				}
+
+				polygons.put(polygon);
+				
+			}
+			else{
+				polygon = new JSONArray();
+
+				for(int k=indices.get(j-1);k<indices.get(j);k++){
+					vertex = finalVertices.get(k);
+					v = vertex.toString();
+					String[] p = v.split("\\(");
+					String[] p1 = p[1].split(",");
+					String x1 = p1[0];
+					String[] p1y = p1[1].split("\\)");
+					String y1 = p1y[0];
+					ver = new JSONObject();
+					ver.put("x",x1);
+					ver.put("y", y1);
+					polygon.put(ver);
+	
+				}
+
+				polygons.put(polygon);
+			}
+		}
+		//add remaining points as last polygon
+		polygon = new JSONArray();
+
+		if(indices.size()!=0){
+
+			for(int k=indices.get(indices.size()-1);k<finalVertices.size();k++){
+				vertex = finalVertices.get(k);
+				v = vertex.toString();
+				String[] p = v.split("\\(");
+				String[] p1 = p[1].split(",");
+				String x1 = p1[0];
+				String[] p1y = p1[1].split("\\)");
+				String y1 = p1y[0];
+				ver = new JSONObject();
+				ver.put("x",x1);
+				ver.put("y", y1);
+				polygon.put(ver);
+
+			}
+
+			polygons.put(polygon);
+		}
+		else{
+			for(int k=0; k<finalVertices.size();k++){
+				vertex = finalVertices.get(k);
+				v = vertex.toString();
+				String[] p = v.split("\\(");
+				String[] p1 = p[1].split(",");
+				String x1 = p1[0];
+				String[] p1y = p1[1].split("\\)");
+				String y1 = p1y[0];
+				ver = new JSONObject();
+				ver.put("x",x1);
+				ver.put("y", y1);
+				polygon.put(ver);
+			}
+			polygons.put(polygon);
+		}
+
+		result.append("polygons", polygons);
+		final String sendPoints = result.toString();
+		return sendPoints;
+
+	}
+	
+public static String poseClassifier(final String pose, final String ratio) throws JSONException{
+	
+	RandomTree mpClassifier = null;
+	String result = "";
+	try {
+		String modelName = pose + "_random.model";
+		//mpClassifier = (MultilayerPerceptron) SerializationHelper.read(new FileInputStream("C:/Users/Giorgia/multilayerPerceptronClassifier.model"));
+		mpClassifier = (RandomTree) SerializationHelper.read(new FileInputStream(modelName));
+
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+
+	}
+
+	
+    // Declare a nominal attribute along with its values
+	
+	FastVector fvNominalVal = null;
+    // Declare a nominal attribute along with its values
+	if(pose.equals("head")){
+		 fvNominalVal = new FastVector(6);
+
+	     fvNominalVal.addElement("glasses");
+	     fvNominalVal.addElement("hair");
+	     fvNominalVal.addElement("necklace");
+	     fvNominalVal.addElement("scarf");
+	     fvNominalVal.addElement("hat");
+	     fvNominalVal.addElement("earrings");
+	}
+	if(pose.equals("torso")){
+		 fvNominalVal = new FastVector(8);
+
+	     fvNominalVal.addElement("shirt");
+	     fvNominalVal.addElement("bag");
+	     fvNominalVal.addElement("dress");
+	     fvNominalVal.addElement("accessories");
+	     fvNominalVal.addElement("tie");
+	     fvNominalVal.addElement("bodysuit");
+	     fvNominalVal.addElement("wallet");
+	     fvNominalVal.addElement("intimate");
+
+	}
+	if(pose.equals("arms")){
+		 fvNominalVal = new FastVector(4);
+
+	     fvNominalVal.addElement("skin");
+		 fvNominalVal.addElement("bracelet");
+	     fvNominalVal.addElement("watch");
+	     fvNominalVal.addElement("ring");
+	     fvNominalVal.addElement("gloves");
+
+	}
+	
+	if(pose.equals("legs")){
+		 fvNominalVal = new FastVector(5);
+
+	     fvNominalVal.addElement("shorts");
+	     fvNominalVal.addElement("skirt");
+	     fvNominalVal.addElement("belt");
+	     fvNominalVal.addElement("pants");
+	     fvNominalVal.addElement("jeans");
+
+	}
+	
+	if(pose.equals("feet")){
+		 fvNominalVal = new FastVector(2);
+
+	     fvNominalVal.addElement("socks");
+	     fvNominalVal.addElement("shoes");
+
+	}
+    
+    Attribute Attribute1 = new Attribute("label", fvNominalVal);
+    
+    
+    // Declare numeric attribute
+    Attribute Attribute2 = new Attribute("rapporto");
+     
+    // Declare the feature vector
+    FastVector fvWekaAttributes = new FastVector(2);
+    fvWekaAttributes.addElement(Attribute1);    
+    fvWekaAttributes.addElement(Attribute2);    
+  
+    
+    // Create an empty training set
+    Instances instances = new Instances("Rel", fvWekaAttributes, 1);       
+     
+    // Set class index
+    instances.setClassIndex(0);
+    
+    // Create the instance
+    double ratioDouble = Double.parseDouble(ratio);
+    Instance i = new Instance(2);
+    i.setMissing(0);          
+    i.setValue((Attribute)fvWekaAttributes.elementAt(1), ratioDouble);
+
+    // add the instance
+    instances.add(i);
+
+    // Classification/prediction
+    for (int k = 0; k < instances.numInstances(); k++) {
+		double clsLabel = 0;
+		try {
+			clsLabel = mpClassifier.classifyInstance(instances.instance(k));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		result = instances.classAttribute().value((int) clsLabel);
+		
+	}
+
+    return result;
+
+	
+	}
+
+	public static String getPose(final String image_id) throws JSONException, CMSException{
+		
+		final JsonReader jsonReader = new JsonReader();
+		final utils.CMS.models.Image image = CMS.getImage(Integer.valueOf(image_id));
+		List<Pose> pose = image.getPose();
+		JSONArray poseJson = new JSONArray();
+		JSONObject tempPose;
+
+		for(int i=0;i<pose.size();i++){
+			tempPose = new JSONObject();
+			tempPose.put("location", pose.get(i).getLocation());
+			tempPose.put("x0", pose.get(i).getX0());
+			tempPose.put("x1", pose.get(i).getX1());
+			tempPose.put("y0", pose.get(i).getY0());
+			tempPose.put("y1", pose.get(i).getY1());
+			poseJson.put(tempPose);
+		}
+
+		//JsonNode image = jsonReader.readJsonArrayFromUrl("http://localhost/cms/wsmc/image/"+image_id+".json");
+		//String pose = image.get("pose").toString();
+		//pose = pose.toString().replace("\\","");
+		//pose = pose.substring(1, pose.length()-1);
+		return poseJson.toString();
 	}
 
 }

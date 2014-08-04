@@ -25,8 +25,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class CMSUtilities {
 
-	private final static String rootUrl = Play.application().configuration()
-			.getString("cmsUrl");
+	//private final static String rootUrl = Play.application().configuration().getString("cmsUrl");
+	private final static String rootUrl = "http://80.240.141.191:80";
 
 	public static JSONArray buildImageId(
 			final List<utils.CMS.models.Image> images) throws JSONException {

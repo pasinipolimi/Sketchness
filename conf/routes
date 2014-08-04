@@ -49,6 +49,11 @@ GET		/MaskAjax						  controllers.Utilities.maskAjaxCall
 GET		/MaskAjaxFashionista			  controllers.Utilities.maskFashionistaAjaxCall
 GET     /retrieveMaskImage                controllers.Utilities.retrieveMaskImage(imageID: String, tag: String)
 
+GET		/segmentationImage				  controllers.Sketchness.segmentationImageCall
+POST	/bentleyOttmann					  controllers.Sketchness.bentleyOttmann
+GET		/poseClassifier					  controllers.Sketchness.poseClassifier
+GET		/getPose						  controllers.Sketchness.getPose
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

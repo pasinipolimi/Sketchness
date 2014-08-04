@@ -1,17 +1,15 @@
 package utils.CMS.models;
 
+import play.Logger;
+
 
 public class Action extends CMSObject {
-
-
-
 
 	private String completed_at;
 	private Integer image;
 	private Integer session;
 	private Segmentation segmentation;
-	private String started_at;
-
+	private String created_at;
 	// "tagging", "segmentation"
 	private String type;
 	private Integer tag;
@@ -32,12 +30,12 @@ public class Action extends CMSObject {
 
 
 
-	public String getStarted_at() {
-		return started_at;
+	public String getCreated_at() {
+		return created_at;
 	}
 
-	public void setStarted_at(final String started_at) {
-		this.started_at = started_at;
+	public void setCreated_at(final String created_at) {
+		this.created_at = created_at;
 	}
 
 
@@ -154,3 +152,4 @@ public class Action extends CMSObject {
 	}
 
 }
+

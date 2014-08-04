@@ -54,7 +54,7 @@ $.jAjax = function(options){
 		headers : null,
 		dataType : "json",
 		processData: true,
-		showLoading: true,
+		showLoading: false,
 		enqueue : true,
 		savingOperation: false, //if true, user is propmpt to not leave the page when a response is still loading
 		loadingMessage: "Loading...", //Saving... by default if savingOperation == true

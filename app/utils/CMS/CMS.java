@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.json.JSONException;
@@ -39,14 +41,15 @@ import akka.actor.Cancellable;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class CMS {
 
-	private final static String rootUrl = "http://80.240.141.191:80";
+	//private final static String rootUrl = "http://80.240.141.191:80";
+	//private final static String rootUrl = "http://localhost:3000";
 
-	// private final static String rootUrl = Play.application().configuration()
-	// .getString("cmsUrl");
+	private final static String rootUrl = Play.application().configuration().getString("cmsUrl");
 	private final static Integer timeoutPostCMS = Play.application()
 			.configuration().getInt("cmsTimeoutPost");
 
@@ -73,6 +76,10 @@ public class CMS {
 
 	public void postImage(final Image i) throws CMSException {
 		postObj(i, "image", Image.class);
+	}
+	
+	public static Action getAction(final Integer id) throws CMSException {
+		return getObj(Action.class, "action", id,"action");
 	}
 
 	private static <T extends Object> T postObj(final T obj,
@@ -103,22 +110,24 @@ public class CMS {
 	private static <T extends Object> Integer postObj2(final T obj,
 			final String service) throws CMSException {
 		try {
-
+			
 			final F.Promise<WS.Response> returned;
 			final WSRequestHolder prov = WS.url(rootUrl + "/" + service)
 					.setHeader("Accept", "application/json")
 					.setTimeout(timeoutPostCMS);
 
+			final HashMap<String, String> params = new HashMap();
+			
 			if (obj != null) {
-
 				final JsonNode a = Json.toJson(obj);
 				returned = prov.post(a);
 			} else {
 				returned = prov.post("");
 			}
 
-			final String respBody = returned.get().getBody();
+			final String respBody = returned.get().getBody();	
 			return Json.parse(respBody).get("id").asInt();
+			
 
 		} catch (final Exception e) {
 			Logger.error("Unable to post: " + service, e);
@@ -314,9 +323,12 @@ public class CMS {
 			final List<utils.CMS.models.Point> points = readTraces(traces);
 
 			final List<History> historyPoints = readHistory(history);
+			
+			//TODO fix quality
+			double quality = 0;
 
 			final Segmentation segmentation = new Segmentation(points,
-					historyPoints);
+					historyPoints, quality);
 
 			final Action action = Action.createSegmentationAction(
 					Integer.valueOf(image), session, tagId, userId, true,
@@ -350,8 +362,7 @@ public class CMS {
 		final List<utils.CMS.models.Point> points = new ArrayList<>();
 		for(final JsonNode trace:traces){
 			points.add(new utils.CMS.models.Point(trace.get("x").asInt(),
-					trace.get("y").asInt(), trace.get("color").asText(), false,
-					trace.get("size").asInt()));
+					trace.get("y").asInt()));
 
 		}
 
@@ -375,7 +386,51 @@ public class CMS {
 	}
 
 	public static Integer postAction(final Action action) throws CMSException {
-		return postObj2(action, "action");
+		
+		final String service = "action";
+		
+			try {
+			
+				final F.Promise<WS.Response> returned;
+				final WSRequestHolder prov = WS.url(rootUrl + "/" + service)
+						.setHeader("Accept", "application/json")
+						.setTimeout(timeoutPostCMS);
+	
+				final HashMap<String, String> params = new HashMap();
+				
+				if ((action != null)&&(action.getType()=="segmentation")) {
+					ObjectNode node = JsonNodeFactory.instance.objectNode();
+					node.put("image", action.getImage());
+				    node.put("user", action.getUser());
+				    node.put("session", action.getSession());
+				    node.put("tag", action.getTag());
+				    node.put("validity", action.getValidity());
+				    node.put("type", action.getType());
+					returned = prov.post(node);
+					
+				} else if((action != null)&&(action.getType()=="tagging")){
+					ObjectNode node = JsonNodeFactory.instance.objectNode();
+					node.put("image", action.getImage());
+				    node.put("user", action.getUser());
+				    node.put("session", action.getSession());
+				    node.put("validity", action.getValidity());
+				    node.put("type", action.getType());
+				    returned = prov.post(node);
+				    
+				} 
+				else {
+					returned = prov.post("");
+				}
+	
+				final String respBody = returned.get().getBody();	
+				return Json.parse(respBody).get("id").asInt();
+				
+	
+			} catch (final Exception e) {
+				Logger.error("Unable to post: " + service, e);
+				throw new CMSException("Unable to post: " + service);
+			}
+			//return postObj2(action, "action");
 	}
 
 	public static void saveTagActionOnAkka(final ObjectNode finalTraces,
@@ -456,12 +511,12 @@ public class CMS {
 	public static void taskSetInitialization(
 			final List<ObjectNode> priorityTaskHashSet,
 			final List<ObjectNode> queueImages, final Room roomChannel,
-			final Integer maxRound, final HashMap<String, Integer> openActions)
+			final Integer maxRound, final HashMap<String, Integer> openActions, final Integer requiredPlayers)
 					throws Error, JSONException {
 		int uploadedTasks = 0;
 		try {
 			uploadedTasks = retrieveTasks(maxRound, priorityTaskHashSet,
-					roomChannel);
+					roomChannel, requiredPlayers);
 		} catch (final Exception e) {
 			LoggerUtils.error("CMS", "Unable to read tasks");
 		}
@@ -485,7 +540,6 @@ public class CMS {
 
 			imgtgs = CMS.getChoose(collection,
 					tasksToAdd.toString());
-
 			LoggerUtils.debug("CMS", "Requested image list to CMS end");
 		} catch (final Exception e) {
 			throw new RuntimeException(
@@ -539,18 +593,17 @@ public class CMS {
 	}
 
 	private static int retrieveTasks(final Integer maxRound,
-			final List<ObjectNode> priorityTaskHashSet, final Room roomChannel) {
+			final List<ObjectNode> priorityTaskHashSet, final Room roomChannel, final Integer requiredPlayers) {
 		boolean taskSent = false;
 
 		int uploadedTasks = 0;
 
 		final List<Task> tasklist;
+		
 		try {
 			LoggerUtils.debug("CMS", "Requested task list to CMS "
 					+ roomChannel);
-
 			tasklist = getTaskCollection(collection);
-
 			LoggerUtils.debug("CMS", "Requested task list to CMS end "
 					+ roomChannel);
 
@@ -558,6 +611,7 @@ public class CMS {
 			throw new RuntimeException(
 					"[CMS] Unable to download collection from CMS");
 		}
+		
 
 		if (tasklist == null || tasklist.size() == 0) {
 			return 0;
@@ -567,7 +621,6 @@ public class CMS {
 			for (final Task t : tasklist) {
 				final Integer taskId = t.getId();
 				// final utils.CMS.models.Task t = getTask(taskId);
-
 				final List<MicroTask> uTasks = CMS.getMicroTasks(String
 						.valueOf(taskId));
 				if (uTasks == null || uTasks.size() > 0) {
@@ -576,30 +629,29 @@ public class CMS {
 
 				final Integer imageId = t.getImage();
 				final Image image = getImage(imageId);
-
 				for (final MicroTask utask : uTasks) {
-
 					final ObjectNode guessWord = Json.newObject();
 					guessWord.put("type", "task");
 					guessWord.put("id", imageId);
-
 					final String type = utask.getType();
 					switch (type) {
 					case "tagging":
-						buildGuessWordTagging(guessWord, image, utask, taskId);
-						priorityTaskHashSet.add(guessWord);
-						uploadedTasks++;
-						if (!taskSent) {
-							taskSent = true;
-							sendTaskAcquired(roomChannel);
+						if(!((requiredPlayers==1)&&(type.equals("tagging")))){
+							buildGuessWordTagging(guessWord, image,
+									utask, taskId);
+
+							priorityTaskHashSet.add(guessWord);
+							uploadedTasks++;
+							if (!taskSent) {
+								taskSent = true;
+								sendTaskAcquired(roomChannel);
+							}
 						}
 						break;
 					case "segmentation":
 						final Integer tagid = t.getTag();
-
 						buildGuessWordSegmentTask(guessWord, tagid, image,
 								String.valueOf(taskId), utask);
-
 						priorityTaskHashSet.add(guessWord);
 						uploadedTasks++;
 						if (!taskSent) {
@@ -818,10 +870,24 @@ public class CMS {
 	}
 
 	public static Integer getTagId(final String name) throws CMSException {
-		final utils.CMS.models.Tag tag = postObj(
-				new utils.CMS.models.Tag(name), "tag",
-				utils.CMS.models.Tag.class);
-		return tag.getId();
+		final String service = "tag";
+		try {
+			final F.Promise<WS.Response> returned;
+			final WSRequestHolder prov = WS.url(rootUrl + "/" + service)
+					.setHeader("Accept", "application/json")
+					.setTimeout(timeoutPostCMS);
+
+			ObjectNode node = JsonNodeFactory.instance.objectNode();
+			node.put("name", name);
+			returned = prov.post(node);
+			final String respBody = returned.get().getBody();	
+			return Json.parse(respBody).get("id").asInt();
+			
+		} catch (final Exception e) {
+			Logger.error("Unable to post: " + service, e);
+			throw new CMSException("Unable to post: " + service);
+		}
+
 	}
 
 	public static List<Action> getSegmentationsByImageAndTag(
@@ -896,4 +962,17 @@ public class CMS {
 		return getCount("action", params);
 	}
 
+	
+	public static List<Action> getBestSegmentation(final Integer imageId, final Integer tagId) throws CMSException {
+
+		final HashMap<String, String> params = new HashMap();
+		params.put("type", "segmentation");
+		params.put("image", String.valueOf(imageId));
+		params.put("tag", String.valueOf(tagId));
+		params.put("completed", "true");
+		
+		return getObjs(utils.CMS.models.Action.class, "action", params, "actions");
+
+
+	}
 }

@@ -5,12 +5,16 @@ import java.util.List;
 
 public class Segmentation extends CMSObject {
 
+	public Segmentation() {
+	}
+	
 	public Segmentation(final List<Point> points,
-			final List<History> historyPoints) {
+			final List<History> historyPoints, final Double quality) {
 		super();
 
 		this.points = points;
 		this.history = historyPoints;
+		this.quality = quality;
 	}
 
 	private Double quality;
@@ -44,5 +48,4 @@ public class Segmentation extends CMSObject {
 	}
 
 }
-
 
