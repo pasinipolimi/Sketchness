@@ -24,6 +24,11 @@ import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
 
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,9 +47,11 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import utils.CMS.CMS;
 import utils.CMS.CMSException;
+import utils.CMS.CMSJsonReader;
 import utils.CMS.CMSUtilities;
 import utils.CMS.models.Collection;
 import utils.CMS.models.Mask;
+import utils.CMS.models.MicroTask;
 import utils.CMS.models.Task;
 import utils.CMS.models.User;
 import utils.gamebus.GameMessages.Join;
@@ -57,10 +64,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
+
+
 public class Renderer extends UntypedActor {
 
-	//private final static String rootUrl = Play.application().configuration().getString("cmsUrl");
-	private final static String rootUrl = "http://localhost:3000";
+	private final static String rootUrl = Play.application().configuration().getString("cmsUrl");
+	//private final static String rootUrl = "http://localhost:3000";
 	private final static Integer timeout = Play.application().configuration().getInt("cmsTimeout");
 	private WebSocket.Out<JsonNode> channel;
 	String imageId;
@@ -820,6 +829,104 @@ public class Renderer extends UntypedActor {
 
 		return images;
 	}
+	
+
+	public static String initializeSlider()
+			throws JSONException, ClientProtocolException, IOException, CMSException {
+
+		final CMSJsonReader jsonReader = new CMSJsonReader();
+		final JsonNode statistics = jsonReader.readJsonFromUrl2(rootUrl, "statistics", null, "statistics");
+		JSONObject element = null;
+		final JSONArray info = new JSONArray();
+		
+		if(statistics.has("actions")){
+				element = new JSONObject();
+				element.put("min", statistics.get("actions").get("segmentations_per_image").get("min"));
+				element.put("max", statistics.get("actions").get("segmentations_per_image").get("max"));
+			}
+
+		info.put(element);
+		return info.toString();
+		
+
+	}
+	
+	public static String annotationRange(final String min, final String max, String max_id, String count) throws JSONException, ClientProtocolException, IOException, CMSException {
+
+		List<utils.CMS.models.Image> images;
+		final HashMap<String, String> params = new HashMap<String,String>();
+
+		if(!max_id.equals("null")){
+			params.put("max_id", max_id);
+			params.put("count", count);
+		}
+		params.put("max_segmentations", max);
+		params.put("min_segmentations", min);
+	
+		try {
+			images = CMS.getObjs(utils.CMS.models.Image.class, "image", params, "images");
+		} catch (final CMSException e) {
+			Logger.error("Unable to read images from cms", e);
+			throw new JSONException("Unable to read images from cms");
+		}
+
+		JSONArray imagesJ = new JSONArray();
+		JSONObject element;
+		final JSONObject result = new JSONObject();
+
+		if (images != null && images.size() > 0) {
+			imagesJ = CMSUtilities.buildImageId(images);
+		}
+		
+		result.append("image", imagesJ);
+		
+		//GET next result: max_id, count
+		final String service = "image";
+		final String response = "search_metadata";
+		
+		Promise<WS.Response> res;
+		final WSRequestHolder wsurl = WS.url(rootUrl + "/" + service).setHeader("Accept", "application/json").setTimeout(timeout);
+		if (params != null) {
+				final Iterator<Entry<String, String>> it = params.entrySet()
+						.iterator();
+				while (it.hasNext()) {
+					final Map.Entry<java.lang.String, java.lang.String> param = it
+							.next();
+					wsurl.setQueryParameter(param.getKey(), param.getValue());
+				}
+		}
+
+		res = wsurl.get();
+		String new_max_id = "";
+		String new_count = "";
+		if (res != null) {
+			final Response result2 = res.get(1000000L);
+			final JsonNode json = result2.asJson();
+			// with a system out i can see that the json is parsed correctly
+			JsonNode node = null;
+			if (json.get("status").asText().equals("OK")) {
+				node = json.get(response);
+				if(node.has("next_results")){
+					String nextResult = node.get("next_results").asText();
+					String[] tokens = nextResult.split("=");
+					new_max_id = tokens[1].split("&")[0];
+					new_count = tokens[2];
+				}
+			} else {
+				throw new CMSException(
+						"Internal Server Error while invoking CMS: "
+								+ json.get("error"));
+			}
+		} else {
+			throw new IllegalStateException("CMS response timeout.");
+		}
+		result.append("max_id", new_max_id);
+		result.append("count", new_count);
+
+		final String options = result.toString();
+		return options;
+	}
+
 
 }
 

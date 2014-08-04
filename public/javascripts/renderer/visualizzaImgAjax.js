@@ -71,12 +71,16 @@ function visualizzaImgAjax(idselected, mediaLocator){
                     	
                     
                     $.each(tags,function(i,d){
+                    	/*
                     	if(d.valid.substring(1, d.valid.length -1)=="1"){
                     		tagList.append("<tr><td class='infoValue' onclick=\"newMask('"+d.annotationId.substring(1, d.annotationId.length -1)+"','"+idselected+"','"+d.tag.substring(1, d.tag.length -1)+"','"+d.numAnnotations+"')\">"+ d.tag.substring(1, d.tag.length -1) +" ( "+d.lang.substring(1, d.lang.length -1)+" )"+"</td>"+
                     				"<td class='infoValue' ><a href='#' class='btn' onclick=\"invalidateTag('"+d.tagId+"')\"><strong>Invalidate</strong></a></td></tr>");
                     			
                     		
                     	}
+                    	*/
+                    	tagList.append("<tr><td class='infoValue' onclick=\"newMask('"+d.tagId+"','"+idselected+"','"+d.tag+"','"+d.numAnnotations+"')\">"+ d.tag+" ( "+d.lang+" )"+"</td>"+
+                				"<td class='infoValue' ><a href='#' class='btn' onclick=\"invalidateTag('"+d.tagId+"')\"><strong>Invalidate</strong></a></td></tr>");
                     });
                     
                     /*

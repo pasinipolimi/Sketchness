@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import org.apache.http.client.ClientProtocolException;
 import org.json.JSONException;
 
 import play.Logger;
@@ -112,9 +113,7 @@ public class Utilities extends Controller {
 	public static Result webToolAjaxCall() throws JSONException, CMSException {
 
 		final String max_id = request().getHeader("max_id");
-		//Logger.info("[GIO] max_id" + max_id);
 		final String count = request().getHeader("count");
-		//Logger.info("[GIO] count" + count);
 		final String result = Renderer.webToolAjax(max_id, count);
 		return ok(result);
 	}
@@ -255,6 +254,22 @@ public class Utilities extends Controller {
 		final String imageId = request().getHeader("idImage");
 		final String tagName = request().getHeader("tagName");
 		final String result = Renderer.maskFashionistaAjaxCall(imageId,tagName);
+		return ok(result);
+	}
+	
+	public static Result initializeSlider() throws JSONException, ClientProtocolException, IOException, CMSException {
+		
+		final String result = Renderer.initializeSlider();
+		return ok(result);
+	}
+	
+	public static Result annotationRange() throws JSONException, ClientProtocolException, IOException, CMSException {
+		
+		final String max_id = request().getHeader("max_id");
+		final String count = request().getHeader("count");
+		final String max = request().getHeader("max");
+		final String min = request().getHeader("min");
+		final String result = Renderer.annotationRange(min,max,max_id,count);
 		return ok(result);
 	}
 

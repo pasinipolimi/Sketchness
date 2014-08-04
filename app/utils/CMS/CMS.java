@@ -44,10 +44,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class CMS {
 
 	//private final static String rootUrl = "http://80.240.141.191:80";
-	private final static String rootUrl = "http://localhost:3000";
+	//private final static String rootUrl = "http://localhost:3000";
 
-	// private final static String rootUrl = Play.application().configuration()
-	// .getString("cmsUrl");
+	private final static String rootUrl = Play.application().configuration().getString("cmsUrl");
 	private final static Integer timeoutPostCMS = Play.application()
 			.configuration().getInt("cmsTimeoutPost");
 

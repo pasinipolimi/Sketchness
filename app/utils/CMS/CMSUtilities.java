@@ -144,7 +144,8 @@ public class CMSUtilities {
 
 	private static int retrieveNumSegments(final List<utils.CMS.models.Tag> tags) {
 		// TODO Auto-generated method stub
-		return 0;
+		//return 0;
+		return tags.size();
 	}
 
 	private static JSONArray retrieveTagsInfo(
@@ -170,8 +171,6 @@ public class CMSUtilities {
 			// TOFIX mettere sempre inglese
 			element.put("lang", lang);
 
-			// TOFIX, cosa se ne fa????
-			element.put("annotationId", annotationId);
 			tags.put(element);
 
 		}

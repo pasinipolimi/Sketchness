@@ -48,6 +48,8 @@ GET		/CollectionImagesAjax			  controllers.Utilities.collectionImagesAjaxCall
 GET		/MaskAjax						  controllers.Utilities.maskAjaxCall
 GET		/MaskAjaxFashionista			  controllers.Utilities.maskFashionistaAjaxCall
 GET     /retrieveMaskImage                controllers.Utilities.retrieveMaskImage(imageID: String, tag: String)
+GET		/initializeSlider				  controllers.Utilities.initializeSlider
+GET		/annotationRange				  controllers.Utilities.annotationRange
 
 
 # Map static resources from the /public folder to the /assets URL path
