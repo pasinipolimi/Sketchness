@@ -333,23 +333,20 @@ input[type="submit"]#submit-login{
 }
 
 #error-section #error-wrap{
-    width: 450px;
-    height: 300px;
+    width: 350px;
+    height: 350px;
     position:absolute;
-    margin-left:-225px;
-    margin-top: -150px;
+    margin-left:-175px;
+    margin-top: -175px;
     left:50%;
     top: 50%;
-    background-color: #fff;
-    -webkit-border-radius: 10px;
-    -moz-border-radius: 10px;
-    border-radius: 10px;
+    background: url('../images/login/bg-alert-box.png') 0 0 no-repeat;
     display: none;
 }
 
 #error-section #error-wrap #error-container {
     position: relative;
-    padding:15px;
+    padding:0 55px;
 }
 
 #error-container #error-title{
@@ -359,26 +356,28 @@ input[type="submit"]#submit-login{
     line-height: 24px;
     padding:0;
     margin:0;
-    color: #ff0000;
+    color: #fff;
     position: absolute;
-    top: 20px;
+    top: 40px;
     left: 0;
     width: 100%;
 }
 
 #error-container #close{
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     position: absolute;
-    top: 5px;
-    left: 410px;
+    top: 40px;
+    left: 270px;
     border: none;
     background: url('../images/login/close-error.png') 0 0 no-repeat;
     cursor: pointer;
+    z-index: 2000;
 }
 
 #error-container #error-message{
-    padding-top: 50px;
+    padding-top: 80px;
+    color: #000;
 }
 
 #error-container #error-message ul{
