@@ -24,9 +24,12 @@ import views.html.account.signup.password_forgot;
 import views.html.account.signup.password_reset;
 import views.html.account.signup.unverified;
 
+import play.data.validation.ValidationError;
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
 import com.feth.play.module.pa.user.AuthUser;
+import java.util.List;
+import java.util.Map;
 import utils.LoggerUtils;
 
 public class Signup extends Controller {
@@ -84,6 +87,12 @@ public class Signup extends Controller {
 				+ filledForm.field("email").value());
 
 		if (filledForm.hasErrors()) {
+                        Map<java.lang.String,java.util.List<ValidationError>> found = filledForm.errors();
+                        for (Map.Entry<String, List<ValidationError>> entry : found.entrySet()) {
+                            String string = entry.getKey();
+                            flash().put(string, "error");
+                            LoggerUtils.info("SIGNUP",string);
+                        }
 			// User did not fill everything properly
 			LoggerUtils.info("SIGNUP","The user did not fill everything properly, return an error message:"
 					+ filledForm.toString());

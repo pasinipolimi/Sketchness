@@ -1,7 +1,7 @@
 @(signupForm: Form[_])
 
 @import helper._
-@import helper.twitterBootstrap._
+@implicitField = @{ FieldConstructor(twitterConstructorCustom.f) }
 @import com.feth.play.module.pa.views.html._
 
 
@@ -21,11 +21,34 @@
     <div id="signup-form">
         @helper.form(routes.Signup.doSignup) {
 
-        @if(signupForm.hasGlobalErrors) {
-        <p class="error">
-            <span class="label label-important">@signupForm.globalError.message</span>
-        </p>
+        @if(flash.get("accept_terms")) {
+            <div>accept_terms</div>
         }
+        
+        @if(flash.get("email")) {
+            <div>email</div>
+        }
+        
+        @if(flash.get("name")) {
+            <div>name</div>
+        }
+        
+        @if(flash.get("repeatPassword")) {
+            <div>repeatPassword</div>
+        }
+        
+        @if(flash.get("password")) {
+            <div>password</div>
+        }
+        
+        @if(flash.get("nation")) {
+            <div>nation</div>
+        }
+        
+        @if(flash.get("gender")) {
+            <div>gender</div>
+        }
+        
         <div id="left-form" class="div-left-form">
             <div id="nickname-container" class="div-input-signup">
                 @inputText(
@@ -76,8 +99,10 @@
         <div id="right-form" class="div-right-form">
             <div id="gender-container">
                 @inputRadioGroup(
-                signupForm("gender"),
-                options = options ("true" ->"", "false" ->"")
+                    signupForm("gender"),
+                    options = options ("true" ->"", "false" ->""),
+                    '_label -> "",
+                    '_id ->"gender"
                 )
             </div>
 
