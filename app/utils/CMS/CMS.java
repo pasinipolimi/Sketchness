@@ -1,14 +1,16 @@
 package utils.CMS;
 
+import akka.actor.Cancellable;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import org.json.JSONException;
-
 import play.Logger;
 import play.Play;
 import play.libs.Akka;
@@ -17,11 +19,10 @@ import play.libs.Json;
 import play.libs.WS;
 import play.libs.WS.WSRequestHolder;
 import scala.concurrent.duration.Duration;
-import utils.LanguagePicker;
-import utils.LoggerUtils;
 import utils.CMS.models.Action;
 import utils.CMS.models.CMSObject;
-import utils.CMS.models.Choose;
+import utils.CMS.models.ChooseImage;
+import utils.CMS.models.ChooseImageTag;
 import utils.CMS.models.Collection;
 import utils.CMS.models.History;
 import utils.CMS.models.Image;
@@ -33,14 +34,12 @@ import utils.CMS.models.Segmentation;
 import utils.CMS.models.Tag;
 import utils.CMS.models.Task;
 import utils.CMS.models.User;
+import utils.LanguagePicker;
+import utils.LoggerUtils;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.Room;
-import akka.actor.Cancellable;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.IntNode;
 
 public class CMS {
 
@@ -445,16 +444,6 @@ public class CMS {
 		LoggerUtils.debug("CMS", "Closing session " + sessionId);
 	}
 
-	public static void postActionSkip(final Integer sessionId,
-			final String actionType, final String username) throws CMSException {
-		final Integer userId = postUser(username);
-		final Action action = Action.createSkipAction(sessionId, userId, true);
-
-		postAction(action);
-		LoggerUtils.debug("CMS", "Action " + actionType + " for session "
-				+ sessionId);
-	}
-
 	public static void addInitializationThread(final String roomName,
 			final Cancellable thread) throws Exception {
 		runningThreads.put(roomName, thread);
@@ -501,19 +490,26 @@ public class CMS {
 			final List<ObjectNode> queueImages, final Room roomChannel,
 			boolean taskSent) {
 
-		final List<Choose> imgtgs;
+                final List<ChooseImage> imgs;
+		List<ChooseImageTag> imgtgs;
 		try {
 			LoggerUtils.debug("CMS", "Requested image list to CMS");
-
+                        imgs = CMS.getChooseImageOnly(collection, tasksToAdd.toString());
 			imgtgs = CMS.getChoose(collection, tasksToAdd.toString());
-
+                        if(imgs!=null) {
+                            //TODO: Ask Carlo why the images are replicated, the only one 
+                            //present in the collection has a tag already.
+                            for (final ChooseImage imgtg : imgs) {
+                                imgtgs.add(0, new ChooseImageTag(imgtg.getImage(),-1));
+                            }
+                        }
 			LoggerUtils.debug("CMS", "Requested image list to CMS end");
 		} catch (final Exception e) {
 			throw new RuntimeException(
 					"[CMS] The request to the CMS is malformed");
 		}
 
-		for (final Choose imgtg : imgtgs) {
+		for (final ChooseImageTag imgtg : imgtgs) {
 			// Save information related to the image
 			final Integer id = imgtg.getImage();
 
@@ -537,7 +533,6 @@ public class CMS {
 						+ ", rooomChanel: " + roomChannel);
 				sendTaskAcquired(roomChannel);
 			}
-
 		}
 
 	}
@@ -549,12 +544,20 @@ public class CMS {
 		postAction(action);
 	}
 
-	private static List<Choose> getChoose(final Integer collection2,
+	private static List<ChooseImageTag> getChoose(final Integer collection2,
 			final String limit) throws CMSException {
 		final HashMap<String, String> params = new HashMap<>();
 		params.put("limit", limit);
 		params.put("collection", String.valueOf(collection2));
-		return getObjs(Choose.class, "choose/" + policy, params, "results");
+		return getObjs(ChooseImageTag.class, "choose/imageandtag/" + policy, params, "results");
+	}
+        
+        private static List<ChooseImage> getChooseImageOnly(final Integer collection2,
+			final String limit) throws CMSException {
+		final HashMap<String, String> params = new HashMap<>();
+		params.put("limit", limit);
+		params.put("collection", String.valueOf(collection2));
+		return getObjs(ChooseImage.class, "choose/image/" + policy, params, "results");
 	}
 
 	private static int retrieveTasks(final Integer maxRound,
@@ -654,7 +657,11 @@ public class CMS {
 	}
 
 	private static Tag getTag(final Integer tagId) throws CMSException {
-		return getObj(Tag.class, "tag", tagId, "tag");
+                if(tagId>=0)
+                    return getObj(Tag.class, "tag", tagId, "tag");
+                else
+                    //The image has no tag associated to it
+                    return new Tag("empty");
 	}
 
 	private static void buildGuessWordSegmentTask(final ObjectNode guessWord,

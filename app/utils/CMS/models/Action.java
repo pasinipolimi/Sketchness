@@ -41,14 +41,15 @@ public class Action extends CMSObject {
 	}
 
 
-	// TODO fix!!
 	public static Action createSkipAction(final Integer session,
-			final Integer user, final Boolean validity) {
-		return new Action();
-
-		// final Integer image, final Integer session,
-		// final String type, final Integer tag, final Integer user,
-		// final Boolean validity
+			final Integer image, final Integer user, final Boolean validity) {
+                final Action a = new Action();
+                a.image = image;
+		a.session = session;
+		a.user = user;
+		a.validity = validity;
+		a.type = "tagging";
+		return a;
 	}
 
 	public Integer getTag() {

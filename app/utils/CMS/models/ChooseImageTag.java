@@ -1,6 +1,6 @@
 package utils.CMS.models;
 
-public class Choose extends CMSObject {
+public class ChooseImageTag extends CMSObject {
 
 	private Integer image;
 	private Integer tag;
@@ -18,4 +18,13 @@ public class Choose extends CMSObject {
 		this.image = image;
 	}
 
+        public ChooseImageTag(Integer image, Integer tag) {
+            this.image = image;
+            this.tag = tag;
+        }
+        
+        public ChooseImageTag() {
+            this.image = 0;
+            this.tag = 0;
+        }
 }

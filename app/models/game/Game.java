@@ -490,7 +490,7 @@ public class Game extends GameRoom {
 			}
 			if (taskImage != null) {
 				final String label = taskImage.get("tag").asText();
-				if (label.equals("")) // We need to ask for a new tag
+				if (label.equals("empty")) // We need to ask for a new tag
 				{
 					sendTask(true);
 				} else // We have already a tag that has been provided, use that
@@ -942,8 +942,7 @@ public class Game extends GameRoom {
 	private void skipTask() throws Exception {
 		//TODO skip action
 		final Integer userid = CMS.postUser(sketcherPainter.name);
-		CMS.postAction(Action.createSkipAction(sessionId, userid,
-				true));
+		CMS.postAction(Action.createSkipAction(sessionId, guessObject.get("id").asInt(), userid, true));
 		GameBus.getInstance().publish(
 				new GameEvent(GameMessages.composeLogMessage(
 						LogLevel.info,
