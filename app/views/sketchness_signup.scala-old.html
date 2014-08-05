@@ -86,17 +86,10 @@
                 field = signupForm("accept_terms"),
                 '_id ->"terms"
                 )
-                <div id="loadTerms"></div>
-                <textarea readonly id="showTerms"></textarea>
-                <script type="text/javascript">
-                    $(function(){
-                        $('#loadTerms').click(function(){
-                            $('#showTerms').slideToggle('fast',function(){
-                                $('#showTerms').css('overflow','auto');
-                            });
-                        });
-                    });
-                </script>
+                <div id="loadTerms" onclick="displayTerms();">
+                </div>
+                <textarea id="showTerms"></textarea>
+
             </div>
 
             <input type="submit" id="submit-signup" class="signup-submit" value="" >
