@@ -104,6 +104,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							size: elements.size.val(),
 							color: elements.color.spectrum("get").toRgbString()
 						};
+			if(tool.tool=="eraser")
+				tool.color = "rgba(255,255,255,1.0)";
 			painter.setTool(tool);
 			communicator.send("changeTool", tool);
 		};

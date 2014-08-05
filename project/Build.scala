@@ -28,7 +28,6 @@ object ApplicationBuild extends Build {
 	val sketchnessResourcesSetting = sketchnessResources := Seq(
 		// Add here the required resources
 		// Resource(name: String, path :String, url :String = null, zipped :Boolean = true)
-		Resource("Lib Folder", "lib"),
 		Resource("Audio Folder", "public/sounds"),
 		Resource("RequireJS", "public/javascripts/lib/require.js", "http://requirejs.org/docs/release/2.1.8/minified/require.js", false),
 		Resource("PaperJS", "public/javascripts/lib/paper.js", "https://raw.github.com/paperjs/paper.js/v0.9.9/dist/paper-full.js", false),
