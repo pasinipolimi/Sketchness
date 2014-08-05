@@ -28,7 +28,6 @@ object ApplicationBuild extends Build {
 	val sketchnessResourcesSetting = sketchnessResources := Seq(
 		// Add here the required resources
 		// Resource(name: String, path :String, url :String = null, zipped :Boolean = true)
-		Resource("Lib Folder", "lib"),
 		Resource("Audio Folder", "public/sounds"),
 		Resource("RequireJS", "public/javascripts/lib/require.js", "http://requirejs.org/docs/release/2.1.8/minified/require.js", false),
 		Resource("PaperJS", "public/javascripts/lib/paper.js", "https://raw.github.com/paperjs/paper.js/v0.9.9/dist/paper-full.js", false),
@@ -54,6 +53,7 @@ object ApplicationBuild extends Build {
 		Resource("Spectrum JS", "public/stylesheets/lib/spectrum.css", "https://raw.github.com/bgrins/spectrum/master/spectrum.css", false),
 		Resource("Modernizr", "public/javascripts/lib/modernizr.custom.js", "https://raw.githubusercontent.com/codrops/Blueprint-ResponsiveFullWidthGrid/master/js/modernizr.custom.js", false),
 		//Zipped files with assets: images and sounds
+		Resource("Libraries", "lib/", "http://54.228.220.100/libs.zip", true),
 		Resource("Website Images", "public/images", "http://54.228.220.100/spritesheets.zip",true),
 		Resource("Website Sound Effects", "public/sounds/effects", "http://54.228.220.100/effects.zip",true)
 	)
