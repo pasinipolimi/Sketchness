@@ -88,11 +88,18 @@ public class Signup extends Controller {
 
 		if (filledForm.hasErrors()) {
                         Map<java.lang.String,java.util.List<ValidationError>> found = filledForm.errors();
+                        Boolean passwordSet = found.containsKey("password");
                         for (Map.Entry<String, List<ValidationError>> entry : found.entrySet()) {
                             String string = entry.getKey();
-                            if((string.equals("password")||string.equals("repeatPassword"))&&(filledForm.field("password").value()!=filledForm.field("RepeatPassword").value()))
+                            if(string.equals("repeatPassword") && passwordSet) {
+                                flash().put(string, "error");
+                            }
+                            if((string.equals("password")||string.equals("repeatPassword"))
+                               &&(filledForm.field("password").value()!=filledForm.field("RepeatPassword").value())
+                               &&(filledForm.field("password").value()!="")
+                               &&(filledForm.field("RepeatPassword").value()!=""))
                                 flash().put("passwordMismatch","error");
-                            else
+                            else if(!string.equals("repeatPassword"))
                                 flash().put(string, "error");
                             LoggerUtils.info("SIGNUP",string);
                         }
