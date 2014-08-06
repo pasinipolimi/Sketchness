@@ -20,34 +20,69 @@
     <div id="logo-container" onclick="location.href='@routes.Login.login';"></div>
     <div id="signup-form">
         @helper.form(routes.Signup.doSignup) {
+        @if(flash.get("accept_terms") || flash.get("email") || flash.get("name") || flash.get("password") || flash.get("repeatPassword") || flash.get("nation") || flash.get("gender")) {
 
-        @if(flash.get("accept_terms")) {
-            <div>accept_terms</div>
+        <div id="error-section">
+            <div id="error-wrap">
+                <div id="error-container">
+                    <div id="close"></div>
+                    <h1 id="error-title">Error: </h1>
+                    <div id="error-message">
+                        Some of the required fields need to be filled:
+                        <ul>
+                            @if(flash.get("accept_terms")) {
+                            <li><strong>Accept terms</strong></li>
+                            }
+
+                            @if(flash.get("email")) {
+                            <li><strong>Email</strong></li>
+                            }
+
+                            @if(flash.get("name")) {
+                            <li><strong>Nickname</strong></li>
+                            }
+
+                            @if(flash.get("repeatPassword") || flash.get("password")) {
+                            <li><strong>Password not chosen or not matching</strong></li>
+                            }
+
+                            @if(flash.get("nation")) {
+                            <li><strong>Nation</strong></li>
+                            }
+
+                            @if(flash.get("gender")) {
+                            <li><strong>Gender</strong></li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            var winHeight = $(window).height();
+            var windWidth = $(window).width();
+
+            $(function(){
+
+                $('#close').click(function(){
+                    $('#error-section').fadeOut();
+                });
+
+                $('#error-section').css({
+                    width: windWidth,
+                    height: winHeight
+                });
+
+
+                $('#error-wrap').fadeOut(function(){
+                    $('#error-wrap').css({
+                        top: (($(window).height()-$().height('#error-wrap'))/2)+'px'
+                    }).fadeIn(500);
+                });
+            });
+        </script>
         }
-        
-        @if(flash.get("email")) {
-            <div>email</div>
-        }
-        
-        @if(flash.get("name")) {
-            <div>name</div>
-        }
-        
-        @if(flash.get("repeatPassword")) {
-            <div>repeatPassword</div>
-        }
-        
-        @if(flash.get("password")) {
-            <div>password</div>
-        }
-        
-        @if(flash.get("nation")) {
-            <div>nation</div>
-        }
-        
-        @if(flash.get("gender")) {
-            <div>gender</div>
-        }
+
         
         <div id="left-form" class="div-left-form">
             <div id="nickname-container" class="div-input-signup">
