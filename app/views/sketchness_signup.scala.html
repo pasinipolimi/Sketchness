@@ -20,6 +20,7 @@
     <div id="logo-container" onclick="location.href='@routes.Login.login';"></div>
     <div id="signup-form">
         @helper.form(routes.Signup.doSignup) {
+
         @if(flash.get("accept_terms") || flash.get("email") || flash.get("name") || flash.get("password") || flash.get("repeatPassword") || flash.get("nation") || flash.get("gender")) {
 
         <div id="error-section">
@@ -45,16 +46,15 @@
                             @if(flash.get("password")) {
                             <li><strong>Password not chosen</strong></li>
                             }
+
                             @if(flash.get("repeatPassword")) {
                             <li><strong>The passwords do not match</strong></li>
                             }
+
                             @if(flash.get("nation")) {
                             <li><strong>Nation</strong></li>
                             }
 
-                            @if(flash.get("gender")) {
-                            <li><strong>Gender</strong></li>
-                            }
                         </ul>
                     </div>
                 </div>
@@ -65,6 +65,9 @@
             var windWidth = $(window).width();
 
             $(function(){
+
+                if (!$("input[name='gender']").is(':checked'))
+                    $('#error-message ul').append('<li><strong>Gender</strong></li>');
 
                 $('#close').click(function(){
                     $('#error-section').fadeOut();
