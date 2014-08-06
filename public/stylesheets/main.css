@@ -1,11 +1,31 @@
+@font-face {
+    font-family: 'futura_lightregular';
+    src: url('font/futura/futura_light-webfont.eot');
+    src: url('font/futura/futura_light-webfont.eot?#iefix') format('embedded-opentype'),
+    url('font/futura/futura_light-webfont.woff') format('woff'),
+    url('font/futura/futura_light-webfont.ttf') format('truetype'),
+    url('font/futura/futura_light-webfont.svg#futura_lightregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
 html {
-	height: 100%;
+    height: 100%;
+
 }
 
 html, body {
-	background-color: #eee;
-}
+    background-color: #eee;
+    background: url(../images/common/background.jpg) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    /*font-family: 'ITCAvantGardeGothicStdBook';*/
+    font-family: 'futura_lightregular';
 
+}
 /*To remove Twitter Bootstrap blue borders*/
 a:focus, a:active, 
 button::-moz-focus-inner,
