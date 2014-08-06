@@ -90,7 +90,7 @@ public class Signup extends Controller {
                         Map<java.lang.String,java.util.List<ValidationError>> found = filledForm.errors();
                         for (Map.Entry<String, List<ValidationError>> entry : found.entrySet()) {
                             String string = entry.getKey();
-                            if((string.equals("password")||string.equals("repeatPassword"))&&(filledForm.field("password").value()!=filledForm.field("repeatPassword").value()))
+                            if((string.equals("password")||string.equals("repeatPassword"))&&(filledForm.field("password").value()!=filledForm.field("RepeatPassword").value()))
                                 flash().put("passwordMismatch","error");
                             else
                                 flash().put(string, "error");
