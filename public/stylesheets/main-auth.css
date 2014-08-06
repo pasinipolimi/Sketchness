@@ -231,6 +231,7 @@ input[type="radio"] + label{
     width: 110px;
 }
 
+#gender{margin-top:-20px;}
 
 input[type=radio]#gender_true + label{
   top:2px;left:0px;

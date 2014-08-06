@@ -42,10 +42,12 @@
                             <li><strong>Nickname</strong></li>
                             }
 
-                            @if(flash.get("repeatPassword") || flash.get("password")) {
-                            <li><strong>Password not chosen or not matching</strong></li>
+                            @if(flash.get("password")) {
+                            <li><strong>Password not chosen</strong></li>
                             }
-
+                            @if(flash.get("repeatPassword")) {
+                            <li><strong>The passwords do not match</strong></li>
+                            }
                             @if(flash.get("nation")) {
                             <li><strong>Nation</strong></li>
                             }
@@ -133,6 +135,7 @@
 
         <div id="right-form" class="div-right-form">
             <div id="gender-container">
+                Gender
                 @inputRadioGroup(
                     signupForm("gender"),
                     options = options ("true" ->"", "false" ->""),
