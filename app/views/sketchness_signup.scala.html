@@ -21,7 +21,7 @@
     <div id="signup-form">
         @helper.form(routes.Signup.doSignup) {
 
-        @if(flash.get("accept_terms") || flash.get("email") || flash.get("name") || flash.get("password") || flash.get("repeatPassword") || flash.get("nation") || flash.get("gender")) {
+        @if(flash.get("accept_terms") || flash.get("email") || flash.get("name") || flash.get("password") || flash.get("passwordMismatch") || flash.get("nation") || flash.get("gender")) {
 
         <div id="error-section">
             <div id="error-wrap">
