@@ -1200,6 +1200,13 @@ input[type=number]::-webkit-outer-spin-button {
     background: url('../images/UI/icon/pantaloncini-on.jpg') center no-repeat;
 }
 
+.ico.pantaloni{
+    background: url('../images/UI/icon/pantaloni.jpg') center no-repeat;
+}
+.ico.pantaloni:hover{
+    background: url('../images/UI/icon/pantaloni-on.jpg') center no-repeat;
+}
+
 .ico.portafoglio{
     background: url('../images/UI/icon/portafoglio.jpg') center no-repeat;
 }
