@@ -26,13 +26,54 @@
 					<canvas id="task" width="420" height="350"></canvas>
 				</div>
 			</div>
-                        <button id="pen" style="display:none"></button>
-                        <button id="eraser" style="display:none"></button>
+            <div id="catSelector">
+                <button id="cat1"></button>
+                <button id="cat2"></button>
+                <button id="cat3"></button>
+            </div>
+            <button id="pen" style="display:none"></button>
+            <button id="eraser" style="display:none"></button>
 			<button id="skipTask" style="display:none"></button>
 			<button id="endSegmentation" style="display:none"></button>
 			<input type="text" id="wordInput" placeholder="@Messages("wordInput")" style="display:none"/>
 		</div>
 
+        <div id="catContainer">
+            <div id="catContainer-wrap">
+                <div id="catContainer-container">
+                    <div id="catContainer-close"></div>
+                    <h1 id="catContainer-title">Choose an element</h1>
+                    <div id="catContainer-icons">
+                        <div id="ico1" class="icons">
+                            <a href="#" class="ico occhiali"></a>
+                            <a href="#" class="ico collana"></a>
+                            <a href="#" class="ico orologio"></a>
+                            <a href="#" class="ico borsa"></a>
+                            <a href="#" class="ico borsetta"></a>
+                            <a href="#" class="ico anello"></a>
+                            <a href="#" class="ico portafoglio"></a>
+                        </div>
+                        <div id="ico2" class="icons">
+                            <a href="#" class="ico t-shirt"></a>
+                            <a href="#" class="ico cappello"></a>
+                            <a href="#" class="ico guanti"></a>
+                            <a href="#" class="ico abito"></a>
+                            <a href="#" class="ico cardigan"></a>
+                            <a href="#" class="ico gilet"></a>
+                            <a href="#" class="ico maglia"></a>
+                            <a href="#" class="ico reggiseno"></a>
+                            <a href="#" class="ico cravatta"></a>
+                        </div>
+                        <div id="ico3" class="icons">
+                            <a href="#" class="ico pantaloni"></a>
+                            <a href="#" class="ico scarpe"></a>
+                            <a href="#" class="ico pantaloncini"></a>
+                            <a href="#" class="ico gonna"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 		<div id="chatPanel" class="gameRoom gameChat">
 			<div id="messages" class="jscroll scroll-pane-arrows jspScrollable">

@@ -64,7 +64,7 @@ input {
 
 /* The white background content wrapper */
 .content {
-    background-color: #fff;
+    /*background-color: #fff;*/
     padding: 20px;
 	position: relative;
     margin: 0 -90px; /* negative indent the amount of the padding to maintain the grid system */

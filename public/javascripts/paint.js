@@ -53,7 +53,13 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			viewport: $("#canvaswindows"),
 			task: $("#task"),
 			draws: $("#draws"),
-			positions: $("#positions")
+			positions: $("#positions"),
+            catSelector: $('#catSelector'),
+            catContainer: $("#catContainer"),
+            catClose: $('#catContainer-close'),
+            cat1: $('#cat1'),
+            cat2: $('#cat2'),
+            cat3: $('#cat3')
 		};
 		
 		var write = new Writer(elements, sketchness.myself);
@@ -563,6 +569,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				onentertaskDrawing: function() {
 					var elements = this.elements;
 					elements.main.addClass("sketcher");
+
 					this.write.top($.i18n.prop("draw"), this.sketchness.word);
 					toolChange();
 					elements.skip.show();
@@ -570,6 +577,38 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.eraser.show();
 					elements.hudArea.show();
 					elements.endSegmentation.hide();
+
+                    // -->MoonSUB
+                    elements.catSelector.show();
+                    elements.cat1.on('click',function(){
+                        var top = ($(window).height()-elements.catContainer.height())/2;
+                        $('#catContainer-wrap').css({'top' :top+'px'});
+                        elements.catClose.on('click',function(){elements.catContainer.fadeOut()});
+                        $('.icons').hide();
+                        $('#ico1').show();
+                        elements.catContainer.hide().fadeIn();
+                    });
+
+                    elements.cat2.on('click',function(){
+                        var top = ($(window).height()-elements.catContainer.height())/2;
+                        $('#catContainer-wrap').css({'top' :top+'px'});
+                        elements.catClose.on('click',function(){elements.catContainer.fadeOut()});
+                        $('.icons').hide();
+                        $('#ico2').show();
+                        elements.catContainer.hide().fadeIn();
+                    });
+
+                    elements.cat3.on('click',function(){
+                        var top = ($(window).height()-elements.catContainer.height())/2;
+                        $('#catContainer-wrap').css({'top' :top+'px'});
+                        elements.catClose.on('click',function(){elements.catContainer.fadeOut()});
+                        $('.icons').hide();
+                        $('#ico3').show();
+                        elements.catContainer.hide().fadeIn();
+                    });
+
+                    // <--MoonSUB
+
 					this.chat.disable();
 					console.log("[BEGIN] TaskDrawing");
 					this.clock.setCountdown("task", this.constants.taskTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
@@ -794,6 +833,9 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.skip.hide();
 					elements.endSegmentation.hide();
 					elements.hudArea.hide();
+                    elements.catContainer.hide();
+                    elements.catSelector.hide();
+                    elements.cat1.off('click');
 					this.chat.enable();
 					console.log("[END] TaskDrawing");
 					this.clock.clearCountdown("task");
