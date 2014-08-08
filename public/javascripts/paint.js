@@ -411,6 +411,37 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					//this.write.warnTag($.i18n.prop("warnTag"));
 					elements.skip.show();
 					elements.wordInput.show();
+
+                    // -->MoonSUB
+                    elements.catSelector.show();
+                    elements.cat1.on('click',function(){
+                        //var top = ($(window).height()-elements.catContainer.height())/2;
+                        //$('#catContainer-wrap').css({'top' :top+'px'});
+                        elements.catClose.on('click',function(){elements.catContainer.fadeOut()});
+                        $('.icons').hide();
+                        $('#ico1').show();
+                        elements.catContainer.hide().fadeIn();
+                    });
+
+                    elements.cat2.on('click',function(){
+                        //var top = ($(window).height()-elements.catContainer.height())/2;
+                        //$('#catContainer-wrap').css({'top' :top+'px'});
+                        elements.catClose.on('click',function(){elements.catContainer.fadeOut()});
+                        $('.icons').hide();
+                        $('#ico2').show();
+                        elements.catContainer.hide().fadeIn();
+                    });
+
+                    elements.cat3.on('click',function(){
+                        //var top = ($(window).height()-elements.catContainer.height())/2;
+                        //$('#catContainer-wrap').css({'top' :top+'px'});
+                        elements.catClose.on('click',function(){elements.catContainer.fadeOut()});
+                        $('.icons').hide();
+                        $('#ico3').show();
+                        elements.catContainer.hide().fadeIn();
+                    });
+                    // <--MoonSUB
+
 					this.chat.disable();
 					
 					this.clock.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
@@ -484,6 +515,13 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.write.time();
 					elements.skip.hide();
 					elements.wordInput.hide();
+
+                    //-->MoonSUB
+                    elements.catContainer.hide();
+                    elements.catSelector.hide();
+                    elements.cat1.off('click');
+                    //<--MoonSUB
+
 					this.chat.enable();
 
 					this.clock.clearCountdown("tag");
@@ -577,37 +615,6 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.eraser.show();
 					elements.hudArea.show();
 					elements.endSegmentation.hide();
-
-                    // -->MoonSUB
-                    elements.catSelector.show();
-                    elements.cat1.on('click',function(){
-                        var top = ($(window).height()-elements.catContainer.height())/2;
-                        $('#catContainer-wrap').css({'top' :top+'px'});
-                        elements.catClose.on('click',function(){elements.catContainer.fadeOut()});
-                        $('.icons').hide();
-                        $('#ico1').show();
-                        elements.catContainer.hide().fadeIn();
-                    });
-
-                    elements.cat2.on('click',function(){
-                        var top = ($(window).height()-elements.catContainer.height())/2;
-                        $('#catContainer-wrap').css({'top' :top+'px'});
-                        elements.catClose.on('click',function(){elements.catContainer.fadeOut()});
-                        $('.icons').hide();
-                        $('#ico2').show();
-                        elements.catContainer.hide().fadeIn();
-                    });
-
-                    elements.cat3.on('click',function(){
-                        var top = ($(window).height()-elements.catContainer.height())/2;
-                        $('#catContainer-wrap').css({'top' :top+'px'});
-                        elements.catClose.on('click',function(){elements.catContainer.fadeOut()});
-                        $('.icons').hide();
-                        $('#ico3').show();
-                        elements.catContainer.hide().fadeIn();
-                    });
-
-                    // <--MoonSUB
 
 					this.chat.disable();
 					console.log("[BEGIN] TaskDrawing");
@@ -833,9 +840,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.skip.hide();
 					elements.endSegmentation.hide();
 					elements.hudArea.hide();
-                    elements.catContainer.hide();
-                    elements.catSelector.hide();
-                    elements.cat1.off('click');
+
+
 					this.chat.enable();
 					console.log("[END] TaskDrawing");
 					this.clock.clearCountdown("task");
@@ -861,7 +867,37 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						sk = this.sketchness,
 						wordInput = this.elements.wordInput,
 						painter = this.painter;
-						
+
+                    // -->MoonSUB
+                    elements.catSelector.show();
+                    elements.cat1.on('click',function(){
+                        //var top = ($(window).height()-elements.catContainer.height())/2;
+                        //$('#catContainer-wrap').css({'top' :top+'px'});
+                        elements.catClose.on('click',function(){elements.catContainer.fadeOut()});
+                        $('.icons').hide();
+                        $('#ico1').show();
+                        elements.catContainer.hide().fadeIn();
+                    });
+
+                    elements.cat2.on('click',function(){
+                        //var top = ($(window).height()-elements.catContainer.height())/2;
+                        //$('#catContainer-wrap').css({'top' :top+'px'});
+                        elements.catClose.on('click',function(){elements.catContainer.fadeOut()});
+                        $('.icons').hide();
+                        $('#ico2').show();
+                        elements.catContainer.hide().fadeIn();
+                    });
+
+                    elements.cat3.on('click',function(){
+                        //var top = ($(window).height()-elements.catContainer.height())/2;
+                        //$('#catContainer-wrap').css({'top' :top+'px'});
+                        elements.catClose.on('click',function(){elements.catContainer.fadeOut()});
+                        $('.icons').hide();
+                        $('#ico3').show();
+                        elements.catContainer.hide().fadeIn();
+                    });
+                    // <--MoonSUB
+
 					elements.pen.hide();
 					elements.eraser.hide();
 					this.write.top($.i18n.prop('guess'));
@@ -962,7 +998,14 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.clock.clearCountdown("task");
 
 					this.communicator.off("timer changeTool beginPath point endPath guess guessed score leave leaderboard roundEnd skipTask");
-				},
+
+                    //-->MoonSUB
+                    elements.catContainer.hide();
+                    elements.catSelector.hide();
+                    elements.cat1.off('click');
+                    //<--MoonSUB
+
+                },
 
 				/**
 				 * Transition method between task and image viewing

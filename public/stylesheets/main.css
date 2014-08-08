@@ -1017,13 +1017,14 @@ input[type=number]::-webkit-outer-spin-button {
 
 #catSelector{
     position: absolute;
-    top: 132px;
-    left: 510px;
-    width: 70px;
-    height: 206px;
+    top: 515px;
+    left: 210px;
+    width: 210px;
+    height: 70px;
     overflow: hidden;
     background-color: #fff;
     display: none;
+    z-index: 1000;
 }
 
 #catSelector button{
@@ -1031,6 +1032,7 @@ input[type=number]::-webkit-outer-spin-button {
     height: 66px;
     border: none;
     display: block;
+    float:left;
     background-color: #002a80;
     margin: 2px 2px 2px;
     cursor: pointer;
@@ -1038,23 +1040,24 @@ input[type=number]::-webkit-outer-spin-button {
 
 
 #catContainer{
-    position: fixed;
-    top:0;
-    left:0;
-    z-index:1000;
-    background: url('../images/login/bg-error.png') 0 0 repeat;
-    height: 100%;
-    width: 100%;
+    position: absolute;
+    top: 250px;
+    left: 530px;
+    z-index: 1000;
+    /*background: url('../images/login/bg-error.png') 0 0 repeat;*/
+    height: 348px;
+    width: 270px;
     display: none;
 }
 
 #catContainer #catContainer-wrap{
-    width: 500px;
-    height: 555px;
+    width: 270px;
+    height: 348px;
     position: absolute;
-    left: 50%;
-    margin-left: -250px;
-    background: url("../images/UI/bg-catcontainer.png");
+    left: 0;
+    top:0;
+    background: url("../images/UI/bg-catcontainer-dx.png");
+    background-size: cover;
 }
 
 #catContainer #catContainer-wrap #catContainer-container{
@@ -1063,16 +1066,21 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 #catContainer #catContainer-wrap #catContainer-container #catContainer-title{
-    margin: 0;padding:0;color: #fff; font-size: 24px;
-    position:relative; top: 30px;left:30px;
+    margin: 0;
+    padding: 0;
+    color: #fff;
+    font-size: 20px;
+    position: relative;
+    top: 20px;
+    left: 20px;
 }
 
 #catContainer #catContainer-wrap #catContainer-container #catContainer-close{
     width: 40px;
     height: 40px;
     position: absolute;
-    top: 40px;
-    left: 420px;
+    top: 25px;
+    left: 210px;
     border: none;
     background: url('../images/login/close-error.png') 0 0 no-repeat;
     cursor: pointer;
@@ -1080,157 +1088,231 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 #catContainer #catContainer-wrap #catContainer-container #catContainer-icons{
-    position:relative;
-    top:50px;
-    margin:0 45px;
+    position: absolute;
+    top: 75px;
+    margin: 0 5px;
+    overflow: hidden;
+    height: 250px;
 }
 
 .ico{
-    width: 78px;
-    height: 78px;
+    width: 60px;
+    height: 60px;
     cursor: pointer;
     margin: 0;
     border:0;
     display: block;
     float: left;
     border-spacing: 0;
+    background-size: cover;
 }
 
 .ico.abito{
     background: url('../images/UI/icon/abito.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.abito:hover{
     background: url('../images/UI/icon/abito-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.anello{
     background: url('../images/UI/icon/anello.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.anello:hover{
     background: url('../images/UI/icon/anello-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.borsa{
     background: url('../images/UI/icon/borsa.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.borsa:hover{
     background: url('../images/UI/icon/borsa-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.borsetta{
     background: url('../images/UI/icon/borsetta.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.borsetta:hover{
     background: url('../images/UI/icon/borsetta-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.cappello{
+    background-size: cover;
     background: url('../images/UI/icon/cappello.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.cappello:hover{
+    background-size: cover;
     background: url('../images/UI/icon/cappello-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.cardigan{
+    background-size: cover;
     background: url('../images/UI/icon/cardigan.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.cardigan:hover{
+    background-size: cover;
     background: url('../images/UI/icon/cardigan-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.collana{
+    background-size: cover;
     background: url('../images/UI/icon/collana.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.collana:hover{
+    background-size: cover;
     background: url('../images/UI/icon/collana-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.cravatta{
+    background-size: cover;
     background: url('../images/UI/icon/cravatta.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.cravatta:hover{
+    background-size: cover;
     background: url('../images/UI/icon/cravatta-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.gilet{
+    background-size: cover;
     background: url('../images/UI/icon/gilet.jpg') center no-repeat;
 }
 .ico.gilet:hover{
+    background-size: cover;
     background: url('../images/UI/icon/gilet-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.gonna{
+    background-size: cover;
     background: url('../images/UI/icon/gonna.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.gonna:hover{
+    background-size: cover;
     background: url('../images/UI/icon/gonna-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.guanti{
+    background-size: cover;
     background: url('../images/UI/icon/guanti.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.guanti:hover{
+    background-size: cover;
     background: url('../images/UI/icon/guanti-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.maglia{
+    background-size: cover;
     background: url('../images/UI/icon/maglia.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.maglia:hover{
+    background-size: cover;
     background: url('../images/UI/icon/maglia-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.occhiali{
+    background-size: cover;
     background: url('../images/UI/icon/occhiali.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.occhiali:hover{
+    background-size: cover;
     background: url('../images/UI/icon/occhiali-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.orologio{
+    background-size: cover;
     background: url('../images/UI/icon/orologio.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.orologio:hover{
+    background-size: cover;
     background: url('../images/UI/icon/orologio-on.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.pantaloncini{
+    background-size: cover;
     background: url('../images/UI/icon/pantaloncini.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.pantaloncini:hover{
+    background-size: cover;
     background: url('../images/UI/icon/pantaloncini-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.pantaloni{
+    background-size: cover;
     background: url('../images/UI/icon/pantaloni.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.pantaloni:hover{
+    background-size: cover;
     background: url('../images/UI/icon/pantaloni-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.portafoglio{
+    background-size: cover;
     background: url('../images/UI/icon/portafoglio.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.portafoglio:hover{
+    background-size: cover;
     background: url('../images/UI/icon/portafoglio-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.reggiseno{
+    background-size: cover;
     background: url('../images/UI/icon/reggiseno.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.reggiseno:hover{
+    background-size: cover;
     background: url('../images/UI/icon/reggiseno-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.scarpe{
+    background-size: cover;
     background: url('../images/UI/icon/scarpe.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.scarpe:hover{
+    background-size: cover;
     background: url('../images/UI/icon/scarpe-on.jpg') center no-repeat;
+    background-size: cover;
 }
 
 .ico.t-shirt{
+    background-size: cover;
     background: url('../images/UI/icon/t-shirt.jpg') center no-repeat;
+    background-size: cover;
 }
 .ico.t-shirt:hover{
+    background-size: cover;
     background: url('../images/UI/icon/t-shirt-on.jpg') center no-repeat;
+    background-size: cover;
 }
