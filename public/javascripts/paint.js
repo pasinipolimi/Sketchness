@@ -305,6 +305,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				onenterSketcher: function() {
 					var that = this;
 					console.log("[BEGIN] Sketcher");
+					clock.setTimer("round");
 					this.communicator.on({
 						tag: function() {
 						    console.log("[RECEIVED MESSAGE] tag");
@@ -1069,7 +1070,6 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				
 				onleavewaitRole: function() {
 					console.log("[END] LeaveWaitRole");
-					clock.setTimer("round");
 					this.communicator.off("leaderboard roundBegin");
 				}
 			}
