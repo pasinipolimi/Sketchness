@@ -57,7 +57,7 @@ define(["Class", "Time", "jquery", "i18n"], function(Class, Time, $) {
 			 * @param text :String The text of the main message
 			 * @param red :String The text of the additional red message
 			 */
-			top: function(text, red) {
+			top: function(text, kind) {
 				var html = "";
 				if(text !== undefined) {
 					html = "<font size='5'><b>" + text;
@@ -65,8 +65,8 @@ define(["Class", "Time", "jquery", "i18n"], function(Class, Time, $) {
 				else {
 					html = "<font size='5'><b>";
 				}
-				if(red !== undefined) {
-					html += "<font color='red'>" + red + "</font>";
+				if(kind !== undefined) {
+					html += "<div class='ico "+kind+"'></div>";
 				}
 				html += "</b></font>";
 

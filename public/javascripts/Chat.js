@@ -56,14 +56,11 @@ define(["Class", "jquery", "i18n", "jscrollpane"], function(Class, $) {
 			},
 
 			guess: function(name, word, affinity, myself) {
-				var el = $('<div class="message"><span></span><p></p></div>');
+				var el = $('<div class="message"><span></span><p class="ico '+word+'" style="width: 70px;height:70px"></p></div>');
 				$("span", el).text(name);
-				$("p", el).text(word).addClass(affinity);
-
 				if (myself) {
 					el.addClass('me');
 				}
-
 				this.appendElement(el);
 			},
 
