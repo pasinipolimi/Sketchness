@@ -88,6 +88,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 		$("#size").change(function(){
 			toolChange();
 		});
+
 		
 		//Use spectrum for the color picker
 		$("#picker").spectrum({
@@ -363,6 +364,20 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 							that.errorEvent();
 						}
 					});
+
+					//Getting the classes of the added buttons for the garments
+					$("a").click(function() {
+					   var myClasses = this.classList;
+					   if(myClasses.length==2) {
+					   	  var nick = that.sketchness.myself;
+					   	  console.log("[SENDING MESSAGE] guessAttempt");
+						  that.communicator.send("guessAttempt", {
+							 user: nick,
+							 word: myClasses[1]
+						  });
+						  elements.catContainer.fadeOut();
+					   }
+					});
 				},
 
 				/**
@@ -423,6 +438,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
                         $('#ico1').show();
                         elements.catContainer.hide().fadeIn();
                     });
+
 
                     elements.cat2.on('click',function(){
                         //var top = ($(window).height()-elements.catContainer.height())/2;
@@ -502,6 +518,18 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 							$(this).off("keypress");
 						}
+					});
+
+					//Getting the classes of the added buttons for the garments
+					$("a").click(function() {
+					   var myClasses = this.classList;
+					   if(myClasses.length==2) {
+					   	  console.log("[SENDING MESSAGE] tag");
+						  that.communicator.send("tag", {
+								word: myClasses[1]
+						  });
+						  elements.catContainer.fadeOut();
+					   }
 					});
 				},
 
