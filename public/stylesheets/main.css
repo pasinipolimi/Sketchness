@@ -587,7 +587,6 @@ table.gameList th, table.gameList td {
 	overflow: hidden;
 	position: absolute;
 	z-index: 10;
-	margin-left: 0px;
 	padding-left: 0px;
 }
 
@@ -636,7 +635,7 @@ div.popup_cont {
 	left: 340px;
 	min-height: 160px;
 	top: 150px;
-	width: 280px;
+	width: 270px;
 }
 
 .gameChat {
@@ -678,6 +677,18 @@ div.avatarIcon {
 	padding-top: 10px;
 	color: black;
 	font-weight: bold;
+}
+
+div.avatarChat {
+	list-style-type: none;
+	background: url('../images/favicon.png') no-repeat top left;
+	background-size: 20px 20px;
+	height: 46px;
+	width: 120px;
+	word-wrap: break-word;
+	padding-left: 10px;
+	padding-top: 0px;
+	color: black;
 }
 
 .userList {
