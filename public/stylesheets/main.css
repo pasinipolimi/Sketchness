@@ -1152,20 +1152,20 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 .ico.purse{
-    background: url('../images/UI/icon/borsa.jpg') center no-repeat;
+    background: url('../images/UI/icon/borsetta.jpg') center no-repeat;
     background-size: cover;
 }
 .ico.purse:hover{
-    background: url('../images/UI/icon/borsa-on.jpg') center no-repeat;
+    background: url('../images/UI/icon/borsetta-on.jpg') center no-repeat;
     background-size: cover;
 }
 
 .ico.handbag{
-    background: url('../images/UI/icon/borsetta.jpg') center no-repeat;
+    background: url('../images/UI/icon/borsa.jpg') center no-repeat;
     background-size: cover;
-}
+}a
 .ico.handbag:hover{
-    background: url('../images/UI/icon/borsetta-on.jpg') center no-repeat;
+    background: url('../images/UI/icon/borsa-on.jpg') center no-repeat;
     background-size: cover;
 }
 
