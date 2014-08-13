@@ -38,12 +38,15 @@ define(["Class", "jquery", "i18n", "jscrollpane"], function(Class, $) {
 			message: function(name, message, myself, color) {
 				var el = $('<div class="message"><div class="avatarChat"><span></span><br /><p></p></div></div>');
 				$("span", el).text(name);
-				$("p", el).text(message);
-				$("p", el).css('color', color);
-				if (myself) {
+				if(!myself) {
+					$("span", el).css('color', color);
+				}
+				else {
 					el.addClass('me');
 				}
-
+				$("p", el).text(message);
+				$("p", el).css('color', color);
+				$("p", el).css('font-weight', 'bold');
 				this.appendElement(el);
 			},
 

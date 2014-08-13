@@ -25,7 +25,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 			tagTime: 30,
 			taskTime: 120,
 			solutionTime: 3,
-			minSendRate: 50
+			minSendRate: 50,
+			playersColors: ['DarkGreen','OrangeRed','Purple','Blue','AliceBlue']
 		};
 
 		var elements = {
@@ -121,7 +122,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 		communicator.on({
 			chat: function(e, content) {
-				chat.message(sketchness.players[content.user].name, content.message, content.user === sketchness.myself, 'red');
+				chat.message(sketchness.players[content.user].name, content.message, content.user === sketchness.myself, sketchness.players[content.user].color);
 			},
 			log: function(e, content) {
 				chat.log(content.level, content.message);
@@ -190,7 +191,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 									id: content[i].user,
 									name: content[i].name,
 									img: content[i].img,
-									score: 0
+									score: 0,
+									color: constants.playersColors[i]
 								};
 							}
 							write.players(sk.players);
@@ -258,7 +260,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 									id: content[i].user,
 									name: content[i].name,
 									img: content[i].img,
-									score: 0
+									score: 0,
+									color: constants.playersColors[i]
 								};
 							}
 							write.players(sk.players);
@@ -522,7 +525,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					});
 
 					//Getting the classes of the added buttons for the garments
-					$("a").unbind( "click" );
+                    $("a").unbind( "click" );
 					$("a").click(function() {
 					   var myClasses = this.classList;
 					   if(myClasses.length==2) {
