@@ -121,7 +121,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
 		communicator.on({
 			chat: function(e, content) {
-				chat.message(sketchness.players[content.user].name, content.message, content.user === sketchness.myself);
+				chat.message(sketchness.players[content.user].name, content.message, content.user === sketchness.myself, 'red');
 			},
 			log: function(e, content) {
 				chat.log(content.level, content.message);
@@ -366,6 +366,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					});
 
 					//Getting the classes of the added buttons for the garments
+					$("a").unbind( "click" );
 					$("a").click(function() {
 					   var myClasses = this.classList;
 					   if(myClasses.length==2) {
@@ -521,6 +522,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					});
 
 					//Getting the classes of the added buttons for the garments
+					$("a").unbind( "click" );
 					$("a").click(function() {
 					   var myClasses = this.classList;
 					   if(myClasses.length==2) {
