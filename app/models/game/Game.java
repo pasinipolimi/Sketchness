@@ -77,10 +77,7 @@ public class Game extends GameRoom {
 			.application().configuration().getString("fixGroundTruth"));
 	private final Integer groundTruthId = Integer.parseInt(Play.application()
 			.configuration().getString("groundTruthId"));
-	// [TODO] Minimum tags that an image should have to avoid asking to the
-	// users for new tags
-	private final Integer minimumTags = Integer.parseInt(Play.application()
-			.configuration().getString("minimumTags"));
+
 	// Variables used to manage the rounds
 	private Boolean guessedWord = false; // Has the word been guessed for the
 	// current round?
@@ -113,7 +110,8 @@ public class Game extends GameRoom {
 	private final List<ObjectNode> priorityTaskQueue = Collections
 			.synchronizedList(new LinkedList<ObjectNode>());
 
-	private final HashMap<String, Integer> openActions = new HashMap<>();
+	private final HashMap<String, Integer> openActionsSeg = new HashMap<>();
+	private final HashMap<String, Integer> openActionsTag = new HashMap<>();
 
 	private ObjectNode taskImage;
 	private Integer sessionId;
@@ -182,7 +180,8 @@ public class Game extends GameRoom {
 					case "finalTraces":
 						CMS.postSegmentationOnAkka(
 								(ObjectNode) event.get("content"),
-								sketcherPainter.name, sessionId, openActions);
+								sketcherPainter.name, sessionId,
+								openActionsSeg, openActionsTag);
 						break;
 					case "endSegmentation":
 						endSegmentation(event.get("content").get("user")
@@ -233,16 +232,27 @@ public class Game extends GameRoom {
 			if (queueImages.size() > 0) {
 				guessObject = queueImages.remove(0);
 
-
 				final Integer user = CMS.postUser(sketcherPainter.name);
 				final Integer image = guessObject.get("id").asInt();
 				final String tagName = guessObject.get("tag").asText();
-				final Integer tag = CMS.saveTag(tagName);
-				final Integer actionid = CMS.postAction(Action
-						.createSegmentationAction(image, sessionId, tag, user,
-								true));
-				openActions.put(String.valueOf(image) + String.valueOf(tag),
-						actionid);
+
+				if (tagName.equals("empty")) {
+					// creo l azione di tag aperta
+					final Integer actionid = CMS.postAction(Action
+							.createTagAction(image, sessionId, user, true));
+					openActionsTag.put(String.valueOf(image), actionid);
+
+				} else {
+					// creo direttamente l'azione di segmentazione aperta
+					final Integer tag = CMS.saveTag(tagName);
+					final Integer actionid = CMS.postAction(Action
+							.createSegmentationAction(image, sessionId, tag,
+									user, true));
+					openActionsSeg.put(
+							String.valueOf(image) + String.valueOf(tag),
+							actionid);
+				}
+
 			}
 
 		}
@@ -653,7 +663,7 @@ public class Game extends GameRoom {
 									CMS.taskSetInitialization(
 											priorityTaskQueue,
 											queueImages, roomChannel,
-											maxRound, openActions);
+											maxRound);
 								else
 									// CMS.fixGroundTruth(groundTruthId,
 									// priorityTaskQueue,

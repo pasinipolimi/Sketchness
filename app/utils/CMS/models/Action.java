@@ -1,5 +1,6 @@
 package utils.CMS.models;
 
+import java.util.List;
 
 public class Action extends CMSObject {
 
@@ -9,7 +10,9 @@ public class Action extends CMSObject {
 	private String completed_at;
 	private Integer image;
 	private Integer session;
-	private Segmentation segmentation;
+	// private Segmentation segmentation;
+	private List<Point> points;
+	private List<History> history;
 	private String started_at;
 
 	// "tagging", "segmentation"
@@ -43,8 +46,8 @@ public class Action extends CMSObject {
 
 	public static Action createSkipAction(final Integer session,
 			final Integer image, final Integer user, final Boolean validity) {
-                final Action a = new Action();
-                a.image = image;
+		final Action a = new Action();
+		a.image = image;
 		a.session = session;
 		a.user = user;
 		a.validity = validity;
@@ -101,13 +104,13 @@ public class Action extends CMSObject {
 		this.session = session;
 	}
 
-	public Segmentation getSegmentation() {
-		return segmentation;
-	}
-
-	public void setSegmentation(final Segmentation segmentation) {
-		this.segmentation = segmentation;
-	}
+	// public Segmentation getSegmentation() {
+	// return segmentation;
+	// }
+	//
+	// public void setSegmentation(final Segmentation segmentation) {
+	// this.segmentation = segmentation;
+	// }
 
 
 
@@ -116,7 +119,12 @@ public class Action extends CMSObject {
 
 	public static Action createSegmentationAction(final Integer image,
 			final Integer session, final Integer tag, final Integer user,
-			final Boolean validity, final Segmentation segmentation) {
+			final Boolean validity, final List<Point> points,
+			final List<History> history) {
+
+		// public static Action createSegmentationAction(final Integer image,
+		// final Integer session, final Integer tag, final Integer user,
+		// final Boolean validity, final Segmentation segmentation) {
 		final Action a = new Action();
 		a.image = image;
 		a.session = session;
@@ -124,7 +132,9 @@ public class Action extends CMSObject {
 		a.user = user;
 		a.validity = validity;
 		a.type = "segmentation";
-		a.segmentation = segmentation;
+		a.points = points;
+		a.history = history;
+		// a.segmentation = segmentation;
 		return a;
 	}
 
@@ -152,6 +162,33 @@ public class Action extends CMSObject {
 		a.validity = validity;
 		a.type = "tagging";
 		return a;
+	}
+
+	public static Action createTagAction(final Integer image,
+			final Integer session, final Integer user, final Boolean validity) {
+		final Action a = new Action();
+		a.image = image;
+		a.session = session;
+		a.user = user;
+		a.validity = validity;
+		a.type = "tagging";
+		return a;
+	}
+
+	public List<Point> getPoints() {
+		return points;
+	}
+
+	public void setPoints(final List<Point> points) {
+		this.points = points;
+	}
+
+	public List<History> getHistory() {
+		return history;
+	}
+
+	public void setHistory(final List<History> history) {
+		this.history = history;
 	}
 
 }

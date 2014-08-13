@@ -1,16 +1,14 @@
 package utils.CMS;
 
-import akka.actor.Cancellable;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 import org.json.JSONException;
+
 import play.Logger;
 import play.Play;
 import play.libs.Akka;
@@ -19,6 +17,8 @@ import play.libs.Json;
 import play.libs.WS;
 import play.libs.WS.WSRequestHolder;
 import scala.concurrent.duration.Duration;
+import utils.LanguagePicker;
+import utils.LoggerUtils;
 import utils.CMS.models.Action;
 import utils.CMS.models.CMSObject;
 import utils.CMS.models.ChooseImage;
@@ -30,16 +30,17 @@ import utils.CMS.models.Mask;
 import utils.CMS.models.MicroTask;
 import utils.CMS.models.Point;
 import utils.CMS.models.SegmentToClose;
-import utils.CMS.models.Segmentation;
 import utils.CMS.models.Tag;
 import utils.CMS.models.Task;
 import utils.CMS.models.User;
-import utils.LanguagePicker;
-import utils.LoggerUtils;
 import utils.gamebus.GameBus;
 import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.Room;
-import com.fasterxml.jackson.databind.node.IntNode;
+import akka.actor.Cancellable;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class CMS {
 
@@ -53,10 +54,18 @@ public class CMS {
 	private final static Integer collection = Play.application()
 			.configuration().getInt("collection");
 
+	private final static String useImageWithNoTags = Play.application()
+			.configuration().getString("useImageWithNoTags");
+
 	private final static String policy = Play.application().configuration()
 			.getString("policy");
 
 	private static HashMap<String, Cancellable> runningThreads = new HashMap<String, Cancellable>();
+
+	// Minimum tags that an image should have to avoid asking to the
+	// users for new tags
+	private static Integer minimumTags = Integer.parseInt(Play.application()
+			.configuration().getString("minimumTags"));
 
 	public static List<Image> getImages() throws CMSException {
 		return getObjs(Image.class, "image", "images");
@@ -117,11 +126,17 @@ public class CMS {
 			}
 
 			final String respBody = returned.get().getBody();
-			return Json.parse(respBody).get("id").asInt();
+			Logger.debug("Output for post on " + service + " : " + respBody);
+			if (Json.parse(respBody).get("id") != null) {
+
+				return Json.parse(respBody).get("id").asInt();
+			}
+			return 0;
 
 		} catch (final Exception e) {
 			Logger.error("Unable to post: " + service, e);
-			throw new CMSException("Unable to post: " + service);
+			return 0;
+			// throw new CMSException("Unable to post: " + service);
 		}
 
 	}
@@ -275,7 +290,7 @@ public class CMS {
 
 	public static void postSegmentationOnAkka(final ObjectNode finalTraces,
 			final String username, final Integer session,
-			final HashMap<String, Integer> openActions) throws Exception {
+			final HashMap<String, Integer> openActionsSeg, final HashMap<String, Integer> openActionsTag) throws Exception {
 		Akka.system()
 		.scheduler()
 		.scheduleOnce(Duration.create(200, TimeUnit.MILLISECONDS),
@@ -283,14 +298,15 @@ public class CMS {
 			@Override
 			public void run() {
 				postSegmentation(finalTraces, username,
-						session, openActions);
+						session, openActionsSeg, openActionsTag);
 			}
 		}, Akka.system().dispatcher());
 	}
 
 	public static void postSegmentation(final ObjectNode finalTraces,
 			final String username, final Integer session,
-			final HashMap<String, Integer> openActions) {
+			final HashMap<String, Integer> openActionsSeg,
+			final HashMap<String, Integer> openActionsTag) {
 
 		try {
 
@@ -299,7 +315,16 @@ public class CMS {
 			final String image = finalTraces.get("id").textValue();
 			final String label = finalTraces.get("label").textValue();
 			final Integer tagId = saveTag(label);
-			postTagAction(userId, session, image, tagId);
+			if (openActionsTag.containsKey(image)) {
+				// era un azione di tag, il tag l ho gia salvato
+
+				final ChooseImageTag stc = new ChooseImageTag(tagId);
+				postObj2(stc, "action/" + openActionsTag.get(image));
+			} else {
+
+				postTagAction(userId, session, image, tagId);
+			}
+
 
 			final ArrayNode traces = (ArrayNode) finalTraces.get("traces");
 			final JsonNode history = finalTraces.get("history");
@@ -308,21 +333,20 @@ public class CMS {
 
 			final List<History> historyPoints = readHistory(history);
 
-			final Segmentation segmentation = new Segmentation(points,
-					historyPoints);
+			// final Segmentation segmentation = new Segmentation(points,
+			// historyPoints);
 
-			final Action action = Action.createSegmentationAction(
-					Integer.valueOf(image), session, tagId, userId, true,
-					segmentation);
 
-			if (openActions.get(image + tagId) != null) {
+			if (openActionsSeg.get(image + tagId) != null) {
 				// esiste già l'azione devo solo chiuderla
-				action.setId(openActions.get(image + tagId));
 				final SegmentToClose stc = new SegmentToClose(tagId, points,
 						historyPoints);
-				postObj2(stc, "action/" + action.getId());
+				postObj2(stc, "action/" + openActionsSeg.get(image + tagId));
 
 			} else {
+				final Action action = Action.createSegmentationAction(
+						Integer.valueOf(image), session, tagId, userId, true,
+						points, historyPoints);
 				postAction(action);
 			}
 
@@ -336,19 +360,25 @@ public class CMS {
 		final List<History> hs = new ArrayList<>();
 
 		final Iterator<JsonNode> histoPezzi = history.elements();
-		int i = 0;
+		// final int i = 0;
+		String lastColor = "rgb(255, 0, 0)";
 		while (histoPezzi.hasNext()) {
 			final JsonNode histoPezzo = histoPezzi.next();
 			final History h = new History();
 			final ArrayNode jpoints = (ArrayNode) histoPezzo.get("points");
 			final JsonNode first = jpoints.get(0);
-
-			h.setColor(first.get("color").asText());
+			String color = first.get("color").asText();
+			if (color.equals("end")) {
+				color = lastColor;
+			} else {
+				lastColor = color;
+			}
+			h.setColor(color);
 			final List<Point> points = readHistoPoints(histoPezzo);
 			h.setPoints(points);
 			h.setSize(first.get("size").asInt());
-			// h.setTime(histoPezzo.get("time").asInt());
-			h.setTime(i++);
+			h.setTime(histoPezzo.get("time").asInt());
+			// h.setTime(i++);
 			hs.add(h);
 
 		}
@@ -467,8 +497,8 @@ public class CMS {
 	public static void taskSetInitialization(
 			final List<ObjectNode> priorityTaskHashSet,
 			final List<ObjectNode> queueImages, final Room roomChannel,
-			final Integer maxRound, final HashMap<String, Integer> openActions)
-					throws Error, JSONException {
+			final Integer maxRound)
+					throws Error, Exception {
 		int uploadedTasks = 0;
 		try {
 			uploadedTasks = retrieveTasks(maxRound, priorityTaskHashSet,
@@ -476,7 +506,14 @@ public class CMS {
 		} catch (final Exception e) {
 			LoggerUtils.error("CMS", "Unable to read tasks");
 		}
-		final int tasksToAdd = maxRound - uploadedTasks;
+
+		int tasksToAdd = maxRound - uploadedTasks;
+		if (tasksToAdd > 0 && useImageWithNoTags.equals("true")) {
+			uploadedTasks = retrieveImagesWithoutTag(tasksToAdd, queueImages,
+					roomChannel, uploadedTasks > 0, uploadedTasks);
+
+		}
+		tasksToAdd = maxRound - uploadedTasks;
 		if (tasksToAdd > 0) {
 			retrieveImages(tasksToAdd, queueImages, roomChannel,
 					uploadedTasks > 0);
@@ -486,27 +523,73 @@ public class CMS {
 		LoggerUtils.debug("CMS", "Task init from CMS end");
 	}
 
-	private static void retrieveImages(final Integer tasksToAdd,
+	private static int retrieveImagesWithoutTag(final Integer tasksToAdd,
 			final List<ObjectNode> queueImages, final Room roomChannel,
-			boolean taskSent) {
+			boolean taskSent, int uploadedTasks) {
 
-                final List<ChooseImage> imgs;
-		List<ChooseImageTag> imgtgs;
+		final List<ChooseImage> imgs;
+		final List<ChooseImageTag> imgtgs = new ArrayList<>();
 		try {
 			LoggerUtils.debug("CMS", "Requested image list to CMS");
-                        imgs = CMS.getChooseImageOnly(collection, tasksToAdd.toString());
-			imgtgs = CMS.getChoose(collection, tasksToAdd.toString());
-                        if(imgs!=null) {
-                            //TODO: Ask Carlo why the images are replicated, the only one 
-                            //present in the collection has a tag already.
-                            for (final ChooseImage imgtg : imgs) {
-                                imgtgs.add(0, new ChooseImageTag(imgtg.getImage(),-1));
-                            }
-                        }
+			imgs = CMS.getChooseImageOnly(collection, tasksToAdd.toString());
+			if (imgs != null) {
+				for (final ChooseImage imgtg : imgs) {
+					if (imgtg.getCount() >= minimumTags) {
+						break;
+					}
+					imgtgs.add(0, new ChooseImageTag(imgtg.getImage(), -1));
+				}
+			}
 			LoggerUtils.debug("CMS", "Requested image list to CMS end");
 		} catch (final Exception e) {
 			throw new RuntimeException(
 					"[CMS] The request to the CMS is malformed");
+		}
+
+		for (final ChooseImageTag imgtg : imgtgs) {
+			// Save information related to the image
+			final Integer id = imgtg.getImage();
+
+			final ObjectNode guessWord = Json.newObject();
+			guessWord.put("type", "task");
+			guessWord.put("id", String.valueOf(id));
+			// Find the valid tags for this task.
+
+			try {
+				buildGuessWordSegment(guessWord, imgtg.getTag(),
+						CMS.getImage(id));
+				uploadedTasks = uploadedTasks + 1;
+			} catch (final CMSException e) {
+				Logger.error("Unable to read image, ignoring...", e);
+			}
+
+			queueImages.add(guessWord);
+
+			if (!taskSent) {
+				taskSent = true;
+				LoggerUtils.debug("CMS", "Send task aquired for image:" + id
+						+ ", rooomChanel: " + roomChannel);
+				sendTaskAcquired(roomChannel);
+			}
+		}
+		return uploadedTasks;
+
+	}
+
+	private static void retrieveImages(final Integer tasksToAdd,
+			final List<ObjectNode> queueImages, final Room roomChannel,
+			boolean taskSent) throws Exception {
+
+		List<ChooseImageTag> imgtgs;
+		try {
+			LoggerUtils.debug("CMS", "Requested image list to CMS");
+
+			imgtgs = CMS.getChoose(collection, tasksToAdd.toString());
+
+			LoggerUtils.debug("CMS", "Requested image list to CMS end");
+		} catch (final Exception e) {
+			throw new Exception(
+					"[CMS] The request to the CMS is malformed", e);
 		}
 
 		for (final ChooseImageTag imgtg : imgtgs) {
@@ -551,8 +634,8 @@ public class CMS {
 		params.put("collection", String.valueOf(collection2));
 		return getObjs(ChooseImageTag.class, "choose/imageandtag/" + policy, params, "results");
 	}
-        
-        private static List<ChooseImage> getChooseImageOnly(final Integer collection2,
+
+	private static List<ChooseImage> getChooseImageOnly(final Integer collection2,
 			final String limit) throws CMSException {
 		final HashMap<String, String> params = new HashMap<>();
 		params.put("limit", limit);
@@ -657,11 +740,11 @@ public class CMS {
 	}
 
 	private static Tag getTag(final Integer tagId) throws CMSException {
-                if(tagId>=0)
-                    return getObj(Tag.class, "tag", tagId, "tag");
-                else
-                    //The image has no tag associated to it
-                    return new Tag("empty");
+		if(tagId>=0)
+			return getObj(Tag.class, "tag", tagId, "tag");
+		else
+			//The image has no tag associated to it
+			return new Tag("empty");
 	}
 
 	private static void buildGuessWordSegmentTask(final ObjectNode guessWord,
