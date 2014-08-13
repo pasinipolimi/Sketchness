@@ -1,11 +1,30 @@
+@font-face {
+    font-family: 'futura_lightregular';
+    src: url('font/futura/futura_light-webfont.eot');
+    src: url('font/futura/futura_light-webfont.eot?#iefix') format('embedded-opentype'),
+    url('font/futura/futura_light-webfont.woff') format('woff'),
+    url('font/futura/futura_light-webfont.ttf') format('truetype'),
+    url('font/futura/futura_light-webfont.svg#futura_lightregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
 html {
-	height: 100%;
+    height: 100%;
+
 }
 
 html, body {
-	background-color: #eee;
-}
+    background: url('../images/common/background.jpg') no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    /*font-family: 'ITCAvantGardeGothicStdBook';*/
+    font-family: 'futura_lightregular';
 
+}
 /*To remove Twitter Bootstrap blue borders*/
 a:focus, a:active, 
 button::-moz-focus-inner,
@@ -37,7 +56,7 @@ input:focus {outline:0;}
 
 /* The white background content wrapper */
 .content {
-	background-color: #fff;
+	/*background-color: #fff;*/
 	padding: 20px;
 	position: relative;
 	margin: 0 -90px; /* negative indent the amount of the padding to maintain the grid system */
@@ -54,6 +73,8 @@ input:focus {outline:0;}
 	position: relative;
 	height: 600px;
 	width: 800px;
+    top: -20px;
+    left: -20px;
 }
 
 .homepage {
@@ -62,7 +83,7 @@ input:focus {outline:0;}
 
 .lobbypage {
 	/*lobby*/
-	top:0px;left:0px;
+	top:-20px;left:0px;
 	width:800px;height:600px;background: url("../images/UI/lobby/lobby.png") no-repeat -0px -0px;
 }
 
@@ -148,9 +169,10 @@ table.gameList th, table.gameList td {
 
 #score {
 	left: 0px;
-	top: 8px;
+	top: 3px;
 	position: relative;
 	z-index: 2;
+    color:#fff;
 }
 
 
@@ -184,7 +206,7 @@ table.gameList th, table.gameList td {
 }
 
 #mainPage {
-	top:0px;left:0px;
+	top:-20px;left:0px;
 	width:800px;height:600px;background: url("../images/UI/game/game.png") no-repeat -0px -0px;
 	width: 800px;
 	height: 600px;
@@ -568,7 +590,6 @@ table.gameList th, table.gameList td {
 	overflow: hidden;
 	position: absolute;
 	z-index: 10;
-	margin-left: 0px;
 	padding-left: 0px;
 }
 
@@ -617,7 +638,7 @@ div.popup_cont {
 	left: 340px;
 	min-height: 160px;
 	top: 150px;
-	width: 280px;
+	width: 270px;
 }
 
 .gameChat {
@@ -659,6 +680,18 @@ div.avatarIcon {
 	padding-top: 10px;
 	color: black;
 	font-weight: bold;
+}
+
+div.avatarChat {
+	list-style-type: none;
+	background: url('../images/favicon.png') no-repeat top left;
+	background-size: 20px 20px;
+	height: 46px;
+	width: 120px;
+	word-wrap: break-word;
+	padding-left: 10px;
+	padding-top: 0px;
+	color: black;
 }
 
 .userList {
@@ -752,7 +785,7 @@ div.avatarIcon {
 	height: 30px;
 	left: 680px;
 	position: absolute;
-	top: 88px;
+	top: 84px;
 	text-align: center;
 	font-size: 15px;
 	font-weight: bold;
@@ -763,8 +796,18 @@ div.avatarIcon {
 	height: 30px;
 	left: 108px;
 	position: absolute;
-	top: 50px;
+	top: 40px;
 	text-align: center;
+}
+
+#topMessage font b{font-size:20px}
+#topMessage font b .ico{
+    position: relative;
+    top: 0;
+    float: right;
+    right: 100px;
+    width: 50px;
+    height: 50px;
 }
 
 #canvasMessage {
@@ -810,9 +853,10 @@ div.avatarIcon {
 	background-color: rgba(0, 0, 0, 0);
 	border: 0px solid rgba(0, 0, 0, 0);
 	border-radius: 4px;
-	width: 300px;
+	/*width: 300px;*/
 	height: 100px;
-	left: 40px;
+	/*left: 40px;*/
+    top: -70px;
 	position: relative;
 }
 
@@ -821,11 +865,12 @@ div.avatarIcon {
 	height: 30px;
 	left: -10px;
 	position: absolute;
-	top: 550px;
+	top: 540px;
 	text-align: center;
 }
-
-
+#timeCounter font b {
+    font-size-adjust: 20px;
+}
 #hudArea {
 	position: absolute;
 	left: 0;
@@ -882,8 +927,30 @@ footer {
 	background-color: transparent;
 	border-color: transparent;
 	z-index: 11;
-	height: 30px;
+	height: 35px;
+    line-height: 30px;
 	resize: none;
+    overflow: hidden;
+}
+
+#talk.lobbyTalk{
+    top:502px;
+}
+
+#talk::-webkit-input-placeholder {
+
+}
+
+#talk:-moz-placeholder { /* Firefox 18- */
+
+}
+
+#talk::-moz-placeholder {  /* Firefox 19+ */
+
+}
+
+#talk:-ms-input-placeholder {
+
 }
 
 .lobbyTalk {
@@ -895,14 +962,22 @@ footer {
 .gameTalk {
 	left: 605px;
 	width: 170px;
-	top: 545px;
+	top: 536px;
 }
 
 
 .message {
-	padding: 4px 0;
-	position: relative;
+    display: inline-block;
+    height: auto;
+    margin-bottom: 10px;
+    padding: 4px 0;
+    position: relative;
 }
+
+.message .avatarChat p{
+    margin-left: -10px;
+}
+
 
 .message span {
 	width: 90px;
@@ -993,4 +1068,441 @@ input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+
+#catSelector{
+    position: absolute;
+    top: 508px;
+    left: 210px;
+    width: 210px;
+    height: 70px;
+    overflow: hidden;
+    background-color: #fff;
+    display: none;
+    z-index: 1000;
+}
+
+#catSelector button{
+    width: 70px;
+    height: 70px;
+    border: none;
+    display: block;
+    float:left;
+    /*background-color: #002a80;*/
+    margin: 0;
+    cursor: pointer;
+}
+
+#catSelector button#cat1{
+    background: url('../images/UI/icon/cat1.jpg') center no-repeat;
+    background-size: cover;
+}
+#catSelector button#cat1:hover{
+    background: url('../images/UI/icon/cat1-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+#catSelector button#cat2{
+    background: url('../images/UI/icon/cat2.jpg') center no-repeat;
+    background-size: cover;
+}
+#catSelector button#cat2:hover{
+    background: url('../images/UI/icon/cat2-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+#catSelector button#cat3{
+    background: url('../images/UI/icon/cat3.jpg') center no-repeat;
+    background-size: cover;
+}
+#catSelector button#cat3:hover{
+    background: url('../images/UI/icon/cat3-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+#catContainer{
+    position: absolute;
+    top: 250px;
+    left: 530px;
+    z-index: 1000;
+    /*background: url('../images/login/bg-error.png') 0 0 repeat;*/
+    height: 348px;
+    width: 270px;
+    display: none;
+}
+
+#catContainer #catContainer-wrap{
+    width: 270px;
+    height: 348px;
+    position: absolute;
+    left: 0;
+    top:0;
+    background: url("../images/UI/bg-catcontainer-dx.png");
+    background-size: cover;
+}
+
+#catContainer #catContainer-wrap #catContainer-container{
+    margin: 10px;
+
+}
+
+#catContainer #catContainer-wrap #catContainer-container #catContainer-title{
+    margin: 0;
+    padding: 0;
+    color: #fff;
+    font-size: 20px;
+    position: relative;
+    top: 20px;
+    left: 20px;
+}
+
+#catContainer #catContainer-wrap #catContainer-container #catContainer-close{
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    top: 25px;
+    left: 210px;
+    border: none;
+    background: url('../images/login/close-error.png') 0 0 no-repeat;
+    cursor: pointer;
+    z-index: 2000;
+}
+
+#catContainer #catContainer-wrap #catContainer-container #catContainer-icons{
+    position: absolute;
+    top: 75px;
+    margin: 0 5px;
+    overflow: hidden;
+    height: 250px;
+}
+
+.ico-chat-container{
+    width: 100%;
+    text-align: center;
+    height: 55px;
+    overflow: hidden;
+}
+
+.ico-chat-container .ico_chat{
+    width: 50px;
+    height: 50px;
+    /*cursor: pointer;*/
+    margin: 5px 0 0 0;
+    border:0;
+    display: inline-block;
+    border-spacing: 0;
+    background-size: cover;
+}
+
+.ico{
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+    margin: 0;
+    border:0;
+    display: block;
+    float: left;
+    border-spacing: 0;
+    background-size: cover;
+}
+
+.ico.dress, .ico_chat.dress{
+    background: url('../images/UI/icon/abito.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.dress:hover{
+    background: url('../images/UI/icon/abito-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.ring,.ico_chat.ring{
+    background: url('../images/UI/icon/anello.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.ring:hover{
+    background: url('../images/UI/icon/anello-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.purse,.ico_chat.purse{
+    background: url('../images/UI/icon/borsetta.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.purse:hover{
+    background: url('../images/UI/icon/borsetta-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.handbag,.ico_chat.handbag{
+    background: url('../images/UI/icon/borsa.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.handbag:hover{
+    background: url('../images/UI/icon/borsa-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.hat,.ico_chat.hat{
+    background: url('../images/UI/icon/cappello.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.hat:hover{
+    background: url('../images/UI/icon/cappello-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.cardigan,.ico_chat.cardigan{
+    background: url('../images/UI/icon/cardigan.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.cardigan:hover{
+    background: url('../images/UI/icon/cardigan-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.necklace,.ico_chat.necklace{
+    background: url('../images/UI/icon/collana.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.necklace:hover{
+    background: url('../images/UI/icon/collana-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.tie,.ico_chat.tie{
+    background: url('../images/UI/icon/cravatta.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.tie:hover{
+    background: url('../images/UI/icon/cravatta-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.vest,.ico_chat.vest{
+    background: url('../images/UI/icon/gilet.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.vest:hover{
+    background: url('../images/UI/icon/gilet-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.skirt, .ico_chat.skirt{
+    background: url('../images/UI/icon/gonna.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.skirt:hover{
+    background: url('../images/UI/icon/gonna-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.gloves, .ico_chat.gloves{
+    background: url('../images/UI/icon/guanti.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.gloves:hover{
+    background: url('../images/UI/icon/guanti-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.shirt,.ico_chat.shirt{
+    background: url('../images/UI/icon/maglia.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.shirt:hover{
+    background: url('../images/UI/icon/maglia-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.glasses, .ico_chat.glasses{
+    background: url('../images/UI/icon/occhiali.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.glasses:hover{
+    background: url('../images/UI/icon/occhiali-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.watch,.ico_chat.watch{
+    background: url('../images/UI/icon/orologio.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.watch:hover{
+    background: url('../images/UI/icon/orologio-on.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.shorts,.ico_chat.shorts{
+    background: url('../images/UI/icon/pantaloncini.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.shorts:hover{
+    background: url('../images/UI/icon/pantaloncini-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.trousers,.ico_chat.trousers{
+    background: url('../images/UI/icon/pantaloni.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.trousers:hover{
+    background: url('../images/UI/icon/pantaloni-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.wallet,.ico_chat.wallet{
+    background: url('../images/UI/icon/portafoglio.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.wallet:hover{
+    background: url('../images/UI/icon/portafoglio-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.bra, .ico_chat.bra{
+    background: url('../images/UI/icon/reggiseno.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.bra:hover{
+    background: url('../images/UI/icon/reggiseno-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.shoes,.ico_chat.shoes{
+    background: url('../images/UI/icon/scarpe.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.shoes:hover{
+    background: url('../images/UI/icon/scarpe-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.t-shirt,.ico_chat.t-shirt{
+    background: url('../images/UI/icon/t-shirt.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.t-shirt:hover{
+    background: url('../images/UI/icon/t-shirt-on.jpg') center no-repeat;
+    background-size: cover;
+}
+/**/
+.ico.bracelet,.ico_chat.bracelet{
+    background: url('../images/UI/icon/bracciale.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.bracelet:hover{
+    background: url('../images/UI/icon/bracciale-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.coat,.ico_chat.coat{
+    background: url('../images/UI/icon/cappotto.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.coat:hover{
+    background: url('../images/UI/icon/cappotto-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.cape,.ico_chat.cape{
+    background: url('../images/UI/icon/mantello.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.cape:hover{
+    background: url('../images/UI/icon/mantello-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.boots,.ico_chat.boots{
+    background: url('../images/UI/icon/stivali.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.boots:hover{
+    background: url('../images/UI/icon/stivali-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.tights,.ico_chat.tights{
+    background: url('../images/UI/icon/collant.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.tights:hover{
+    background: url('../images/UI/icon/collant-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.scarf,.ico_chat.scarf{
+    background: url('../images/UI/icon/sciarpa.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.scarf:hover{
+    background: url('../images/UI/icon/sciarpa-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.jacket,.ico_chat.jacket{
+    background: url('../images/UI/icon/giacca.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.jacket:hover{
+    background: url('../images/UI/icon/giacca-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.blouse,.ico_chat.blouse{
+    background: url('../images/UI/icon/camicetta.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.blouse:hover{
+    background: url('../images/UI/icon/camicetta-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.dungarees,.ico_chat.dungarees{
+    background: url('../images/UI/icon/salopette.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.dungarees:hover{
+    background: url('../images/UI/icon/salopette-on.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.socks,.ico_chat.socks{
+    background: url('../images/UI/icon/calzini.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.socks:hover{
+    background: url('../images/UI/icon/calzini-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+#other-palyer{
+    position: absolute;
+    width: 190px;
+    height: 40px;
+    top: 184px;
+    left: 600px;
+    overflow: hidden;
+}
+
+#other-palyer .player{
+    display: inline-block;
+    width: 30px; height: 40px;
+    position: relative;
+    top: 4px;
+}
+
+#other-palyer #player2{
+    left: 10px;
+}
+
+#other-palyer #player3{
+    left: 24px;
+}
+
+#other-palyer #player4{
+    left: 36px;
+}
+
+#other-palyer #player5{
+    left: 50px;
 }
