@@ -1461,3 +1461,35 @@ input[type=number]::-webkit-outer-spin-button {
     background: url('../images/UI/icon/calzini-on.jpg') center no-repeat;
     background-size: cover;
 }
+
+#other-palyer{
+    position: absolute;
+    width: 190px;
+    height: 40px;
+    top: 184px;
+    left: 600px;
+    overflow: hidden;
+}
+
+#other-palyer .player{
+    display: inline-block;
+    width: 30px; height: 40px;
+    position: relative;
+    top: 4px;
+}
+
+#other-palyer #player2{
+    left: 10px;
+}
+
+#other-palyer #player3{
+    left: 24px;
+}
+
+#other-palyer #player4{
+    left: 36px;
+}
+
+#other-palyer #player5{
+    left: 50px;
+}
