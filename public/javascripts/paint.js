@@ -191,6 +191,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						    for(var i in content)
 							{
 								sk.players[content[i].user] = {
+									number : i,
 									id: content[i].user,
 									name: content[i].name,
 									img: content[i].img,
@@ -260,6 +261,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						    for(var i in content)
 							{
 								sk.players[content[i].user] = {
+									number : i,
 									id: content[i].user,
 									name: content[i].name,
 									img: content[i].img,
@@ -434,6 +436,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					//this.write.warnTag($.i18n.prop("warnTag"));
 					elements.skip.show();
 					elements.wordInput.show();
+					sk = this.sketchness;
 
                     // -->MoonSUB
                     elements.catSelector.show();
@@ -579,7 +582,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					console.log("[BEGIN] TagWait");
 					var question = this.elements.questionMark;
 					this.painter.showImage(question.attr("src"), question.attr("rwidth"), question.attr("rheight"));
-
+					sk = this.sketchness;
 					this.clock.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
 
 					var that = this;
@@ -679,7 +682,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						score: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] score");
 							sk.players[content.user].score += content.score;
-
+							write.players(sk.players);
 							if(content.user == sk.myself) {
 								that.write.score(sk.players[content.user].score);
 							}
@@ -1006,7 +1009,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						score: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] score");
 							sk.players[content.user].score += content.score;
-
+							write.players(sk.players);
 							if(content.user == sk.myself) {
 								that.write.score(sk.players[content.user].score);
 							}

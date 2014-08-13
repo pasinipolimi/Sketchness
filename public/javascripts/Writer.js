@@ -129,17 +129,26 @@ define(["Class", "Time", "jquery", "i18n"], function(Class, Time, $) {
 			 * @param players :Array The opponents lists
 			 */
 			players: function(players) {
-				var myself = this.myself,
-					opponents = this.elements.opponents;
-
-				opponents.empty();
-				$.each(players, function(id, player) {
-					if (id != myself) {
-						var element = $("<li></li>");
-						element.attr("title", player.name);
-						opponents.append(element);
+				var count = 0;
+				for(var i in players) {
+					count++;
+					switch(players[i].number) {
+						case "0": $('#currentNickname').css('color', players[i].color);break;
+						case "1": $('#player2').css('background-color', players[i].color);$('#player2').text(players[i].score);break;
+						case "2": $('#player3').css('background-color', players[i].color);$('#player3').text(players[i].score);break;
+						case "3": $('#player4').css('background-color', players[i].color);$('#player4').text(players[i].score);break;
+						case "4": $('#player5').css('background-color', players[i].color);$('#player5').text(players[i].score);break;
 					}
-				});
+				}
+				for(var j=count; j<4;j++) {
+					switch(j) {
+						case 0: $('#currentNickname').removeAttr('color');break;
+						case 1: $('#player2').removeAttr('style');$('#player2').text("");break;
+						case 2: $('#player3').removeAttr('style');$('#player3').text("");break;
+						case 3: $('#player4').removeAttr('style');$('#player4').text("");break;
+						case 4: $('#player5').removeAttr('style');$('#player5').text("");break;
+					}
+				}
 			}
 		}
 	});
