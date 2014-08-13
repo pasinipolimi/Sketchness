@@ -73,6 +73,8 @@ input:focus {outline:0;}
 	position: relative;
 	height: 600px;
 	width: 800px;
+    top: -20px;
+    left: -20px;
 }
 
 .homepage {
@@ -167,9 +169,10 @@ table.gameList th, table.gameList td {
 
 #score {
 	left: 0px;
-	top: 8px;
+	top: 3px;
 	position: relative;
 	z-index: 2;
+    color:#fff;
 }
 
 
@@ -782,7 +785,7 @@ div.avatarChat {
 	height: 30px;
 	left: 680px;
 	position: absolute;
-	top: 88px;
+	top: 84px;
 	text-align: center;
 	font-size: 15px;
 	font-weight: bold;
@@ -793,9 +796,12 @@ div.avatarChat {
 	height: 30px;
 	left: 108px;
 	position: absolute;
-	top: 50px;
+	top: 40px;
 	text-align: center;
 }
+
+#topMessage font b{font-size:20px}
+
 
 #canvasMessage {
 	display: none;
@@ -912,8 +918,25 @@ footer {
 	background-color: transparent;
 	border-color: transparent;
 	z-index: 11;
-	height: 30px;
+	height: 35px;
+    line-height: 30px;
 	resize: none;
+}
+
+#talk::-webkit-input-placeholder {
+
+}
+
+#talk:-moz-placeholder { /* Firefox 18- */
+
+}
+
+#talk::-moz-placeholder {  /* Firefox 19+ */
+
+}
+
+#talk:-ms-input-placeholder {
+
 }
 
 .lobbyTalk {
@@ -925,7 +948,7 @@ footer {
 .gameTalk {
 	left: 605px;
 	width: 170px;
-	top: 545px;
+	top: 536px;
 }
 
 
