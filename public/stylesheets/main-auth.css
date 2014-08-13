@@ -674,19 +674,34 @@ div#text-contenitor-content {
 }
 
 div#unverified-scroll {
-	background-image: url('../images/UI/pergamena.png');
-	background-repeat: no-repeat;
-	background-color: transparent;
-	position: absolute;
-	margin-left: 150px;
-	margin-top: 70px;
-	width: 500px;
-	height: 379px;
+    background-image: url('../images/UI/not-found.png');
+    background-repeat: no-repeat;
+    background-color: transparent;
+    position: absolute;
+    margin-left: 150px;
+    margin-top: 70px;
+    width: 500px;
+    height: 420px;
 }
 
+div#unverified-scroll .logo-error{
+    background-image: url('../images/UI/logo-404.png');
+    background-repeat: no-repeat;
+    background-color: transparent;
+    position: absolute;
+    width: 200px;
+    height: 80px;
+    top: -70px;
+    left: -150px;
+}
+
+
 p#Profile-text{
-    padding-top:45px;
-    padding-left:50px
+    padding-top: 130px;
+    padding: 130px 57px;
+    color: #fff;
+    text-align: center;
+    font-size: 24px;
 }
 
 ul#ChangeNamePsw{
@@ -728,13 +743,15 @@ ul#ChangeNamePsw{
 
 #back1 {
 	/*backUnpressed*/
-	width:160px;height:51px;background: url("../images/UI/lobby/lobby.png") no-repeat -800px -51px;
-	left: 600px;
-	position: absolute;
-	margin-left: -700px;
-	margin-top: -75px;
-	border-width: 0px;
-	top: 530px;
+    width: 160px;
+    height: 51px;
+    background: url("../images/UI/lobby/lobby.png") no-repeat -800px -51px;
+    left: 160px;
+    position: absolute;
+    /* margin-left: -700px; */
+    /* margin-top: -75px; */
+    border-width: 0px;
+    top: 270px;
 }
 
 #back1:hover {

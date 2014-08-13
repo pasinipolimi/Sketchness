@@ -56,7 +56,7 @@ define(["Class", "jquery", "i18n", "jscrollpane"], function(Class, $) {
 			},
 
 			guess: function(name, word, affinity, myself) {
-				var el = $('<div class="message" style="height:100px"><div class="avatarChat"><span></span><p class="ico '+word+'_chat" style="width: 70px;height:70px; padding-top: 10px; padding-bottom: 10px; padding-left: 40px"></p></div></div>');
+				var el = $('<div class="message" style="height:100px"><div class="avatarChat"><span></span><div class="ico-chat-container"><p class="ico_chat '+word+'"></p></div></div></div>');
 				$("span", el).text(name);
 				if (myself) {
 					el.addClass('me');

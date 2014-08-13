@@ -83,7 +83,7 @@ input:focus {outline:0;}
 
 .lobbypage {
 	/*lobby*/
-	top:0px;left:0px;
+	top:-20px;left:0px;
 	width:800px;height:600px;background: url("../images/UI/lobby/lobby.png") no-repeat -0px -0px;
 }
 
@@ -206,7 +206,7 @@ table.gameList th, table.gameList td {
 }
 
 #mainPage {
-	top:0px;left:0px;
+	top:-20px;left:0px;
 	width:800px;height:600px;background: url("../images/UI/game/game.png") no-repeat -0px -0px;
 	width: 800px;
 	height: 600px;
@@ -801,7 +801,9 @@ div.avatarChat {
 }
 
 #topMessage font b{font-size:20px}
+#topMessage font b .ico{
 
+}
 
 #canvasMessage {
 	display: none;
@@ -857,11 +859,12 @@ div.avatarChat {
 	height: 30px;
 	left: -10px;
 	position: absolute;
-	top: 550px;
+	top: 540px;
 	text-align: center;
 }
-
-
+#timeCounter font b {
+    font-size-adjust: 20px;
+}
 #hudArea {
 	position: absolute;
 	left: 0;
@@ -1155,6 +1158,24 @@ input[type=number]::-webkit-outer-spin-button {
     height: 250px;
 }
 
+.ico-chat-container{
+    width: 100%;
+    text-align: center;
+    height: 55px;
+    overflow: hidden;
+}
+
+.ico-chat-container .ico_chat{
+    width: 50px;
+    height: 50px;
+    /*cursor: pointer;*/
+    margin: 5px 0 0 0;
+    border:0;
+    display: inline-block;
+    border-spacing: 0;
+    background-size: cover;
+}
+
 .ico{
     width: 60px;
     height: 60px;
@@ -1167,7 +1188,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.dress{
+.ico.dress, .ico_chat.dress{
     background: url('../images/UI/icon/abito.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1176,7 +1197,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.ring{
+.ico.ring,.ico_chat.ring{
     background: url('../images/UI/icon/anello.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1185,7 +1206,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.purse{
+.ico.purse,.ico_chat.purse{
     background: url('../images/UI/icon/borsetta.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1194,7 +1215,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.handbag{
+.ico.handbag,.ico_chat.handbag{
     background: url('../images/UI/icon/borsa.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1203,7 +1224,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.hat{
+.ico.hat,.ico_chat.hat{
     background: url('../images/UI/icon/cappello.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1212,7 +1233,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.cardigan{
+.ico.cardigan,.ico_chat.cardigan{
     background: url('../images/UI/icon/cardigan.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1221,7 +1242,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.necklace{
+.ico.necklace,.ico_chat.necklace{
     background: url('../images/UI/icon/collana.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1230,7 +1251,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.tie{
+.ico.tie,.ico_chat.tie{
     background: url('../images/UI/icon/cravatta.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1239,7 +1260,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.vest{
+.ico.vest,.ico_chat.vest{
     background: url('../images/UI/icon/gilet.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1248,7 +1269,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.skirt{
+.ico.skirt, .ico_chat.skirt{
     background: url('../images/UI/icon/gonna.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1257,7 +1278,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.gloves{
+.ico.gloves, .ico_chat.gloves{
     background: url('../images/UI/icon/guanti.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1266,16 +1287,16 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.jersey{
+.ico.shirt,.ico_chat.shirt{
     background: url('../images/UI/icon/maglia.jpg') center no-repeat;
     background-size: cover;
 }
-.ico.jersey:hover{
+.ico.shirt:hover{
     background: url('../images/UI/icon/maglia-on.jpg') center no-repeat;
     background-size: cover;
 }
 
-.ico.glasses{
+.ico.glasses, .ico_chat.glasses{
     background: url('../images/UI/icon/occhiali.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1284,7 +1305,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.watch{
+.ico.watch,.ico_chat.watch{
     background: url('../images/UI/icon/orologio.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1292,7 +1313,7 @@ input[type=number]::-webkit-outer-spin-button {
     background: url('../images/UI/icon/orologio-on.jpg') center no-repeat;
     background-size: cover;
 }
-.ico.shorts{
+.ico.shorts,.ico_chat.shorts{
     background: url('../images/UI/icon/pantaloncini.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1301,7 +1322,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.trousers{
+.ico.trousers,.ico_chat.trousers{
     background: url('../images/UI/icon/pantaloni.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1310,7 +1331,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.wallet{
+.ico.wallet,.ico_chat.wallet{
     background: url('../images/UI/icon/portafoglio.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1319,7 +1340,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.bra{
+.ico.bra, .ico_chat.bra{
     background: url('../images/UI/icon/reggiseno.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1328,7 +1349,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.shoes{
+.ico.shoes,.ico_chat.shoes{
     background: url('../images/UI/icon/scarpe.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1337,7 +1358,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.t-shirt{
+.ico.t-shirt,.ico_chat.t-shirt{
     background: url('../images/UI/icon/t-shirt.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1346,7 +1367,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 /**/
-.ico.bracelet{
+.ico.bracelet,.ico_chat.bracelet{
     background: url('../images/UI/icon/bracciale.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1355,7 +1376,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.coat{
+.ico.coat,.ico_chat.coat{
     background: url('../images/UI/icon/cappotto.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1364,7 +1385,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.cape{
+.ico.cape,.ico_chat.cape{
     background: url('../images/UI/icon/mantello.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1373,7 +1394,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.boots{
+.ico.boots,.ico_chat.boots{
     background: url('../images/UI/icon/stivali.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1382,7 +1403,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.tights{
+.ico.tights,.ico_chat.tights{
     background: url('../images/UI/icon/collant.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1391,7 +1412,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.scarf{
+.ico.scarf,.ico_chat.scarf{
     background: url('../images/UI/icon/sciarpa.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1400,7 +1421,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.jacket{
+.ico.jacket,.ico_chat.jacket{
     background: url('../images/UI/icon/giacca.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1409,7 +1430,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.blouse{
+.ico.blouse,.ico_chat.blouse{
     background: url('../images/UI/icon/camicetta.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1418,7 +1439,7 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-.ico.dungarees{
+.ico.dungarees,.ico_chat.dungarees{
     background: url('../images/UI/icon/salopette.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1426,7 +1447,7 @@ input[type=number]::-webkit-outer-spin-button {
     background: url('../images/UI/icon/salopette-on.jpg') center no-repeat;
     background-size: cover;
 }
-.ico.socks{
+.ico.socks,.ico_chat.socks{
     background: url('../images/UI/icon/calzini.jpg') center no-repeat;
     background-size: cover;
 }
