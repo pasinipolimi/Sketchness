@@ -609,6 +609,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						    console.log("[RECEIVED MESSAGE] noTag");
 							that.nextRound();
 						},
+						skipTask: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] skipTask");
+							that.skipRound();
+						},
 						error: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] error");
 							that.errorEvent();
@@ -1078,6 +1082,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					console.log("[BEGIN] ImageViewing");
 					var that = this;
 					var elements = that.elements;
+					sk = this.sketchness;
 					elements.skip.hide();
 					elements.endSegmentation.hide();
 					elements.hudArea.hide();
@@ -1205,7 +1210,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				{ name: "beSketcher", from: ["loading", "playersWait", "waitRole", "tagInsertion", "tagWait" ], to: "Sketcher" },
 				{ name: "beGuesser", from: ["loading", "playersWait", "waitRole", "tagInsertion", "tagWait" ], to: "Guesser" },
 				{ name: "nextRound", from: ["imageViewing", "taskDrawing",  "tagInsertion", "tagWait"], to: "waitRole"},
-				{ name: "skipRound", from: ["taskGuessing", "taskDrawing", "tagInsertion"], to: "waitRole" },
+				{ name: "skipRound", from: ["taskGuessing", "taskDrawing", "tagInsertion", "tagWait"], to: "waitRole" },
 				{ name: "tag", from: "Sketcher", to: "tagInsertion" },
 				{ name: "tag", from: "Guesser", to: "tagWait" },
 				{ name: "task", from: ["Sketcher", "tagInsertion"], to: "taskDrawing" },
