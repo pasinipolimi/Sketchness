@@ -25,8 +25,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class CMSUtilities {
 
-	//private final static String rootUrl = Play.application().configuration().getString("cmsUrl");
-	private final static String rootUrl = "http://localhost:3000";
+	private final static String rootUrl = Play.application().configuration().getString("cmsUrl");
+	//private final static String rootUrl = "http://localhost:3000";
 
 	public static JSONArray buildImageId(
 			final List<utils.CMS.models.Image> images) throws JSONException {
@@ -169,7 +169,7 @@ public class CMSUtilities {
 			element.put("valid", valid);
 
 			// TOFIX mettere sempre inglese
-			element.put("lang", lang);
+			element.put("lang", "eng");
 
 			tags.put(element);
 
@@ -223,17 +223,27 @@ public class CMSUtilities {
 	}
 
 	public static String retriveCollImages(final Collection c)
-			throws JSONException {
+			throws JSONException, CMSException {
 		final JSONArray imageIds = new JSONArray();
 		JSONObject element, finalElement;
 		final JSONArray info = new JSONArray();
 
+		/*
 		for (final Integer id : c.getImages()) {
 
 			element = new JSONObject();
 			element.put("id", id);
 			imageIds.put(element);
 		}
+		*/
+		for (final Integer id : c.getImages()) {
+			Image im = CMS.getImage(id);
+			element = new JSONObject();
+			element.put("id", id);
+			element.put("media", rootUrl + im.getMediaLocator());
+			imageIds.put(element);
+		}
+		
 
 		finalElement = new JSONObject();
 		finalElement.put("images", imageIds);

@@ -4,29 +4,17 @@
  */
 
 function repopolate(){
-		/*
-		$("#imageList").children().show();
-		//reset annotations filter
-		var maxAnn = $("#maxAnn").val();
-		$("#slider").replaceWith("<input id='slider' type='range' name='range' min='1' max='"+maxAnn+"' value='"+maxAnn+"' onchange='numberAnnotations();'>");
-		$("#range").replaceWith("<output id='range'> "+maxAnn+"</output>");
-		//reset collection filter
-		$("input:checkbox[name=collection]:checked").each(function()
-		{
-			$(this).prop("checked", false); 
-					
-		});
-		//reset image id filter
-		$("input:text[name=imageIdSearch]").each(function()
-				{
-					$(this).val('');	
-				});
-		*/
+
 		$('#images_scroll').unbind('inview');
 		popolaSelectionAjax(null,100,false);
 };
 
 function filter(){
+	
+		//reset image list
+		var selection = $("#imageList");
+		$('#images_scroll').unbind('inview');
+		selection.children().remove();
 	
 		//reset collection filter
 		$("input:checkbox[name=collection]:checked").each(function()
@@ -36,26 +24,15 @@ function filter(){
 			});
 		
 		//reset annotations filter
-		/*
-		var maxAnn = $("#maxAnn").val();
-		$(".range").replaceWith("<span class='range'>Num. Annotations <input id='slider' type='range' name='range' min='1' max='"+maxAnn+"' value='"+maxAnn+"' onchange='numberAnnotations();'><output id='range'> "+maxAnn+"</output><input type='text' id='maxAnn' style='display:none;'/>");
-		*/
-		var maxAnn = $("#maxAnn").val();
-		var values = [0,maxAnn];
-		$("#slider").val(values);
-		$("#resSlider").replaceWith("<span id='resSlider'>"+0+":"+maxAnn+"</span>");
-		/*
-		var idElements = $('.imageId');
-		$(".cbp-rfgrid").children().hide();
-		idElements.each( function(i, val) {
-			
-			if($(val).text()==$('#system-search').val())
-			{
-				
-				$(".cbp-rfgrid").children().eq(i).show();
-			}
-		});
-		*/
+        var min_ann = $("#minAnn").val();
+        var max_ann = $("#maxAnn").val();
+
+        var values = [min_ann,max_ann];
+        $("#slider").val(values);
+        $("#resSlider").replaceWith("<span id='resSlider'>"+min_ann+":"+max_ann+"</span>");
+
+
+        //IMAGE ID FILTER
 		var id_selected = $('#system-search').val();
 
 		$.jAjax({
@@ -108,24 +85,32 @@ function filter(){
     
 function visualizzaCollection(){
 
-	//reset annotations filter
-	var maxAnn = $("#maxAnn").val();
-	$("#slider").replaceWith("<input id='slider' type='range' name='range' min='1' max='"+maxAnn+"' value='"+maxAnn+"' onchange='numberAnnotations();'>");
-	$("#range").replaceWith("<output id='range'> "+maxAnn+"</output>");
+	var selection = $("#imageList")
+    ,li,img,div,h3
+    ,ids
+    ,tasks
+    ,result;
+
+	//reset image list
+	$('#images_scroll').unbind('inview');
+	selection.children().remove();
+	
 	//reset image id filter
 	$("input:text[name=imageIdSearch]").each(function()
 			{
 				$(this).val('');	
 			});
 	
-	var selection = $("#imageList")
-        ,li,img,div,h3
-        ,ids
-        ,tasks
-        ,result;
+	//reset annotations filter
+    var min_ann = $("#minAnn").val();
+    var max_ann = $("#maxAnn").val();
 
-	$(".cbp-rfgrid").children().hide();
-	
+    var values = [min_ann,max_ann];
+    $("#slider").val(values);
+    $("#resSlider").replaceWith("<span id='resSlider'>"+min_ann+":"+max_ann+"</span>");
+    
+    
+    //COLLECTION FILTER
 	$("input:checkbox[name=collection]:checked").each(function()
 	{
 		var idselected = $(this).val(); 
@@ -137,19 +122,20 @@ function visualizzaCollection(){
 	                if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
 
 	                    result = JSON.parse(xhr.responseText);
-	                    var ids = result[0].images;
+	                    var imgs = result[0].images;
+	                    
+	                    $.each(imgs, function(i,d){
 
-	    				var idElements = $('.imageId');
-	    	    		idElements.each( function(i, val) {
-	    	    			$.each(ids, function(j,d){
-	    	    				if($(val).text()==d.id)
-	        	    			{
-	    	    					 $(".cbp-rfgrid").children().eq(i).show();
-	        	    			}
-	                        	
-	                        	
-	                        });
-	    	    		});
+                    		li = document.createElement("li");
+                    		selection.append(li);
+                    		var html = "<a href='#'><img src='"+d.media+"'/><div><h3 class='imageId'>"+d.id+"</h3></div></a>";
+                    		li.innerHTML = html;
+                    		li.onclick = function() {
+                    			imgPreview(d.media,d.id);
+
+                    		};
+                    	
+                    });
 	   
 	                }
 	                else{
@@ -161,59 +147,3 @@ function visualizzaCollection(){
 	});
  
 }
-
-function numberAnnotations(){
-	
-	//reset collection filter
-	$("input:checkbox[name=collection]:checked").each(function()
-			{
-				$(this).prop("checked", false); 
-						
-			});
-	//reset image id filter
-	$("input:text[name=imageIdSearch]").each(function()
-			{
-				$(this).val('');	
-			});
-	
-	$("#range").replaceWith("<output id='range'>"+$('#slider').val()+"</output>");
-	var selection = $("#imageList")
-	,li,img,div,h3
-    ,ids
-    ,tasks
-    ,result;
-	
-	$.jAjax({
-        url: "WebToolAjax",
-        onComplete: function(xhr,status){
-            if(xhr.readyState === 4){
-                if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
-                    result = JSON.parse(xhr.responseText);
-                    ids = result.image[0];
-                    
-                    $(".cbp-rfgrid").children().hide();
-                    
-                    var idElements = $('.imageId');
-    	    		idElements.each( function(i, val) {
-    	    			$.each(ids, function(j,d){
-    	    				if($(val).text()==d.id)
-        	    			{	
-    	    					if(d.numAnnotations<=$('#slider').val())
-    	    					{
-    	    						$(".cbp-rfgrid").children().eq(i).show();
-    	    					}
-    	    					 
-        	    			}
-                        	
-                        	
-                        });
-    	    		});
-                    
-                }
-                else{
-                    alert("Request was unsuccesfull: "+ xhr.status);
-                }
-            }
-        }
-    });
-};

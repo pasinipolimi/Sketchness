@@ -14,6 +14,9 @@ import java.awt.image.RGBImageFilter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,6 +40,7 @@ import play.Logger;
 import play.Play;
 import play.libs.Akka;
 import play.libs.F;
+import play.libs.Json;
 import play.libs.WS;
 import play.libs.F.Promise;
 import play.libs.WS.Response;
@@ -49,18 +53,25 @@ import utils.CMS.CMS;
 import utils.CMS.CMSException;
 import utils.CMS.CMSJsonReader;
 import utils.CMS.CMSUtilities;
+import utils.CMS.SortObject;
+import utils.CMS.models.Action;
 import utils.CMS.models.Collection;
 import utils.CMS.models.Mask;
 import utils.CMS.models.MicroTask;
+import utils.CMS.models.Point;
 import utils.CMS.models.Task;
 import utils.CMS.models.User;
+import utils.aggregator.ContourAggregator;
 import utils.gamebus.GameMessages.Join;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.pattern.Patterns;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
@@ -132,79 +143,59 @@ public class Renderer extends UntypedActor {
 	private Image aggregate(final boolean networkOn, final String requiredTag,
 			final boolean transparentMask) throws IOException, Exception {
 		// final JavascriptColor[] colors = JavascriptColor.values();
-		// final JsonReader jsonReader = new JsonReader();
+		//final JsonReader jsonReader = new JsonReader();
 		//
-		// final utils.CMS.models.Image image = CMS.getImage(Integer
-		// .valueOf(imageId));
-		//
-		// final Integer imWidth = image.getWidth();
-		// final Integer imHeight = image.getHeight();
-		//
-		// final Integer tagId = CMS.getTagId(requiredTag);
-		//
-		// final List<Action> actions = CMS.getSegmentationsByImageAndTag(
-		// Integer.valueOf(imageId), tagId);
-		//
-		// Image toReturn = null;
-		// Boolean found = false;
-		// if (actions != null && actions.size() > 0) {
-		// final int numberTraces = actions.size();
-		// final ArrayList<String> toAggregate = new ArrayList<>();
-		// for (int i = 0; i < numberTraces; i++) {
+		final utils.CMS.models.Image image = CMS.getImage(Integer.valueOf(imageId));
+		final Integer imWidth = image.getWidth();
+		final Integer imHeight = image.getHeight();
+		final Integer tagId = CMS.getTagId(requiredTag);
+		//final List<Action> actions = CMS.getSegmentationsByImageAndTag(Integer.valueOf(imageId), tagId);
+		final List<Action> actions = CMS.getBestSegmentation(Integer.valueOf(imageId), tagId);
+		Image toReturn = null;
+		Boolean found = false;
+		if (actions != null && actions.size() > 0) {
+		 final int numberTraces = actions.size();
+		 final ArrayList<String> toAggregate = new ArrayList<>();
+		 for (int i = 0; i < numberTraces; i++) {
 		// final JavascriptColor c = colors[i % colors.length];
-		// final Action current = actions.get(i);
-		//
-		// final Integer tag = current.getTag();
-		// found = true;
-		// for (final Point p : current.getSegmentation().getPoints()) {
-		// result = result.get("polyline");
-		// final ObjectMapper mapper = new ObjectMapper();
-		// final JsonFactory factory = mapper.getJsonFactory(); // since
-		// // 2.1
-		// // use
-		// // mapper.getFactory()
-		// // instead
-		// final String toParse = result.asText()
-		// .replace("\\", "");
-		// final JsonParser jp = factory.createJsonParser(toParse);
-		// final JsonNode actualObj = mapper.readTree(jp);
-		// if (networkOn) {
-		// final ObjectNode points = new ObjectNode(
-		// JsonNodeFactory.instance);
-		// points.put("points", actualObj);
-		// points.put("type", "trace");
-		// points.put("color", c.name());
-		// points.put("imageId", imageId);
-		// channel.write(points);
-		// }
-		// toAggregate.add(actualObj.toString());
-		// jp.close();
-		//
-		// }
-		// }
-		// if (found && !networkOn) {
-		// final String[] toAggregateString = new String[toAggregate
-		// .size()];
-		// for (int i = 0; i < toAggregate.size(); i++) {
-		// toAggregateString[i] = toAggregate.get(i);
-		// }
-		// toReturn = ContourAggregator.simpleAggregator(
-		// toAggregateString, imWidth, imHeight);
-		// if (transparentMask) {
-		// final BufferedImage transparent = imageToBufferedImage(toReturn);
-		// toReturn = makeColorTransparent(transparent, Color.WHITE);
-		// }
-		// } else if (!networkOn) {
-		// LoggerUtils.error(
-		// "[AGGREGATOR] Cannot retrieve mask for image "
-		// + imageId + " with tag " + requiredTag,
-		// "NOT FOUND");
-		// throw new Exception("[AGGREGATOR] Tag " + requiredTag
-		// + " not found for image " + imageId);
-		// }
-		// }
-		// return toReturn;
-		return null;
+			 final Action action = actions.get(i);
+			 Integer action_id = action.getId();
+			 Action current = CMS.getAction(action_id);
+			 final Integer tag = current.getTag();
+			 found = true;
+		 	 List<Point> p = current.getSegmentation().getPoints();
+			 /*final ObjectMapper mapper = new ObjectMapper();
+			 final JsonFactory factory = mapper.getJsonFactory();
+			 final String toParse = p.toString().replace("\\", "");
+			 final JsonParser jp = factory.createJsonParser(toParse);
+			 final JsonNode actualObj = mapper.readTree(jp);*/
+		 	 JSONObject element = null;
+		 	final JSONArray actualObj = new JSONArray();
+		 	for(int j=0;j<p.size();j++){
+		 		element = new JSONObject();
+		 		element.put("x", p.get(j).getX());
+		 		element.put("y", p.get(j).getY());
+		 		actualObj.put(element);
+		 	}
+			 toAggregate.add(actualObj.toString());
+		}
+		if (found && !networkOn) {
+			final String[] toAggregateString = new String[toAggregate.size()];
+			for (int i = 0; i < toAggregate.size(); i++) {
+				toAggregateString[i] = toAggregate.get(i);
+			}
+			toReturn = ContourAggregator.simpleAggregator(toAggregateString, imWidth, imHeight);
+			if (transparentMask) {
+				final BufferedImage transparent = imageToBufferedImage(toReturn);
+				toReturn = makeColorTransparent(transparent, Color.WHITE);
+			}
+		} else if (!networkOn) {
+			LoggerUtils.error("[AGGREGATOR] Cannot retrieve mask for image "+ imageId + " with tag " + requiredTag,"NOT FOUND");
+			throw new Exception("[AGGREGATOR] Tag " + requiredTag+ " not found for image " + imageId);
+		}
+	}
+		return toReturn;
+		//return null;
 	}
 
 	private static BufferedImage imageToBufferedImage(final Image image) {
@@ -245,7 +236,6 @@ public class Renderer extends UntypedActor {
 
 	public static synchronized File retrieveMask(final String ImageID,
 			final String tag) throws Exception {
-
 		final Props properties = new Props(Renderer.class);
 		final ActorRef finalRoom = Akka.system().actorOf(properties);
 		final Future<Object> future = Patterns.ask(finalRoom,
@@ -262,24 +252,22 @@ public class Renderer extends UntypedActor {
 		return null;
 	}
 
-	public static BufferedImage retrieveMaskImage(final String ImageID,
-			final String tag) throws Exception {
+	public static BufferedImage retrieveMaskImage(final String media) throws Exception {
 
 		BufferedImage img = null;
+		Logger.info(media);
 		try {
-			final URL url = new URL(rootUrl
-					+ "/sites/default/files/images/Mask_" + ImageID + "_" + tag
-					+ ".png");
+			final URL url = new URL(media);
 			img = ImageIO.read(url);
 		} catch (final IOException e) {
 			Logger.error("[AGGREGATOR] " + e);
 		}
 
 		if (img instanceof Image) {
-			Logger.info("[AGGREGATOR] Retrieved mask for image " + ImageID);
+			Logger.info("[AGGREGATOR] Retrieved mask");
 			return img;
 		}
-		Logger.error("[AGGREGATOR] Retrieved mask for image " + ImageID);
+		Logger.error("[AGGREGATOR] Retrieved mask");
 		return null;
 	}
 
@@ -315,10 +303,10 @@ public class Renderer extends UntypedActor {
 				final File toReturn = new File(imageId + ".png");
 				getSender().tell(toReturn, this.getSelf());
 			} else {
-				getSender().tell(null, this.getSelf());
+				//getSender().tell(null, this.getSelf());
 			}
 		} catch (final Exception e) {
-			getSender().tell(null, this.getSelf());
+			//getSender().tell(null, this.getSelf());
 		}
 	}
 
@@ -588,8 +576,7 @@ public class Renderer extends UntypedActor {
 
 		Mask mask;
 		try {
-			mask = CMS
-					.getMask(Integer.valueOf(imageId), Integer.valueOf(tagId));
+			mask = CMS.getMask(Integer.valueOf(imageId), Integer.valueOf(tagId));
 		} catch (final Exception e) {
 			Logger.error("Unable to read mask from CMS", e);
 			throw new JSONException("Unable to read mask from CMS");
@@ -814,9 +801,10 @@ public class Renderer extends UntypedActor {
 	 *            the id of the collection
 	 * @return the info that i retrived
 	 * @throws JSONException
+	 * @throws CMSException 
 	 */
 	public static String collectionImagesAjaxCall(final String collectionId)
-			throws JSONException {
+			throws JSONException, CMSException {
 
 		final Collection c;
 		try {
@@ -925,6 +913,36 @@ public class Renderer extends UntypedActor {
 
 		final String options = result.toString();
 		return options;
+	}
+	
+	public static String getTraces(final String imageId, final String tagId)
+			throws JSONException, CMSException {
+		
+		JSONArray result = new JSONArray();
+		List<utils.CMS.models.Action> actions;
+		try {
+			actions = CMS.getBestSegmentation(Integer.valueOf(imageId),Integer.valueOf(tagId));
+		} catch (final CMSException e) {
+			Logger.error("Unable to read segmentation for image " + imageId, e);
+			throw new JSONException("Unable to read segmentation from cms");
+		}
+		
+
+		JSONObject element;
+		JsonNode points = null;
+		
+		for (int j = 0; j < actions.size(); j++) {
+			final utils.CMS.models.Action a = actions.get(j);
+		    Integer action_id = a.getId();
+		    utils.CMS.models.Action action = CMS.getAction(action_id);
+			element = new JSONObject();
+			points = Json.toJson(action.getSegmentation().getPoints());
+			element.put("points", points);
+			result.put(element);
+		}
+
+		return result.toString();
+	
 	}
 
 

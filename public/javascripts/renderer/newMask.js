@@ -1,6 +1,6 @@
 
-/////////////////////////////////////////////////////////////////////////////////OK
-
+/////////////////////////////////////////////////////////////////////////////////OLD
+/*
 var rendererGlobalVar = (function() {
 var socket;
 
@@ -19,20 +19,20 @@ var imageH, imageW;
 
 
 function newMask(idTag, idImage, tagName, numAnnotations){
-	
+
 	//clear masks
-	   var maskCanvas = document.getElementById("maskNew");
-	   var maskContext = maskCanvas.getContext("2d");
-	   maskContext.clearRect(0,0,maskCanvas.width,maskCanvas.height);
-	   var maskCanvas2 = document.getElementById("mask");
-	   var maskContext2 = maskCanvas2.getContext("2d");
-	   maskContext2.clearRect(0,0,maskCanvas2.width,maskCanvas2.height);
-	   var maskCanvas3 = document.getElementById("maskFashion");
-	   var maskContext3 = maskCanvas3.getContext("2d");
-	   maskContext3.clearRect(0,0,maskCanvas3.width,maskCanvas3.height);
-	   var maskCanvas4 = document.getElementById("draws");
-	   var maskContext4 = maskCanvas4.getContext("2d");
-	   maskContext4.clearRect(0,0,maskCanvas4.width,maskCanvas4.height);
+	var maskCanvas = document.getElementById("maskNew");
+	var maskContext = maskCanvas.getContext("2d");
+	maskContext.clearRect(0,0,maskCanvas.width,maskCanvas.height);
+	var maskCanvas2 = document.getElementById("mask");
+	var maskContext2 = maskCanvas2.getContext("2d");
+	maskContext2.clearRect(0,0,maskCanvas2.width,maskCanvas2.height);
+	var maskCanvas3 = document.getElementById("maskFashion");
+	var maskContext3 = maskCanvas3.getContext("2d");
+	maskContext3.clearRect(0,0,maskCanvas3.width,maskCanvas3.height);
+	var maskCanvas4 = document.getElementById("draws");
+	var maskContext4 = maskCanvas4.getContext("2d");
+	maskContext4.clearRect(0,0,maskCanvas4.width,maskCanvas4.height);
 	   
 
 	 var url= "http://54.228.220.100/";
@@ -249,7 +249,6 @@ var gameloop = (function(){
   var maskContext = maskCanvas.getContext("2d");
  
 
-  /*******************************MANAGING THE INCOMING MESSAGES*****************/
   onSocketMessage = function (e) {
     var m = JSON.parse(e.data);
     switch(m.type)
@@ -300,3 +299,193 @@ var gameloop = (function(){
     taskContext.lineCap = 'round';
     taskContext.lineJoin = 'round';
   })();
+*/
+////////////////////////////////////////////////////////////////////////////////////////////// FINE OLD
+function newMask(idTag, idImage, tagName, numAnnotations,im_width,im_height){
+	
+	//clear masks
+	var maskCanvas = document.getElementById("maskNew");
+	var maskContext = maskCanvas.getContext("2d");
+	maskContext.clearRect(0,0,maskCanvas.width,maskCanvas.height);
+	var maskCanvas2 = document.getElementById("mask");
+	var maskContext2 = maskCanvas2.getContext("2d");
+	maskContext2.clearRect(0,0,maskCanvas2.width,maskCanvas2.height);
+	var maskCanvas3 = document.getElementById("maskFashion");
+	var maskContext3 = maskCanvas3.getContext("2d");
+	maskContext3.clearRect(0,0,maskCanvas3.width,maskCanvas3.height);
+	var maskCanvas4 = document.getElementById("draws");
+	var maskContext4 = maskCanvas4.getContext("2d");
+	maskContext4.clearRect(0,0,maskCanvas4.width,maskCanvas4.height);
+	
+	
+	
+	$.jAjax({
+        url: "getTraces",
+        headers : {
+            "idImage" : idImage,
+            "tagName" : tagName
+        },
+        onComplete: function(xhr,status){
+            if(xhr.readyState === 4){
+                if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
+
+                	var canvas = document.getElementById("draws");
+                	var ctx = canvas.getContext("2d");
+                	var taskCanvas = document.getElementById("task");
+                	var taskContext = taskCanvas.getContext("2d");
+                	var maskCanvas = document.getElementById("mask");
+                    var maskContext = maskCanvas.getContext("2d");
+                	var result = JSON.parse(xhr.responseText);
+                	numAnnotations = result.length;
+                	
+                	var tagTitle = $("#tagTitle");
+                	tagTitle.replaceWith("<div id='tagTitle' class='panelTitle'> Tag '"+tagName+"' ("+numAnnotations+" annotations)</div>");
+                	var maskButtons = $("#maskButtons");
+                	maskButtons.replaceWith("<div class='span12' id='maskButtons'>"+
+                	 						"<a class='btn' onclick=\"loadMask('"+tagName+"')\"><strong>View mask without spam detector</strong></a>"+
+                	 						"<a class='btn' onclick=\"loadMaskFashionista('"+idImage+"','"+tagName+"')\"><strong>Cloth parser (Fashionista)</strong></a>"+
+                	 						"</div>");
+
+                	 
+                	var fun = function(){
+                     	var points = JSON.parse(result.shift().points);
+                     	taskContext.lineJoin = "round";
+               	        taskContext.beginPath();
+               	        taskContext.strokeStyle = getRandomColor();
+
+               	        var drawable=true;
+               	        taskContext.moveTo(Math.round(points[0].x*taskCanvas.width/im_width), Math.round(points[0].y*taskCanvas.height/im_height));
+
+               	        for(var i=0;i<points.length;i++)
+               	        {
+               	        	var p=points[i];
+               	        	if(p.end!=true)
+               	        	{
+	     						if(!drawable)
+	     						 {
+	     							drawable=true;
+	     							taskContext.beginPath();
+	     							taskContext.moveTo(Math.round(p.x*taskCanvas.width/im_width),Math.round(p.y*taskCanvas.height/im_height));
+	     						 }
+	     						
+	     						taskContext.lineWidth = 3;
+	     						taskContext.lineTo(Math.round(p.x*taskCanvas.width/im_width), Math.round(p.y*taskCanvas.height/im_height));
+	     					}
+	     					else
+	     					{
+	     						if(drawable)
+	     						{
+	     							taskContext.stroke();
+	     							drawable=false;
+	     						}
+	     					}
+
+               	        }; 
+
+                     	if (result.length == 0) return;
+                     	setTimeout(fun , 100);
+                     }
+                     setTimeout(fun, 0);
+                	
+                    
+                }
+                else{
+                	alert("Request was unsuccesfull: "+ xhr.status);
+
+                }
+                    
+
+            }
+        }
+    });
+	
+	function getRandomColor() {
+	    var letters = '0123456789ABCDEF'.split('');
+	    var color = '#';
+	    for (var i = 0; i < 6; i++ ) {
+	        color += letters[Math.floor(Math.random() * 16)];
+	    }
+	    return color;
+	}
+	/*
+	$.jAjax({
+        url: "MaskAjax",
+        headers : {
+            "idImage" : idImage,
+            "tag" : tagName
+        },
+        onComplete: function(xhr,status){
+            if(xhr.readyState === 4){
+                if(xhr.status >= 200 && xhr.status < 300 || xhr.status === 304){
+
+               	 	var result = JSON.parse(xhr.responseText);
+               	
+                    var media = result[0].medialocator;
+                    var quality = result[0].quality;
+                    
+                    var canvasmasknew = document.createElement("canvas");
+                    canvasmasknew.id = "maskNewCont";
+                    canvasmasknew.style.visibility  = "hidden";
+                    document.body.appendChild(canvasmasknew);
+
+                    maskCanvasCont = document.getElementById("maskNewCont");
+                    maskContextCont = maskCanvasCont.getContext("2d");
+
+                    maskImage=new Image();
+                    maskImage.src="/retrieveMaskImage?media="+media;
+                    //maskImage.src= media;
+
+                    maskImage.onload = function() {
+                                                    
+                   	 							maskCanvasCont.width = window.innerWidth*0.8/4;
+                   	 							maskCanvasCont.height = window.innerWidth*0.8/4*this.height/this.width;
+                   	 							maskCanvas.width = window.innerWidth*0.8/4;
+                   	 							maskCanvas.height = window.innerWidth*0.8/4*this.height/this.width;
+   												
+                   	 							maskContextCont.drawImage(maskImage,0,0,maskCanvasCont.width,maskCanvasCont.height);
+   												 var imdata = maskContextCont.getImageData(0, 0, maskCanvasCont.width, maskCanvasCont.height);
+   												 var r,g,b,a;
+   												 for (var p=0;p<imdata.data.length;p+=4) {
+
+   												  r = imdata.data[p];
+   												  g = imdata.data[p+1];
+   												  b = imdata.data[p+2];
+   												  
+   												  if((r==0)&&(g==0)&&(b==0))
+   												  {
+   													  imdata.data[p+3] = 170;
+
+   												  }
+   												  else
+   												  {
+   													  imdata.data[p+3] = 255;
+
+   												  }
+
+   												 }
+   												 
+   												 maskContextCont.putImageData(imdata,0,0);
+   												 maskContext.globalCompositeOperation = "copy";
+   												 maskContext.drawImage(maskCanvasCont, 0, 0);
+   												 maskContext.globalCompositeOperation = 'darker';
+   												 maskContext.drawImage(taskImage,0,0,maskCanvas.width,maskCanvas.height);
+   												 maskContext.globalCompositeOperation = 'source-over';
+                                                 maskContext.font="bold 15px Arial";
+                                                 maskContext.fillStyle = 'white';
+                                                 maskContext.fillText('Quality: ' + quality, 10,20);
+                                                };
+                    
+                }
+                else{
+                	//alert("Request was unsuccesfull: "+ xhr.status);
+                	maskContext.font="15px Arial";
+                	maskContext.fillText("Mask is not available",10,20);
+                }
+                    
+
+            }
+        }
+    });
+    */
+
+}

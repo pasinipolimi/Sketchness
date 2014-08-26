@@ -35,8 +35,6 @@ var selectionimg = $("#ImgAttivattiva").val()
 
 	var maskImage = new Image();
 	maskImage.src = "/retrieveMask?imageID="+selectionimg+"&tag="+tag;
-
-
 	maskImage.onload = function() {
 
 		if((maskImage.src.substring(maskImage.src.indexOf("=")+1,maskImage.src.indexOf("&"))==$("#ImgAttivattiva").val())&& ($("#ImgPreview").val() == $("#ImgAttivattiva").val())){
@@ -44,14 +42,23 @@ var selectionimg = $("#ImgAttivattiva").val()
 			maskContext.beginPath();
 			maskCanvas.width = window.innerWidth*0.8/4;
 			maskCanvas.height = window.innerWidth*0.8/4*this.height/this.width;
+			/*
 			maskContext.drawImage(taskImage,0,0,maskCanvas.width,maskCanvas.height);
 			maskContext.drawImage(maskImage,0,0,maskCanvas.width,maskCanvas.height);
 			maskContext.restore();
+			*/
+			
+			maskContext.drawImage(maskImage,0,0,maskCanvas.width,maskCanvas.height);
+			maskContext.globalCompositeOperation = 'darker';
+			maskContext.drawImage(taskImage,0,0,maskCanvas.width,maskCanvas.height);
+			
 			maskContext.globalCompositeOperation = 'source-over';
 			maskContext.font="bold 15px Arial";
 			maskContext.fillStyle = 'white';
 			maskContext.fillText('Quality: unknown', 10,20);
 	     };
 	}
+
+
   
 };

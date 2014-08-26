@@ -55,17 +55,16 @@ public class Utilities extends Controller {
 		return ok("ok");
 	}
 
-	public static Result retrieveMaskImage(final String imageID, final String tag) {
-
+	public static Result retrieveMaskImage(final String media) throws CMSException {
+		
 		try {
-			final BufferedImage img = Renderer.retrieveMaskImage(imageID, tag);
-			final File result = new File("Mask_"+imageID+"_"+tag+".png");
+			final BufferedImage img = Renderer.retrieveMaskImage(media);
+			final File result = new File("Mask_"+media+".png");
 			ImageIO.write(img, "png", result);
 			if (null != result) {
 				return ok(result);
 			} else {
-				return ok("[AGGREGATOR] Cannot retrieve the mask for image "
-						+ imageID + " and tag " + tag);
+				return ok("[AGGREGATOR] Cannot retrieve the mask");
 			}
 		} catch (final Exception e) {
 			return ok("[AGGREGATOR] " + e.toString());
@@ -234,17 +233,17 @@ public class Utilities extends Controller {
 		return ok(result);
 	}
 
-	public static Result collectionImagesAjaxCall() throws JSONException {
+	public static Result collectionImagesAjaxCall() throws JSONException, CMSException {
 		final String collectionId = request().getHeader("selected");
 		final String result = Renderer.collectionImagesAjaxCall(collectionId);
 		return ok(result);
 	}
 
-	public static Result maskAjaxCall() throws JSONException {
-
+	public static Result maskAjaxCall() throws JSONException, CMSException {
 
 		final String imageId = request().getHeader("idImage");
-		final String tagId = request().getHeader("idTag");
+		final String tagName = request().getHeader("tag");
+		final String tagId = String.valueOf(CMS.getTagId(tagName));
 		final String result = Renderer.maskAjaxCall(imageId,tagId);
 		return ok(result);
 
@@ -272,6 +271,18 @@ public class Utilities extends Controller {
 		final String result = Renderer.annotationRange(min,max,max_id,count);
 		return ok(result);
 	}
+	
+
+	public static Result getTraces() throws JSONException, CMSException {
+		
+		final String imageId = request().getHeader("idImage");
+		final String name = request().getHeader("tagName");
+		final String tagId = String.valueOf(CMS.getTagId(name));
+		final String result = Renderer.getTraces(imageId,tagId);
+		return ok(result);
+
+
+	}		
 
 
 

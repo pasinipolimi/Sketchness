@@ -25,7 +25,6 @@ function visualizzaImgAjax(idselected, mediaLocator){
    
    var tagContainer = $(".tag.listBody")
        //,url= "http://54.228.220.100/"
-   	   ,url= "http://localhost:3000"
        ,taskImage
        ,canvas = document.getElementById("draws")
        ,ctx = canvas.getContext("2d")
@@ -79,7 +78,7 @@ function visualizzaImgAjax(idselected, mediaLocator){
                     		
                     	}
                     	*/
-                    	tagList.append("<tr><td class='infoValue' onclick=\"newMask('"+d.tagId+"','"+idselected+"','"+d.tag+"','"+d.numAnnotations+"')\">"+ d.tag+" ( "+d.lang+" )"+"</td>"+
+                    	tagList.append("<tr><td class='infoValue' onclick=\"newMask('"+d.tagId+"','"+idselected+"','"+d.tag+"','"+d.numAnnotations+"','"+width+"','"+height+"')\">"+ d.tag+" ( "+d.lang+" )"+"</td>"+
                 				"<td class='infoValue' ><a href='#' class='btn' onclick=\"invalidateTag('"+d.tagId+"')\"><strong>Invalidate</strong></a></td></tr>");
                     });
                     
@@ -93,7 +92,7 @@ function visualizzaImgAjax(idselected, mediaLocator){
    									+"</div>");
                     */
                     
-                    url += result[0].medialocator.substring(1, result[0].medialocator.length -1);
+                    url = result[0].medialocator;
                     taskImage=new Image();
                     taskImage.src=url;
                     $("#immagine").attr("src",url);

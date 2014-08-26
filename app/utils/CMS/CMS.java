@@ -39,6 +39,7 @@ import akka.actor.Cancellable;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class CMS {
@@ -315,8 +316,11 @@ public class CMS {
 
 			final List<History> historyPoints = readHistory(history);
 
+			//TODO fix quality
+			double quality = 0;
+
 			final Segmentation segmentation = new Segmentation(points,
-					historyPoints);
+					historyPoints, quality);
 
 			final Action action = Action.createSegmentationAction(
 					Integer.valueOf(image), session, tagId, userId, true,
@@ -350,8 +354,7 @@ public class CMS {
 		final List<utils.CMS.models.Point> points = new ArrayList<>();
 		for(final JsonNode trace:traces){
 			points.add(new utils.CMS.models.Point(trace.get("x").asInt(),
-					trace.get("y").asInt(), trace.get("color").asText(), false,
-					trace.get("size").asInt()));
+					trace.get("y").asInt()));
 
 		}
 
@@ -818,10 +821,24 @@ public class CMS {
 	}
 
 	public static Integer getTagId(final String name) throws CMSException {
-		final utils.CMS.models.Tag tag = postObj(
-				new utils.CMS.models.Tag(name), "tag",
-				utils.CMS.models.Tag.class);
-		return tag.getId();
+		final String service = "tag";
+		try {
+			final F.Promise<WS.Response> returned;
+			final WSRequestHolder prov = WS.url(rootUrl + "/" + service)
+					.setHeader("Accept", "application/json")
+					.setTimeout(timeoutPostCMS);
+
+			ObjectNode node = JsonNodeFactory.instance.objectNode();
+			node.put("name", name);
+			returned = prov.post(node);
+			final String respBody = returned.get().getBody();	
+			return Json.parse(respBody).get("id").asInt();
+			
+		} catch (final Exception e) {
+			Logger.error("Unable to post: " + service, e);
+			throw new CMSException("Unable to post: " + service);
+		}
+
 	}
 
 	public static List<Action> getSegmentationsByImageAndTag(
@@ -833,6 +850,10 @@ public class CMS {
 		final List<Action> segs = getObjs(Action.class, "action", params,
 				"action");
 		return segs;
+	}
+	
+	public static Action getAction(final Integer id) throws CMSException {
+		return getObj(Action.class, "action", id,"action");
 	}
 
 	public static void test() throws CMSException {
@@ -894,6 +915,19 @@ public class CMS {
 		params.put("type", "segmentation");
 
 		return getCount("action", params);
+	}
+	
+	public static List<Action> getBestSegmentation(final Integer imageId, final Integer tagId) throws CMSException {
+
+		final HashMap<String, String> params = new HashMap();
+		params.put("type", "segmentation");
+		params.put("image", String.valueOf(imageId));
+		params.put("tag", String.valueOf(tagId));
+		params.put("completed", "true");
+		
+		return getObjs(utils.CMS.models.Action.class, "action", params, "actions");
+
+
 	}
 
 }

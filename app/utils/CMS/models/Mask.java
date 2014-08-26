@@ -6,7 +6,7 @@ import java.util.List;
 public class Mask extends CMSObject {
 
 	private Double quality;
-	private List<Integer> segmentations;
+	private Integer segmentations;
 	private String updated_at;
 	private Integer image;
 	private Integer tag;
@@ -21,11 +21,11 @@ public class Mask extends CMSObject {
 		this.quality = quality;
 	}
 
-	public List<Integer> getSegmentations() {
+	public Integer getSegmentations() {
 		return segmentations;
 	}
 
-	public void setSegmentations(final List<Integer> segmentations) {
+	public void setSegmentations(final Integer segmentations) {
 		this.segmentations = segmentations;
 	}
 

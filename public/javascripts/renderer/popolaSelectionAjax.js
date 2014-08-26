@@ -5,14 +5,13 @@
 function popolaSelectionAjax(max_id, count, first){
 
 	var selection = $("#imageList")
-        ,selectionCollection = $("#collectionList")
         ,li,img,div,h3
         ,ids
         ,tasks
         ,result;
 
     selection.children().remove();
-    selectionCollection.children().remove();
+
     
     var maxAnn = 0;
 
@@ -44,11 +43,6 @@ function popolaSelectionAjax(max_id, count, first){
                         			imgPreview(d.media,d.id);
 
                         		};
-                        		if(d.numAnnotations>maxAnn)
-                        		{
-                        			maxAnn = d.numAnnotations;
-                                    $("#maxAnn").val(maxAnn);
-                        		}
                         	
                         });
                         //id filter
@@ -67,10 +61,14 @@ function popolaSelectionAjax(max_id, count, first){
                 		                    result = JSON.parse(xhr.responseText);
                 		                    var min_ann = parseInt(result[0].min);
                 		                    var max_ann = parseInt(result[0].max);
-                		                  //annotation filter
-                                    		$(".range").replaceWith("<span class='range'><div id='slider'></div><span id='resSlider'>"+min_ann+":"+max_ann+"</span><a class='btn' id='filter'><strong>Filter Num Annotations</strong></a><input type='text' id='maxAnn' value='"+max_ann+"' style='display:none;'/></span>");
+                		                    
+                		                    //annotation filter
+                                    		$(".range").replaceWith("<span class='range'><div id='slider'></div><span id='resSlider'>"+min_ann+":"+max_ann+"</span><a class='btn' id='filter'><strong>Filter Num Annotations</strong></a><input type='text' id='maxAnn' value='"+max_ann+"' style='display:none;'/><input type='text' id='minAnn' value='"+min_ann+"' style='display:none;'/></span>");
+                		                    
+                                    		$("#maxAnn").val(max_ann);
+                		                    $("#minAnn").val(min_ann);
                                             
-                                            $("#slider").noUiSlider({
+                		                    $("#slider").noUiSlider({
                                             	start: [min_ann, max_ann],
                                             	connect: true,
                                             	step: 1,
@@ -102,15 +100,6 @@ function popolaSelectionAjax(max_id, count, first){
                 			
                             first = false;
                 		}
-
-                        //collection filter
-                        /*
-                		$("input:checkbox[name=collection]:checked").each(function()
-                		{
-                			$(this).prop("checked", false); 
-                					
-                		});
-						*/
   
  
                         if(new_max_id!=""){
@@ -142,6 +131,8 @@ function popolaSelectionAjax(max_id, count, first){
     
     
     var option;
+    var selectionCollection = $("#collectionList");
+    selectionCollection.children().remove();
     
     $.jAjax({
         url: "CollectionAjax",
@@ -152,7 +143,7 @@ function popolaSelectionAjax(max_id, count, first){
                     result = JSON.parse(xhr.responseText);
                     var collIds = result.collections[0];
                     $.each(collIds, function(i,d){
-                    		selectionCollection.append("<label><input type='checkbox' name='collection' value='"+d.id.substring(1, d.id.length -1)+"'> Collection: "+d.name.substring(1, d.name.length -1)+"</input></label>");
+                    		selectionCollection.append("<label><input type='checkbox' name='collection' value='"+d.id+"'> Collection: "+d.name+"</input></label>");
 	
                     });
           
@@ -170,11 +161,20 @@ function popolaSelectionAjax(max_id, count, first){
 
 //IMAGE SCROLL WHEN ANNOTATION FILTER
 function imagesScrollAnn(min_ann, max_ann,max_id,count){
-
-	$('#images_scroll').unbind('inview');
+	
+	//reset image list
 	var selection = $("#imageList");
+	$('#images_scroll').unbind('inview');
 	selection.children().remove();
 
+	//reset collection filter
+	$("input:checkbox[name=collection]:checked").each(function()
+		{
+			$(this).prop("checked", false); 
+					
+		});
+	
+	//ANNOTATION FILTER
     $.jAjax({
         url: "annotationRange",
         headers : {
