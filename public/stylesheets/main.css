@@ -1475,6 +1475,33 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
+.ico.belt,.ico_chat.belt{
+    background: url('../images/UI/icon/cintura.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.belt:hover{
+    background: url('../images/UI/icon/cintura-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.bandana,.ico_chat.bandana{
+    background: url('../images/UI/icon/bandana.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.bandana:hover{
+    background: url('../images/UI/icon/bandana-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.rucksack,.ico_chat.rucksack{
+    background: url('../images/UI/icon/rucksack.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.rucksack:hover{
+    background: url('../images/UI/icon/rucksack-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
 #other-palyer{
     position: absolute;
     width: 190px;
