@@ -140,6 +140,39 @@ table.gameList th, table.gameList td {
 	width: 33%;
 }
 
+.popup_close{
+    float: right;
+    top: 20px;
+    cursor: pointer;
+    right: 30px;
+    color: #FFF;
+    border-radius: 30px;
+    text-align: center;
+    line-height: 30px;
+    /*background: #605F61;*/
+    font-size: 30px;
+    font-weight: bold;
+    /* display: inline-block; */
+    line-height: 30px;
+    /* padding: 20px 10px; */
+    width: 30px;
+    height: 30px;
+    padding: 0!important;
+}
+
+input#nPlayers{
+    width: 40px;
+    text-align: center;
+    -moz-appearance:textfield;
+    border: none;
+}
+input#nPlayers::-webkit-inner-spin-button,
+input#nPlayers::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/*
 .popup_close {
 	float: right;
 	top: 20px;
@@ -156,6 +189,7 @@ table.gameList th, table.gameList td {
 }
 
 
+*/
 
 #scoreBaloon {
 	/*scoreBaloon*/
@@ -456,7 +490,7 @@ table.gameList th, table.gameList td {
 	left: 0px;
 	position: relative;
 	border-width: 0px;
-	top: 30px;
+	top: 0px;
 	width: 200px;
 }
 
@@ -608,8 +642,8 @@ table.gameList th, table.gameList td {
 }
 
 div.popup_cont {
-	height: 350px !important;
-	width: 350px !important;
+	height: 342px !important;
+	width: 344px !important;
 	position: fixed;
 	top: 25% !important;
 	left: 40% !important;
@@ -906,7 +940,16 @@ footer {
 
 .lobbyMessages {
 	height: 330px!important;
+
 }
+
+#messages {
+    position: absolute;
+    height: 265px;
+    top: 10px;
+    overflow-y: scroll;
+}
+
 
 #unorderedUserList{
 	height: 330px!important;
@@ -915,7 +958,7 @@ footer {
 	left: 30px;
 }
 
-#messages {
+#chatPanel.gameRoom #messages {
 	position: absolute;
 	height: 265px;
 	top: 10px;
@@ -965,6 +1008,13 @@ footer {
 	top: 536px;
 }
 
+.lobbyMessages .message {
+    display: block;
+    height: auto;
+    margin-bottom: 10px;
+    padding: 4px 0;
+    position: relative;
+}
 
 .message {
     display: inline-block;
