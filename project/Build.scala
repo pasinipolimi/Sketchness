@@ -17,7 +17,7 @@ object ApplicationBuild extends Build {
 		"gov.nih.imagej" % "imagej" % "1.47",
 		"net.sf.json-lib" % "json-lib" % "2.4" classifier "jdk15",
 		"be.objectify"  %%  "deadbolt-java"     % "2.2.1-RC2",
-		"com.feth"      %%  "play-authenticate" % "0.5.2-SNAPSHOT"
+		"com.feth"      %%  "play-authenticate" % "0.5.3-SNAPSHOT"
 	)
 
 	/** Defines a new setting key that contains the resources list */

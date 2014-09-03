@@ -191,6 +191,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						    for(var i in content)
 							{
 								sk.players[content[i].user] = {
+									number : i,
 									id: content[i].user,
 									name: content[i].name,
 									img: content[i].img,
@@ -260,6 +261,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						    for(var i in content)
 							{
 								sk.players[content[i].user] = {
+									number : i,
 									id: content[i].user,
 									name: content[i].name,
 									img: content[i].img,
@@ -434,6 +436,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					//this.write.warnTag($.i18n.prop("warnTag"));
 					elements.skip.show();
 					elements.wordInput.show();
+					sk = this.sketchness;
 
                     // -->MoonSUB
                     elements.catSelector.show();
@@ -579,7 +582,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					console.log("[BEGIN] TagWait");
 					var question = this.elements.questionMark;
 					this.painter.showImage(question.attr("src"), question.attr("rwidth"), question.attr("rheight"));
-
+					sk = this.sketchness;
 					this.clock.setCountdown("tag", this.constants.tagTime * Time.second, Time.second, this.write.time.bind(this.write), this.timeUp.bind(this));
 
 					var that = this;
@@ -605,6 +608,10 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						noTag: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] noTag");
 							that.nextRound();
+						},
+						skipTask: function(e, content) {
+						    console.log("[RECEIVED MESSAGE] skipTask");
+							that.skipRound();
 						},
 						error: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] error");
@@ -679,7 +686,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						score: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] score");
 							sk.players[content.user].score += content.score;
-
+							write.players(sk.players);
 							if(content.user == sk.myself) {
 								that.write.score(sk.players[content.user].score);
 							}
@@ -1006,7 +1013,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						score: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] score");
 							sk.players[content.user].score += content.score;
-
+							write.players(sk.players);
 							if(content.user == sk.myself) {
 								that.write.score(sk.players[content.user].score);
 							}
@@ -1075,6 +1082,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					console.log("[BEGIN] ImageViewing");
 					var that = this;
 					var elements = that.elements;
+					sk = this.sketchness;
 					elements.skip.hide();
 					elements.endSegmentation.hide();
 					elements.hudArea.hide();
@@ -1202,7 +1210,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 				{ name: "beSketcher", from: ["loading", "playersWait", "waitRole", "tagInsertion", "tagWait" ], to: "Sketcher" },
 				{ name: "beGuesser", from: ["loading", "playersWait", "waitRole", "tagInsertion", "tagWait" ], to: "Guesser" },
 				{ name: "nextRound", from: ["imageViewing", "taskDrawing",  "tagInsertion", "tagWait"], to: "waitRole"},
-				{ name: "skipRound", from: ["taskGuessing", "taskDrawing", "tagInsertion"], to: "waitRole" },
+				{ name: "skipRound", from: ["taskGuessing", "taskDrawing", "tagInsertion", "tagWait"], to: "waitRole" },
 				{ name: "tag", from: "Sketcher", to: "tagInsertion" },
 				{ name: "tag", from: "Guesser", to: "tagWait" },
 				{ name: "task", from: ["Sketcher", "tagInsertion"], to: "taskDrawing" },

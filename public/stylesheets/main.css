@@ -1502,34 +1502,36 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
-#other-palyer{
+#other-player{
     position: absolute;
     width: 190px;
     height: 40px;
     top: 184px;
     left: 600px;
     overflow: hidden;
+    color: white;
+    font-weight: bolder;
 }
 
-#other-palyer .player{
-    display: inline-block;
-    width: 30px; height: 40px;
+#other-player .player{
+	display: inline-block;
+    width: 30px; height: 30px;
     position: relative;
     top: 4px;
 }
 
-#other-palyer #player2{
+#other-player #player2{
     left: 10px;
 }
 
-#other-palyer #player3{
+#other-player #player3{
     left: 24px;
 }
 
-#other-palyer #player4{
+#other-player #player4{
     left: 36px;
 }
 
-#other-palyer #player5{
+#other-player #player5{
     left: 50px;
 }
