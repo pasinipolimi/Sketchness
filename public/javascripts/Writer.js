@@ -46,7 +46,7 @@ define(["Class", "Time", "jquery", "i18n"], function(Class, Time, $) {
 			time: function(time) {
 				var html = "";
 				if(time || time === 0) {
-					html = "<font size='5'><b>" + $.i18n.prop('time') + Time.round(time, Time.second) + "</b></font>";
+					html = "<p>" + $.i18n.prop('time') + Time.round(time, Time.second) + "</p>";
 				}
 				this.elements.time.html(html);
 			},
