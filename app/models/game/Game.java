@@ -204,12 +204,20 @@ public class Game extends GameRoom {
 				case "leave":
 					handleQuitter(event);
 					break;
+				case "tag":
+					saveTag(event.get("content").get("word"));
+					break;
 				}
 			}
 		} catch (final Exception e) {
 			LoggerUtils.error("[GAME]:", e);
 
 		}
+	}
+
+	private void saveTag(final JsonNode tag) {
+		guessObject.put("tag", tag.asText());
+
 	}
 
 	/*
@@ -346,9 +354,23 @@ public class Game extends GameRoom {
 			final int nPlayers = playersVect.size();
 			if (requiredPlayers - nPlayers > 1) {
 				GameBus.getInstance()
-				.publish(new GameEvent(GameMessages.composeLogMessage(
-						LogLevel.info,Messages.get(LanguagePicker.retrieveLocale(),"waitingfor")+ " "+ (requiredPlayers - nPlayers)+ " "+ Messages.get(LanguagePicker.retrieveLocale(),"playerstostart"))
-						,roomChannel));
+				.publish(
+						new GameEvent(
+								GameMessages
+								.composeLogMessage(
+										LogLevel.info,
+										Messages.get(
+												LanguagePicker
+												.retrieveLocale(),
+												"waitingfor")
+												+ " "
+												+ (requiredPlayers - nPlayers)
+												+ " "
+												+ Messages.get(
+														LanguagePicker
+														.retrieveLocale(),
+														"playerstostart")),
+														roomChannel));
 			} else if (requiredPlayers - nPlayers == 1) {
 				GameBus.getInstance()
 				.publish(
@@ -581,7 +603,9 @@ public class Game extends GameRoom {
 					if (guessedWord) {
 						// GameBus.getInstance().publish(new
 						// GameEvent(roomChannel, GameEventType.saveTraces));
-						GameBus.getInstance().publish(new GameEvent(GameMessages.composeSaveTraces(), roomChannel));
+						GameBus.getInstance().publish(
+								new GameEvent(GameMessages.composeSaveTraces(),
+										roomChannel));
 					}
 
 					areWeAsking = false;
@@ -589,52 +613,49 @@ public class Game extends GameRoom {
 					// Start a new round
 					missingPlayers = requiredPlayers;
 					nextRound();
-				}
-				else// If the solution has been given or a tag has not been
+				} else // If the solution has been given or a tag has not been
 					// chosen, start a new round
-					if(requiredPlayers==1) {
+					if (requiredPlayers == 1) {
 						if (guessedWord) {
 							// GameBus.getInstance().publish(new
 							// GameEvent(roomChannel, GameEventType.saveTraces));
-							GameBus.getInstance().publish(new GameEvent(GameMessages.composeSaveTraces(), roomChannel));
+							GameBus.getInstance().publish(
+									new GameEvent(GameMessages.composeSaveTraces(),
+											roomChannel));
 						}
 						nextRound();
+					} else if (areWeAsking) {
+						GameBus.getInstance()
+						.publish(
+								new GameEvent(
+										GameMessages
+										.composeLogMessage(
+												LogLevel.info,
+												sketcherPainter.name
+												+ " "
+												+ Messages
+												.get(LanguagePicker
+														.retrieveLocale(),
+														"notag")),
+														roomChannel));
+						GameBus.getInstance().publish(
+								new GameEvent(GameMessages.composeNoTag(),
+										roomChannel));
+						missingPlayers = requiredPlayers;
+						areWeAsking = false;
+						nextRound();
+					} else if (!shownImages) {
+						shownImages = true;
+						final String id = taskImage.get("id").asText();
+						final String medialocator = taskImage.get("image").asText();
+						final int width = taskImage.get("width").asInt();
+						final int height = taskImage.get("height").asInt();
+						GameBus.getInstance().publish(
+								new GameEvent(GameMessages.composeRoundEnd(
+										taskImage.get("tag").asText(), id,
+										medialocator, width, height), roomChannel));
+						missingPlayers = requiredPlayers;
 					}
-					else
-						if (areWeAsking) {
-							GameBus.getInstance()
-							.publish(
-									new GameEvent(
-											GameMessages
-											.composeLogMessage(
-													LogLevel.info,
-													sketcherPainter.name
-													+ " "
-													+ Messages
-													.get(LanguagePicker
-															.retrieveLocale(),
-															"notag")),
-															roomChannel));
-							GameBus.getInstance().publish(
-									new GameEvent(GameMessages.composeNoTag(),
-											roomChannel));
-							missingPlayers = requiredPlayers;
-							areWeAsking = false;
-							nextRound();
-						} else if (!shownImages) {
-							shownImages = true;
-							final String id = taskImage.get("id").asText();
-							final String medialocator = taskImage.get("image")
-									.asText();
-							final int width = taskImage.get("width").asInt();
-							final int height = taskImage.get("height").asInt();
-							GameBus.getInstance().publish(
-									new GameEvent(GameMessages.composeRoundEnd(
-											taskImage.get("tag").asText(), id,
-											medialocator, width, height),
-											roomChannel));
-							missingPlayers = requiredPlayers;
-						}
 			}
 		}
 	}
@@ -950,9 +971,40 @@ public class Game extends GameRoom {
 	}
 
 	private void skipTask() throws Exception {
-		//TODO skip action
 		final Integer userid = CMS.postUser(sketcherPainter.name);
-		CMS.postAction(Action.createSkipAction(sessionId, guessObject.get("id").asInt(), userid, true));
+		final String tagS=guessObject.get("tag").asText();
+		Integer tag = null;
+		if (!tagS.equals("empty")) {
+			tag = CMS.saveTag(tagS);
+		}
+
+		final Integer imgid = guessObject.get("id").asInt();
+		final String imgidS = guessObject.get("id").asText();
+		final Integer actionId;
+		if (tag == null) {
+			// is tagging
+			if (openActionsTag.containsKey(imgidS)) {
+				actionId = openActionsTag.get(imgidS);
+			} else {
+				actionId = CMS.postAction(Action.createSkipActionTagging(
+						sessionId, imgid, userid, true));
+			}
+
+		} else {
+			// is seg
+			if (openActionsSeg.containsKey(String.valueOf(imgid)
+					+ String.valueOf(tag))) {
+				actionId = openActionsSeg.get(String.valueOf(imgid)
+						+ String.valueOf(tag));
+			} else {
+				actionId =  CMS.postAction(Action
+						.createSkipActionSeg(sessionId, guessObject.get("id")
+								.asInt(), userid, true, tag));
+				CMS.closeAction(actionId);
+			}
+		}
+		CMS.closeAction(actionId);
+
 		GameBus.getInstance().publish(
 				new GameEvent(GameMessages.composeLogMessage(
 						LogLevel.info,
@@ -961,8 +1013,8 @@ public class Game extends GameRoom {
 						+ Messages.get(LanguagePicker.retrieveLocale(),
 								"skiptask")), roomChannel));
 		nextRound();
-	}
 
+	}
 	private void tagReceived(final String word) throws Exception {
 		taskImage.remove("tag");
 		taskImage.put("tag", word);

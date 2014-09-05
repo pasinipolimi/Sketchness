@@ -20,6 +20,7 @@ GET     /retrieveImages                   controllers.Utilities.retrieveImages()
 GET     /retrieveTags                     controllers.Utilities.retrieveTags(imageID: String)
 
 GET     /testCMS                     controllers.Utilities.testCMS
+GET     /cleanCMS                     controllers.Utilities.cleanCMS
 
 
 

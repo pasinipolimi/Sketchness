@@ -53,6 +53,16 @@ public class Utilities extends Controller {
 		return ok("ok");
 	}
 
+	public static Result cleanCMS() {
+		try {
+			CMS.cleanOpenActions();
+		} catch (final CMSException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return ok("ok");
+	}
+
 	public static Result retrieveMaskImage(final String imageID, final String tag) {
 
 		try {
@@ -159,7 +169,7 @@ public class Utilities extends Controller {
 	}
 
 	public static Result addUTaskCall() throws IOException, JSONException,
-			CMSException {
+	CMSException {
 		String newId;
 		final String taskType = request().getHeader("taskType");
 		final String selectionTask = request().getHeader("selectionTask");

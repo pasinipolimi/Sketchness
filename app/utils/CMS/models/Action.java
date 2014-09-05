@@ -2,6 +2,11 @@ package utils.CMS.models;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Action extends CMSObject {
 
 
@@ -13,7 +18,7 @@ public class Action extends CMSObject {
 	// private Segmentation segmentation;
 	private List<Point> points;
 	private List<History> history;
-	private String started_at;
+	private String created_at;
 
 	// "tagging", "segmentation"
 	private String type;
@@ -35,16 +40,9 @@ public class Action extends CMSObject {
 
 
 
-	public String getStarted_at() {
-		return started_at;
-	}
-
-	public void setStarted_at(final String started_at) {
-		this.started_at = started_at;
-	}
 
 
-	public static Action createSkipAction(final Integer session,
+	public static Action createSkipActionTagging(final Integer session,
 			final Integer image, final Integer user, final Boolean validity) {
 		final Action a = new Action();
 		a.image = image;
@@ -52,6 +50,19 @@ public class Action extends CMSObject {
 		a.user = user;
 		a.validity = validity;
 		a.type = "tagging";
+		return a;
+	}
+
+	public static Action createSkipActionSeg(final Integer session,
+			final Integer image, final Integer user, final Boolean validity,
+			final Integer tag) {
+		final Action a = new Action();
+		a.image = image;
+		a.session = session;
+		a.tag = tag;
+		a.user = user;
+		a.validity = validity;
+		a.type = "segmentation";
 		return a;
 	}
 
@@ -189,6 +200,14 @@ public class Action extends CMSObject {
 
 	public void setHistory(final List<History> history) {
 		this.history = history;
+	}
+
+	public String getCreated_at() {
+		return created_at;
+	}
+
+	public void setCreated_at(final String created_at) {
+		this.created_at = created_at;
 	}
 
 }

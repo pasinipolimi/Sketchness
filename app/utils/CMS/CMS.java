@@ -2,6 +2,7 @@ package utils.CMS;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -44,10 +45,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class CMS {
 
-	private final static String rootUrl = "http://80.240.141.191:80";
+	// private final static String rootUrl = "http://80.240.141.191:80";
 
-	// private final static String rootUrl = Play.application().configuration()
-	// .getString("cmsUrl");
+	private final static String rootUrl = Play.application().configuration()
+			.getString("cmsUrl");
 	private final static Integer timeoutPostCMS = Play.application()
 			.configuration().getInt("cmsTimeoutPost");
 
@@ -59,6 +60,7 @@ public class CMS {
 
 	private final static String policy = Play.application().configuration()
 			.getString("policy");
+	private static final long MAX_OPEN_ACTION = 1800000;
 
 	private static HashMap<String, Cancellable> runningThreads = new HashMap<String, Cancellable>();
 
@@ -71,9 +73,13 @@ public class CMS {
 		return getObjs(Image.class, "image", "images");
 	}
 
-	public static List<Image> getImages3() throws CMSException {
-		return getObjs(Image.class, "image", "images");
+	public static List<Action> getActions() throws CMSException {
+		return getObjs(Action.class, "action", "actions");
 	}
+
+	// public static List<Image> getImages() throws CMSException {
+	// return getObjs(Image.class, "image", "images");
+	// }
 
 	public static Image getImage(final Integer id) throws CMSException {
 		return getObj(utils.CMS.models.Image.class, "image", id, "image");
@@ -470,7 +476,7 @@ public class CMS {
 
 	public static void closeSession(final Integer sessionId)
 			throws CMSException {
-		postObj("session", sessionId);
+		postObj2(null, "session/" + sessionId);
 		LoggerUtils.debug("CMS", "Closing session " + sessionId);
 	}
 
@@ -573,8 +579,29 @@ public class CMS {
 			}
 		}
 		return uploadedTasks;
-
 	}
+
+	public static void cleanOpenActions() throws CMSException {
+		final List<Action> actions = getActions();
+		for (final Action a : actions) {
+			final String completed = a.getCompleted_at();
+			if (completed != null) {
+				continue;
+			}
+
+			final String started = a.getCreated_at();
+			final Calendar date = javax.xml.bind.DatatypeConverter
+					.parseDateTime(started);
+			final Calendar now = Calendar.getInstance();
+			final long diff = now.getTimeInMillis() - date.getTimeInMillis();
+			if (diff > MAX_OPEN_ACTION) {
+				System.out.println("Closing action");
+				closeAction(a.getId());
+			}
+		}
+	}
+
+
 
 	private static void retrieveImages(final Integer tasksToAdd,
 			final List<ObjectNode> queueImages, final Room roomChannel,
@@ -998,8 +1025,13 @@ public class CMS {
 	public static int getSegmentationCount() throws CMSException {
 		final HashMap<String, String> params = new HashMap<>();
 		params.put("type", "segmentation");
-
 		return getCount("action", params);
+	}
+
+	public static void closeAction(final Integer actionId) throws CMSException {
+		postObj2(null, "action/" + actionId);
+		LoggerUtils.debug("CMS", "Closing action " + actionId);
+
 	}
 
 }
