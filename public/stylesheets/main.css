@@ -1282,6 +1282,26 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
+
+
+.ico.romper, .ico_chat.romper{
+    background: url('../images/UI/icon/abito.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.romper:hover{
+    background: url('../images/UI/icon/abito-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.bodysuit, .ico_chat.bodysuit{
+    background: url('../images/UI/icon/abito.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.bodysuit:hover{
+    background: url('../images/UI/icon/abito-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
 .ico.ring,.ico_chat.ring{
     background: url('../images/UI/icon/anello.jpg') center no-repeat;
     background-size: cover;
@@ -1309,6 +1329,15 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
+.ico.bag,.ico_chat.bag{
+    background: url('../images/UI/icon/borsa.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.bag:hover{
+    background: url('../images/UI/icon/borsa-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
 .ico.hat,.ico_chat.hat{
     background: url('../images/UI/icon/cappello.jpg') center no-repeat;
     background-size: cover;
@@ -1318,11 +1347,39 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
+
+.ico.headband,.ico_chat.headband{
+    background: url('../images/UI/icon/cappello.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.headband:hover{
+    background: url('../images/UI/icon/cappello-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
 .ico.cardigan,.ico_chat.cardigan{
     background: url('../images/UI/icon/cardigan.jpg') center no-repeat;
     background-size: cover;
 }
 .ico.cardigan:hover{
+    background: url('../images/UI/icon/cardigan-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.sweater,.ico_chat.sweater{
+    background: url('../images/UI/icon/cardigan.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.sweater:hover{
+    background: url('../images/UI/icon/cardigan-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.jumper,.ico_chat.jumper{
+    background: url('../images/UI/icon/cardigan.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.jumper:hover{
     background: url('../images/UI/icon/cardigan-on.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1381,11 +1438,31 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
+
+.ico.sweatshirt,.ico_chat.sweatshirt{
+    background: url('../images/UI/icon/maglia.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.sweatshirt:hover{
+    background: url('../images/UI/icon/maglia-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+
 .ico.glasses, .ico_chat.glasses{
     background: url('../images/UI/icon/occhiali.jpg') center no-repeat;
     background-size: cover;
 }
 .ico.glasses:hover{
+    background: url('../images/UI/icon/occhiali-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.sunglasses, .ico_chat.sunglasses{
+    background: url('../images/UI/icon/occhiali.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.sunglasses:hover{
     background: url('../images/UI/icon/occhiali-on.jpg') center no-repeat;
     background-size: cover;
 }
@@ -1416,6 +1493,34 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
+.ico.jeans,.ico_chat.jeans{
+    background: url('../images/UI/icon/pantaloni.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.jeans:hover{
+    background: url('../images/UI/icon/pantaloni-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.leggins,.ico_chat.leggins{
+    background: url('../images/UI/icon/pantaloni.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.leggins:hover{
+    background: url('../images/UI/icon/pantaloni-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.pants,.ico_chat.pants{
+    background: url('../images/UI/icon/pantaloni.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.pants:hover{
+    background: url('../images/UI/icon/pantaloni-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+
 .ico.wallet,.ico_chat.wallet{
     background: url('../images/UI/icon/portafoglio.jpg') center no-repeat;
     background-size: cover;
@@ -1443,6 +1548,78 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
+.ico.clogs,.ico_chat.clogs{
+    background: url('../images/UI/icon/scarpe.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.clogs:hover{
+    background: url('../images/UI/icon/scarpe-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.flats,.ico_chat.flats{
+    background: url('../images/UI/icon/scarpe.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.flats:hover{
+    background: url('../images/UI/icon/scarpe-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.heels,.ico_chat.heels{
+    background: url('../images/UI/icon/scarpe.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.heels:hover{
+    background: url('../images/UI/icon/scarpe-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.loafers,.ico_chat.loafers{
+    background: url('../images/UI/icon/scarpe.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.loafers:hover{
+    background: url('../images/UI/icon/scarpe-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.pumps,.ico_chat.pumps{
+    background: url('../images/UI/icon/scarpe.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.pumps:hover{
+    background: url('../images/UI/icon/scarpe-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.sandals,.ico_chat.sandals{
+    background: url('../images/UI/icon/scarpe.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.sandals:hover{
+    background: url('../images/UI/icon/scarpe-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.sneakers,.ico_chat.sneakers{
+    background: url('../images/UI/icon/scarpe.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.sneakers:hover{
+    background: url('../images/UI/icon/scarpe-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.wedges,.ico_chat.wedges{
+    background: url('../images/UI/icon/scarpe.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.wedges:hover{
+    background: url('../images/UI/icon/scarpe-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
 .ico.t-shirt,.ico_chat.t-shirt{
     background: url('../images/UI/icon/t-shirt.jpg') center no-repeat;
     background-size: cover;
@@ -1451,6 +1628,16 @@ input[type=number]::-webkit-outer-spin-button {
     background: url('../images/UI/icon/t-shirt-on.jpg') center no-repeat;
     background-size: cover;
 }
+
+.ico.top,.ico_chat.top{
+    background: url('../images/UI/icon/t-shirt.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.top:hover{
+    background: url('../images/UI/icon/t-shirt-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
 /**/
 .ico.bracelet,.ico_chat.bracelet{
     background: url('../images/UI/icon/bracciale.jpg') center no-repeat;
@@ -1515,6 +1702,15 @@ input[type=number]::-webkit-outer-spin-button {
     background-size: cover;
 }
 
+.ico.blazer,.ico_chat.blazer{
+    background: url('../images/UI/icon/giacca.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.blazer:hover{
+    background: url('../images/UI/icon/giacca-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
 .ico.blouse,.ico_chat.blouse{
     background: url('../images/UI/icon/camicetta.jpg') center no-repeat;
     background-size: cover;
@@ -1532,11 +1728,30 @@ input[type=number]::-webkit-outer-spin-button {
     background: url('../images/UI/icon/salopette-on.jpg') center no-repeat;
     background-size: cover;
 }
+
+.ico.suit,.ico_chat.suit{
+    background: url('../images/UI/icon/salopette.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.suit:hover{
+    background: url('../images/UI/icon/salopette-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
 .ico.socks,.ico_chat.socks{
     background: url('../images/UI/icon/calzini.jpg') center no-repeat;
     background-size: cover;
 }
 .ico.socks:hover{
+    background: url('../images/UI/icon/calzini-on.jpg') center no-repeat;
+    background-size: cover;
+}
+
+.ico.stockings,.ico_chat.stockings{
+    background: url('../images/UI/icon/calzini.jpg') center no-repeat;
+    background-size: cover;
+}
+.ico.stockings:hover{
     background: url('../images/UI/icon/calzini-on.jpg') center no-repeat;
     background-size: cover;
 }

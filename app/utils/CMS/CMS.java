@@ -2,7 +2,6 @@ package utils.CMS;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -46,6 +45,68 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class CMS {
 
 	// private final static String rootUrl = "http://80.240.141.191:80";
+
+	private static String[] invalid = { "21106", "21105", "21064", "21063",
+		"21058", "21057", "20964", "20963", "20859", "20858", "20732",
+		"20731", "20718", "20717", "20716", "20715", "20710", "20709",
+		"20708", "20707", "20700", "20699", "20696", "20695", "20686",
+		"20685", "20682", "20681", "20291", "20290", "20277", "20276",
+		"20229", "20228", "20173", "20172", "20123", "20122", "20051",
+		"20050", "19963", "19962", "19823", "19822", "19753", "19752",
+		"19705", "19704", "19637", "19636", "19593", "19592", "19483",
+		"19482", "19167", "19166", "19155", "19154", "19093", "19092",
+		"18955", "18954", "18917", "18916", "18883", "18882", "18829",
+		"18828", "18755", "18754", "18743", "18742", "18715", "18714",
+		"18707", "18706", "18603", "18602", "18527", "18526", "18431",
+		"18430", "18399", "18398", "18295", "18294", "18259", "18258",
+		"18223", "18222", "18143", "18142", "18131", "18130", "18109",
+		"18108", "18017", "18016", "17983", "17982", "13484", "13483",
+		"2785", "2784", "2635", "2634", "2555", "2554", "2297", "2296",
+		"1889", "1888", "1155", "1154", "12709", "12708", "12673", "12672",
+			"12666", "12665", "12662", "20815", "20814", "18283", "18282",
+			"12804", "12803", "12529", "12528", "12351", "12350", "12141",
+			"12140", "11801", "11800", "11635", "11634", "11437", "11436",
+			"11205", "11204", "11073", "11072", "10777", "10776", "10753",
+			"10752", "10515", "10514", "10269", "10268", "9979", "9978",
+			"9913", "9912", "9723", "9722", "9491", "9490", "9285", "9284",
+			"8997", "8996", "8759", "8758", "8631", "8630", "8513", "8512",
+			"8363", "8362", "8245", "8244", "7967", "7966", "7741", "7740",
+			"7565", "7564", "7421", "7420", "7237", "7236", "7001", "7000",
+			"6865", "6864", "6489", "6488", "6421", "6420", "6091", "6090",
+			"5981", "5980", "5795", "5794", "5459", "5458", "5339", "5338",
+			"5107", "5106", "4858", "4857", "4632", "4631", "4442", "4441",
+			"4076", "4075", "4000", "3999", "3391", "3390", "3185", "3184",
+			"3149", "3148", "3041", "3040", "3015", "3014", "2845", "2844",
+			"13546", "13545", "13497", "13496", "13495", "13443", "13442",
+			"13441", "13440", "13211", "13210", "2431", "2430", "1801", "1800",
+			"951", "950", "20579", "20578", "13541", "13540", "13539", "13147",
+			"13146", "13095", "13094", "13003", "13002", "12806", "12805",
+			"12543", "12542", "12247", "12246", "11999", "11998", "11897",
+			"11896", "11693", "11692", "11429", "11428", "11225", "11224",
+			"11137", "11136", "10951", "10950", "10635", "10634", "10383",
+			"10382", "10163", "10162", "10017", "10016", "9765", "9764",
+			"9637", "9636", "9525", "9524", "9135", "9134", "9011", "9010",
+			"8791", "8790", "8693", "8692", "8327", "8326", "8191", "8190",
+			"8051", "8050", "7737", "7736", "7551", "7550", "7335", "7334",
+			"7243", "7242", "7063", "7062", "6743", "6742", "6681", "6680",
+			"6461", "6460", "6369", "6368", "6113", "6112", "5989", "5988",
+			"5851", "5850", "5683", "5682", "5475", "5474", "5281", "5280",
+			"5037", "5036", "4899", "4898", "4748", "4747", "4548", "4547",
+			"4300", "4299", "4120", "99398", "99395", "99394", "99388",
+			"99387", "22355", "21137", "21136", "21135", "21134", "21108",
+			"21107", "21050", "21049", "20980", "20979", "20948", "20947",
+			"20899", "20898", "20549", "20548", "20547", "20546", "20531",
+			"20530", "20471", "20470", "20421", "20420", "20413", "20412",
+			"20389", "20388", "20279", "20278", "20263", "20262", "20251",
+			"20250", "20175", "20174", "20137", "20136", "20125", "20124",
+			"20099", "20098", "20093", "20092", "20019", "20018", "19979",
+			"19978", "19899", "19898", "19881", "19880", "19837", "19836",
+			"19755", "19754", "19657", "19656", "19639", "19638", "19475",
+			"19474", "19441", "19440", "19427", "19426", "19331", "19330",
+			"19293", "19292", "19275", "19274", "19253", "19252", "19243",
+			"19242", "19179", "19178", "19143", "19142", "19081", "19080",
+			"18965", "18964", "18909", "18908", "18841", "18840", "18811",
+			"18810", "18799", "18798", "18791", "18790" };
 
 	private final static String rootUrl = Play.application().configuration()
 			.getString("cmsUrl");
@@ -165,18 +226,27 @@ public class CMS {
 	private static <T extends Object> void updateObj(final T obj,
 			final String service, final HashMap<String, String> params)
 					throws CMSException {
-		final WSRequestHolder ws = WS.url(rootUrl + "/" + service).setTimeout(
-				timeoutPostCMS);
+		final F.Promise<WS.Response> returned;
+		final WSRequestHolder ws = WS.url(rootUrl + "/" + service)
+				.setHeader("Accept", "application/json")
+				.setTimeout(timeoutPostCMS);
 		final Iterator<String> it = params.keySet().iterator();
 		while (it.hasNext()) {
 			final String parId = it.next();
 			ws.setQueryParameter(parId, params.get(parId));
 		}
 
+
 		try {
-			ws.put(Json.toJson(obj));
+
+			final JsonNode body = Json.toJson(obj);
+			returned = ws.put(body);
+
+			final String respBody = returned.get().getBody();
+			Logger.debug("Output for put on " + service + " : " + respBody);
+
 		} catch (final Exception e) {
-			throw new CMSException("Unable to post: " + service);
+			throw new CMSException("Unable to put: " + service);
 		}
 
 	}
@@ -582,26 +652,40 @@ public class CMS {
 	}
 
 	public static void cleanOpenActions() throws CMSException {
-		final List<Action> actions = getActions();
-		for (final Action a : actions) {
-			final String completed = a.getCompleted_at();
-			if (completed != null) {
-				continue;
-			}
 
-			final String started = a.getCreated_at();
-			final Calendar date = javax.xml.bind.DatatypeConverter
-					.parseDateTime(started);
-			final Calendar now = Calendar.getInstance();
-			final long diff = now.getTimeInMillis() - date.getTimeInMillis();
-			if (diff > MAX_OPEN_ACTION) {
-				System.out.println("Closing action");
-				closeAction(a.getId());
-			}
+		for (final String a : invalid) {
+			invalidateAction(a);
 		}
+
+		// final List<Action> actions = getActions();
+		// for (final Action a : actions) {
+		// final String completed = a.getCompleted_at();
+		// if (completed != null) {
+		// continue;
+		// }
+		//
+		// final String started = a.getCreated_at();
+		// final Calendar date = javax.xml.bind.DatatypeConverter
+		// .parseDateTime(started);
+		// final Calendar now = Calendar.getInstance();
+		// final long diff = now.getTimeInMillis() - date.getTimeInMillis();
+		// if (diff > MAX_OPEN_ACTION) {
+		// System.out.println("Closing action");
+		// closeAction(a.getId());
+		// }
+		// }
 	}
 
 
+
+	private static void invalidateAction(final String a) throws CMSException {
+		final HashMap<String, String> body = new HashMap<>();
+		body.put("validity", "false");
+		final HashMap<String, String> params = new HashMap<>();
+
+		updateObj(body, "action/" + a, params);
+
+	}
 
 	private static void retrieveImages(final Integer tasksToAdd,
 			final List<ObjectNode> queueImages, final Room roomChannel,
