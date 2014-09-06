@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -24,7 +25,6 @@ import play.libs.Akka;
 import scala.concurrent.duration.Duration;
 import utils.LanguagePicker;
 import utils.LoggerUtils;
-import utils.levenshteinDistance;
 import utils.CMS.CMS;
 import utils.CMS.models.Action;
 import utils.gamebus.GameBus;
@@ -1049,39 +1049,122 @@ public class Game extends GameRoom {
 		} else if (gameStarted) {
 			// Compare the message sent with the tag in order to establish if we
 			// have a right guess
-			final levenshteinDistance distance = new levenshteinDistance();
+			// final levenshteinDistance distance = new levenshteinDistance();
 			if (text != null) {
-				switch (distance.computeLevenshteinDistance(text, currentGuess)) {
-				case 0:
-					// GameBus.getInstance().publish(new GameEvent(username,
-					// roomChannel, GameEventType.guessed));
+
+				if (isRight(text, currentGuess)) {
 					GameBus.getInstance().publish(
 							new GameEvent(GameMessages.composeGuessed(username,
 									text), roomChannel));
-					break;
-				case 1:
-					GameBus.getInstance().publish(
-							new GameMessages.GameEvent(GameMessages
-									.composeGuess(username, text, "hot"),
-									roomChannel));
-					break;
-				case 2:
-					GameBus.getInstance().publish(
-							new GameMessages.GameEvent(GameMessages
-									.composeGuess(username, text, "warm"),
-									roomChannel));
-					break;
-				default:
+				} else {
 					GameBus.getInstance().publish(
 							new GameMessages.GameEvent(GameMessages
 									.composeGuess(username, text, "cold"),
 									roomChannel));
-					break;
 				}
+
+				// switch (distance.computeLevenshteinDistance(text,
+				// currentGuess)) {
+				// case 0:
+				// // GameBus.getInstance().publish(new GameEvent(username,
+				// // roomChannel, GameEventType.guessed));
+				// GameBus.getInstance().publish(
+				// new GameEvent(GameMessages.composeGuessed(username,
+				// text), roomChannel));
+				// break;
+				// case 1:
+				// GameBus.getInstance().publish(
+				// new GameMessages.GameEvent(GameMessages
+				// .composeGuess(username, text, "hot"),
+				// roomChannel));
+				// break;
+				// case 2:
+				// GameBus.getInstance().publish(
+				// new GameMessages.GameEvent(GameMessages
+				// .composeGuess(username, text, "warm"),
+				// roomChannel));
+				// break;
+				// default:
+				// GameBus.getInstance().publish(
+				// new GameMessages.GameEvent(GameMessages
+				// .composeGuess(username, text, "cold"),
+				// roomChannel));
+				// break;
+				// }
 			}
 		}
 	}
+
+	private boolean isRight(final String attempt, final String right) {
+		if (attempt.equals(right)) {
+			return true;
+		}
+		if (synonymousTags.get(attempt) == null) {
+			// no syno
+			return false;
+		}
+
+		for (final String syn : synonymousTags.get(attempt)) {
+			if (right.equals(syn)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+	private static final Map<String, String[]> synonymousTags;
+	static
+	{
+		synonymousTags = new HashMap<String, String[]>();
+
+		final String[] bag = { "bag" };
+		synonymousTags.put("handbag", bag);
+
+		final String[] bra = { "bikini" };
+		synonymousTags.put("bra", bra);
+		final String[] jacket = { "blazer" };
+		synonymousTags.put("jacket", jacket);
+
+		final String[] dress = { "bodysuit", "romper" };
+		synonymousTags.put("dress", dress);
+
+		final String[] shoes = { "clogs", "flats", "heels", "loafers", "pumps",
+				"sandals", "sneakers", "wedges" };
+		synonymousTags.put("shoes", shoes);
+
+		final String[] hat = { "headband", "" };
+		synonymousTags.put("hat", hat);
+
+		final String[] trousers = { "jeans", "leggins", "pants" };
+		synonymousTags.put("trousers", trousers);
+
+		final String[] cardigan = { "jumper", "sweater" };
+		synonymousTags.put("cardigan", cardigan);
+
+		final String[] socks = { "stockings", "" };
+		synonymousTags.put("socks", socks);
+
+		final String[] dungarees = { "suit", "" };
+		synonymousTags.put("dungarees", dungarees);
+
+		final String[] sunglasses = { "sunglasses", "" };
+		synonymousTags.put("glasses", sunglasses);
+
+		final String[] shirt = { "sweatshirt", "" };
+		synonymousTags.put("shirt", shirt);
+
+		final String[] ths = { "top" };
+		synonymousTags.put("t-shirt", ths);
+
+	}
+
+
+
 }
+
+
+
 
 enum CountdownTypes {
 	round, tag
