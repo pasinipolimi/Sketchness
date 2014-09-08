@@ -836,8 +836,9 @@ div.avatarChat {
 	text-align: center;
 }
 
-#topMessage font b{font-size:20px; font-weight: normal}
-#topMessage font b .ico{
+#topMessage .todraw{font-size:20px; font-weight: normal}
+#topMessage .todraw.red{color:#ff0000;font-size: 22px}
+#topMessage .todraw .ico{
     position: relative;
     top: 4;
     float: right;

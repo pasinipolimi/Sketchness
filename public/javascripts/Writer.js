@@ -59,22 +59,29 @@ define(["Class", "Time", "jquery", "i18n"], function(Class, Time, $) {
 			 */
 			top: function(text, kind) {
 				var html = "";
-				if(text !== undefined) {
-					html = "<font size='5'><b>" + text;
-				}
-				else {
-					html = "<font size='5'><b>";
-				}
-				if(kind !== undefined) {
-					html += "<div class='ico "+kind+"'></div>";
-				}
-				html += "</b></font>";
+                if(text !== undefined) {
+                    html = "<div class='todraw'>" + text;
+                }
+                else {
+                    html = "<div class='todraw'>";
+                }
+                if(kind !== undefined) {
+                    html += "<div class='ico "+kind+"'></div>";
+                }
+                html += "</div>";
 
 				this.elements.top.html(html);
                 // --> MoonSUB
                 var test = setTimeout(function(){
                     for(var i=0;i<20;i++) {
-                        $('#topMessage .ico').fadeToggle('slow');
+
+                        $('#topMessage .todraw').css({
+                            fontSize: '22px',
+                        },600,function(){
+                            $('#topMessage .todraw').css({
+                                fontSize: '20px'
+                            });
+                        });
                     }
                 },1000);
                 // <-- MoonSUB
