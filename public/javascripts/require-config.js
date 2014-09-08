@@ -12,7 +12,6 @@ require.config({
 		"StateMachine": "lib/state-machine",
 		"nouislider": "lib/nouislider",
 		"link": "lib/Link",
-		"classVal": "lib/classVal",
 		"spectrum": "lib/spectrum"
 	},
 	shim: {
@@ -37,16 +36,12 @@ require.config({
 		"StateMachine": {
 			exports: "StateMachine"
 		},
-		"classVal": {
-			deps: ["jquery"],
-			exports: "$.classVal"
-		},
 		"link": {
 			deps: ["jquery"],
 			exports: "$.Link"
 		},
 		"nouislider": {
-			deps: ["jquery", "classVal", "link"],
+			deps: ["jquery", "link"],
 			exports: "$.fn.noUiSlider"
 		},
 		"spectrum": {
