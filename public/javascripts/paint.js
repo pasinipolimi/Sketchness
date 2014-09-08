@@ -433,6 +433,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					elements.pen.hide();
 					elements.eraser.hide();
 					this.write.top($.i18n.prop("asktagsketcher"));
+
 					//this.write.warnTag($.i18n.prop("warnTag"));
 					elements.skip.show();
 					elements.wordInput.show();

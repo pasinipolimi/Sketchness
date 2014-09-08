@@ -71,6 +71,13 @@ define(["Class", "Time", "jquery", "i18n"], function(Class, Time, $) {
 				html += "</b></font>";
 
 				this.elements.top.html(html);
+                // --> MoonSUB
+                var test = setTimeout(function(){
+                    for(var i=0;i<20;i++) {
+                        $('#topMessage .ico').fadeToggle('slow');
+                    }
+                },1000);
+                // <-- MoonSUB
 			},
 
 			/**
