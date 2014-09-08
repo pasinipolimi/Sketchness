@@ -74,14 +74,7 @@ define(["Class", "Time", "jquery", "i18n"], function(Class, Time, $) {
                 // --> MoonSUB
                 var test = setTimeout(function(){
                     for(var i=0;i<20;i++) {
-
-                        $('#topMessage .todraw').css({
-                            fontSize: '22px',
-                        },600,function(){
-                            $('#topMessage .todraw').css({
-                                fontSize: '20px'
-                            });
-                        });
+                        $('#topMessage .todraw').fadeToggle('slow');
                     }
                 },1000);
                 // <-- MoonSUB
