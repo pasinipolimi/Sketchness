@@ -1,4 +1,4 @@
-define(["Class", "Time", "jquery", "i18n"], function(Class, Time, $) {
+define(["Class", "Time", "jquery", "jquery-ui", "i18n"], function(Class, Time, $) {
 
 	/**
 	 * Component that handles the DOM manipulation
@@ -73,8 +73,9 @@ define(["Class", "Time", "jquery", "i18n"], function(Class, Time, $) {
 				this.elements.top.html(html);
                 // --> MoonSUB
                 var test = setTimeout(function(){
-                    for(var i=0;i<20;i++) {
-                        $('#topMessage .todraw').fadeToggle('slow');
+                    for(var i=0;i<5;i++) {
+                        $('#topMessage .todraw').animate({color:'#f00',fontSize:'22px'}).animate({color:'#000',fontSize:'20px'});
+                        console.log(i);
                     }
                 },1000);
                 // <-- MoonSUB

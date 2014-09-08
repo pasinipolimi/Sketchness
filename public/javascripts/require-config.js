@@ -2,6 +2,7 @@ require.config({
 	baseUrl: "assets/javascripts",
 	paths: {
 		"jquery": "lib/jquery",
+        "jquery-ui": "lib/jquery-ui",
 		"i18n": "lib/jquery.i18n.properties",
 		"mousewheel": "lib/jquery.mousewheel",
 		"jscrollpane": "lib/jquery.jscrollpane",
