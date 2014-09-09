@@ -543,18 +543,31 @@ div#preloaded-images {
 }
 
 #ProfileContenitor{
-    width: 550px;
-    padding-left:266px;
-    padding-top:26px;
+    width: 500px;
+    height: 420px;
+    /* padding-left: 266px; */
+    margin-left: -250px;
+    /* margin-top: 70px; */
+    /* padding-top: 26px; */
+    position: relative;
+    background-image: url('../images/UI/not-found.png');
+    left: 50%;
+    top: 120px;
 }
 
 #ProfileImage{
 	/*profileImage*//*nation*/
-	top:3px;left:3px;
-	width:311px;height:83px;background: url("../images/UI/lobby/lobby.png") no-repeat -344px -600px;
-    margin-top: -25px;
-    margin-left: -30px;
-	border-width: 0px;
+    /*top: 3px; */
+    /* left: 3px; */
+    width: 311px;
+    height: 83px;
+    background: url("../images/UI/lobby/lobby.png") no-repeat -344px -600px;
+    /* margin-top: -25px; */
+    margin-left: -155px;
+    border-width: 0px;
+    position: absolute;
+    left: 50%;
+    top: -90px;
 }
 
 #ProfileLink {
@@ -584,10 +597,20 @@ div#preloaded-images {
 }
 
 #tolobbyprofile {
+    /*
 	top:500px;left:530px;
 	width:189px;height:50px;background: url("../images/UI/lobby/lobby.png") no-repeat -773px -805px;
 	position: absolute;
 	border-width: 0px;
+	*/
+    top: 310px;
+    left: 50%;
+    margin-left: -93px;
+    width: 189px;
+    height: 50px;
+    background: url("../images/UI/lobby/lobby.png") no-repeat -773px -805px;
+    position: absolute;
+    border-width: 0px;
 }
 
 #tolobbyprofile:hover {
@@ -668,7 +691,7 @@ div#text-contenitor-content {
 	background-repeat:no-repeat;
 	background-color: transparent;
 	position: relative;
-	margin-left: -90px;
+
 	height: 481px;
 	width: 500px;
 }
@@ -697,18 +720,36 @@ div#unverified-scroll .logo-error{
 
 
 p#Profile-text{
+    color: #fff;
+    text-align: center;
+    font-size: 17px;
+    /* margin-top: 60px; */
+    position: relative;
+    top: 60px;
+    margin-left: -188px;
+    left: 50%;
+    width: 378px;
+    /*
     padding-top: 130px;
     padding: 130px 57px;
     color: #fff;
     text-align: center;
-    font-size: 24px;
+    font-size: 24px;*/
 }
 
 ul#ChangeNamePsw{
     padding-top: 0px;
+    /* padding-left: 71px; */
+    list-style-type: none;
+    list-style-position: inside;
+    padding: 0;
+    margin-left: 90px;
+    margin-top:50px;
+    /*
+    padding-top: 0px;
     padding-left: 71px;
     list-style-type: none;
-
+    */
 }
 
 #left-form-change {
