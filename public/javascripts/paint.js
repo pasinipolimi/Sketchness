@@ -1,9 +1,17 @@
-require(["Class", "Chat", "StateMachine", "Communicator", "Time", "Writer", "canvas/Painter", "jquery", "nouislider", "spectrum", "i18n", "howler"],
+require(["Class", "Chat", "StateMachine", "Communicator", "Time", "Writer", "canvas/Painter", "jquery", "nouislider", "spectrum", "i18n", "howler", "snow"],
 function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Painter,          $) {
 
 	$(function() {
 
 		var clock = new Time();
+
+        var animation = {
+            speed: 1,
+            size: 20,
+            count: 50,
+            image: "assets/images/sket.png",
+            timeOut: 5000
+        }
 
 		//var background_music = new Howl({
 		//	urls: ['assets/sounds/music/background.ogg']
@@ -1008,7 +1016,22 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
                                 wordInput.hide().off("keypress");
                                 this.one("image", function(e, content) {
                                     painter.showImage(content.url, content.width, content.height);
+                                    $('#canvaswindows').prepend('<canvas id="winner" style="z-index: 10;position: absolute;width: inherit;height: inherit;"/>');
+                                    $('canvas#winner').let_it_snow({
+                                        speed: animation.speed,
+                                        size: animation.size,
+                                        count: animation.count,
+                                        image: animation.image
+
+                                    });
+
+                                    setTimeout(function(){
+                                        $('#winner').remove();
+                                    },animation.timeOut);
                                 });
+
+
+
 							}
 						},
 						score: function(e, content) {
