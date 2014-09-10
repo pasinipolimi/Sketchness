@@ -75,7 +75,6 @@ define(["Class", "Time", "jquery", "jquery-ui", "i18n"], function(Class, Time, $
                 var test = setTimeout(function(){
                     for(var i=0;i<5;i++) {
                         $('#topMessage .todraw').animate({color:'#f00',fontSize:'24px'}).animate({color:'#000',fontSize:'20px'});
-                        console.log(i);
                     }
                 },1000);
                 // <-- MoonSUB

@@ -12,7 +12,8 @@ require.config({
 		"StateMachine": "lib/state-machine",
 		"nouislider": "lib/nouislider",
 		"link": "lib/Link",
-		"spectrum": "lib/spectrum"
+		"spectrum": "lib/spectrum",
+        "snow":"lib/jquery.snow"
 	},
 	shim: {
 		"jquery": {
@@ -47,6 +48,10 @@ require.config({
 		"spectrum": {
 		    deps: ["jquery"],
 			exports: "$.fn.spectrum"
-		}
+		},
+        "snow": {
+            deps: ["jquery"],
+            exports: "$.fn.let_it_snow"
+        }
 	}
 });
