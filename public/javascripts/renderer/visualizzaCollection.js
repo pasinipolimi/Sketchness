@@ -6,6 +6,14 @@
 function repopolate(){
 
 		$('#images_scroll').unbind('inview');
+		//reset annotations filter
+        var min_ann = $("#minAnn").val();
+        var max_ann = $("#maxAnn").val();
+
+        var values = [min_ann,max_ann];
+        $("#slider").val(values);
+        $("#resSlider").replaceWith("<span id='resSlider'>"+min_ann+":"+max_ann+"</span>");
+        
 		popolaSelectionAjax(null,100,false);
 };
 

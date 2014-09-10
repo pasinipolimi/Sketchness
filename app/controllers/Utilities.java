@@ -59,7 +59,7 @@ public class Utilities extends Controller {
 		
 		try {
 			final BufferedImage img = Renderer.retrieveMaskImage(media);
-			final File result = new File("Mask_"+media+".png");
+			final File result = new File("Mask_.png");
 			ImageIO.write(img, "png", result);
 			if (null != result) {
 				return ok(result);

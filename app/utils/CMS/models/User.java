@@ -2,11 +2,15 @@ package utils.CMS.models;
 
 public class User extends CMSObject {
 
-
+	
 	private Integer app_id;
 	private String app_user_id;
 	private Double quality;
 	private Statistics statistics;
+	
+	public User() {
+
+	}
 
 	public String getApp_user_id() {
 		return app_user_id;
@@ -47,6 +51,11 @@ public class User extends CMSObject {
 	}
 
 	public class Statistics {
+		
+		public Statistics() {
+
+		}
+		
 		private Integer sessions;
 		private Integer actions;
 

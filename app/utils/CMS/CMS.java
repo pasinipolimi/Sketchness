@@ -5,9 +5,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.collections.ListUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import play.Logger;
 import play.Play;
@@ -15,6 +20,8 @@ import play.libs.Akka;
 import play.libs.F;
 import play.libs.Json;
 import play.libs.WS;
+import play.libs.F.Promise;
+import play.libs.WS.Response;
 import play.libs.WS.WSRequestHolder;
 import scala.concurrent.duration.Duration;
 import utils.LanguagePicker;
@@ -48,8 +55,8 @@ public class CMS {
 	//private final static String rootUrl = "http://localhost:3000";
 
 	private final static String rootUrl = Play.application().configuration().getString("cmsUrl");
-	private final static Integer timeoutPostCMS = Play.application()
-			.configuration().getInt("cmsTimeoutPost");
+	private final static Integer timeoutPostCMS = Play.application().configuration().getInt("cmsTimeoutPost");
+	private final static Integer timeout = Play.application().configuration().getInt("cmsTimeout");
 
 	private final static Integer collection = Play.application()
 			.configuration().getInt("collection");
@@ -200,6 +207,7 @@ public class CMS {
 		// params, response);
 		final JsonNode result = jsonReader.readJsonFromUrl2(rootUrl, service,
 				params, response);
+
 		// lista = Json.fromJson(result, lista.getClass());
 
 		final List<T> lista = new ArrayList<>();
@@ -699,8 +707,84 @@ public class CMS {
 						roomChannel));
 	}
 
-	public static List<User> getUsers() throws CMSException {
-		return getObjs(User.class, "user", "user");
+	public static List<User> getUsers() throws CMSException, JSONException {
+		//return getObjs(User.class, "user?populate=true", "users");
+		/*
+		HashMap<String, String> params = new HashMap<String, String>();
+		params.put("populate", "true");
+		return getObjs(User.class, "user", params, "users");
+		*/
+		//get ALL users
+		Boolean end = false;
+		List<utils.CMS.models.User> users = new ArrayList<utils.CMS.models.User>();
+		String max_id = "null";
+		String count = String.valueOf(100);
+		int i = 0;
+		
+		while(!end){
+			HashMap<String, String> params = new HashMap<String, String>();
+			params.put("populate", "true");
+			if(!max_id.equals("null")){
+				params.put("max_id", max_id);
+				params.put("count", count);
+			}
+			
+			try {
+				List<utils.CMS.models.User> nextUsers = CMS.getObjs(User.class, "user", params, "users");
+				for(int k=0;k<nextUsers.size();k++){
+					users.add(nextUsers.get(k));
+				}
+			} catch (final CMSException e) {
+				Logger.error("Unable to read users from cms", e);
+				Logger.info("Unable to read users from cms " + e);
+				throw new JSONException("Unable to read users from cms");
+			}
+
+			//GET next result: max_id, count
+			final String service = "user";
+			final String response = "search_metadata";
+			
+			Promise<WS.Response> res;
+			final WSRequestHolder wsurl = WS.url(rootUrl + "/" + service).setHeader("Accept", "application/json").setTimeout(timeout);
+			if (params != null) {
+					final Iterator<Entry<String, String>> it = params.entrySet()
+							.iterator();
+					while (it.hasNext()) {
+						final Map.Entry<java.lang.String, java.lang.String> param = it
+								.next();
+						wsurl.setQueryParameter(param.getKey(), param.getValue());
+					}
+			}
+
+			res = wsurl.get();
+
+			if (res != null) {
+				final Response result2 = res.get(1000000L);
+				final JsonNode json = result2.asJson();
+				JsonNode node = null;
+				if (json.get("status").asText().equals("OK")) {
+					node = json.get(response);
+					if(node.has("next_results")){
+						String nextResult = node.get("next_results").asText();
+						String[] tokens = nextResult.split("=");
+						max_id = tokens[1].split("&")[0];
+						//count = tokens[2];
+					}
+					else{
+						end = true;
+					}
+				} else {
+					throw new CMSException(
+							"Internal Server Error while invoking CMS: "
+									+ json.get("error"));
+				}
+			} else {
+				throw new IllegalStateException("CMS response timeout.");
+			}
+		}
+
+		return users;
+		
 	}
 
 	public static Integer getUserCount() throws CMSException {
@@ -728,7 +812,7 @@ public class CMS {
 
 	public static Integer getTagActionCount() throws CMSException {
 		final HashMap<String, String> params = new HashMap<>();
-		params.put("type", "tag");
+		params.put("type", "tagging");
 		return getCount("action", params);
 	}
 

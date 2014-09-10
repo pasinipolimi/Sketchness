@@ -26,8 +26,7 @@ public class CMSJsonReader {
 
 		Promise<WS.Response> res;
 		// res = WS.url(url).setTimeout(1000000).get();
-		final WSRequestHolder wsurl = WS.url(url + "/" + service)
-				.setHeader("Accept", "application/json").setTimeout(timeout);
+		final WSRequestHolder wsurl = WS.url(url + "/" + service).setHeader("Accept", "application/json").setTimeout(timeout);
 		if (params!=null) {
 			final Iterator<Entry<String, String>> it = params.entrySet()
 					.iterator();
@@ -62,6 +61,7 @@ public class CMSJsonReader {
 					throws CMSException {
 		Promise<WS.Response> res;
 		// res = WS.url(url).setTimeout(1000000).get();
+
 		final WSRequestHolder wsurl = WS.url(url + "/" + service)
 				.setHeader("Accept", "application/json").setTimeout(timeout);
 		if (params != null) {

@@ -9,17 +9,19 @@ function caricaStatisticheUsers(){
              var result = JSON.parse(xhr.responseText);
              
              users = result.usersInfo[0];
-             var id, name, numPlays, numAnn;
+             var cubrik_userid, name, app_id, actions, sessions, quality;
              var table = $("#statisticheUsers");
 
              $.each(users, function(i,d){
             	    
-            	 	cubrik_userid = d.cubrik_userid.substring(1, d.cubrik_userid.length -1);
-            	 	app_id = d.app_id.substring(1, d.app_id.length -1);
-            	 	app_user_id = d.app_user_id.substring(1, d.app_user_id.length -1);
-            	 	number_of_plays = d.number_of_plays.substring(1, d.number_of_plays.length -1);
-            	 	number_of_annotations = d.number_of_annotations.substring(1, d.number_of_annotations.length -1);
-             		table.append("<tr><td class='infoValue'>"+cubrik_userid+"</td><td class='infoValue'>"+app_id+"</td><td class='infoValue'>"+app_user_id+"</td><td class='infoValue'>"+number_of_plays+"</td><td class='infoValue'>"+number_of_annotations+"</td><td class='infoValue'>"+0+"</td></tr>");
+            	 	cubrik_userid = d.id;
+            	 	app_id = d.app_id;
+            	 	name = d.app_user_id;
+            	 	sessions = d.num_sessions;
+            	 	actions = d.num_actions;
+            	 	quality = d.quality;
+             		//table.append("<tr><td class='infoValue'>"+cubrik_userid+"</td><td class='infoValue'>"+app_id+"</td><td class='infoValue'>"+name+"</td><td class='infoValue'>"+sessions+"</td><td class='infoValue'>"+actions+"</td><td class='infoValue'>"+quality+"</td></tr>");
+            	 	table.append("<tr><td class='infoValue'>"+name+"</td><td class='infoValue'>"+app_id+"</td><td class='infoValue'>"+sessions+"</td><td class='infoValue'>"+actions+"</td><td class='infoValue'>"+quality+"</td></tr>");
             	 	//table.append("<tr><td class='infoValue'>"+cubrik_userid+"</td><td class='infoValue'>"+app_id+"</td><td class='infoValue'>"+app_user_id+"</td><td class='infoValue'>"+d.number_of_plays+"</td><td class='infoValue'>"+d.number_of_annotations+"</td><td class='infoValue'>"+0+"</td></tr>");
              });
 

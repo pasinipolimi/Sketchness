@@ -85,8 +85,6 @@ public class Renderer extends UntypedActor {
 	private WebSocket.Out<JsonNode> channel;
 	String imageId;
 
-
-
 	public static synchronized void createRenderer(final String imageID,
 			final WebSocket.In<JsonNode> in, final WebSocket.Out<JsonNode> out)
 					throws Exception {
@@ -264,10 +262,10 @@ public class Renderer extends UntypedActor {
 		}
 
 		if (img instanceof Image) {
-			Logger.info("[AGGREGATOR] Retrieved mask");
+			Logger.info("[AGGREGATOR1] Retrieved mask");
 			return img;
 		}
-		Logger.error("[AGGREGATOR] Retrieved mask");
+		Logger.error("[AGGREGATOR2] Retrieved mask");
 		return null;
 	}
 
@@ -466,6 +464,7 @@ public class Renderer extends UntypedActor {
 			Logger.error("Unable to read stats", e);
 			throw new net.sf.json.JSONException();
 		}
+		
 
 		final JSONObject result = new JSONObject();
 
@@ -521,6 +520,10 @@ public class Renderer extends UntypedActor {
 			// object.get("cubrik_userid").toString());
 			element.put("app_id", u.getApp_id());
 			element.put("app_user_id", u.getApp_user_id());
+			//element.put("quality", u.getQuality());
+			element.put("quality", 0);
+			element.put("num_actions", u.getStatistics().getActions());
+			element.put("num_sessions", u.getStatistics().getSessions());
 			// TODO
 			// element.put("number_of_plays", CMS);
 			// element.put("number_of_annotations",
@@ -725,6 +728,7 @@ public class Renderer extends UntypedActor {
 
 		final JSONArray info = CMSUtilities.loadFirstGraph();
 		final String result = info.toString();
+		Logger.info(result);
 		return result;
 	}
 

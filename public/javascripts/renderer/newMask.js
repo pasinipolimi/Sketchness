@@ -302,6 +302,7 @@ var gameloop = (function(){
 */
 ////////////////////////////////////////////////////////////////////////////////////////////// FINE OLD
 function newMask(idTag, idImage, tagName, numAnnotations,im_width,im_height){
+
 	
 	//clear masks
 	var maskCanvas = document.getElementById("maskNew");
@@ -317,7 +318,11 @@ function newMask(idTag, idImage, tagName, numAnnotations,im_width,im_height){
 	var maskContext4 = maskCanvas4.getContext("2d");
 	maskContext4.clearRect(0,0,maskCanvas4.width,maskCanvas4.height);
 	
-	
+    var taskCanvas = document.getElementById("task");
+    var taskContext = taskCanvas.getContext("2d");
+	var taskImage=new Image();
+    taskImage.src= $("#mediaLocator").val();
+    taskContext.drawImage(taskImage,0,0,taskCanvas.width,taskCanvas.height);
 	
 	$.jAjax({
         url: "getTraces",
@@ -333,6 +338,8 @@ function newMask(idTag, idImage, tagName, numAnnotations,im_width,im_height){
                 	var ctx = canvas.getContext("2d");
                 	var taskCanvas = document.getElementById("task");
                 	var taskContext = taskCanvas.getContext("2d");
+                	canvas.width = taskCanvas.width;
+                	canvas.height = taskCanvas.height;
                 	var maskCanvas = document.getElementById("mask");
                     var maskContext = maskCanvas.getContext("2d");
                 	var result = JSON.parse(xhr.responseText);
@@ -350,11 +357,11 @@ function newMask(idTag, idImage, tagName, numAnnotations,im_width,im_height){
                 	var fun = function(){
                      	var points = JSON.parse(result.shift().points);
                      	taskContext.lineJoin = "round";
-               	        taskContext.beginPath();
-               	        taskContext.strokeStyle = getRandomColor();
+                     	taskContext.beginPath();
+                     	taskContext.strokeStyle = getRandomColor();
 
                	        var drawable=true;
-               	        taskContext.moveTo(Math.round(points[0].x*taskCanvas.width/im_width), Math.round(points[0].y*taskCanvas.height/im_height));
+               	     taskContext.moveTo(Math.round(points[0].x*taskCanvas.width/im_width), Math.round(points[0].y*taskCanvas.height/im_height));
 
                	        for(var i=0;i<points.length;i++)
                	        {
@@ -407,7 +414,9 @@ function newMask(idTag, idImage, tagName, numAnnotations,im_width,im_height){
 	    }
 	    return color;
 	}
-	/*
+	
+
+	
 	$.jAjax({
         url: "MaskAjax",
         headers : {
@@ -422,7 +431,6 @@ function newMask(idTag, idImage, tagName, numAnnotations,im_width,im_height){
                	
                     var media = result[0].medialocator;
                     var quality = result[0].quality;
-                    
                     var canvasmasknew = document.createElement("canvas");
                     canvasmasknew.id = "maskNewCont";
                     canvasmasknew.style.visibility  = "hidden";
@@ -433,10 +441,9 @@ function newMask(idTag, idImage, tagName, numAnnotations,im_width,im_height){
 
                     maskImage=new Image();
                     maskImage.src="/retrieveMaskImage?media="+media;
-                    //maskImage.src= media;
-
+                     
                     maskImage.onload = function() {
-                                                    
+                                                
                    	 							maskCanvasCont.width = window.innerWidth*0.8/4;
                    	 							maskCanvasCont.height = window.innerWidth*0.8/4*this.height/this.width;
                    	 							maskCanvas.width = window.innerWidth*0.8/4;
@@ -473,7 +480,9 @@ function newMask(idTag, idImage, tagName, numAnnotations,im_width,im_height){
                                                  maskContext.font="bold 15px Arial";
                                                  maskContext.fillStyle = 'white';
                                                  maskContext.fillText('Quality: ' + quality, 10,20);
+                                                 
                                                 };
+                                                
                     
                 }
                 else{
@@ -486,6 +495,6 @@ function newMask(idTag, idImage, tagName, numAnnotations,im_width,im_height){
             }
         }
     });
-    */
+    
 
 }
