@@ -38,7 +38,7 @@ public class Utilities extends Controller {
 				return ok(result);
 			} else {
 				return ok("[AGGREGATOR] Cannot retrieve the mask for image "
-						+ imageID + " and tag " + tag);
+						+ imageID + " and tag: " + tag);
 			}
 		} catch (final Exception e) {
 			return ok("[AGGREGATOR] " + e.toString());
