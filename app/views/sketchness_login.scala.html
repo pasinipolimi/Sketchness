@@ -1,37 +1,85 @@
 @(loginForm: Form[_])
 
 @import helper._
-@import helper.twitterBootstrap._
+
+@implicitField = @{ FieldConstructor(twitterConstructorCustom.f) }
 
 @main2(Messages("Login")) {
 
 <div class="backgroundimage-login">
     @helper.form(routes.Login.doLogin, 'id -> "loginForm") {
+        <!-- PopUp on error -->
+        @if(flash.get("email") || flash.get("password")) {
+            <div id="error-section">
+                <div id="error-wrap">
+                    <div id="error-container">
+                        <div id="close"></div>
+                        <h1 id="error-title">Error: </h1>
+                        <div id="error-message">
+                            Check these fields to resolve the error:
+                            <ul>
+                                @if(flash.get("email")) {
+                                <li>Invalid <strong>eMail</strong></li>
+                                }
+                                @if(flash.get("password")) {
+                                <li>Invalid <strong>Password</strong></li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <script type="text/javascript">
+            var winHeight = $(window).height();
+            var windWidth = $(window).width();
 
-    @if(loginForm.hasGlobalErrors) {
+            $(function(){
 
-    <p class="error">
-        <span class="label label-important">@loginForm.globalError.message</span>
-    </p>
+                $('#close').click(function(){
+                    $('#error-section').fadeOut();
+                });
+
+                $('#error-section').css({
+                    width: windWidth,
+                    height: winHeight
+                });
+
+
+                $('#error-wrap').fadeOut(function(){
+                    $('#error-wrap').css({
+                        top: (($(window).height()-$().height('#error-wrap'))/2)+'px'
+                    }).fadeIn(500);
+                });
+            });
+        </script>
     }
     <div id="login-form">
-        <div id="username-container-login" class="div-input-username-login">
+        <div class="input-login-container">
             @inputText(
-            loginForm("email"),
-            '_id -> "email-input",
-            'placeholder -> "E-mail"
+                loginForm("email"),
+                '_id -> "email-input",
+                'placeholder -> "E-mail"
             )
-        </div>
 
-        <div id="password-container-login" class="div-input-password-login">
             @inputPassword(
-            loginForm("password"),
-            '_showConstraints -> false,
-            'placeholder -> "Password"
+                loginForm("password"),
+                '_showConstraints -> false,
+                'placeholder -> "Password"
             )
+
         </div>
+        <input type="submit" id="submit-login" class="login-submit" value="">
+        <script type="text/javascript">
+            $(function(){
+                $('#submit-login').mouseenter(function(){
+                   $('#login-form').css("background-image","url(/assets/images/login/login-bg-on.png)");
+                }).mouseleave(function(){
+                   $('#login-form').css("background-image","url(/assets/images/login/login-bg.png)");
+                });
+            });
+        </script>
     </div>
-    <input type="submit" id="submit-login" class="login-submit" value="">
+
 
     <div id="provider-container" class="provider-container">
         @* Display list of available providers *@
@@ -43,7 +91,9 @@
 
     <a id="register" class="register-container" href="@routes.Signup.signup()">
     </a>
-    
+
+
+
     <div id="facebookLike">
             <iframe src="//www.facebook.com/plugins/follow.php?href=https%3A%2F%2Fwww.facebook.com%2FCUbRIKproject&amp;layout=standard&amp;show_faces=false&amp;colorscheme=light&amp;font=tahoma" mce_src="http://www.facebook.com/plugins/follow.php?href=https%3A%2F%2Fwww.facebook.com%2FCUbRIKproject&amp;layout=standard&amp;show_faces=false&amp;colorscheme=light&amp;font=tahoma" style="border:none; overflow:hidden; width:250px;" allowtransparency="true" frameborder="0" scrolling="no">
             </iframe>

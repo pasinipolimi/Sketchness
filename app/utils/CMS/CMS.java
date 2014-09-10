@@ -28,12 +28,14 @@ import utils.LanguagePicker;
 import utils.LoggerUtils;
 import utils.CMS.models.Action;
 import utils.CMS.models.CMSObject;
-import utils.CMS.models.Choose;
+import utils.CMS.models.ChooseImage;
+import utils.CMS.models.ChooseImageTag;
 import utils.CMS.models.Collection;
 import utils.CMS.models.History;
 import utils.CMS.models.Image;
 import utils.CMS.models.Mask;
 import utils.CMS.models.MicroTask;
+import utils.CMS.models.Point;
 import utils.CMS.models.SegmentToClose;
 import utils.CMS.models.Segmentation;
 import utils.CMS.models.Tag;
@@ -51,29 +53,161 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class CMS {
 
-	//private final static String rootUrl = "http://80.240.141.191:80";
-	//private final static String rootUrl = "http://localhost:3000";
+
 
 	private final static String rootUrl = Play.application().configuration().getString("cmsUrl");
 	private final static Integer timeoutPostCMS = Play.application().configuration().getInt("cmsTimeoutPost");
 	private final static Integer timeout = Play.application().configuration().getInt("cmsTimeout");
 
+	private static String[] invalid = { "20254", "20252", "20225", "20166",
+			"20096", "20064", "20015", "19666", "19664", "19648", "19647",
+			"19588", "19587", "19538", "19537", "19530", "19529", "19506",
+			"19505", "19396", "19395", "19380", "19379", "19368", "19367",
+			"19292", "19291", "19254", "19253", "19242", "19241", "19216",
+			"19215", "19210", "19209", "19136", "19135", "19096", "19095",
+			"19016", "19015", "18998", "18997", "18954", "18953", "18872",
+			"18871", "18774", "18773", "18756", "18755", "18592", "18591",
+			"18558", "18557", "18544", "18543", "18448", "18447", "18410",
+			"18409", "18392", "18391", "18370", "18369", "18360", "18359",
+			"18296", "18295", "18260", "18259", "18198", "18197", "18082",
+			"18081", "18026", "18025", "17958", "17957", "17928", "17927",
+			"17916", "17915", "17908", "17907", "17890", "17889", "17796",
+			"17795", "17784", "17783", "17776", "17775", "17756", "17755",
+			"17744", "17743", "17732", "17731", "17664", "17663", "17654",
+			"17653", "17648", "17647", "17634", "17633", "17622", "17621",
+			"17556", "17555", "17528", "17527", "17476", "17475", "17462",
+			"17461", "17456", "17455", "17446", "17445", "17432", "17431",
+			"17424", "17423", "17404", "17403", "17370", "17369", "17352",
+			"17351", "17178", "17177", "17138", "17137", "17102", "17101",
+			"17028", "17027", "17006", "17005", "16984", "16983", "16952",
+			"16951", "16928", "16927", "16914", "16913", "16880", "16879",
+			"16748", "16747", "16726", "16725", "16714", "16713", "16700",
+			"16699", "16644", "16643", "16568", "16567", "16428", "16427",
+			"16326", "16325", "16254", "16253", "16228", "16227", "16204",
+			"16203", "16190", "16189", "16128", "16127", "16118", "16117",
+			"16106", "16105", "16098", "16097", "16048", "16047", "16038",
+			"16037", "16018", "16017", "15994", "15993", "15988", "15987",
+			"15952", "15951", "15902", "15901", "15874", "15873", "15846",
+			"15845", "15832", "15831", "15788", "15787", "15746", "15745",
+			"15738", "15737", "15728", "15727", "15708", "15707", "15662",
+			"15661", "15654", "15653", "15644", "15643", "15602", "15601",
+			"15580", "15579", "15542", "15541", "15520", "15519", "15480",
+			"15479", "15352", "15351", "15326", "15325", "15302", "15301",
+			"15272", "15271", "15262", "15261", "15238", "15237", "15222",
+			"15221", "15062", "15061", "15048", "15047", "15010", "15009",
+			"14880", "14879", "14846", "14845", "14832", "14831", "14804",
+			"14803", "14780", "14779", "14682", "14681", "14658", "14657",
+			"14650", "14649", "14592", "14591", "14556", "14555", "14502",
+			"14501", "14492", "14491", "14448", "14447", "14438", "14437",
+			"14426", "14425", "14414", "14413", "14392", "14391", "14332",
+			"14331", "14320", "14319", "14308", "14307", "14296", "14295",
+			"14288", "14287", "14278", "14277", "14264", "14263", "14248",
+			"14247", "14236", "14235", "14166", "14165", "13892", "13891",
+			"13830", "13829", "13768", "13767", "13730", "13729", "13720",
+			"13719", "13712", "13711", "13704", "13703", "13668", "13667",
+			"13660", "13659", "13636", "13635", "13628", "13627", "13618",
+			"13617", "13608", "13607", "13584", "13583", "13548", "13547",
+			"13516", "13515", "13430", "13429", "13416", "13415", "13376",
+			"13375", "13364", "13363", "13352", "13351", "13316", "13315",
+			"13304", "13303", "13248", "13247", "13234", "13233", "13222",
+			"13221", "13200", "13199", "13180", "13179", "13152", "13151",
+			"13072", "13071", "12884", "12883", "12872", "12871", "12814",
+			"12813", "12776", "12775", "12760", "12759", "12446", "12428",
+			"12369", "12362", "12360", "12290", "12139", "12050", "12039",
+			"11745", "11633", "11627", "11465", "11409", "11235", "11179",
+			"10977", "10945", "10825", "10769", "10639", "10491", "10421",
+			"10305", "10305", "10223", "10131", "10023", "9927", "9867",
+			"9723", "9645", "9557", "9431", "9405", "9217", "9163", "8967",
+			"8959", "8831", "8681", "8587", "8501", "8321", "8283", "8201",
+			"8061", "7953", "7893", "7813", "7751", "7633", "7473", "7469",
+			"7401", "7211", "7191", "7075", "6919", "6917", "6747", "6643",
+			"6529", "6491", "6297", "6275", "6111", "6049", "5965", "5963",
+			"5731", "5667", "5591", "5469", "5389", "5257", "5159", "5135",
+			"4995", "4831", "4801", "4611", "4583", "4447", "4431", "4359",
+			"4217", "4193", "4089", "4049", "4025", "3922", "3882", "3726",
+			"3604", "3578", "3486", "3292", "3214", "3096", "3058", "2971",
+			"2931", "2921", "2917", "2907", "2839", "2745", "2649", "2569",
+			"2473", "2391", "2237", "2235", "2193", "2187", "2091", "1951",
+			"1929", "1789", "1699", "1685", "1515", "1483", "1483", "1465",
+			"1091", "979", "897", "416", "57", "51", "49", "12662", "12614",
+			"12560", "12558", "12327", "1547", "917", "67", "19695", "12658",
+			"12263", "12211", "12119", "11922", "11659", "11363", "11115",
+			"11013", "10809", "10545", "10341", "10253", "10067", "9751",
+			"9499", "9279", "9133", "8881", "8753", "8641", "8251", "8127",
+			"7907", "7809", "7443", "7307", "7167", "6853", "6667", "6451",
+			"6359", "6179", "5859", "5797", "5577", "5485", "5229", "5105",
+			"4967", "4799", "4591", "4397", "4153", "4015", "3864", "3664",
+			"3416", "3236", "2990", "2573", "2505", "2279", "2195", "2189",
+			"2057", "1259", "1149", "177", "11920", "11645", "11467", "11257",
+			"10917", "10751", "10553", "10321", "10189", "9893", "9869",
+			"9631", "9385", "9095", "9029", "8839", "8607", "8401", "8113",
+			"7875", "7747", "7629", "7479", "7361", "7083", "6857", "6681",
+			"6537", "6353", "6117", "5981", "5605", "5537", "5207", "5097",
+			"4911", "4575", "4455", "4223", "3974", "3748", "3558", "3192",
+			"3116", "2507", "2301", "2265", "2157", "2131", "1961", "1797",
+			"1665", "1557", "1023", "315", "19931", "17400", "17399", "11825",
+			"11789", "11782", "12600", "1901", "1751", "1671", "1413", "1005",
+			"271", "20223", "20180", "20174", "20080", "19975", "19848",
+			"19834", "19832", "19826", "19824", "19816", "19812", "19802",
+			"19798", "19408", "19407", "19394", "19393", "19346", "19345",
+			"19290", "19289", "19240", "19239", "19168", "19167", "19080",
+			"19079", "18940", "18939", "18870", "18869", "18822", "18821",
+			"18754", "18753", "18710", "18709", "18600", "18599", "18284",
+			"18283", "18272", "18271", "18210", "18209", "18072", "18071",
+			"18034", "18033", "18000", "17999", "17946", "17945", "17872",
+			"17871", "17860", "17859", "17832", "17831", "17824", "17823",
+			"17720", "17719", "17644", "17643", "17548", "17547", "17516",
+			"17515", "17412", "17411", "17376", "17375", "17340", "17339",
+			"17260", "17259", "17248", "17247", "17226", "17225", "17134",
+			"17133", "17100", "17099", "17062", "17061", "17050", "17049",
+			"16938", "16937", "16912", "16911", "16900", "16899", "16876",
+			"16875", "16848", "16847", "16847", "16824", "16823", "16800",
+			"16799", "16688", "16687", "16674", "16673", "16642", "16641",
+			"16542", "16541", "16414", "16413", "16180", "16179", "16088",
+			"16087", "15986", "15985", "15974", "15973", "15890", "15889",
+			"15418", "15417", "15394", "15393", "15374", "15373", "15292",
+			"15291", "15044", "15043", "15032", "15031", "15006", "15005",
+			"14992", "14991", "14976", "14975", "14952", "14951", "14936",
+			"14935", "14922", "14921", "14908", "14907", "14876", "14875",
+			"14864", "14863", "14830", "14829", "14792", "14791", "14744",
+			"14743", "14726", "14725", "14656", "14655", "14628", "14627",
+			"14462", "14461", "14404", "14403", "14390", "14389", "14382",
+			"14381", "14330", "14329", "14294", "14293", "14072", "14071",
+			"14032", "14031", "13828", "13827", "13710", "13709", "13440",
+			"13439", "13414", "13413", "13336", "13335", "13268", "13267",
+			"13220", "13219", "13178", "13177", "13114", "13114", "13113",
+			"13092", "13091" };
+
+
+
 	private final static Integer collection = Play.application()
 			.configuration().getInt("collection");
 
-	private final static String policy = Play.application()
-			.configuration()
+	private final static String useImageWithNoTags = Play.application()
+			.configuration().getString("useImageWithNoTags");
+
+	private final static String policy = Play.application().configuration()
 			.getString("policy");
+	private static final long MAX_OPEN_ACTION = 1800000;
 
 	private static HashMap<String, Cancellable> runningThreads = new HashMap<String, Cancellable>();
+
+	// Minimum tags that an image should have to avoid asking to the
+	// users for new tags
+	private static Integer minimumTags = Integer.parseInt(Play.application()
+			.configuration().getString("minimumTags"));
 
 	public static List<Image> getImages() throws CMSException {
 		return getObjs(Image.class, "image", "images");
 	}
 
-	public static List<Image> getImages3() throws CMSException {
-		return getObjs(Image.class, "image", "images");
+	public static List<Action> getActions() throws CMSException {
+		return getObjs(Action.class, "action", "actions");
 	}
+
+	// public static List<Image> getImages() throws CMSException {
+	// return getObjs(Image.class, "image", "images");
+	// }
 
 	public static Image getImage(final Integer id) throws CMSException {
 		return getObj(utils.CMS.models.Image.class, "image", id, "image");
@@ -126,11 +260,17 @@ public class CMS {
 			}
 
 			final String respBody = returned.get().getBody();
-			return Json.parse(respBody).get("id").asInt();
+			Logger.debug("Output for post on " + service + " : " + respBody);
+			if (Json.parse(respBody).get("id") != null) {
+
+				return Json.parse(respBody).get("id").asInt();
+			}
+			return 0;
 
 		} catch (final Exception e) {
 			Logger.error("Unable to post: " + service, e);
-			throw new CMSException("Unable to post: " + service);
+			return 0;
+			// throw new CMSException("Unable to post: " + service);
 		}
 
 	}
@@ -153,18 +293,27 @@ public class CMS {
 	private static <T extends Object> void updateObj(final T obj,
 			final String service, final HashMap<String, String> params)
 					throws CMSException {
-		final WSRequestHolder ws = WS.url(rootUrl + "/" + service).setTimeout(
-				timeoutPostCMS);
+		final F.Promise<WS.Response> returned;
+		final WSRequestHolder ws = WS.url(rootUrl + "/" + service)
+				.setHeader("Accept", "application/json")
+				.setTimeout(timeoutPostCMS);
 		final Iterator<String> it = params.keySet().iterator();
 		while (it.hasNext()) {
 			final String parId = it.next();
 			ws.setQueryParameter(parId, params.get(parId));
 		}
 
+
 		try {
-			ws.put(Json.toJson(obj));
+
+			final JsonNode body = Json.toJson(obj);
+			returned = ws.put(body);
+
+			final String respBody = returned.get().getBody();
+			Logger.debug("Output for put on " + service + " : " + respBody);
+
 		} catch (final Exception e) {
-			throw new CMSException("Unable to post: " + service);
+			throw new CMSException("Unable to put: " + service);
 		}
 
 	}
@@ -224,7 +373,6 @@ public class CMS {
 		return lista;
 	}
 
-
 	private static <T extends CMSObject> List<T> getObjs(final Class<T> claz,
 			final String service, final Integer count, final Integer max_id,
 			final Integer since_id, final Boolean populate,
@@ -258,9 +406,6 @@ public class CMS {
 		return getObjs(claz, service, null, response);
 	}
 
-
-
-
 	public static void closeUTask(final Integer uTaskID, final Integer actionId)
 			throws CMSException {
 		if (uTaskID != null) {
@@ -289,7 +434,7 @@ public class CMS {
 
 	public static void postSegmentationOnAkka(final ObjectNode finalTraces,
 			final String username, final Integer session,
-			final HashMap<String, Integer> openActions) throws Exception {
+			final HashMap<String, Integer> openActionsSeg, final HashMap<String, Integer> openActionsTag) throws Exception {
 		Akka.system()
 		.scheduler()
 		.scheduleOnce(Duration.create(200, TimeUnit.MILLISECONDS),
@@ -297,14 +442,15 @@ public class CMS {
 			@Override
 			public void run() {
 				postSegmentation(finalTraces, username,
-						session, openActions);
+						session, openActionsSeg, openActionsTag);
 			}
 		}, Akka.system().dispatcher());
 	}
 
 	public static void postSegmentation(final ObjectNode finalTraces,
 			final String username, final Integer session,
-			final HashMap<String, Integer> openActions) {
+			final HashMap<String, Integer> openActionsSeg,
+			final HashMap<String, Integer> openActionsTag) {
 
 		try {
 
@@ -313,12 +459,19 @@ public class CMS {
 			final String image = finalTraces.get("id").textValue();
 			final String label = finalTraces.get("label").textValue();
 			final Integer tagId = saveTag(label);
-			postTagAction(userId, session, image, tagId);
+			if (openActionsTag.containsKey(image)) {
+				// era un azione di tag, il tag l ho gia salvato
+
+				final ChooseImageTag stc = new ChooseImageTag(tagId);
+				postObj2(stc, "action/" + openActionsTag.get(image));
+			} else {
+
+				postTagAction(userId, session, image, tagId);
+			}
+
 
 			final ArrayNode traces = (ArrayNode) finalTraces.get("traces");
 			final JsonNode history = finalTraces.get("history");
-
-
 
 			final List<utils.CMS.models.Point> points = readTraces(traces);
 
@@ -330,18 +483,21 @@ public class CMS {
 			final Segmentation segmentation = new Segmentation(points,
 					historyPoints, quality);
 
-			final Action action = Action.createSegmentationAction(
-					Integer.valueOf(image), session, tagId, userId, true,
-					segmentation);
+			// final Segmentation segmentation = new Segmentation(points,
+			// historyPoints);
 
-			if (openActions.get(image + tagId) != null) {
+
+
+			if (openActionsSeg.get(image + tagId) != null) {
 				// esiste già l'azione devo solo chiuderla
-				action.setId(openActions.get(image + tagId));
 				final SegmentToClose stc = new SegmentToClose(tagId, points,
 						historyPoints);
-				postObj2(stc, "action/" + action.getId());
+				postObj2(stc, "action/" + openActionsSeg.get(image + tagId));
 
-			}else{
+			} else {
+				final Action action = Action.createSegmentationAction(
+						Integer.valueOf(image), session, tagId, userId, true,
+						points, historyPoints);
 				postAction(action);
 			}
 
@@ -352,14 +508,51 @@ public class CMS {
 	}
 
 	private static List<History> readHistory(final JsonNode history) {
-		final List<History> h = new ArrayList<>();
-		return h;
+		final List<History> hs = new ArrayList<>();
+
+		final Iterator<JsonNode> histoPezzi = history.elements();
+		// final int i = 0;
+		String lastColor = "rgb(255, 0, 0)";
+		while (histoPezzi.hasNext()) {
+			final JsonNode histoPezzo = histoPezzi.next();
+			final History h = new History();
+			final ArrayNode jpoints = (ArrayNode) histoPezzo.get("points");
+			final JsonNode first = jpoints.get(0);
+			String color = first.get("color").asText();
+			if (color.equals("end")) {
+				color = lastColor;
+			} else {
+				lastColor = color;
+			}
+			h.setColor(color);
+			final List<Point> points = readHistoPoints(histoPezzo);
+			h.setPoints(points);
+			h.setSize(first.get("size").asInt());
+			h.setTime(histoPezzo.get("time").asInt());
+			// h.setTime(i++);
+			hs.add(h);
+
+		}
+
+		return hs;
+	}
+
+	private static List<Point> readHistoPoints(final JsonNode histoPezzo) {
+		final List<Point> ps = new ArrayList<>();
+		final ArrayNode jpoints = (ArrayNode) histoPezzo.get("points");
+		for (final JsonNode jpoint : jpoints) {
+			ps.add(new utils.CMS.models.Point(jpoint.get("x").asInt(), jpoint
+					.get("y").asInt()));
+
+		}
+		return ps;
 	}
 
 	private static List<utils.CMS.models.Point> readTraces(
 			final ArrayNode traces) {
 
 		final List<utils.CMS.models.Point> points = new ArrayList<>();
+
 		for(final JsonNode trace:traces){
 			points.add(new utils.CMS.models.Point(trace.get("x").asInt(),
 					trace.get("y").asInt()));
@@ -370,10 +563,9 @@ public class CMS {
 
 	}
 
-	private static Integer saveTag(final String label) throws CMSException {
+	public static Integer saveTag(final String label) throws CMSException {
 
-		return postObj2(
-				new utils.CMS.models.Tag(label), "tag");
+		return postObj2(new utils.CMS.models.Tag(label), "tag");
 		// final utils.CMS.models.Tag tag = postObj(
 		// new utils.CMS.models.Tag(label), "tag",
 		// utils.CMS.models.Tag.class);
@@ -413,8 +605,8 @@ public class CMS {
 			final Integer session, final String image, final Integer tagId)
 					throws CMSException {
 
-		final Action action = Action.createTagAction(Integer.valueOf(image), session, tagId,
-				userId, true);
+		final Action action = Action.createTagAction(Integer.valueOf(image),
+				session, tagId, userId, true);
 		return postAction(action);
 
 	}
@@ -429,19 +621,8 @@ public class CMS {
 
 	public static void closeSession(final Integer sessionId)
 			throws CMSException {
-		postObj("session", sessionId);
+		postObj2(null, "session/" + sessionId);
 		LoggerUtils.debug("CMS", "Closing session " + sessionId);
-	}
-
-	public static void postActionSkip(final Integer sessionId,
-			final String actionType, final String username)
-					throws CMSException {
-		final Integer userId = postUser(username);
-		final Action action = Action.createSkipAction(sessionId, userId, true);
-
-		postAction(action);
-		LoggerUtils.debug("CMS", "Action " + actionType + " for session "
-				+ sessionId);
 	}
 
 	public static void addInitializationThread(final String roomName,
@@ -467,8 +648,8 @@ public class CMS {
 	public static void taskSetInitialization(
 			final List<ObjectNode> priorityTaskHashSet,
 			final List<ObjectNode> queueImages, final Room roomChannel,
-			final Integer maxRound, final HashMap<String, Integer> openActions)
-					throws Error, JSONException {
+			final Integer maxRound)
+					throws Error, Exception {
 		int uploadedTasks = 0;
 		try {
 			uploadedTasks = retrieveTasks(maxRound, priorityTaskHashSet,
@@ -476,7 +657,14 @@ public class CMS {
 		} catch (final Exception e) {
 			LoggerUtils.error("CMS", "Unable to read tasks");
 		}
-		final int tasksToAdd = maxRound - uploadedTasks;
+
+		int tasksToAdd = maxRound - uploadedTasks;
+		if (tasksToAdd > 0 && useImageWithNoTags.equals("true")) {
+			uploadedTasks = retrieveImagesWithoutTag(tasksToAdd, queueImages,
+					roomChannel, uploadedTasks > 0, uploadedTasks);
+
+		}
+		tasksToAdd = maxRound - uploadedTasks;
 		if (tasksToAdd > 0) {
 			retrieveImages(tasksToAdd, queueImages, roomChannel,
 					uploadedTasks > 0);
@@ -486,24 +674,30 @@ public class CMS {
 		LoggerUtils.debug("CMS", "Task init from CMS end");
 	}
 
-	private static void retrieveImages(final Integer tasksToAdd,
+	private static int retrieveImagesWithoutTag(final Integer tasksToAdd,
 			final List<ObjectNode> queueImages, final Room roomChannel,
-			boolean taskSent) {
+			boolean taskSent, int uploadedTasks) {
 
-		final List<Choose> imgtgs;
+		final List<ChooseImage> imgs;
+		final List<ChooseImageTag> imgtgs = new ArrayList<>();
 		try {
 			LoggerUtils.debug("CMS", "Requested image list to CMS");
-
-			imgtgs = CMS.getChoose(collection,
-					tasksToAdd.toString());
-
+			imgs = CMS.getChooseImageOnly(collection, tasksToAdd.toString());
+			if (imgs != null) {
+				for (final ChooseImage imgtg : imgs) {
+					if (imgtg.getCount() >= minimumTags) {
+						break;
+					}
+					imgtgs.add(0, new ChooseImageTag(imgtg.getImage(), -1));
+				}
+			}
 			LoggerUtils.debug("CMS", "Requested image list to CMS end");
 		} catch (final Exception e) {
 			throw new RuntimeException(
 					"[CMS] The request to the CMS is malformed");
 		}
 
-		for (final Choose imgtg : imgtgs) {
+		for (final ChooseImageTag imgtg : imgtgs) {
 			// Save information related to the image
 			final Integer id = imgtg.getImage();
 
@@ -512,6 +706,86 @@ public class CMS {
 			guessWord.put("id", String.valueOf(id));
 			// Find the valid tags for this task.
 
+			try {
+				buildGuessWordSegment(guessWord, imgtg.getTag(),
+						CMS.getImage(id));
+				uploadedTasks = uploadedTasks + 1;
+			} catch (final CMSException e) {
+				Logger.error("Unable to read image, ignoring...", e);
+			}
+
+			queueImages.add(guessWord);
+
+			if (!taskSent) {
+				taskSent = true;
+				LoggerUtils.debug("CMS", "Send task aquired for image:" + id
+						+ ", rooomChanel: " + roomChannel);
+				sendTaskAcquired(roomChannel);
+			}
+		}
+		return uploadedTasks;
+	}
+
+	public static void cleanOpenActions() throws CMSException {
+
+		for (final String a : invalid) {
+			invalidateAction(a);
+		}
+
+		// final List<Action> actions = getActions();
+		// for (final Action a : actions) {
+		// final String completed = a.getCompleted_at();
+		// if (completed != null) {
+		// continue;
+		// }
+		//
+		// final String started = a.getCreated_at();
+		// final Calendar date = javax.xml.bind.DatatypeConverter
+		// .parseDateTime(started);
+		// final Calendar now = Calendar.getInstance();
+		// final long diff = now.getTimeInMillis() - date.getTimeInMillis();
+		// if (diff > MAX_OPEN_ACTION) {
+		// System.out.println("Closing action");
+		// closeAction(a.getId());
+		// }
+		// }
+	}
+
+
+
+	private static void invalidateAction(final String a) throws CMSException {
+		final HashMap<String, String> body = new HashMap<>();
+		body.put("validity", "false");
+		final HashMap<String, String> params = new HashMap<>();
+
+		updateObj(body, "action/" + a, params);
+
+	}
+
+	private static void retrieveImages(final Integer tasksToAdd,
+			final List<ObjectNode> queueImages, final Room roomChannel,
+			boolean taskSent) throws Exception {
+
+		List<ChooseImageTag> imgtgs;
+		try {
+			LoggerUtils.debug("CMS", "Requested image list to CMS");
+
+			imgtgs = CMS.getChoose(collection, tasksToAdd.toString());
+
+			LoggerUtils.debug("CMS", "Requested image list to CMS end");
+		} catch (final Exception e) {
+			throw new Exception(
+					"[CMS] The request to the CMS is malformed", e);
+		}
+
+		for (final ChooseImageTag imgtg : imgtgs) {
+			// Save information related to the image
+			final Integer id = imgtg.getImage();
+
+			final ObjectNode guessWord = Json.newObject();
+			guessWord.put("type", "task");
+			guessWord.put("id", String.valueOf(id));
+			// Find the valid tags for this task.
 
 			try {
 				buildGuessWordSegment(guessWord, imgtg.getTag(),
@@ -522,14 +796,12 @@ public class CMS {
 
 			queueImages.add(guessWord);
 
-
 			if (!taskSent) {
 				taskSent = true;
-				LoggerUtils.debug("CMS", "Send task aquired for image:"
-						+ id + ", rooomChanel: " + roomChannel);
+				LoggerUtils.debug("CMS", "Send task aquired for image:" + id
+						+ ", rooomChanel: " + roomChannel);
 				sendTaskAcquired(roomChannel);
 			}
-
 		}
 
 	}
@@ -541,12 +813,20 @@ public class CMS {
 		postAction(action);
 	}
 
-	private static List<Choose> getChoose(final Integer collection2,
+	private static List<ChooseImageTag> getChoose(final Integer collection2,
 			final String limit) throws CMSException {
 		final HashMap<String, String> params = new HashMap<>();
 		params.put("limit", limit);
 		params.put("collection", String.valueOf(collection2));
-		return getObjs(Choose.class, "choose/" + policy, params, "results");
+		return getObjs(ChooseImageTag.class, "choose/imageandtag/" + policy, params, "results");
+	}
+
+	private static List<ChooseImage> getChooseImageOnly(final Integer collection2,
+			final String limit) throws CMSException {
+		final HashMap<String, String> params = new HashMap<>();
+		params.put("limit", limit);
+		params.put("collection", String.valueOf(collection2));
+		return getObjs(ChooseImage.class, "choose/image/" + policy, params, "results");
 	}
 
 	private static int retrieveTasks(final Integer maxRound,
@@ -646,12 +926,15 @@ public class CMS {
 	}
 
 	private static Tag getTag(final Integer tagId) throws CMSException {
-		return getObj(Tag.class, "tag", tagId, "tag");
+		if(tagId>=0)
+			return getObj(Tag.class, "tag", tagId, "tag");
+		else
+			//The image has no tag associated to it
+			return new Tag("empty");
 	}
 
 	private static void buildGuessWordSegmentTask(final ObjectNode guessWord,
-			final Integer tagId, final Image image,
-			final String taskId,
+			final Integer tagId, final Image image, final String taskId,
 			final MicroTask utask) throws CMSException {
 		buildGuessWordSegment(guessWord, tagId, image);
 		guessWord.put("utaskid", utask.getId());
@@ -960,7 +1243,6 @@ public class CMS {
 		// final List<Task> s = CMS.getTaskCollection(1);
 		// CMS.closeSession(8);
 
-
 		final Integer s = CMS.postUser("pippo");
 
 		// System.out.println("ciao" + sd);
@@ -991,13 +1273,11 @@ public class CMS {
 		// closeTask
 		// closeUTask
 
-
 	}
 
 	public static int getSegmentationCount() throws CMSException {
 		final HashMap<String, String> params = new HashMap<>();
 		params.put("type", "segmentation");
-
 		return getCount("action", params);
 	}
 	
@@ -1011,6 +1291,12 @@ public class CMS {
 		
 		return getObjs(utils.CMS.models.Action.class, "action", params, "actions");
 
+
+	}
+
+	public static void closeAction(final Integer actionId) throws CMSException {
+		postObj2(null, "action/" + actionId);
+		LoggerUtils.debug("CMS", "Closing action " + actionId);
 
 	}
 

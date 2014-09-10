@@ -2,6 +2,7 @@ require.config({
 	baseUrl: "assets/javascripts",
 	paths: {
 		"jquery": "lib/jquery",
+        "jquery-ui": "lib/jquery-ui",
 		"i18n": "lib/jquery.i18n.properties",
 		"mousewheel": "lib/jquery.mousewheel",
 		"jscrollpane": "lib/jquery.jscrollpane",
@@ -11,7 +12,6 @@ require.config({
 		"StateMachine": "lib/state-machine",
 		"nouislider": "lib/nouislider",
 		"link": "lib/Link",
-		"classVal": "lib/classVal",
 		"spectrum": "lib/spectrum"
 	},
 	shim: {
@@ -36,16 +36,12 @@ require.config({
 		"StateMachine": {
 			exports: "StateMachine"
 		},
-		"classVal": {
-			deps: ["jquery"],
-			exports: "$.classVal"
-		},
 		"link": {
 			deps: ["jquery"],
 			exports: "$.Link"
 		},
 		"nouislider": {
-			deps: ["jquery", "classVal", "link"],
+			deps: ["jquery", "link"],
 			exports: "$.fn.noUiSlider"
 		},
 		"spectrum": {

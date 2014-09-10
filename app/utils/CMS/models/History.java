@@ -2,29 +2,22 @@ package utils.CMS.models;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class History {
 
-	private List<Point> points;
-	private String time;
-	private int size;
+	private Integer size;
 	private String color;
 
-	public int getSize() {
-		return size;
-	}
-	public void setSize(int size) {
-		this.size = size;
-	}
-	public String getColor() {
-		return color;
-	}
-	public void setColor(String color) {
-		this.color = color;
-	}
-	public String getTime() {
+	private List<Point> points;
+	private Integer time;
+
+	public Integer getTime() {
 		return time;
 	}
-	public void setTime(final String time) {
+
+	public void setTime(final Integer time) {
 		this.time = time;
 	}
 	public List<Point> getPoints() {
@@ -32,6 +25,22 @@ public class History {
 	}
 	public void setPoints(final List<Point> points) {
 		this.points = points;
+	}
+
+	public Integer getSize() {
+		return size;
+	}
+
+	public void setSize(final Integer size) {
+		this.size = size;
+	}
+
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(final String color) {
+		this.color = color;
 	}
 
 }

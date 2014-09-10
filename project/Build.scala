@@ -17,7 +17,7 @@ object ApplicationBuild extends Build {
 		"gov.nih.imagej" % "imagej" % "1.47",
 		"net.sf.json-lib" % "json-lib" % "2.4" classifier "jdk15",
 		"be.objectify"  %%  "deadbolt-java"     % "2.2.1-RC2",
-		"com.feth"      %%  "play-authenticate" % "0.5.2-SNAPSHOT"
+		"com.feth"      %%  "play-authenticate" % "0.5.3-SNAPSHOT"
 	)
 
 	/** Defines a new setting key that contains the resources list */
@@ -28,7 +28,6 @@ object ApplicationBuild extends Build {
 	val sketchnessResourcesSetting = sketchnessResources := Seq(
 		// Add here the required resources
 		// Resource(name: String, path :String, url :String = null, zipped :Boolean = true)
-		Resource("Lib Folder", "lib"),
 		Resource("Audio Folder", "public/sounds"),
 		Resource("RequireJS", "public/javascripts/lib/require.js", "http://requirejs.org/docs/release/2.1.8/minified/require.js", false),
 		Resource("PaperJS", "public/javascripts/lib/paper.js", "https://raw.github.com/paperjs/paper.js/v0.9.9/dist/paper-full.js", false),
@@ -46,16 +45,17 @@ object ApplicationBuild extends Build {
 		Resource("Bootstrap CSS Map", "public/stylesheets/lib/bootstrap.css.map", "https://raw.github.com/twbs/bootstrap/master/dist/css/bootstrap.css.map", false),
 		Resource("Bootstrap Js", "public/javascripts/lib/bootstrap.min.js","https://raw.github.com/twbs/bootstrap/master/dist/js/bootstrap.min.js",false),
 		Resource("Howler Js", "public/javascripts/lib/howler.js","https://raw.github.com/goldfire/howler.js/master/howler.min.js",false),
-		Resource("noUISlider", "public/javascripts/lib/nouislider.js","https://raw.github.com/leongersen/noUiSlider/master/jquery.nouislider.js",false),
-		Resource("noUISlider Link", "public/javascripts/lib/Link.js","https://raw.github.com/leongersen/noUiSlider/master/Link.js",false),
-		Resource("classVal", "public/javascripts/lib/classVal.js","https://raw.githubusercontent.com/leongersen/classVal/master/jquery.classval.js",false),
-		Resource("noUISlider CSS", "public/stylesheets/lib/nouislider.css", "https://raw.github.com/leongersen/noUiSlider/master/jquery.nouislider.css", false),
+		Resource("jQuery UI", "public/javascripts/lib/jquery-ui.js", "http://code.jquery.com/ui/1.11.1/jquery-ui.min.js", false),
+		Resource("noUISlider", "public/javascripts/lib/nouislider.js","https://raw.githubusercontent.com/leongersen/noUiSlider/6.2.0/jquery.nouislider.js",false),
+		Resource("noUISlider Link", "public/javascripts/lib/Link.js","https://raw.githubusercontent.com/leongersen/noUiSlider/6.2.0/Link.js",false),
+		Resource("noUISlider CSS", "public/stylesheets/lib/nouislider.css", "https://raw.github.com/leongersen/noUiSlider/6.2.0/jquery.nouislider.css", false),
 		Resource("Spectrum", "public/javascripts/lib/spectrum.js", "https://raw.github.com/bgrins/spectrum/master/spectrum.js", false),
 		Resource("Spectrum JS", "public/stylesheets/lib/spectrum.css", "https://raw.github.com/bgrins/spectrum/master/spectrum.css", false),
 		Resource("Modernizr", "public/javascripts/lib/modernizr.custom.js", "https://raw.githubusercontent.com/codrops/Blueprint-ResponsiveFullWidthGrid/master/js/modernizr.custom.js", false),
 		//Zipped files with assets: images and sounds
-		Resource("Website Images", "public/images", "http://54.228.220.100/spritesheets.zip",true),
-		Resource("Website Sound Effects", "public/sounds/effects", "http://54.228.220.100/effects.zip",true)
+		Resource("Libraries", "lib/", "http://54.75.252.197/storage/libs.zip", true),
+		Resource("Website Images", "public/images", "http://54.75.252.197/storage/spritesheets.zip",true),
+		Resource("Website Sound Effects", "public/sounds/effects", "http://54.75.252.197/storage/effects.zip",true)
 	)
 
 	/** Defines a new task key for retrieving all the resources

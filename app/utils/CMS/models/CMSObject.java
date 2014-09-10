@@ -1,5 +1,8 @@
 package utils.CMS.models;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CMSObject {
 
 	public CMSObject(final Integer id) {
@@ -15,6 +18,7 @@ public class CMSObject {
 	private Integer id;
 
 	public Integer getId() {
+
 		return id;
 	}
 

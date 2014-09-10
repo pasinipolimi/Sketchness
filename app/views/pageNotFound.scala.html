@@ -4,11 +4,12 @@
 			var element = document.getElementById('ProfileContenitor');
 			var parent = element.parentNode;
 			parent.removeChild(element);
-			parent.innerHTML = '<div id="unverified-scroll"><p id="Profile-text">Page Not Found,<br/>Go to lobby or back to login page</p><a href="@routes.Application.doLogout"> <button type="submit" id="back1"></button></a></div>';
+			parent.innerHTML = '<div id="unverified-scroll"><div class="logo-error"></div><p id="Profile-text">Page Not Found,<br/>Go to lobby or back to login page</p><a href="@routes.Application.doLogout"> <button type="submit" id="back1"></button></a></div>';
 		 </script>
 		
 	}
 	<div id="unverified-scroll">
+        <div class="logo-error"></div>
 		<p id="Profile-text">
 				Page Not Found,<br/>
 				Go to lobby or back to login page

@@ -26,13 +26,75 @@
 					<canvas id="task" width="420" height="350"></canvas>
 				</div>
 			</div>
-                        <button id="pen" style="display:none"></button>
-                        <button id="eraser" style="display:none"></button>
+
+            <button id="pen" style="display:none"></button>
+            <button id="eraser" style="display:none"></button>
 			<button id="skipTask" style="display:none"></button>
 			<button id="endSegmentation" style="display:none"></button>
-			<input type="text" id="wordInput" placeholder="@Messages("wordInput")" style="display:none"/>
+            <div id="catSelector">
+                <button id="cat1"></button>
+                <button id="cat2"></button>
+                <button id="cat3"></button>
+            </div>
+			<!--
+            <input type="text" id="wordInput" placeholder="@Messages("wordInput")" style="display:none"/>
+            -->
 		</div>
-
+        <div id="other-player">
+            <div id="player2" class="player"></div>
+            <div id="player3" class="player"></div>
+            <div id="player4" class="player"></div>
+            <div id="player5" class="player"></div>
+        </div>
+        <div id="catContainer">
+            <div id="catContainer-wrap">
+                <div id="catContainer-container">
+                    <div id="catContainer-close"></div>
+                    <h1 id="catContainer-title">Choose an element</h1>
+                    <div id="catContainer-icons">
+                        <!-- Accessori -->
+                        <div id="ico1" class="icons">
+                            <a href="#" class="ico bracelet"></a>
+                            <a href="#" class="ico boots"></a>
+                            <a href="#" class="ico scarf"></a>
+                            <a href="#" class="ico gloves"></a>
+                            <a href="#" class="ico ring"></a>
+                            <a href="#" class="ico wallet"></a>
+                            <a href="#" class="ico watch"></a>
+                            <a href="#" class="ico shoes"></a>
+                            <a href="#" class="ico handbag"></a>
+                            <a href="#" class="ico tie"></a>
+                            <a href="#" class="ico hat"></a>
+                            <a href="#" class="ico purse"></a>
+                            <a href="#" class="ico glasses"></a>
+                            <a href="#" class="ico necklace"></a>
+                        </div>
+                        <!-- Alta -->
+                        <div id="ico2" class="icons">
+                            <a href="#" class="ico t-shirt"></a>
+                            <a href="#" class="ico vest"></a>
+                            <a href="#" class="ico cardigan"></a>
+                            <a href="#" class="ico dress"></a>
+                            <a href="#" class="ico shirt"></a>
+                            <a href="#" class="ico bra"></a>
+                            <a href="#" class="ico cape"></a>
+                            <a href="#" class="ico coat"></a>
+                            <a href="#" class="ico jacket"></a>
+                            <a href="#" class="ico blouse"></a>
+                        </div>
+                        <!-- Bassa -->
+                        <div id="ico3" class="icons">
+                            <a href="#" class="ico trousers"></a>
+                            <a href="#" class="ico dungarees"></a>
+                            <a href="#" class="ico shorts"></a>
+                            <a href="#" class="ico skirt"></a>
+                            <a href="#" class="ico tights"></a>
+                            <a href="#" class="ico socks"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 		<div id="chatPanel" class="gameRoom gameChat">
 			<div id="messages" class="jscroll scroll-pane-arrows jspScrollable">

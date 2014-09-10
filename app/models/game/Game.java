@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -24,7 +25,6 @@ import play.libs.Akka;
 import scala.concurrent.duration.Duration;
 import utils.LanguagePicker;
 import utils.LoggerUtils;
-import utils.levenshteinDistance;
 import utils.CMS.CMS;
 import utils.CMS.models.Action;
 import utils.gamebus.GameBus;
@@ -77,10 +77,7 @@ public class Game extends GameRoom {
 			.application().configuration().getString("fixGroundTruth"));
 	private final Integer groundTruthId = Integer.parseInt(Play.application()
 			.configuration().getString("groundTruthId"));
-	// [TODO] Minimum tags that an image should have to avoid asking to the
-	// users for new tags
-	private final Integer minimumTags = Integer.parseInt(Play.application()
-			.configuration().getString("minimumTags"));
+
 	// Variables used to manage the rounds
 	private Boolean guessedWord = false; // Has the word been guessed for the
 	// current round?
@@ -113,7 +110,8 @@ public class Game extends GameRoom {
 	private final List<ObjectNode> priorityTaskQueue = Collections
 			.synchronizedList(new LinkedList<ObjectNode>());
 
-	private final HashMap<String, Integer> openActions = new HashMap<>();
+	private final HashMap<String, Integer> openActionsSeg = new HashMap<>();
+	private final HashMap<String, Integer> openActionsTag = new HashMap<>();
 
 	private ObjectNode taskImage;
 	private Integer sessionId;
@@ -182,7 +180,8 @@ public class Game extends GameRoom {
 					case "finalTraces":
 						CMS.postSegmentationOnAkka(
 								(ObjectNode) event.get("content"),
-								sketcherPainter.name, sessionId, openActions);
+								sketcherPainter.name, sessionId,
+								openActionsSeg, openActionsTag);
 						break;
 					case "endSegmentation":
 						endSegmentation(event.get("content").get("user")
@@ -205,12 +204,20 @@ public class Game extends GameRoom {
 				case "leave":
 					handleQuitter(event);
 					break;
+				case "tag":
+					saveTag(event.get("content").get("word"));
+					break;
 				}
 			}
 		} catch (final Exception e) {
 			LoggerUtils.error("[GAME]:", e);
 
 		}
+	}
+
+	private void saveTag(final JsonNode tag) {
+		guessObject.put("tag", tag.asText());
+
 	}
 
 	/*
@@ -233,15 +240,27 @@ public class Game extends GameRoom {
 			if (queueImages.size() > 0) {
 				guessObject = queueImages.remove(0);
 
-
 				final Integer user = CMS.postUser(sketcherPainter.name);
 				final Integer image = guessObject.get("id").asInt();
-				final Integer tag = guessObject.get("tag").asInt();
-				final Integer actionid = CMS.postAction(Action
-						.createSegmentationAction(image, sessionId, tag, user,
-								true));
-				openActions.put(String.valueOf(image) + String.valueOf(tag),
-						actionid);
+				final String tagName = guessObject.get("tag").asText();
+
+				if (tagName.equals("empty")) {
+					// creo l azione di tag aperta
+					final Integer actionid = CMS.postAction(Action
+							.createTagAction(image, sessionId, user, true));
+					openActionsTag.put(String.valueOf(image), actionid);
+
+				} else {
+					// creo direttamente l'azione di segmentazione aperta
+					final Integer tag = CMS.saveTag(tagName);
+					final Integer actionid = CMS.postAction(Action
+							.createSegmentationAction(image, sessionId, tag,
+									user, true));
+					openActionsSeg.put(
+							String.valueOf(image) + String.valueOf(tag),
+							actionid);
+				}
+
 			}
 
 		}
@@ -335,9 +354,23 @@ public class Game extends GameRoom {
 			final int nPlayers = playersVect.size();
 			if (requiredPlayers - nPlayers > 1) {
 				GameBus.getInstance()
-				.publish(new GameEvent(GameMessages.composeLogMessage(
-						LogLevel.info,Messages.get(LanguagePicker.retrieveLocale(),"waitingfor")+ " "+ (requiredPlayers - nPlayers)+ " "+ Messages.get(LanguagePicker.retrieveLocale(),"playerstostart"))
-						,roomChannel));
+				.publish(
+						new GameEvent(
+								GameMessages
+								.composeLogMessage(
+										LogLevel.info,
+										Messages.get(
+												LanguagePicker
+												.retrieveLocale(),
+												"waitingfor")
+												+ " "
+												+ (requiredPlayers - nPlayers)
+												+ " "
+												+ Messages.get(
+														LanguagePicker
+														.retrieveLocale(),
+														"playerstostart")),
+														roomChannel));
 			} else if (requiredPlayers - nPlayers == 1) {
 				GameBus.getInstance()
 				.publish(
@@ -489,7 +522,7 @@ public class Game extends GameRoom {
 			}
 			if (taskImage != null) {
 				final String label = taskImage.get("tag").asText();
-				if (label.equals("")) // We need to ask for a new tag
+				if (label.equals("empty")) // We need to ask for a new tag
 				{
 					sendTask(true);
 				} else // We have already a tag that has been provided, use that
@@ -570,7 +603,9 @@ public class Game extends GameRoom {
 					if (guessedWord) {
 						// GameBus.getInstance().publish(new
 						// GameEvent(roomChannel, GameEventType.saveTraces));
-						GameBus.getInstance().publish(new GameEvent(GameMessages.composeSaveTraces(), roomChannel));
+						GameBus.getInstance().publish(
+								new GameEvent(GameMessages.composeSaveTraces(),
+										roomChannel));
 					}
 
 					areWeAsking = false;
@@ -578,52 +613,49 @@ public class Game extends GameRoom {
 					// Start a new round
 					missingPlayers = requiredPlayers;
 					nextRound();
-				}
-				else// If the solution has been given or a tag has not been
+				} else // If the solution has been given or a tag has not been
 					// chosen, start a new round
-					if(requiredPlayers==1) {
+					if (requiredPlayers == 1) {
 						if (guessedWord) {
 							// GameBus.getInstance().publish(new
 							// GameEvent(roomChannel, GameEventType.saveTraces));
-							GameBus.getInstance().publish(new GameEvent(GameMessages.composeSaveTraces(), roomChannel));
+							GameBus.getInstance().publish(
+									new GameEvent(GameMessages.composeSaveTraces(),
+											roomChannel));
 						}
 						nextRound();
+					} else if (areWeAsking) {
+						GameBus.getInstance()
+						.publish(
+								new GameEvent(
+										GameMessages
+										.composeLogMessage(
+												LogLevel.info,
+												sketcherPainter.name
+												+ " "
+												+ Messages
+												.get(LanguagePicker
+														.retrieveLocale(),
+														"notag")),
+														roomChannel));
+						GameBus.getInstance().publish(
+								new GameEvent(GameMessages.composeNoTag(),
+										roomChannel));
+						missingPlayers = requiredPlayers;
+						areWeAsking = false;
+						nextRound();
+					} else if (!shownImages) {
+						shownImages = true;
+						final String id = taskImage.get("id").asText();
+						final String medialocator = taskImage.get("image").asText();
+						final int width = taskImage.get("width").asInt();
+						final int height = taskImage.get("height").asInt();
+						GameBus.getInstance().publish(
+								new GameEvent(GameMessages.composeRoundEnd(
+										taskImage.get("tag").asText(), id,
+										medialocator, width, height), roomChannel));
+						missingPlayers = requiredPlayers;
 					}
-					else
-						if (areWeAsking) {
-							GameBus.getInstance()
-							.publish(
-									new GameEvent(
-											GameMessages
-											.composeLogMessage(
-													LogLevel.info,
-													sketcherPainter.name
-													+ " "
-													+ Messages
-													.get(LanguagePicker
-															.retrieveLocale(),
-															"notag")),
-															roomChannel));
-							GameBus.getInstance().publish(
-									new GameEvent(GameMessages.composeNoTag(),
-											roomChannel));
-							missingPlayers = requiredPlayers;
-							areWeAsking = false;
-							nextRound();
-						} else if (!shownImages) {
-							shownImages = true;
-							final String id = taskImage.get("id").asText();
-							final String medialocator = taskImage.get("image")
-									.asText();
-							final int width = taskImage.get("width").asInt();
-							final int height = taskImage.get("height").asInt();
-							GameBus.getInstance().publish(
-									new GameEvent(GameMessages.composeRoundEnd(
-											taskImage.get("tag").asText(), id,
-											medialocator, width, height),
-											roomChannel));
-							missingPlayers = requiredPlayers;
-						}
 			}
 		}
 	}
@@ -652,7 +684,7 @@ public class Game extends GameRoom {
 									CMS.taskSetInitialization(
 											priorityTaskQueue,
 											queueImages, roomChannel,
-											maxRound, openActions);
+											maxRound);
 								else
 									// CMS.fixGroundTruth(groundTruthId,
 									// priorityTaskQueue,
@@ -687,10 +719,10 @@ public class Game extends GameRoom {
 							try {
 								gameEnded();
 							} catch (final Exception e) {
-										LoggerUtils
-												.error("GAME",
-														"[GAME] Impossible to close the game, aborting");
-										return;
+								LoggerUtils
+								.error("GAME",
+										"[GAME] Impossible to close the game, aborting");
+								return;
 							}
 						}
 					}
@@ -939,10 +971,40 @@ public class Game extends GameRoom {
 	}
 
 	private void skipTask() throws Exception {
-		//TODO skip action
 		final Integer userid = CMS.postUser(sketcherPainter.name);
-		CMS.postAction(Action.createSkipAction(sessionId, userid,
-				true));
+		final String tagS=guessObject.get("tag").asText();
+		Integer tag = null;
+		if (!tagS.equals("empty")) {
+			tag = CMS.saveTag(tagS);
+		}
+
+		final Integer imgid = guessObject.get("id").asInt();
+		final String imgidS = guessObject.get("id").asText();
+		final Integer actionId;
+		if (tag == null) {
+			// is tagging
+			if (openActionsTag.containsKey(imgidS)) {
+				actionId = openActionsTag.get(imgidS);
+			} else {
+				actionId = CMS.postAction(Action.createSkipActionTagging(
+						sessionId, imgid, userid, true));
+			}
+
+		} else {
+			// is seg
+			if (openActionsSeg.containsKey(String.valueOf(imgid)
+					+ String.valueOf(tag))) {
+				actionId = openActionsSeg.get(String.valueOf(imgid)
+						+ String.valueOf(tag));
+			} else {
+				actionId =  CMS.postAction(Action
+						.createSkipActionSeg(sessionId, guessObject.get("id")
+								.asInt(), userid, true, tag));
+				CMS.closeAction(actionId);
+			}
+		}
+		CMS.closeAction(actionId);
+
 		GameBus.getInstance().publish(
 				new GameEvent(GameMessages.composeLogMessage(
 						LogLevel.info,
@@ -951,8 +1013,8 @@ public class Game extends GameRoom {
 						+ Messages.get(LanguagePicker.retrieveLocale(),
 								"skiptask")), roomChannel));
 		nextRound();
-	}
 
+	}
 	private void tagReceived(final String word) throws Exception {
 		taskImage.remove("tag");
 		taskImage.put("tag", word);
@@ -987,39 +1049,122 @@ public class Game extends GameRoom {
 		} else if (gameStarted) {
 			// Compare the message sent with the tag in order to establish if we
 			// have a right guess
-			final levenshteinDistance distance = new levenshteinDistance();
+			// final levenshteinDistance distance = new levenshteinDistance();
 			if (text != null) {
-				switch (distance.computeLevenshteinDistance(text, currentGuess)) {
-				case 0:
-					// GameBus.getInstance().publish(new GameEvent(username,
-					// roomChannel, GameEventType.guessed));
+
+				if (isRight(text, currentGuess)) {
 					GameBus.getInstance().publish(
 							new GameEvent(GameMessages.composeGuessed(username,
 									text), roomChannel));
-					break;
-				case 1:
-					GameBus.getInstance().publish(
-							new GameMessages.GameEvent(GameMessages
-									.composeGuess(username, text, "hot"),
-									roomChannel));
-					break;
-				case 2:
-					GameBus.getInstance().publish(
-							new GameMessages.GameEvent(GameMessages
-									.composeGuess(username, text, "warm"),
-									roomChannel));
-					break;
-				default:
+				} else {
 					GameBus.getInstance().publish(
 							new GameMessages.GameEvent(GameMessages
 									.composeGuess(username, text, "cold"),
 									roomChannel));
-					break;
 				}
+
+				// switch (distance.computeLevenshteinDistance(text,
+				// currentGuess)) {
+				// case 0:
+				// // GameBus.getInstance().publish(new GameEvent(username,
+				// // roomChannel, GameEventType.guessed));
+				// GameBus.getInstance().publish(
+				// new GameEvent(GameMessages.composeGuessed(username,
+				// text), roomChannel));
+				// break;
+				// case 1:
+				// GameBus.getInstance().publish(
+				// new GameMessages.GameEvent(GameMessages
+				// .composeGuess(username, text, "hot"),
+				// roomChannel));
+				// break;
+				// case 2:
+				// GameBus.getInstance().publish(
+				// new GameMessages.GameEvent(GameMessages
+				// .composeGuess(username, text, "warm"),
+				// roomChannel));
+				// break;
+				// default:
+				// GameBus.getInstance().publish(
+				// new GameMessages.GameEvent(GameMessages
+				// .composeGuess(username, text, "cold"),
+				// roomChannel));
+				// break;
+				// }
 			}
 		}
 	}
+
+	private boolean isRight(final String attempt, final String right) {
+		if (attempt.equals(right)) {
+			return true;
+		}
+		if (synonymousTags.get(attempt) == null) {
+			// no syno
+			return false;
+		}
+
+		for (final String syn : synonymousTags.get(attempt)) {
+			if (right.equals(syn)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+	private static final Map<String, String[]> synonymousTags;
+	static
+	{
+		synonymousTags = new HashMap<String, String[]>();
+
+		final String[] bag = { "bag" };
+		synonymousTags.put("handbag", bag);
+
+		final String[] bra = { "bikini" };
+		synonymousTags.put("bra", bra);
+		final String[] jacket = { "blazer" };
+		synonymousTags.put("jacket", jacket);
+
+		final String[] dress = { "bodysuit", "romper" };
+		synonymousTags.put("dress", dress);
+
+		final String[] shoes = { "clogs", "flats", "heels", "loafers", "pumps",
+				"sandals", "sneakers", "wedges" };
+		synonymousTags.put("shoes", shoes);
+
+		final String[] hat = { "headband", "" };
+		synonymousTags.put("hat", hat);
+
+		final String[] trousers = { "jeans", "leggins", "pants" };
+		synonymousTags.put("trousers", trousers);
+
+		final String[] cardigan = { "jumper", "sweater" };
+		synonymousTags.put("cardigan", cardigan);
+
+		final String[] socks = { "stockings", "" };
+		synonymousTags.put("socks", socks);
+
+		final String[] dungarees = { "suit", "" };
+		synonymousTags.put("dungarees", dungarees);
+
+		final String[] sunglasses = { "sunglasses", "" };
+		synonymousTags.put("glasses", sunglasses);
+
+		final String[] shirt = { "sweatshirt", "" };
+		synonymousTags.put("shirt", shirt);
+
+		final String[] ths = { "top" };
+		synonymousTags.put("t-shirt", ths);
+
+	}
+
+
+
 }
+
+
+
 
 enum CountdownTypes {
 	round, tag

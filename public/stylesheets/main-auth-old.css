@@ -1,15 +1,3 @@
-@font-face {
-    font-family: 'futura_lightregular';
-    src: url('font/futura/futura_light-webfont.eot');
-    src: url('font/futura/futura_light-webfont.eot?#iefix') format('embedded-opentype'),
-    url('font/futura/futura_light-webfont.woff') format('woff'),
-    url('font/futura/futura_light-webfont.ttf') format('truetype'),
-    url('font/futura/futura_light-webfont.svg#futura_lightregular') format('svg');
-    font-weight: normal;
-    font-style: normal;
-
-}
-
 html {
     height: 100%;
 
@@ -22,8 +10,7 @@ html, body {
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
-    /*font-family: 'ITCAvantGardeGothicStdBook';*/
-    font-family: 'futura_lightregular';
+    font-family: 'ITCAvantGardeGothicStdBook';
 
 }
 
@@ -64,7 +51,7 @@ input {
 
 /* The white background content wrapper */
 .content {
-    /*background-color: #fff;*/
+    background-color: #fff;
     padding: 20px;
 	position: relative;
     margin: 0 -90px; /* negative indent the amount of the padding to maintain the grid system */
@@ -74,12 +61,12 @@ input {
 }
 
 .backgroundimage-signup {
-	background: url("../images/registration/registration.png") no-repeat -0px -0px;
-	margin-left: -400px;
+	width:800px;height:600px;background: url("../images/registration/registration.png") no-repeat -0px -0px;
+	margin-left: auto ;
+    margin-right: auto ;
 	position: relative;
 	height: 600px;
 	width: 800px;
-    left: 50%;
 }
 
 .backgroundimage-login{
@@ -120,11 +107,11 @@ div#logo-container {
 .input input {
     background: none repeat scroll 0 0 transparent;
     border: medium none;
-    padding: 0px 5px;
+    padding: 3px 5px;
     margin-left: 80px;
-	margin-top: 23px;
+	margin-top: 30px;
 	width: 62%;
-	font-family: 'futura_lightregular';
+	font-family: 'ITCAvantGardeGothicStdBook';
 }
 
 .div-input-signup label{
@@ -134,7 +121,7 @@ div#logo-container {
 .div-terms{
 	background-color: transparent;
 	background-repeat:no-repeat;
-	width:335px;height:65px;background: url("../images/registration/bg-terms.png") no-repeat 0;
+	width:323px;height:50px;background: url("../images/registration/registration.png") no-repeat -0px -688px;
 	margin-top: 30px;
 }
 
@@ -187,34 +174,24 @@ div#nation-container {
 }
 
 
-input[type="checkbox"]{
-    border: 1px solid red;
-    width: 15px;
-    height: 15px;
-    margin-left: 45px;
-    margin-top: 21px;
+input[type="checkbox"] {
+	margin-left: 15px;
+	margin-top:10px;
+	border:1px solid red;
+	width:15px;
+    height:15px;
+    margin-left: 30px;
+    margin-top:15px;
+
 }
 
-#accept_terms:before{
-    content: "";
-    display: inline-block;
-    background: url("../images/registration/uncheck.png");
-    position: relative;
-    border: none;
-    width: 19px;
-    height: 19px;
-    left: -2px;
-    top: -3px;
-    margin: 0;
-    vertical-align: top;
-}
-
-#accept_terms:checked:before{
-    background: url("../images/registration/check.png");
+#accept_terms{
+	margin-top:15px;
+	vertical-align: top;
 }
 
 input[type="checkbox"]:hover {
-   cursor: pointer;
+    box-shadow:0px 0px 10px #FF0000;
 }
 
 input[type="radio"] {
@@ -231,7 +208,6 @@ input[type="radio"] + label{
     width: 110px;
 }
 
-#gender{margin-top:-20px;}
 
 input[type=radio]#gender_true + label{
   top:2px;left:0px;
@@ -254,9 +230,9 @@ input[type=radio]#gender_false:checked  + label {
 input[type=submit]#submit-signup  {
 	background-color: transparent;
 	top:6px;left:0px;
-	width:335px;height:95px;background: url("../images/registration/register-now.png") no-repeat 0;
+	width:334px;height:88px;background: url("../images/registration/registration.png") no-repeat -0px -600px;
  	border: none;
- 	margin-top:85px;
+ 	margin-top:40px;
 }
 
 input[type=submit]#submit-ok  {
@@ -272,146 +248,19 @@ input[type=submit]#submit-ok  {
 /* Login style */
 
 #login-form{
-    top: 440px;
-    left: 0px;
-    position:absolute;
-    background:url("../images/login/login-bg.png") 0 0 no-repeat;
-    width: 410px; height: 80px;
-}
-
-#login-form .input-login-container{
-    position: absolute;
-    left:160px;
-    top:22px;
-    width: 228px;
-    height: 30px;
-    background: url("../images/login/bg-input.png") no-repeat 0;
-}
-
-#login-form .input-login-container #email-input{
-    left: 6px;
-    top: 5px;
-    width: 102px;
-    height: 20px;
-    overflow: hidden;
-    position: absolute;
-}
-
-#login-form .input-login-container #password_field{
-    left: 114px;
-    top: 5px;
-    width: 102px;
-    height: 20px;
-    overflow: hidden;
-    position: absolute;
-}
-
-
-#login-form .input-login-container #email-input label,
-#login-form .input-login-container #password_field label{display: none}
-#login-form .input-login-container #email-input .input,
-#login-form .input-login-container #password_field .input {
-    width: 100%;
-    height:100%
-}
-#login-form .input-login-container #email-input .input input[type=text]#email,
-#login-form .input-login-container #password_field .input input[type=password]#password{
-    width: 100%;
-    height: 100%;
-    padding:0;
-    margin:0;
-}
-
-input[type="submit"]#submit-login{
-    left: 25px;
-    background-color: transparent;
-    position: absolute;
-    width: 125px;
-    height: 70px;
-    border: none;
-    padding: 0;
-    margin: 0;
-}
-
-#error-section{
-    position: fixed;
-    top:0;
-    left:0;
-    z-index:1000;
-    background: url('../images/login/bg-error.png') 0 0 repeat;
-    height: 100%;
-    width: 100%;
-}
-
-#error-section #error-wrap{
-    width: 350px;
-    height: 350px;
-    position:absolute;
-    margin-left:-175px;
-    margin-top: -175px;
-    left:50%;
-    top: 50%;
-    background: url('../images/login/bg-alert-box.png') 0 0 no-repeat;
-    display: none;
-}
-
-#error-section #error-wrap #error-container {
-    position: relative;
-    padding:0 55px;
-}
-
-#error-container #error-title{
-    text-align: center;
-    width: 100%;
-    font-size: 24px;
-    line-height: 24px;
-    padding:0;
-    margin:0;
-    color: #fff;
-    position: absolute;
-    top: 40px;
-    left: 0;
-    width: 100%;
-}
-
-#error-container #close{
-    width: 40px;
-    height: 40px;
-    position: absolute;
-    top: 40px;
-    left: 270px;
-    border: none;
-    background: url('../images/login/close-error.png') 0 0 no-repeat;
-    cursor: pointer;
-    z-index: 2000;
-}
-
-#error-container #error-message{
-    padding-top: 80px;
-    color: #000;
-}
-
-#error-container #error-message ul{
-    list-style: none;
-    list-style-position: inside;
-    margin:10px 0 0 0;
-    padding:0;
-}
-
-#error-container #error-message ul li {
-    padding: 0;
-    margin: 5px 0 0px 0;
+	margin-top: 500px;
+	margin-left: 450px;
+	position:absolute;
 }
 
 /* Div username */
-/*
 .div-input-username-login{
 	position: absolute;
 	height:33px ;
 	width:133px;
 	background:url("../images/login/login.png") no-repeat -486px -601px;
 }
-*/
+
 /* Hide Label div */
 .div-input-username-login label{
 	display: none;
@@ -447,8 +296,8 @@ input[type="submit"]#submit-login{
 }
 
 .play-as-guest-container{
-	top:500px;left:0px;
-	width:270px;height:80px;background: url("../images/login/bg-guest.png") no-repeat 0;
+	top:0px;left:0px;
+	width:246px;height:68px;background: url("../images/login/login.png") no-repeat -0px -736px;
 	position: absolute;
 	margin-left: 470px;
 	margin-top: 10px;
@@ -456,79 +305,90 @@ input[type="submit"]#submit-login{
 
 
 .play-as-guest-container:hover{
-    background: url("../images/login/bg-guest-on.png") no-repeat 0;
-
+	top:0px;left:0px;
+	width:246px;height:68px;background: url("../images/login/login.png") no-repeat -0px -600px;
 }
 
 .play-as-guest-container:active{
-    background: url("../images/login/bg-guest-on.png") no-repeat 0;
-
+	top:4px;left:4px;
+	width:241px;height:48px;background: url("../images/login/login.png") no-repeat -246px -600px;
 }
 
 .provider-container{
-    width: 410px;
-    height: 80px;
-    position: absolute;
-    left: -7px;
-    top: 512px;
-    background: url('../images/login/bg-social.png');
+	position: absolute;
+	margin-left: 350px;
+	margin-top: 500px
 }
 
 .register-container{
 	top:0px;left:0px;
-	width:200px;height:80px;background: url("../images/login/bg-register.png") no-repeat 0;
+	width:182px;height:69px;background: url("../images/login/login.png") no-repeat -614px -714px;
 	position: absolute;
 	margin-left: 10px;
 	margin-top: 370px;
 	border: none;
-    cursor: pointer;
 }
 .register-container:hover{
-    background: url("../images/login/bg-register-on.png") no-repeat 0;
+	top:0px;left:0px;
+	background: url("../images/login/login.png") no-repeat -432px -714px;
 }
 .register-container:active{
-
+	top:0px;left:0px;
+	background: url("../images/login/login.png") no-repeat -246px -780px;
 }
 
 #facebookLike {
 	width: 300px;
-	top: 10px;
+	top: 530px;
 	position: absolute;
 	right: 10px;
 }
 
 #twitterFollow {
 	width: 300px;
-	top: 40px;
+	top: 560px;
 	position: absolute;
 	right: 10px;
 }
 
 
+input[type="submit"]#submit-login{
+	top:0px;left:0px;
+	background: url("../images/login/login.png") no-repeat -246px -648px;
+	position: absolute;
+	width:186px;
+	height:66px;
+	border: none;
+	margin-left: 10px;
+	margin-top: 440px;
+}
 
+input[type="submit"]#submit-login:hover{
+	top:0px;left:0px;
+	background: url("../images/login/login.png") no-repeat -246px -714px;
+}
+
+input[type="submit"]#submit-login:active{
+	top:4px;left:4px;
+	width:181px;height:46px;
+	background: url("../images/login/login.png") no-repeat -428px -783px;
+}
 
 #login-form .help-inline{
-    display: none;
 	margin-left: 10px;
  	margin-top: 10px;
 }
 
 
 .providers{
-    list-style: none;
-    margin: 0;
-    width: 155px;
-    height: 50px;
-    position: relative;
-    top: 16px;
-    left: 170px;
+	list-style:none;
+	margin: 0;
+	width: 100px;
+	height: 50px;
 }
 
 div#provider-container ul li{
-    display: inline-block;
-    width: 55px;
-    height: 55px;
-    margin-right: -10px;
+	display: inline;
 }
 
 
@@ -601,7 +461,7 @@ div#preloaded-images {
 #back {
 	/*backUnpressed*/
 	top:0px;left:0px;
-	width:165px;height:55px;background: url("../images/registration/back.png") no-repeat 0;
+	width:160px;height:51px;background: url("../images/UI/lobby/lobby.png") no-repeat -800px -51px;
 	left: 600px;
 	position: absolute;
 	border-width: 0px;
@@ -610,15 +470,13 @@ div#preloaded-images {
 
 #back:hover {
 	/*backHover*/
-	background: url("../images/registration/back_on.png") no-repeat 0;
+	width:160px;height:51px;background: url("../images/UI/lobby/lobby.png") no-repeat -800px -0px;
 }
 
-/*
 #back:active {
-	/*backPressed
+	/*backPressed*/
 	width:140px;height:39px;background: url("../images/UI/lobby/lobby.png") no-repeat -799px -762px;
 }
-*/
 
 #endInput.signup-submit {
     top: 0px;
@@ -664,77 +522,36 @@ div#preloaded-images {
 }
 
 div#text-contenitor-content {
-    background-image: url('../images/UI/not-found.png');
-    background-repeat:no-repeat;
-    background-color: transparent;
-    position: relative;
-    left: 50%;
-    margin-left: -250px;
-    width: 500px;
-    height: 420px;
+	background-image:url('../images/UI/pergamena.png');
+	background-repeat:no-repeat;
+	background-color: transparent;
+	position: relative;
+	margin-left: -90px;
+	height: 481px;
+	width: 500px;
 }
 
 div#unverified-scroll {
-    background-image: url('../images/UI/not-found.png');
-    background-repeat: no-repeat;
-    background-color: transparent;
-    position: absolute;
-    margin-left: 150px;
-    margin-top: 70px;
-    width: 500px;
-    height: 420px;
+	background-image: url('../images/UI/pergamena.png');
+	background-repeat: no-repeat;
+	background-color: transparent;
+	position: absolute;
+	margin-left: 150px;
+	margin-top: 70px;
+	width: 500px;
+	height: 379px;
 }
-
-div#unverified-scroll .logo-error{
-    background-image: url('../images/UI/logo-404.png');
-    background-repeat: no-repeat;
-    background-color: transparent;
-    position: absolute;
-    width: 200px;
-    height: 80px;
-    top: -70px;
-    left: -150px;
-}
-
 
 p#Profile-text{
-    color: #fff;
-    text-align: center;
-    font-size: 17px;
-    width: 376px;
-    margin-left: -178px;
-    left: 50%;
-    position: relative;
-    top: 60px;
+    padding-top:45px;
+    padding-left:50px
 }
 
 ul#ChangeNamePsw{
     padding-top: 0px;
     padding-left: 71px;
     list-style-type: none;
-    width: 376px;
-    list-style-position: inside;
-    padding: 0;
-    display: inline-block;
-    position: relative;
-    left: 50%;
-    margin-left: -178px;
-    top: 70px;
-    /*
-    padding-top: 0px;
-    padding-left: 71px;
-    list-style-type: none;
-    */
-}
 
-ul#ChangeNamePsw li a{
-    color:#fff;
-    text-decoration: underline;
-}
-
-ul#ChangeNamePsw li a:hover{
-    color:#fff;
-    text-decoration: none;
 }
 
 #left-form-change {
@@ -769,15 +586,13 @@ ul#ChangeNamePsw li a:hover{
 
 #back1 {
 	/*backUnpressed*/
-    width: 160px;
-    height: 51px;
-    background: url("../images/UI/lobby/lobby.png") no-repeat -800px -51px;
-    left: 160px;
-    position: absolute;
-    /* margin-left: -700px; */
-    /* margin-top: -75px; */
-    border-width: 0px;
-    top: 270px;
+	width:160px;height:51px;background: url("../images/UI/lobby/lobby.png") no-repeat -800px -51px;
+	left: 600px;
+	position: absolute;
+	margin-left: -700px;
+	margin-top: -75px;
+	border-width: 0px;
+	top: 530px;
 }
 
 #back1:hover {
@@ -799,12 +614,11 @@ ul#ChangeNamePsw li a:hover{
 }
 
 #showTerms{
-    background-color: #c5b077;
-    width: 290px;
+    background-color: #DEDEA6;
+    width: 302px;
     height: 100px;
     line-height: 20px;
-    margin-left: 25px;
+    margin-left: 11px;
     resize: none;
     display: none;
-    border: none;
 }

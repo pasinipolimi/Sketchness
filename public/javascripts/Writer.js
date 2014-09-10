@@ -1,4 +1,4 @@
-define(["Class", "Time", "jquery", "i18n"], function(Class, Time, $) {
+define(["Class", "Time", "jquery", "jquery-ui", "i18n"], function(Class, Time, $) {
 
 	/**
 	 * Component that handles the DOM manipulation
@@ -46,7 +46,7 @@ define(["Class", "Time", "jquery", "i18n"], function(Class, Time, $) {
 			time: function(time) {
 				var html = "";
 				if(time || time === 0) {
-					html = "<font size='5'><b>" + $.i18n.prop('time') + Time.round(time, Time.second) + "</b></font>";
+					html = "<p>" + $.i18n.prop('time') + Time.round(time, Time.second) + "</p>";
 				}
 				this.elements.time.html(html);
 			},
@@ -57,20 +57,28 @@ define(["Class", "Time", "jquery", "i18n"], function(Class, Time, $) {
 			 * @param text :String The text of the main message
 			 * @param red :String The text of the additional red message
 			 */
-			top: function(text, red) {
+			top: function(text, kind) {
 				var html = "";
-				if(text !== undefined) {
-					html = "<font size='5'><b>" + text;
-				}
-				else {
-					html = "<font size='5'><b>";
-				}
-				if(red !== undefined) {
-					html += "<font color='red'>" + red + "</font>";
-				}
-				html += "</b></font>";
+                if(text !== undefined) {
+                    html = "<div class='todraw'>" + text;
+                }
+                else {
+                    html = "<div class='todraw'>";
+                }
+                if(kind !== undefined) {
+                    html += "<div class='ico "+kind+"'></div>";
+                }
+                html += "</div>";
 
 				this.elements.top.html(html);
+                // --> MoonSUB
+                var test = setTimeout(function(){
+                    for(var i=0;i<5;i++) {
+                        $('#topMessage .todraw').animate({color:'#f00',fontSize:'24px'}).animate({color:'#000',fontSize:'20px'});
+                        console.log(i);
+                    }
+                },1000);
+                // <-- MoonSUB
 			},
 
 			/**
@@ -129,17 +137,26 @@ define(["Class", "Time", "jquery", "i18n"], function(Class, Time, $) {
 			 * @param players :Array The opponents lists
 			 */
 			players: function(players) {
-				var myself = this.myself,
-					opponents = this.elements.opponents;
-
-				opponents.empty();
-				$.each(players, function(id, player) {
-					if (id != myself) {
-						var element = $("<li></li>");
-						element.attr("title", player.name);
-						opponents.append(element);
+				var count = 0;
+				for(var i in players) {
+					count++;
+					switch(players[i].number) {
+						case "0": $('#currentNickname').css('color', players[i].color);break;
+						case "1": $('#player2').css('background-color', players[i].color);$('#player2').text(players[i].score);break;
+						case "2": $('#player3').css('background-color', players[i].color);$('#player3').text(players[i].score);break;
+						case "3": $('#player4').css('background-color', players[i].color);$('#player4').text(players[i].score);break;
+						case "4": $('#player5').css('background-color', players[i].color);$('#player5').text(players[i].score);break;
 					}
-				});
+				}
+				for(var j=count; j<4;j++) {
+					switch(j) {
+						case 0: $('#currentNickname').removeAttr('color');break;
+						case 1: $('#player2').removeAttr('style');$('#player2').text("");break;
+						case 2: $('#player3').removeAttr('style');$('#player3').text("");break;
+						case 3: $('#player4').removeAttr('style');$('#player4').text("");break;
+						case 4: $('#player5').removeAttr('style');$('#player5').text("");break;
+					}
+				}
 			}
 		}
 	});

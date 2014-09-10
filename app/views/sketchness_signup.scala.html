@@ -1,7 +1,7 @@
 @(signupForm: Form[_])
 
 @import helper._
-@import helper.twitterBootstrap._
+@implicitField = @{ FieldConstructor(twitterConstructorCustom.f) }
 @import com.feth.play.module.pa.views.html._
 
 
@@ -21,11 +21,74 @@
     <div id="signup-form">
         @helper.form(routes.Signup.doSignup) {
 
-        @if(signupForm.hasGlobalErrors) {
-        <p class="error">
-            <span class="label label-important">@signupForm.globalError.message</span>
-        </p>
+        @if(flash.get("accept_terms") || flash.get("email") || flash.get("name") || flash.get("password") || flash.get("passwordMismatch") || flash.get("nation") || flash.get("gender")) {
+
+        <div id="error-section">
+            <div id="error-wrap">
+                <div id="error-container">
+                    <div id="close"></div>
+                    <h1 id="error-title">Error</h1>
+                    <div id="error-message">
+                        Some of the required fields need to be filled:
+                        <ul>
+                            @if(flash.get("accept_terms")) {
+                            <li><strong>Accept terms</strong></li>
+                            }
+
+                            @if(flash.get("email")) {
+                            <li><strong>Email</strong></li>
+                            }
+
+                            @if(flash.get("name")) {
+                            <li><strong>Nickname</strong></li>
+                            }
+
+                            @if(flash.get("password")) {
+                            <li><strong>Password not chosen</strong></li>
+                            }
+
+                            @if(flash.get("passwordMismatch")) {
+                            <li><strong>The passwords do not match</strong></li>
+                            }
+
+                            @if(flash.get("nation")) {
+                            <li><strong>Nation</strong></li>
+                            }
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            var winHeight = $(window).height();
+            var windWidth = $(window).width();
+
+            $(function(){
+
+                if (!$("input[name='gender']").is(':checked'))
+                    $('#error-message ul').append('<li><strong>Gender</strong></li>');
+
+                $('#close').click(function(){
+                    $('#error-section').fadeOut();
+                });
+
+                $('#error-section').css({
+                    width: windWidth,
+                    height: winHeight
+                });
+
+
+                $('#error-wrap').fadeOut(function(){
+                    $('#error-wrap').css({
+                        top: (($(window).height()-$().height('#error-wrap'))/2)+'px'
+                    }).fadeIn(500);
+                });
+            });
+        </script>
         }
+
+        
         <div id="left-form" class="div-left-form">
             <div id="nickname-container" class="div-input-signup">
                 @inputText(
@@ -75,9 +138,12 @@
 
         <div id="right-form" class="div-right-form">
             <div id="gender-container">
+                Gender
                 @inputRadioGroup(
-                signupForm("gender"),
-                options = options ("true" ->"", "false" ->"")
+                    signupForm("gender"),
+                    options = options ("true" ->"", "false" ->""),
+                    '_label -> "",
+                    '_id ->"gender"
                 )
             </div>
 
@@ -86,10 +152,17 @@
                 field = signupForm("accept_terms"),
                 '_id ->"terms"
                 )
-                <div id="loadTerms" onclick="displayTerms();">
-                </div>
-                <textarea id="showTerms"></textarea>
-
+                <div id="loadTerms"></div>
+                <textarea readonly id="showTerms"></textarea>
+                <script type="text/javascript">
+                    $(function(){
+                        $('#loadTerms').click(function(){
+                            $('#showTerms').slideToggle('fast',function(){
+                                $('#showTerms').css('overflow','auto');
+                            });
+                        });
+                    });
+                </script>
             </div>
 
             <input type="submit" id="submit-signup" class="signup-submit" value="" >
