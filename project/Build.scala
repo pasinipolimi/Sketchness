@@ -53,7 +53,7 @@ object ApplicationBuild extends Build {
 		Resource("Spectrum JS", "public/stylesheets/lib/spectrum.css", "https://raw.github.com/bgrins/spectrum/master/spectrum.css", false),
 		Resource("Modernizr", "public/javascripts/lib/modernizr.custom.js", "https://raw.githubusercontent.com/codrops/Blueprint-ResponsiveFullWidthGrid/master/js/modernizr.custom.js", false),
 		//Zipped files with assets: images and sounds
-		Resource("Libraries", "lib/", "http://54.75.252.197/storage/libs.zip", true),
+		Resource("Libraries", "/", "http://54.75.252.197/storage/libs.zip", true),
 		Resource("Website Images", "public/images", "http://54.75.252.197/storage/spritesheets.zip",true),
 		Resource("Website Sound Effects", "public/sounds/effects", "http://54.75.252.197/storage/effects.zip",true)
 	)
