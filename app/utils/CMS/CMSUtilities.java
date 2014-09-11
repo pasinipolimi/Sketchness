@@ -284,7 +284,6 @@ public class CMSUtilities {
 						"Unable to read segementations from CMS");
 			}
 			num = semgents.size();
-			Logger.info("[GIO] image " + image.getId() + " , segments " + num);
 			sorting.setNum(num);
 			tempList.add(i, sorting);
 			num = 0;
