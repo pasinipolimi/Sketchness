@@ -2,6 +2,7 @@ package utils.CMS;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -9,18 +10,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.collections.ListUtils;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import play.Logger;
 import play.Play;
 import play.libs.Akka;
 import play.libs.F;
+import play.libs.F.Promise;
 import play.libs.Json;
 import play.libs.WS;
-import play.libs.F.Promise;
 import play.libs.WS.Response;
 import play.libs.WS.WSRequestHolder;
 import scala.concurrent.duration.Duration;
@@ -59,124 +57,9 @@ public class CMS {
 	private final static Integer timeoutPostCMS = Play.application().configuration().getInt("cmsTimeoutPost");
 	private final static Integer timeout = Play.application().configuration().getInt("cmsTimeout");
 
-	private static String[] invalid = { "20254", "20252", "20225", "20166",
-			"20096", "20064", "20015", "19666", "19664", "19648", "19647",
-			"19588", "19587", "19538", "19537", "19530", "19529", "19506",
-			"19505", "19396", "19395", "19380", "19379", "19368", "19367",
-			"19292", "19291", "19254", "19253", "19242", "19241", "19216",
-			"19215", "19210", "19209", "19136", "19135", "19096", "19095",
-			"19016", "19015", "18998", "18997", "18954", "18953", "18872",
-			"18871", "18774", "18773", "18756", "18755", "18592", "18591",
-			"18558", "18557", "18544", "18543", "18448", "18447", "18410",
-			"18409", "18392", "18391", "18370", "18369", "18360", "18359",
-			"18296", "18295", "18260", "18259", "18198", "18197", "18082",
-			"18081", "18026", "18025", "17958", "17957", "17928", "17927",
-			"17916", "17915", "17908", "17907", "17890", "17889", "17796",
-			"17795", "17784", "17783", "17776", "17775", "17756", "17755",
-			"17744", "17743", "17732", "17731", "17664", "17663", "17654",
-			"17653", "17648", "17647", "17634", "17633", "17622", "17621",
-			"17556", "17555", "17528", "17527", "17476", "17475", "17462",
-			"17461", "17456", "17455", "17446", "17445", "17432", "17431",
-			"17424", "17423", "17404", "17403", "17370", "17369", "17352",
-			"17351", "17178", "17177", "17138", "17137", "17102", "17101",
-			"17028", "17027", "17006", "17005", "16984", "16983", "16952",
-			"16951", "16928", "16927", "16914", "16913", "16880", "16879",
-			"16748", "16747", "16726", "16725", "16714", "16713", "16700",
-			"16699", "16644", "16643", "16568", "16567", "16428", "16427",
-			"16326", "16325", "16254", "16253", "16228", "16227", "16204",
-			"16203", "16190", "16189", "16128", "16127", "16118", "16117",
-			"16106", "16105", "16098", "16097", "16048", "16047", "16038",
-			"16037", "16018", "16017", "15994", "15993", "15988", "15987",
-			"15952", "15951", "15902", "15901", "15874", "15873", "15846",
-			"15845", "15832", "15831", "15788", "15787", "15746", "15745",
-			"15738", "15737", "15728", "15727", "15708", "15707", "15662",
-			"15661", "15654", "15653", "15644", "15643", "15602", "15601",
-			"15580", "15579", "15542", "15541", "15520", "15519", "15480",
-			"15479", "15352", "15351", "15326", "15325", "15302", "15301",
-			"15272", "15271", "15262", "15261", "15238", "15237", "15222",
-			"15221", "15062", "15061", "15048", "15047", "15010", "15009",
-			"14880", "14879", "14846", "14845", "14832", "14831", "14804",
-			"14803", "14780", "14779", "14682", "14681", "14658", "14657",
-			"14650", "14649", "14592", "14591", "14556", "14555", "14502",
-			"14501", "14492", "14491", "14448", "14447", "14438", "14437",
-			"14426", "14425", "14414", "14413", "14392", "14391", "14332",
-			"14331", "14320", "14319", "14308", "14307", "14296", "14295",
-			"14288", "14287", "14278", "14277", "14264", "14263", "14248",
-			"14247", "14236", "14235", "14166", "14165", "13892", "13891",
-			"13830", "13829", "13768", "13767", "13730", "13729", "13720",
-			"13719", "13712", "13711", "13704", "13703", "13668", "13667",
-			"13660", "13659", "13636", "13635", "13628", "13627", "13618",
-			"13617", "13608", "13607", "13584", "13583", "13548", "13547",
-			"13516", "13515", "13430", "13429", "13416", "13415", "13376",
-			"13375", "13364", "13363", "13352", "13351", "13316", "13315",
-			"13304", "13303", "13248", "13247", "13234", "13233", "13222",
-			"13221", "13200", "13199", "13180", "13179", "13152", "13151",
-			"13072", "13071", "12884", "12883", "12872", "12871", "12814",
-			"12813", "12776", "12775", "12760", "12759", "12446", "12428",
-			"12369", "12362", "12360", "12290", "12139", "12050", "12039",
-			"11745", "11633", "11627", "11465", "11409", "11235", "11179",
-			"10977", "10945", "10825", "10769", "10639", "10491", "10421",
-			"10305", "10305", "10223", "10131", "10023", "9927", "9867",
-			"9723", "9645", "9557", "9431", "9405", "9217", "9163", "8967",
-			"8959", "8831", "8681", "8587", "8501", "8321", "8283", "8201",
-			"8061", "7953", "7893", "7813", "7751", "7633", "7473", "7469",
-			"7401", "7211", "7191", "7075", "6919", "6917", "6747", "6643",
-			"6529", "6491", "6297", "6275", "6111", "6049", "5965", "5963",
-			"5731", "5667", "5591", "5469", "5389", "5257", "5159", "5135",
-			"4995", "4831", "4801", "4611", "4583", "4447", "4431", "4359",
-			"4217", "4193", "4089", "4049", "4025", "3922", "3882", "3726",
-			"3604", "3578", "3486", "3292", "3214", "3096", "3058", "2971",
-			"2931", "2921", "2917", "2907", "2839", "2745", "2649", "2569",
-			"2473", "2391", "2237", "2235", "2193", "2187", "2091", "1951",
-			"1929", "1789", "1699", "1685", "1515", "1483", "1483", "1465",
-			"1091", "979", "897", "416", "57", "51", "49", "12662", "12614",
-			"12560", "12558", "12327", "1547", "917", "67", "19695", "12658",
-			"12263", "12211", "12119", "11922", "11659", "11363", "11115",
-			"11013", "10809", "10545", "10341", "10253", "10067", "9751",
-			"9499", "9279", "9133", "8881", "8753", "8641", "8251", "8127",
-			"7907", "7809", "7443", "7307", "7167", "6853", "6667", "6451",
-			"6359", "6179", "5859", "5797", "5577", "5485", "5229", "5105",
-			"4967", "4799", "4591", "4397", "4153", "4015", "3864", "3664",
-			"3416", "3236", "2990", "2573", "2505", "2279", "2195", "2189",
-			"2057", "1259", "1149", "177", "11920", "11645", "11467", "11257",
-			"10917", "10751", "10553", "10321", "10189", "9893", "9869",
-			"9631", "9385", "9095", "9029", "8839", "8607", "8401", "8113",
-			"7875", "7747", "7629", "7479", "7361", "7083", "6857", "6681",
-			"6537", "6353", "6117", "5981", "5605", "5537", "5207", "5097",
-			"4911", "4575", "4455", "4223", "3974", "3748", "3558", "3192",
-			"3116", "2507", "2301", "2265", "2157", "2131", "1961", "1797",
-			"1665", "1557", "1023", "315", "19931", "17400", "17399", "11825",
-			"11789", "11782", "12600", "1901", "1751", "1671", "1413", "1005",
-			"271", "20223", "20180", "20174", "20080", "19975", "19848",
-			"19834", "19832", "19826", "19824", "19816", "19812", "19802",
-			"19798", "19408", "19407", "19394", "19393", "19346", "19345",
-			"19290", "19289", "19240", "19239", "19168", "19167", "19080",
-			"19079", "18940", "18939", "18870", "18869", "18822", "18821",
-			"18754", "18753", "18710", "18709", "18600", "18599", "18284",
-			"18283", "18272", "18271", "18210", "18209", "18072", "18071",
-			"18034", "18033", "18000", "17999", "17946", "17945", "17872",
-			"17871", "17860", "17859", "17832", "17831", "17824", "17823",
-			"17720", "17719", "17644", "17643", "17548", "17547", "17516",
-			"17515", "17412", "17411", "17376", "17375", "17340", "17339",
-			"17260", "17259", "17248", "17247", "17226", "17225", "17134",
-			"17133", "17100", "17099", "17062", "17061", "17050", "17049",
-			"16938", "16937", "16912", "16911", "16900", "16899", "16876",
-			"16875", "16848", "16847", "16847", "16824", "16823", "16800",
-			"16799", "16688", "16687", "16674", "16673", "16642", "16641",
-			"16542", "16541", "16414", "16413", "16180", "16179", "16088",
-			"16087", "15986", "15985", "15974", "15973", "15890", "15889",
-			"15418", "15417", "15394", "15393", "15374", "15373", "15292",
-			"15291", "15044", "15043", "15032", "15031", "15006", "15005",
-			"14992", "14991", "14976", "14975", "14952", "14951", "14936",
-			"14935", "14922", "14921", "14908", "14907", "14876", "14875",
-			"14864", "14863", "14830", "14829", "14792", "14791", "14744",
-			"14743", "14726", "14725", "14656", "14655", "14628", "14627",
-			"14462", "14461", "14404", "14403", "14390", "14389", "14382",
-			"14381", "14330", "14329", "14294", "14293", "14072", "14071",
-			"14032", "14031", "13828", "13827", "13710", "13709", "13440",
-			"13439", "13414", "13413", "13336", "13335", "13268", "13267",
-			"13220", "13219", "13178", "13177", "13114", "13114", "13113",
-			"13092", "13091" };
+
+
+
 
 
 
@@ -275,6 +158,39 @@ public class CMS {
 
 	}
 
+	private static <T extends Object> Integer postObjString(final String obj,
+			final String service) throws CMSException {
+		try {
+
+			final F.Promise<WS.Response> returned;
+			final WSRequestHolder prov = WS.url(rootUrl + "/" + service)
+					.setHeader("Accept", "application/json")
+					.setHeader("Content-Type", "application/json")
+					.setTimeout(timeoutPostCMS);
+
+			if (obj != null) {
+
+				returned = prov.post(obj);
+			} else {
+				returned = prov.post("");
+			}
+
+			final String respBody = returned.get().getBody();
+			Logger.debug("Output for post on " + service + " : " + respBody);
+			if (Json.parse(respBody).get("id") != null) {
+
+				return Json.parse(respBody).get("id").asInt();
+			}
+			return 0;
+
+		} catch (final Exception e) {
+			Logger.error("Unable to post: " + service, e);
+			return 0;
+			// throw new CMSException("Unable to post: " + service);
+		}
+
+	}
+
 	private static void postObj(final String service, final Integer id)
 			throws CMSException {
 		try {
@@ -296,6 +212,7 @@ public class CMS {
 		final F.Promise<WS.Response> returned;
 		final WSRequestHolder ws = WS.url(rootUrl + "/" + service)
 				.setHeader("Accept", "application/json")
+				.setHeader("Content-Type", "application/json")
 				.setTimeout(timeoutPostCMS);
 		final Iterator<String> it = params.keySet().iterator();
 		while (it.hasNext()) {
@@ -478,7 +395,7 @@ public class CMS {
 			final List<History> historyPoints = readHistory(history);
 
 			//TODO fix quality
-			double quality = 0;
+			final double quality = 0;
 
 			final Segmentation segmentation = new Segmentation(points,
 					historyPoints, quality);
@@ -666,7 +583,7 @@ public class CMS {
 		}
 		tasksToAdd = maxRound - uploadedTasks;
 		if (tasksToAdd > 0) {
-			retrieveImages(tasksToAdd, queueImages, roomChannel,
+			retrieveImagesCERT(tasksToAdd, queueImages, roomChannel,
 					uploadedTasks > 0);
 
 		}
@@ -727,7 +644,7 @@ public class CMS {
 	}
 
 	public static void cleanOpenActions() throws CMSException {
-
+		final String[] invalid = { "20254" };
 		for (final String a : invalid) {
 			invalidateAction(a);
 		}
@@ -802,6 +719,62 @@ public class CMS {
 						+ ", rooomChanel: " + roomChannel);
 				sendTaskAcquired(roomChannel);
 			}
+		}
+
+	}
+
+	private static void retrieveImagesCERT(final Integer tasksToAdd,
+			final List<ObjectNode> queueImages, final Room roomChannel,
+			final boolean taskSent) throws Exception {
+
+		List<ChooseImageTag> imgtgs;
+		List<ChooseImageTag> imgtgsDress;
+		try {
+			LoggerUtils.debug("CMS", "Requested image list to CMS");
+
+			final int tot = tasksToAdd - 3;
+			imgtgs = CMS.getChoose(collection, "3");
+			imgtgsDress = CMS.getChoose(4, String.valueOf(tot));
+			imgtgs.addAll(imgtgsDress);
+
+			LoggerUtils.debug("CMS", "Requested image list to CMS end");
+		} catch (final Exception e) {
+			throw new Exception("[CMS] The request to the CMS is malformed", e);
+		}
+
+		Collections.shuffle(imgtgs);
+
+		for (final ChooseImageTag imgtg : imgtgs) {
+
+			addImgToQueue(imgtg, queueImages, roomChannel, taskSent);
+
+		}
+
+	}
+
+	private static void addImgToQueue(final ChooseImageTag imgtg,
+			final List<ObjectNode> queueImages, final Room roomChannel,
+			boolean taskSent) {
+		final Integer id = imgtg.getImage();
+
+		final ObjectNode guessWord = Json.newObject();
+		guessWord.put("type", "task");
+		guessWord.put("id", String.valueOf(id));
+		// Find the valid tags for this task.
+
+		try {
+			buildGuessWordSegment(guessWord, imgtg.getTag(), CMS.getImage(id));
+		} catch (final CMSException e) {
+			Logger.error("Unable to read image, ignoring...", e);
+		}
+
+		queueImages.add(guessWord);
+
+		if (!taskSent) {
+			taskSent = true;
+			LoggerUtils.debug("CMS", "Send task aquired for image:" + id
+					+ ", rooomChanel: " + roomChannel);
+			sendTaskAcquired(roomChannel);
 		}
 
 	}
@@ -996,24 +969,24 @@ public class CMS {
 		HashMap<String, String> params = new HashMap<String, String>();
 		params.put("populate", "true");
 		return getObjs(User.class, "user", params, "users");
-		*/
+		 */
 		//get ALL users
 		Boolean end = false;
-		List<utils.CMS.models.User> users = new ArrayList<utils.CMS.models.User>();
+		final List<utils.CMS.models.User> users = new ArrayList<utils.CMS.models.User>();
 		String max_id = "null";
-		String count = String.valueOf(100);
-		int i = 0;
-		
+		final String count = String.valueOf(100);
+		final int i = 0;
+
 		while(!end){
-			HashMap<String, String> params = new HashMap<String, String>();
+			final HashMap<String, String> params = new HashMap<String, String>();
 			params.put("populate", "true");
 			if(!max_id.equals("null")){
 				params.put("max_id", max_id);
 				params.put("count", count);
 			}
-			
+
 			try {
-				List<utils.CMS.models.User> nextUsers = CMS.getObjs(User.class, "user", params, "users");
+				final List<utils.CMS.models.User> nextUsers = CMS.getObjs(User.class, "user", params, "users");
 				for(int k=0;k<nextUsers.size();k++){
 					users.add(nextUsers.get(k));
 				}
@@ -1026,17 +999,17 @@ public class CMS {
 			//GET next result: max_id, count
 			final String service = "user";
 			final String response = "search_metadata";
-			
+
 			Promise<WS.Response> res;
 			final WSRequestHolder wsurl = WS.url(rootUrl + "/" + service).setHeader("Accept", "application/json").setTimeout(timeout);
 			if (params != null) {
-					final Iterator<Entry<String, String>> it = params.entrySet()
-							.iterator();
-					while (it.hasNext()) {
-						final Map.Entry<java.lang.String, java.lang.String> param = it
-								.next();
-						wsurl.setQueryParameter(param.getKey(), param.getValue());
-					}
+				final Iterator<Entry<String, String>> it = params.entrySet()
+						.iterator();
+				while (it.hasNext()) {
+					final Map.Entry<java.lang.String, java.lang.String> param = it
+							.next();
+					wsurl.setQueryParameter(param.getKey(), param.getValue());
+				}
 			}
 
 			res = wsurl.get();
@@ -1048,8 +1021,8 @@ public class CMS {
 				if (json.get("status").asText().equals("OK")) {
 					node = json.get(response);
 					if(node.has("next_results")){
-						String nextResult = node.get("next_results").asText();
-						String[] tokens = nextResult.split("=");
+						final String nextResult = node.get("next_results").asText();
+						final String[] tokens = nextResult.split("=");
 						max_id = tokens[1].split("&")[0];
 						//count = tokens[2];
 					}
@@ -1067,7 +1040,7 @@ public class CMS {
 		}
 
 		return users;
-		
+
 	}
 
 	public static Integer getUserCount() throws CMSException {
@@ -1195,12 +1168,12 @@ public class CMS {
 					.setHeader("Accept", "application/json")
 					.setTimeout(timeoutPostCMS);
 
-			ObjectNode node = JsonNodeFactory.instance.objectNode();
+			final ObjectNode node = JsonNodeFactory.instance.objectNode();
 			node.put("name", name);
 			returned = prov.post(node);
-			final String respBody = returned.get().getBody();	
+			final String respBody = returned.get().getBody();
 			return Json.parse(respBody).get("id").asInt();
-			
+
 		} catch (final Exception e) {
 			Logger.error("Unable to post: " + service, e);
 			throw new CMSException("Unable to post: " + service);
@@ -1218,16 +1191,18 @@ public class CMS {
 				"action");
 		return segs;
 	}
-	
+
 	public static Action getAction(final Integer id) throws CMSException {
 		return getObj(Action.class, "action", id,"action");
 	}
 
 	public static void test() throws CMSException {
 
+		CMS.addImagesToCollection();
+
 		// OK
-		final Tag ims = CMS.getTag(0);
-		System.out.println("ciao" + ims.getId());
+		// final Tag ims = CMS.getTag(0);
+		// System.out.println("ciao" + ims.getId());
 
 		// final Image sd = CMS.getImage(0);
 		// final Integer s = CMS.getImageCount();
@@ -1243,10 +1218,10 @@ public class CMS {
 		// final List<Task> s = CMS.getTaskCollection(1);
 		// CMS.closeSession(8);
 
-		final Integer s = CMS.postUser("pippo");
+		// final Integer s = CMS.postUser("pippo");
 
 		// System.out.println("ciao" + sd);
-		System.out.println("ciao" + s);
+		// System.out.println("ciao" + s);
 		// System.out.println("ciao" + ss);
 		// System.out.println("ciao" + use);
 		// System.out.println("ciao" + t);
@@ -1275,12 +1250,21 @@ public class CMS {
 
 	}
 
+	private static void addImagesToCollection() throws CMSException {
+		final String[] imgFash = { "197", "198" };
+		for (final String id : imgFash) {
+
+			postObjString("{\"image\":" + id + "}", "collection/5/image");
+		}
+
+	}
+
 	public static int getSegmentationCount() throws CMSException {
 		final HashMap<String, String> params = new HashMap<>();
 		params.put("type", "segmentation");
 		return getCount("action", params);
 	}
-	
+
 	public static List<Action> getBestSegmentation(final Integer imageId, final Integer tagId) throws CMSException {
 
 		final HashMap<String, String> params = new HashMap();
@@ -1288,7 +1272,7 @@ public class CMS {
 		params.put("image", String.valueOf(imageId));
 		params.put("tag", String.valueOf(tagId));
 		params.put("completed", "true");
-		
+
 		return getObjs(utils.CMS.models.Action.class, "action", params, "actions");
 
 

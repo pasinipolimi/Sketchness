@@ -840,11 +840,11 @@ div.avatarChat {
 #topMessage .todraw.red{color:#ff0000;font-size: 22px}
 #topMessage .todraw .ico{
     position: relative;
-    top: 4;
+    top: -22px;
     float: right;
     right: 100px;
-    width: 36px;
-    height: 36px;
+    width: 82px;
+    height: 82px;
     background-size: cover;
 }
 
