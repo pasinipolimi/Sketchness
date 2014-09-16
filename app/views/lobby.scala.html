@@ -76,11 +76,16 @@
 					<strong>Number of Players</strong>
 				</p>
 
-                <div id="gameNumberSlider" class="noUi-base">
-                </div>
+                <!-- <div id="gameNumberSlider" class="noUi-base">
+                </div> -->
                 <p style="text-align:center">
-                    <br/>
-				    <input type="number" id="nPlayers" name="nPlayers" min="2" max="4" step="1" value="3" readonly="readonly"/>
+                    
+                    <select name="nPlayers" id="nPlayers">
+                    	<option>2</option>
+                    	<option selected>3</option>
+                    	<option>4</option>
+                    </select>
+				    <!-- <input type="number" id="nPlayers" name="nPlayers" min="2" max="4" step="1" value="3" readonly="readonly"/> -->
                 </p>
 				<button id="createGamePopUp" type="submit"></button>
 			</form>

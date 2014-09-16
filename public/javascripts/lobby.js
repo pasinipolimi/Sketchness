@@ -11,7 +11,7 @@ require(["Communicator", "Chat", "jquery","nouislider", "popup", "jscrollpane", 
 			myself: $('#currentNickname').text()
 		};
 
-        $("#gameNumberSlider").noUiSlider({
+        /*$("#gameNumberSlider").noUiSlider({
         	start: [ 3 ],
             step: 1,
             range: {
@@ -29,7 +29,7 @@ require(["Communicator", "Chat", "jquery","nouislider", "popup", "jscrollpane", 
         $("#gameNumberSlider").on( "change", function(){
             $('#nPlayers').val($("#gameNumberSlider").val());
         });
-
+*/
 
 		// Show error message
 		var setError = function(message) {

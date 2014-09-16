@@ -29,6 +29,7 @@ object ApplicationBuild extends Build {
 		// Add here the required resources
 		// Resource(name: String, path :String, url :String = null, zipped :Boolean = true)
 		Resource("Audio Folder", "public/sounds"),
+		Resource("Javascript Libraries", "public/javascripts/lib/", "http://54.75.252.197/storage/libs.zip", true),
 		Resource("RequireJS", "public/javascripts/lib/require.js", "http://requirejs.org/docs/release/2.1.8/minified/require.js", false),
 		Resource("PaperJS", "public/javascripts/lib/paper.js", "https://raw.github.com/paperjs/paper.js/v0.9.9/dist/paper-full.js", false),
 		Resource("JS State Machine", "public/javascripts/lib/state-machine.js", "https://raw.github.com/jakesgordon/javascript-state-machine/master/state-machine.js", false),
