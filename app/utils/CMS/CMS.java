@@ -687,7 +687,7 @@ public class CMS {
 		try {
 			LoggerUtils.debug("CMS", "Requested image list to CMS");
 
-			imgtgs = CMS.getChoose(collection, tasksToAdd.toString());
+			imgtgs = CMS.getChoose(collection, tasksToAdd.toString(), policy);
 
 			LoggerUtils.debug("CMS", "Requested image list to CMS end");
 		} catch (final Exception e) {
@@ -733,8 +733,8 @@ public class CMS {
 			LoggerUtils.debug("CMS", "Requested image list to CMS");
 
 			final int tot = tasksToAdd - 3;
-			imgtgs = CMS.getChoose(collection, "3");
-			imgtgsDress = CMS.getChoose(4, String.valueOf(tot));
+			imgtgs = CMS.getChoose(collection, "3", "random");
+			imgtgsDress = CMS.getChoose(4, String.valueOf(tot), policy);
 			imgtgs.addAll(imgtgsDress);
 
 			LoggerUtils.debug("CMS", "Requested image list to CMS end");
@@ -787,7 +787,7 @@ public class CMS {
 	}
 
 	private static List<ChooseImageTag> getChoose(final Integer collection2,
-			final String limit) throws CMSException {
+			final String limit, final String policy) throws CMSException {
 		final HashMap<String, String> params = new HashMap<>();
 		params.put("limit", limit);
 		params.put("collection", String.valueOf(collection2));
