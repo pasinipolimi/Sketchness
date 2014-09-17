@@ -207,12 +207,12 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 									color: constants.playersColors[i]
 								};
 							}
-							write.players(sk.players);
+							write.players(sk.players,sketchness.myself);
 						},
 						leave: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] leave");
 							delete sk.players[content.user];
-							write.players(sk.players);
+							write.players(sk.players,sketchness.myself);
 						},
 						loading: function() {
 						    console.log("[RECEIVED MESSAGE] loading");
@@ -279,7 +279,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 									color: constants.playersColors[i]
 								};
 							}
-							write.players(sk.players);
+							write.players(sk.players,sketchness.myself);
 						},
 						roundBegin: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] roundBegin");
@@ -498,7 +498,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						leave: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] leave");
                             delete sk.players[content.user];
-                            write.players(sk.players);
+                            write.players(sk.players,sketchness.myself);
                         },
                         leaderboard: function(e, content) {
                             console.log("[RECEIVED MESSAGE] leaderboard");
@@ -606,7 +606,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						leave: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] leave");
                             delete sk.players[content.user];
-                            write.players(sk.players);
+                            write.players(sk.players,sketchness.myself);
                         },
                         leaderboard: function(e, content) {
                             console.log("[RECEIVED MESSAGE] leaderboard");
@@ -697,7 +697,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						score: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] score");
 							sk.players[content.user].score += content.score;
-							write.players(sk.players);
+							write.players(sk.players,sketchness.myself);
 							if(content.user == sk.myself) {
 								that.write.score(sk.players[content.user].score);
 							}
@@ -705,7 +705,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						leave: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] leave");
                             delete sk.players[content.user];
-                            write.players(sk.players);
+                            write.players(sk.players,sketchness.myself);
                         },
                         leaderboard: function(e, content) {
                             console.log("[RECEIVED MESSAGE] leaderboard");
@@ -1041,7 +1041,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						score: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] score");
 							sk.players[content.user].score += content.score;
-							write.players(sk.players);
+							write.players(sk.players,sketchness.myself);
 							if(content.user == sk.myself) {
 								that.write.score(sk.players[content.user].score);
 							}
@@ -1049,7 +1049,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						leave: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] leave");
                             delete sk.players[content.user];
-                            write.players(sk.players);
+                            write.players(sk.players,sketchness.myself);
                         },
                         leaderboard: function(e, content) {
                             console.log("[RECEIVED MESSAGE] leaderboard");
@@ -1125,7 +1125,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						leave: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] leave");
                             delete sk.players[content.user];
-                            write.players(sk.players);
+                            write.players(sk.players,sketchness.myself);
                         },
 						leaderboard: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] leaderboard");
