@@ -270,6 +270,14 @@ public class Game extends GameRoom {
 	private void endSegmentation(final String user) throws Exception {
 		final GameEvent eventGuesser = new GameEvent(GameMessages.composeScore(
 				user, guesserPointsRemaining), roomChannel);
+                for (final Painter painter : playersVect) {
+			// If the current painter is the guesser, has not guessed before and
+			// it is not the sketcher, update his points
+			if (painter.name.equals(user)) {
+				painter.setPoints(painter.getPoints() + guesserPointsRemaining);
+                                break;
+                        }
+                }
 		GameBus.getInstance().publish(eventGuesser);
 		GameBus.getInstance().publish(
 				new GameEvent(GameMessages.composeSaveTraces(), roomChannel));
