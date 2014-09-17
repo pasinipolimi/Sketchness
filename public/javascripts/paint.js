@@ -254,6 +254,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.write.top($.i18n.prop('matchstarting'));
 					elements.endSegmentation.hide();
 					elements.skip.hide();
+					elements.pen.hide();
+					elements.eraser.hide();
 					console.log("[ENTER] Loading");
 					var that = this,
 						sk = this.sketchness;
@@ -904,6 +906,8 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 					this.write.time();
 					elements.skip.hide();
 					elements.endSegmentation.hide();
+					elements.pen.hide();
+					elements.eraser.hide();
 					elements.hudArea.hide();
 
 
