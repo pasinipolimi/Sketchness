@@ -733,7 +733,7 @@ public class CMS {
 			LoggerUtils.debug("CMS", "Requested image list to CMS");
 
 			final int tot = tasksToAdd - 3;
-			imgtgs = CMS.getChoose(collection, "3", "random");
+			imgtgs = CMS.getChoose(1, "3", policy);
 			imgtgsDress = CMS.getChoose(4, String.valueOf(tot), policy);
 			imgtgs.addAll(imgtgsDress);
 
