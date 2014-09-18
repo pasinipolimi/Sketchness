@@ -25,6 +25,11 @@ html, body {
     font-family: 'futura_lightregular';
 
 }
+
+a {
+	color: #610B0B;
+}
+
 /*To remove Twitter Bootstrap blue borders*/
 a:focus, a:active, 
 button::-moz-focus-inner,
