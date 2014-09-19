@@ -927,7 +927,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 								offsetY += element.offsetTop;
 							} while ((element = element.offsetParent));
 						}
-						if(undefined!=event) {
+						if((typeof event != 'undefined') && (typeof event.originalEvent != 'undefined')) {
 							if(!sk.isMobile) {
 									if(event.originalEvent.type !== "mouseup")
 									  return {
