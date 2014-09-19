@@ -11,8 +11,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.json.JSONException;
-import utils.CMS.models.Pose;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import play.Logger;
 import play.Play;
@@ -88,10 +86,6 @@ public class CMS {
 
 	public static List<Action> getActions() throws CMSException {
 		return getObjs(Action.class, "action", "actions");
-	}
-
-	public static Action getAction(final Integer id) throws CMSException {
-		return getObj(Action.class, "action", id,"action");
 	}
 
 	// public static List<Image> getImages() throws CMSException {
@@ -500,52 +494,8 @@ public class CMS {
 		return postObj2(user, "user");
 	}
 
-	//GIORGIA FIX TO CHECK
 	public static Integer postAction(final Action action) throws CMSException {
-		final String service = "action";
-		
-			try {
-			
-				final F.Promise<WS.Response> returned;
-				final WSRequestHolder prov = WS.url(rootUrl + "/" + service)
-						.setHeader("Accept", "application/json")
-						.setTimeout(timeoutPostCMS);
-	
-				final HashMap<String, String> params = new HashMap();
-				
-				if ((action != null)&&(action.getType()=="segmentation")) {
-					ObjectNode node = JsonNodeFactory.instance.objectNode();
-					node.put("image", action.getImage());
-				    node.put("user", action.getUser());
-				    node.put("session", action.getSession());
-				    node.put("tag", action.getTag());
-				    node.put("validity", action.getValidity());
-				    node.put("type", action.getType());
-					returned = prov.post(node);
-					
-				} else if((action != null)&&(action.getType()=="tagging")){
-					ObjectNode node = JsonNodeFactory.instance.objectNode();
-					node.put("image", action.getImage());
-				    node.put("user", action.getUser());
-				    node.put("session", action.getSession());
-				    node.put("validity", action.getValidity());
-				    node.put("type", action.getType());
-				    returned = prov.post(node);
-				    
-				} 
-				else {
-					returned = prov.post("");
-				}
-	
-				final String respBody = returned.get().getBody();	
-				return Json.parse(respBody).get("id").asInt();
-				
-	
-			} catch (final Exception e) {
-				Logger.error("Unable to post: " + service, e);
-				throw new CMSException("Unable to post: " + service);
-			}
-			//return postObj2(action, "action");
+		return postObj2(action, "action");
 	}
 
 	public static void saveTagActionOnAkka(final ObjectNode finalTraces,
@@ -614,30 +564,25 @@ public class CMS {
 
 	public static void taskSetInitialization(
 			final List<ObjectNode> priorityTaskHashSet,
-			final List<ObjectNode> queueImages, final Room roomChannel, 
-			final Integer maxRound, final Integer requiredPlayers)
-					throws Error, Exception, JSONException, CMSException {
+			final List<ObjectNode> queueImages, final Room roomChannel,
+			final Integer maxRound)
+					throws Error, Exception {
 		int uploadedTasks = 0;
 		try {
 			uploadedTasks = retrieveTasks(maxRound, priorityTaskHashSet,
-					roomChannel, requiredPlayers);
+					roomChannel);
 		} catch (final Exception e) {
 			LoggerUtils.error("CMS", "Unable to read tasks");
 		}
 
 		int tasksToAdd = maxRound - uploadedTasks;
-		if (tasksToAdd > 0 && useImageWithNoTags.equals("true") && requiredPlayers!=1) {
+		if (tasksToAdd > 0 && useImageWithNoTags.equals("true")) {
 			uploadedTasks = retrieveImagesWithoutTag(tasksToAdd, queueImages,
 					roomChannel, uploadedTasks > 0, uploadedTasks);
 
 		}
 		tasksToAdd = maxRound - uploadedTasks;
-		if ((tasksToAdd > 0) && (requiredPlayers==1)) {
-			retrieveImages(tasksToAdd, queueImages, roomChannel,
-					uploadedTasks > 0, requiredPlayers);
-
-		}
-		else if (tasksToAdd > 0) {
+		if (tasksToAdd > 0) {
 			retrieveImagesCERT(tasksToAdd, queueImages, roomChannel,
 					uploadedTasks > 0);
 
@@ -736,7 +681,7 @@ public class CMS {
 
 	private static void retrieveImages(final Integer tasksToAdd,
 			final List<ObjectNode> queueImages, final Room roomChannel,
-			boolean taskSent, final Integer requiredPlayers) throws Exception {
+			boolean taskSent) throws Exception {
 
 		List<ChooseImageTag> imgtgs;
 		try {
@@ -754,49 +699,26 @@ public class CMS {
 			// Save information related to the image
 			final Integer id = imgtg.getImage();
 
-			//check pose exists if single player
-			final utils.CMS.models.Image image = CMS.getImage(id);
-			List<Pose> pose = image.getPose();
-			//check segmentations exist
-			List<utils.CMS.models.Action> actions;
-			actions = CMS.getBestSegmentation(Integer.valueOf(id),Integer.valueOf(imgtg.getTag()));
-			//remove actions with null quality
-			for (int j = 0; j < actions.size(); j++) {
-				final utils.CMS.models.Action a = actions.get(j);
-				if(a.getSegmentation().getQuality()==null){
-					actions.remove(j);
-				}
+			final ObjectNode guessWord = Json.newObject();
+			guessWord.put("type", "task");
+			guessWord.put("id", String.valueOf(id));
+			// Find the valid tags for this task.
 
+			try {
+				buildGuessWordSegment(guessWord, imgtg.getTag(),
+						CMS.getImage(id));
+			} catch (final CMSException e) {
+				Logger.error("Unable to read image, ignoring...", e);
 			}
-			if((requiredPlayers==1)&&((pose.size()==0)||(actions.size()==0))){
-				//empty pose or no segmentation actions --> skip task
+
+			queueImages.add(guessWord);
+
+			if (!taskSent) {
+				taskSent = true;
+				LoggerUtils.debug("CMS", "Send task aquired for image:" + id
+						+ ", rooomChanel: " + roomChannel);
+				sendTaskAcquired(roomChannel);
 			}
-			else{
-				Logger.info("image " + id + " seg " + actions.size());
-				final ObjectNode guessWord = Json.newObject();
-				guessWord.put("type", "task");
-				guessWord.put("id", String.valueOf(id));
-				// Find the valid tags for this task.
-	
-	
-				try {
-					buildGuessWordSegment(guessWord, imgtg.getTag(),
-							CMS.getImage(id));
-				} catch (final CMSException e) {
-					Logger.error("Unable to read image, ignoring...", e);
-				}
-	
-				queueImages.add(guessWord);
-	
-	
-				if (!taskSent) {
-					taskSent = true;
-					LoggerUtils.debug("CMS", "Send task aquired for image:"
-							+ id + ", rooomChanel: " + roomChannel);
-					sendTaskAcquired(roomChannel);
-				}
-			}
-			
 		}
 
 	}
@@ -881,7 +803,7 @@ public class CMS {
 	}
 
 	private static int retrieveTasks(final Integer maxRound,
-			final List<ObjectNode> priorityTaskHashSet, final Room roomChannel, final Integer requiredPlayers) {
+			final List<ObjectNode> priorityTaskHashSet, final Room roomChannel) {
 		boolean taskSent = false;
 
 		int uploadedTasks = 0;
@@ -928,16 +850,12 @@ public class CMS {
 					final String type = utask.getType();
 					switch (type) {
 					case "tagging":
-						if(!((requiredPlayers==1)&&(type.equals("tagging")))){
-							buildGuessWordTagging(guessWord, image,
-									utask, taskId);
-
-							priorityTaskHashSet.add(guessWord);
-							uploadedTasks++;
-							if (!taskSent) {
-								taskSent = true;
-								sendTaskAcquired(roomChannel);
-							}
+						buildGuessWordTagging(guessWord, image, utask, taskId);
+						priorityTaskHashSet.add(guessWord);
+						uploadedTasks++;
+						if (!taskSent) {
+							taskSent = true;
+							sendTaskAcquired(roomChannel);
 						}
 						break;
 					case "segmentation":
@@ -1272,6 +1190,10 @@ public class CMS {
 		final List<Action> segs = getObjs(Action.class, "action", params,
 				"action");
 		return segs;
+	}
+
+	public static Action getAction(final Integer id) throws CMSException {
+		return getObj(Action.class, "action", id,"action");
 	}
 
 	public static void test() throws CMSException {
