@@ -764,13 +764,13 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						var offsetX = 0, offsetY = 0;
 
 						// Compute the total offset
-						if (element.offsetParent !== undefined) {
+						if (typeof element.offsetParent !== 'undefined') {
 							do {
 								offsetX += element.offsetLeft;
 								offsetY += element.offsetTop;
 							} while ((element = element.offsetParent));
 						}
-						if(undefined!=event) {
+						if((typeof event != 'undefined') && (typeof event.originalEvent != 'undefined')) {
 							if(!sk.isMobile) {
 									if(event.originalEvent.type !== "mouseup")
 									  return {
