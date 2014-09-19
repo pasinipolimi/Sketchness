@@ -126,22 +126,15 @@ public class Signup extends Controller {
 						Messages.get("error.userInBrowser"));
 				return badRequest(sketchness_login.render(filledForm));
 			}
-            // check if there is already the email registered
-            if(User.checkMail(filledForm.field("email").value())){
-                LoggerUtils.debug("SIGNUP","Email already registered: "
-                        + filledForm.field("email").value());
-                flash(Application.FLASH_ERROR_KEY,
-                        Messages.get("error.mailExists"));
-                return badRequest(sketchness_signup.render(filledForm));
-            }
+                        // check if there is already the email registered
+                        if(User.checkMail(filledForm.field("email").value())){
+                            LoggerUtils.debug("SIGNUP","Email already registered: "
+                                    + filledForm.field("email").value());
+                            flash(Application.FLASH_ERROR_KEY,
+                                    Messages.get("error.mailExists"));
+                            return badRequest(sketchness_signup.render(filledForm));
+                        }
 
-            if(User.checkMail(filledForm.field("email").value())){
-                LoggerUtils.debug("SIGNUP","Email already registered: "
-                        + filledForm.field("email").value());
-                flash(Application.FLASH_ERROR_KEY,
-                        Messages.get("error.mailExists"));
-                return badRequest(sketchness_signup.render(filledForm));
-            }
 			// Everything was filled
                         response().setHeader("P3P","CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\"");
 			return UsernamePasswordAuthProvider.handleSignup(ctx());

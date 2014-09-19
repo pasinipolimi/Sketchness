@@ -1,6 +1,7 @@
 package controllers;
 
 import com.feth.play.module.pa.PlayAuthenticate;
+import com.feth.play.module.pa.providers.AuthProvider;
 import com.feth.play.module.pa.providers.password.UsernamePasswordAuthProvider;
 import com.feth.play.module.pa.user.AuthUser;
 import java.util.List;
@@ -8,12 +9,12 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import models.User;
 import play.data.Form;
+import play.data.validation.ValidationError;
 import play.i18n.Messages;
 import play.libs.Akka;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-import play.data.validation.ValidationError;
 import providers.MyUsernamePasswordAuthProvider;
 import providers.MyUsernamePasswordAuthProvider.MyLogin;
 import scala.concurrent.duration.Duration;
@@ -90,10 +91,30 @@ public class Login extends Controller {
 						Messages.get("error.userInBrowser"));
 				return badRequest(sketchness_login.render(filledForm));
 			}
+                        
 			// Everything was filled and no other users in session
-			LoggerUtils.debug("LOGIN","The login form was filled properly, handling login..");
+			Map<String,String> data = filledForm.data();
+                        String email="";
+                        String password="";
+                        for (Map.Entry<String, String> entry : data.entrySet()) {
+                            if(entry.getKey().equals("email"))
+                                email=entry.getValue();
+                            else if(entry.getKey().equals("password"))
+                                password=entry.getValue();
+                        }
+                        
+                        User result = User.findByEmail(email);
+                        
+                        
+                        
+                        LoggerUtils.debug("LOGIN","The login form was filled properly, handling login..");
 			return UsernamePasswordAuthProvider.handleLogin(ctx());
 		}
 	}
 
+        private enum Case {
+		SIGNUP, LOGIN
+	}
+
 }
+
