@@ -9,7 +9,7 @@
 <div class="backgroundimage-login">
     @helper.form(routes.Login.doLogin, 'id -> "loginForm") {
         <!-- PopUp on error -->
-        @if(flash.get("email") || flash.get("password")) {
+        @if(flash.get("email") || flash.get("password") || flash.get("failmail") || flash.get("failmailorpass")) {
             <div id="error-section">
                 <div id="error-wrap">
                     <div id="error-container">
@@ -23,6 +23,12 @@
                                 }
                                 @if(flash.get("password")) {
                                 <li>Invalid <strong>Password</strong></li>
+                                }
+                                @if(flash.get("failmail")) {
+                                <li><strong>Email</strong> not registered</li>
+                                }
+                                @if(flash.get("failmailorpass")) {
+                                <li><strong>Email</strong> and/or <strong>Password</strong> <strong>don't match</strong></li>
                                 }
                             </ul>
                         </div>

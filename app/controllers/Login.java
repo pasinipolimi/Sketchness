@@ -104,9 +104,10 @@ public class Login extends Controller {
                         }
                         
                         User result = User.findByEmail(email);
-                        
-                        
-                        
+                        if(result==null)
+                            flash().put("failmail", "error");
+                        else
+                            flash().put("failmailorpass", "error");
                         LoggerUtils.debug("LOGIN","The login form was filled properly, handling login..");
 			return UsernamePasswordAuthProvider.handleLogin(ctx());
 		}
