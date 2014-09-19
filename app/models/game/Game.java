@@ -124,6 +124,9 @@ public class Game extends GameRoom {
 	String askTagSketcher;
 	Boolean loadingAlreadySent = false;
 
+	//single player variables
+	String singlePlayerName;
+
 	public Game() {
 		super(Game.class);
 	}
@@ -297,6 +300,41 @@ public class Game extends GameRoom {
 		sketcherPainter = null;
 		final int currentPlayers = requiredPlayers - disconnectedPlayers;
 		int count = 0;
+
+		//Single player BOT 
+		if (requiredPlayers == 1)
+		{
+			if(playersVect.get(0).hasBeenSketcher == true)
+			{
+				playersVect.get(0).role = "GUESSER";
+				sketcherPainter = playersVect.get(0);
+				playersVect.get(0).hasBeenSketcher = false;
+				sketcherPainter.name = "bot";
+				
+			}
+			else
+			{
+				playersVect.get(0).role = "SKETCHER";
+				sketcherPainter = playersVect.get(0);
+				sketcherPainter.role = "SKETCHER";
+				sketcherPainter.hasBeenSketcher = true;
+				sketcherPainter.name = singlePlayerName;
+				playersVect.get(0).hasBeenSketcher = true;
+
+			}
+			GameBus.getInstance().publish(
+					new GameEvent(GameMessages.composeLogMessage(
+							LogLevel.info,
+							Messages.get(LanguagePicker.retrieveLocale(),
+									"thesketcheris") + " " + sketcherPainter.name),
+									roomChannel));
+			GameBus.getInstance().publish(
+					new GameEvent(GameMessages
+							.composeRoundBegin(sketcherPainter.name), roomChannel));
+			return sketcherPainter.name;
+		}
+
+
 		// Publish system messages to inform that a new round is starting and
 		// the roles are being chosen
 		GameBus.getInstance().publish(
@@ -519,6 +557,15 @@ public class Game extends GameRoom {
 			// not, ask for a new one
 			try {
 				taskImage = retrieveTaskImage();
+				String lab = taskImage.get("tag").asText();
+				if(requiredPlayers==1){
+					while((lab.equals(""))&&taskImage!=null){
+						taskImage = retrieveTaskImage();
+						if(taskImage!=null){
+							lab = taskImage.get("tag").asText();
+						}
+					}
+				}
 			} // We cannot recover the task to be done, recover the error by
 			// closing
 			// the game
@@ -692,7 +739,7 @@ public class Game extends GameRoom {
 									CMS.taskSetInitialization(
 											priorityTaskQueue,
 											queueImages, roomChannel,
-											maxRound);
+											maxRound, requiredPlayers);
 								else
 									// CMS.fixGroundTruth(groundTruthId,
 									// priorityTaskQueue,
@@ -753,6 +800,11 @@ public class Game extends GameRoom {
 		Logger.info("[GAME] added player "
 				+ playersVect.get(playersVect.size() - 1).name);
 		Logger.debug("[GAME] Check Start");
+
+		if(requiredPlayers == 1){
+			singlePlayerName = playersVect.get(0).name;
+		}
+
 		checkStart();
 	}
 
@@ -826,7 +878,7 @@ public class Game extends GameRoom {
 		for (final Painter painter : playersVect) {
 			// If the current painter is the guesser, has not guessed before and
 			// it is not the sketcher, update his points
-			if (painter.name.equals(guesser) && painter.guessed == false) {
+			if (((painter.name.equals(guesser)) && (painter.guessed == false))||(requiredPlayers == 1)) {
 				numberGuessed++;
 				painter.setPoints(painter.getPoints() + guesserPointsRemaining);
 				painter.setCorrectGuess();
@@ -965,6 +1017,9 @@ public class Game extends GameRoom {
 		final ObjectNode leaderboard = new ObjectNode(factory);
 		leaderboard.put("type", "leaderboard");
 		leaderboard.put("playersNumber", playersVect.size());
+		if(requiredPlayers == 1){
+			leaderboard.put("singlePlayerName", singlePlayerName);
+		}
 		final Painter[] sorted = playersVect.toArray(new Painter[0]);
 		Arrays.sort(sorted);
 		final ArrayNode playersOrder = new ArrayNode(factory);

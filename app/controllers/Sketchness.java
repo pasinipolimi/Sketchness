@@ -24,6 +24,19 @@ import views.html.lobby;
 import be.objectify.deadbolt.java.actions.Group;
 import be.objectify.deadbolt.java.actions.Restrict;
 
+
+import org.json.JSONException;
+import java.io.IOException;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import play.mvc.BodyParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import utils.Renderer;
+import utils.CMS.CMS;
+import utils.CMS.CMSException;
+
+
 import com.feth.play.module.pa.PlayAuthenticate;
 import com.feth.play.module.pa.user.AuthUser;
 import static play.mvc.Controller.flash;
@@ -234,6 +247,71 @@ public class Sketchness extends Controller {
                 }
 		return ok();
 	}
+
+	/**
+     * Retrieve segmentations of an image to simulate sketcher (bot)
+     * @return one of the best polyline segmentation of the image
+     * @throws JSONException, CMSException
+     */
+    public static Result segmentationImageCall() throws JSONException, CMSException {
+        
+        final String imageId = request().getHeader("selected");
+        final String name = request().getHeader("tag");
+        final String tagId = String.valueOf(CMS.getTagId(name));
+        final String result = Renderer.segmentationImageCall(imageId,tagId);
+        return ok(result);
+
+
+    }       
+    
+
+    @BodyParser.Of(BodyParser.Json.class)
+    public static Result bentleyOttmann() throws JSONException {
+        
+        //final String points = request().getHeader("points");
+        Http.RequestBody body = request().body();           
+        JsonNode p = body.asJson();
+        final String points = p.toString();
+        
+        ObjectMapper mapper = new ObjectMapper();
+        JsonFactory factory = mapper.getJsonFactory();
+        JsonParser jp;
+        JsonNode actualObj = null;
+        try {
+            jp = factory.createJsonParser(points);
+            actualObj = mapper.readTree(jp);
+        } catch (JsonParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        
+        String finalPoints = Renderer.retrievePoints(actualObj);
+        
+        return ok(finalPoints);
+
+    }
+    
+    public static Result poseClassifier() throws JSONException {
+        
+        final String pose = request().getHeader("pose");
+        final String ratio = request().getHeader("ratio");
+
+        final String result = Renderer.poseClassifier(pose, ratio);
+        return ok(result);
+    }       
+    
+    public static Result getPose() throws JSONException, CMSException {
+
+        final String image_id = request().getHeader("idselected");
+        final String result = Renderer.getPose(image_id);
+        return ok(result);
+
+    }
+
 
 
 }

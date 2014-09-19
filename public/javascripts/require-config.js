@@ -13,7 +13,8 @@ require.config({
 		"nouislider": "lib/nouislider",
 		"link": "lib/Link",
 		"spectrum": "lib/spectrum",
-        "snow":"lib/jquery.snow"
+        "snow":"lib/jquery.snow",
+        "jAjax": "lib/jAjax"
 	},
 	shim: {
 		"jquery": {
@@ -52,6 +53,10 @@ require.config({
         "snow": {
             deps: ["jquery"],
             exports: "$.fn.let_it_snow"
+        },
+        "jAjax": {
+        	deps: ["jquery"],
+        	exports: "$.jAjax"
         }
 	}
 });

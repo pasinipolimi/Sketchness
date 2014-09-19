@@ -13,6 +13,7 @@ public abstract class SortObject implements Comparable<SortObject> {
     private int idU;
     private int num;
     private String media;
+    private double quality;
 
     private int idTmp;
     private int imgTmp;
@@ -53,11 +54,23 @@ public abstract class SortObject implements Comparable<SortObject> {
     public String getMedia(){
         return media;
     }
+     public double getQuality() {
+        return quality;
+    }
+    public void setQuality(double quality) {
+        this.quality = quality;
+    }
 
     @Override
     public int compareTo(SortObject o) {
         String i = Integer.toString(getNum());
         String j = Integer.toString(o.getNum());
+        return i.compareTo(j);
+    }
+
+    public int compareToDouble(SortObject o) {
+        String i = Double.toString(getQuality());
+        String j = Double.toString(o.getQuality());
         return i.compareTo(j);
     }
 
