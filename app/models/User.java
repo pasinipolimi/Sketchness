@@ -142,7 +142,8 @@ public class User extends Model implements Subject {
 
 	public static User findByUsernamePasswordIdentity(
 			final UsernamePasswordAuthUser identity) {
-		return getUsernamePasswordAuthUserFind(identity).findUnique();
+                List<User> returned = getUsernamePasswordAuthUserFind(identity).findList();
+                return returned.get(returned.size()-1);
 	}
 
 	private static ExpressionList<User> getUsernamePasswordAuthUserFind(
@@ -363,7 +364,8 @@ public class User extends Model implements Subject {
 	}
 
 	public static User findByEmail(final String email) {
-		return getEmailUserFind(email).findUnique();
+		List<User> returned = getEmailUserFind(email).findList();
+                return returned.get(returned.size()-1);
 	}
 
 	private static ExpressionList<User> getEmailUserFind(final String email) {
