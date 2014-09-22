@@ -24,21 +24,12 @@ public class MyUserServicePlugin extends UserServicePlugin {
                 // verified within the application as a security breach there might
                 // break your security as well!
                 user.email = identity.getEmail();
-
-
-                if(user.checkMail(identity.getEmail())){
-
-                    return null;
-                }
-
-
             }
-
-			return User.create(authUser).id;
-		} else {
-			// we have this user already, so return null
-			return null;
-		}
+            return User.create(authUser).id;
+            } else {
+                    // we have this user already, so return null
+                    return null;
+            }
 	}
 
 	@Override
