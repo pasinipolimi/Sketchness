@@ -130,8 +130,7 @@ public class Signup extends Controller {
                         if(User.checkMail(filledForm.field("email").value())){
                             LoggerUtils.debug("SIGNUP","Email already registered: "
                                     + filledForm.field("email").value());
-                            flash(Application.FLASH_ERROR_KEY,
-                                    Messages.get("error.mailExists"));
+                            flash("mailAlreadyRegistered","error");
                             return badRequest(sketchness_signup.render(filledForm));
                         }
 

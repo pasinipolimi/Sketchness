@@ -21,15 +21,14 @@
     <div id="signup-form">
         @helper.form(routes.Signup.doSignup) {
 
-        @if(flash.get("accept_terms") || flash.get("email") || flash.get("name") || flash.get("password") || flash.get("passwordMismatch") || flash.get("nation") || flash.get("gender")) {
-
+        @if(flash.get("mailAlreadyRegistered") || flash.get("accept_terms") || flash.get("email") || flash.get("name") || flash.get("password") || flash.get("passwordMismatch") || flash.get("nation") || flash.get("gender")) {
         <div id="error-section">
             <div id="error-wrap">
                 <div id="error-container">
                     <div id="close"></div>
                     <h1 id="error-title">Error</h1>
                     <div id="error-message">
-                        Some of the required fields need to be filled:
+                        @if(!flash.get("mailAlreadyRegistered")) {Some of the required fields need to be filled:}
                         <ul>
                             @if(flash.get("accept_terms")) {
                             <li><strong>Accept terms</strong></li>
@@ -54,7 +53,9 @@
                             @if(flash.get("nation")) {
                             <li><strong>Nation</strong></li>
                             }
-
+                            @if(flash.get("mailAlreadyRegistered")) {
+                                <li>It is possible you already made a registration. In order to connect your account you have to login and click on "Link_Provider" button from the "Profile" menu.</li>
+                            }
                         </ul>
                     </div>
                 </div>
