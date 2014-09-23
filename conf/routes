@@ -89,7 +89,7 @@ GET     /login                      controllers.Application.login
 POST    /login                      controllers.Application.doLogin
 
 GET     /logout                     controllers.Application.doLogout
-GET     /authenticate/:provider     com.feth.play.module.pa.controllers.Authenticate.authenticate(provider: String)
+GET     /authenticate/:provider     controllers.Login.authenticate(provider: String)
 
 GET     /signup                     controllers.Application.signup
 POST    /signup                     controllers.Application.doSignup

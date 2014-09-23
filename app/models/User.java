@@ -189,10 +189,9 @@ public class User extends Model implements Subject {
 			// secondo me inutile e genera un NPE dopo... se sono in signup ho
 			// fatto la verifica dell esistenza della mail prima e se sono in
 			// login pure
-			// if (user.checkMail(identity.getEmail())) {
-			//
-			// return user;
-			// }
+//			 if (user.checkMail(identity.getEmail())) {
+//                            return User.findByEmail(identity.getEmail());
+//			 }
 
 			user.emailValidated = false;
 		}

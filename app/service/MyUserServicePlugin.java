@@ -17,19 +17,19 @@ public class MyUserServicePlugin extends UserServicePlugin {
 	public Object save(final AuthUser authUser) {
 		final boolean isLinked = User.existsByAuthUserIdentity(authUser);
 		if (!isLinked) {
-            if (authUser instanceof EmailIdentity) {
-                final EmailIdentity identity = (EmailIdentity) authUser;
-                final User user = new User();
-                // Remember, even when getting them from FB & Co., emails should be
-                // verified within the application as a security breach there might
-                // break your security as well!
-                user.email = identity.getEmail();
-            }
-            return User.create(authUser).id;
-            } else {
+                    if (authUser instanceof EmailIdentity) {
+                        final EmailIdentity identity = (EmailIdentity) authUser;
+                        final User user = new User();
+                        // Remember, even when getting them from FB & Co., emails should be
+                        // verified within the application as a security breach there might
+                        // break your security as well!
+                        user.email = identity.getEmail();
+                    }
+                    return User.create(authUser).id;
+                } else {
                     // we have this user already, so return null
                     return null;
-            }
+                }
 	}
 
 	@Override

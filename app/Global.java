@@ -52,8 +52,7 @@ public class Global extends GlobalSettings {
 				// You can provide your own authentication implementation,
 				// however the evolutions.default should be sufficient for most
 				// cases
-				return com.feth.play.module.pa.controllers.routes.Authenticate
-						.authenticate(provider);
+				return routes.Login.authenticate(provider);
 			}
 
 			@Override
