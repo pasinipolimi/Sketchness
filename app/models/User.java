@@ -240,7 +240,7 @@ public class User extends Model implements Subject {
 		user.totalScore = 0;
 		LoggerUtils.debug("USER","Saving the new user...");
 		user.save();
-		user.saveManyToManyAssociations("roles");
+		//user.saveManyToManyAssociations("roles");
 		// user.saveManyToManyAssociations("permissions");
 		return user;
 	}
