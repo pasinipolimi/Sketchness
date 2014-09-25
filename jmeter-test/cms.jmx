@@ -1,0 +1,488 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="2.6" jmeter="2.11 r1554548">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan CMSs" enabled="true">
+      <stringProp name="TestPlan.comments"></stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="GETIMAGE_OLD" enabled="false">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">200</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">20</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <longProp name="ThreadGroup.start_time">1395492431000</longProp>
+        <longProp name="ThreadGroup.end_time">1395492431000</longProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="getImageOldCMS" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">localhost</stringProp>
+          <stringProp name="HTTPSampler.port">8080</stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/cms/wsmc/image.json?collection=44296&amp;limit=100</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <boolProp name="HTTPSampler.monitor">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>false</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="true">
+          <stringProp name="DurationAssertion.duration">1000</stringProp>
+        </DurationAssertion>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="POSTACTION_OLD" enabled="false">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <intProp name="LoopController.loops">-1</intProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <longProp name="ThreadGroup.start_time">1395492431000</longProp>
+        <longProp name="ThreadGroup.end_time">1395492431000</longProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="taskAPI" enabled="true">
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&quot;image&quot;:849,&quot;session&quot;:516,&quot;points&quot;:[{&quot;x&quot;:67,&quot;y&quot;:106,&quot;end&quot;:false},{&quot;x&quot;:67,&quot;y&quot;:108,&quot;end&quot;:false},{&quot;x&quot;:65,&quot;y&quot;:108,&quot;end&quot;:false},{&quot;x&quot;:60,&quot;y&quot;:111,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:113,&quot;end&quot;:false},{&quot;x&quot;:57,&quot;y&quot;:115,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:117,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:118,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:120,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:122,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:129,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:130,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:134,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:137,&quot;end&quot;:false},{&quot;x&quot;:57,&quot;y&quot;:142,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:146,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:149,&quot;end&quot;:false},{&quot;x&quot;:60,&quot;y&quot;:153,&quot;end&quot;:false},{&quot;x&quot;:62,&quot;y&quot;:156,&quot;end&quot;:false},{&quot;x&quot;:62,&quot;y&quot;:165,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:171,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:175,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:182,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:189,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:192,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:199,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:202,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:211,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:214,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:218,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:223,&quot;end&quot;:false},{&quot;x&quot;:62,&quot;y&quot;:226,&quot;end&quot;:false},{&quot;x&quot;:62,&quot;y&quot;:230,&quot;end&quot;:false},{&quot;x&quot;:60,&quot;y&quot;:235,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:238,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:245,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:250,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:254,&quot;end&quot;:false},{&quot;x&quot;:57,&quot;y&quot;:264,&quot;end&quot;:false},{&quot;x&quot;:57,&quot;y&quot;:266,&quot;end&quot;:false},{&quot;x&quot;:57,&quot;y&quot;:269,&quot;end&quot;:false},{&quot;x&quot;:57,&quot;y&quot;:274,&quot;end&quot;:false},{&quot;x&quot;:57,&quot;y&quot;:279,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:285,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:288,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:291,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:295,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:298,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:309,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:312,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:319,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:326,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:331,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:336,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:339,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:343,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:345,&quot;end&quot;:false},{&quot;x&quot;:60,&quot;y&quot;:345,&quot;end&quot;:false},{&quot;x&quot;:62,&quot;y&quot;:346,&quot;end&quot;:false},{&quot;x&quot;:62,&quot;y&quot;:348,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:348,&quot;end&quot;:false},{&quot;x&quot;:65,&quot;y&quot;:350,&quot;end&quot;:false},{&quot;x&quot;:67,&quot;y&quot;:351,&quot;end&quot;:false},{&quot;x&quot;:72,&quot;y&quot;:351,&quot;end&quot;:false},{&quot;x&quot;:75,&quot;y&quot;:351,&quot;end&quot;:false},{&quot;x&quot;:79,&quot;y&quot;:353,&quot;end&quot;:false},{&quot;x&quot;:82,&quot;y&quot;:353,&quot;end&quot;:false},{&quot;x&quot;:86,&quot;y&quot;:353,&quot;end&quot;:false},{&quot;x&quot;:94,&quot;y&quot;:353,&quot;end&quot;:false},{&quot;x&quot;:99,&quot;y&quot;:353,&quot;end&quot;:false},{&quot;x&quot;:111,&quot;y&quot;:355,&quot;end&quot;:false},{&quot;x&quot;:118,&quot;y&quot;:357,&quot;end&quot;:false},{&quot;x&quot;:122,&quot;y&quot;:357,&quot;end&quot;:false},{&quot;x&quot;:125,&quot;y&quot;:358,&quot;end&quot;:false},{&quot;x&quot;:129,&quot;y&quot;:358,&quot;end&quot;:false},{&quot;x&quot;:132,&quot;y&quot;:358,&quot;end&quot;:false},{&quot;x&quot;:134,&quot;y&quot;:358,&quot;end&quot;:false},{&quot;x&quot;:137,&quot;y&quot;:358,&quot;end&quot;:false},{&quot;x&quot;:141,&quot;y&quot;:357,&quot;end&quot;:false},{&quot;x&quot;:144,&quot;y&quot;:357,&quot;end&quot;:false},{&quot;x&quot;:147,&quot;y&quot;:355,&quot;end&quot;:false},{&quot;x&quot;:154,&quot;y&quot;:355,&quot;end&quot;:false},{&quot;x&quot;:156,&quot;y&quot;:353,&quot;end&quot;:false},{&quot;x&quot;:158,&quot;y&quot;:351,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:350,&quot;end&quot;:false},{&quot;x&quot;:163,&quot;y&quot;:348,&quot;end&quot;:false},{&quot;x&quot;:165,&quot;y&quot;:348,&quot;end&quot;:false},{&quot;x&quot;:168,&quot;y&quot;:345,&quot;end&quot;:false},{&quot;x&quot;:170,&quot;y&quot;:345,&quot;end&quot;:false},{&quot;x&quot;:171,&quot;y&quot;:345,&quot;end&quot;:false},{&quot;x&quot;:173,&quot;y&quot;:345,&quot;end&quot;:false},{&quot;x&quot;:175,&quot;y&quot;:343,&quot;end&quot;:false},{&quot;x&quot;:175,&quot;y&quot;:343,&quot;end&quot;:false},{&quot;x&quot;:175,&quot;y&quot;:341,&quot;end&quot;:false},{&quot;x&quot;:177,&quot;y&quot;:341,&quot;end&quot;:false},{&quot;x&quot;:178,&quot;y&quot;:339,&quot;end&quot;:false},{&quot;x&quot;:180,&quot;y&quot;:336,&quot;end&quot;:false},{&quot;x&quot;:180,&quot;y&quot;:333,&quot;end&quot;:false},{&quot;x&quot;:180,&quot;y&quot;:329,&quot;end&quot;:false},{&quot;x&quot;:180,&quot;y&quot;:322,&quot;end&quot;:false},{&quot;x&quot;:178,&quot;y&quot;:312,&quot;end&quot;:false},{&quot;x&quot;:175,&quot;y&quot;:302,&quot;end&quot;:false},{&quot;x&quot;:168,&quot;y&quot;:283,&quot;end&quot;:false},{&quot;x&quot;:166,&quot;y&quot;:276,&quot;end&quot;:false},{&quot;x&quot;:165,&quot;y&quot;:271,&quot;end&quot;:false},{&quot;x&quot;:163,&quot;y&quot;:264,&quot;end&quot;:false},{&quot;x&quot;:163,&quot;y&quot;:255,&quot;end&quot;:false},{&quot;x&quot;:163,&quot;y&quot;:249,&quot;end&quot;:false},{&quot;x&quot;:161,&quot;y&quot;:242,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:235,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:230,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:223,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:214,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:209,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:202,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:197,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:195,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:192,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:187,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:183,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:180,&quot;end&quot;:false},{&quot;x&quot;:158,&quot;y&quot;:177,&quot;end&quot;:false},{&quot;x&quot;:158,&quot;y&quot;:173,&quot;end&quot;:false},{&quot;x&quot;:158,&quot;y&quot;:170,&quot;end&quot;:false},{&quot;x&quot;:156,&quot;y&quot;:163,&quot;end&quot;:false},{&quot;x&quot;:156,&quot;y&quot;:158,&quot;end&quot;:false},{&quot;x&quot;:156,&quot;y&quot;:154,&quot;end&quot;:false},{&quot;x&quot;:154,&quot;y&quot;:149,&quot;end&quot;:false},{&quot;x&quot;:153,&quot;y&quot;:142,&quot;end&quot;:false},{&quot;x&quot;:151,&quot;y&quot;:137,&quot;end&quot;:false},{&quot;x&quot;:149,&quot;y&quot;:130,&quot;end&quot;:false},{&quot;x&quot;:149,&quot;y&quot;:127,&quot;end&quot;:false},{&quot;x&quot;:147,&quot;y&quot;:122,&quot;end&quot;:false},{&quot;x&quot;:146,&quot;y&quot;:118,&quot;end&quot;:false},{&quot;x&quot;:146,&quot;y&quot;:117,&quot;end&quot;:false},{&quot;x&quot;:146,&quot;y&quot;:111,&quot;end&quot;:false},{&quot;x&quot;:144,&quot;y&quot;:108,&quot;end&quot;:false},{&quot;x&quot;:142,&quot;y&quot;:103,&quot;end&quot;:false},{&quot;x&quot;:141,&quot;y&quot;:99,&quot;end&quot;:false},{&quot;x&quot;:139,&quot;y&quot;:96,&quot;end&quot;:false},{&quot;x&quot;:139,&quot;y&quot;:93,&quot;end&quot;:false},{&quot;x&quot;:137,&quot;y&quot;:91,&quot;end&quot;:false},{&quot;x&quot;:137,&quot;y&quot;:89,&quot;end&quot;:false},{&quot;x&quot;:135,&quot;y&quot;:89,&quot;end&quot;:false},{&quot;x&quot;:135,&quot;y&quot;:86,&quot;end&quot;:false},{&quot;x&quot;:134,&quot;y&quot;:86,&quot;end&quot;:false},{&quot;x&quot;:134,&quot;y&quot;:87,&quot;end&quot;:false},{&quot;x&quot;:132,&quot;y&quot;:94,&quot;end&quot;:false},{&quot;x&quot;:129,&quot;y&quot;:99,&quot;end&quot;:false},{&quot;x&quot;:127,&quot;y&quot;:103,&quot;end&quot;:false},{&quot;x&quot;:125,&quot;y&quot;:106,&quot;end&quot;:false},{&quot;x&quot;:125,&quot;y&quot;:110,&quot;end&quot;:false},{&quot;x&quot;:122,&quot;y&quot;:111,&quot;end&quot;:false},{&quot;x&quot;:120,&quot;y&quot;:115,&quot;end&quot;:false},{&quot;x&quot;:120,&quot;y&quot;:117,&quot;end&quot;:false},{&quot;x&quot;:118,&quot;y&quot;:118,&quot;end&quot;:false},{&quot;x&quot;:117,&quot;y&quot;:120,&quot;end&quot;:false},{&quot;x&quot;:113,&quot;y&quot;:122,&quot;end&quot;:false},{&quot;x&quot;:110,&quot;y&quot;:123,&quot;end&quot;:false},{&quot;x&quot;:108,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:106,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:103,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:99,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:98,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:96,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:94,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:89,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:84,&quot;y&quot;:118,&quot;end&quot;:false},{&quot;x&quot;:77,&quot;y&quot;:113,&quot;end&quot;:false},{&quot;x&quot;:70,&quot;y&quot;:106,&quot;end&quot;:false},{&quot;x&quot;:67,&quot;y&quot;:103,&quot;end&quot;:false},{&quot;x&quot;:65,&quot;y&quot;:103,&quot;end&quot;:false},{&quot;x&quot;:65,&quot;y&quot;:103,&quot;end&quot;:true},{&quot;x&quot;:65,&quot;y&quot;:103,&quot;end&quot;:true}],&quot;history&quot;:[{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:132,&quot;y&quot;:62},{&quot;x&quot;:132,&quot;y&quot;:63}],&quot;time&quot;:10586},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:131,&quot;y&quot;:63},{&quot;x&quot;:128,&quot;y&quot;:65},{&quot;x&quot;:127,&quot;y&quot;:66}],&quot;time&quot;:10652},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:126,&quot;y&quot;:67},{&quot;x&quot;:125,&quot;y&quot;:68},{&quot;x&quot;:125,&quot;y&quot;:69}],&quot;time&quot;:10704},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:125,&quot;y&quot;:70},{&quot;x&quot;:125,&quot;y&quot;:71},{&quot;x&quot;:125,&quot;y&quot;:73}],&quot;time&quot;:10774},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:125,&quot;y&quot;:75},{&quot;x&quot;:125,&quot;y&quot;:76},{&quot;x&quot;:125,&quot;y&quot;:78}],&quot;time&quot;:10843},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:125,&quot;y&quot;:80},{&quot;x&quot;:126,&quot;y&quot;:83}],&quot;time&quot;:10902},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:127,&quot;y&quot;:85},{&quot;x&quot;:127,&quot;y&quot;:87},{&quot;x&quot;:128,&quot;y&quot;:89}],&quot;time&quot;:10971},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:129,&quot;y&quot;:91},{&quot;x&quot;:129,&quot;y&quot;:96},{&quot;x&quot;:130,&quot;y&quot;:100}],&quot;time&quot;:11050},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:130,&quot;y&quot;:102},{&quot;x&quot;:130,&quot;y&quot;:106},{&quot;x&quot;:130,&quot;y&quot;:110},{&quot;x&quot;:130,&quot;y&quot;:112}],&quot;time&quot;:11105},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:130,&quot;y&quot;:116},{&quot;x&quot;:130,&quot;y&quot;:118},{&quot;x&quot;:130,&quot;y&quot;:123}],&quot;time&quot;:11176},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:130,&quot;y&quot;:125},{&quot;x&quot;:130,&quot;y&quot;:127},{&quot;x&quot;:130,&quot;y&quot;:130},{&quot;x&quot;:129,&quot;y&quot;:132}],&quot;time&quot;:11237},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:129,&quot;y&quot;:134},{&quot;x&quot;:128,&quot;y&quot;:137},{&quot;x&quot;:127,&quot;y&quot;:139}],&quot;time&quot;:11300},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:127,&quot;y&quot;:143},{&quot;x&quot;:127,&quot;y&quot;:146},{&quot;x&quot;:127,&quot;y&quot;:148}],&quot;time&quot;:11372},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:126,&quot;y&quot;:154},{&quot;x&quot;:126,&quot;y&quot;:155},{&quot;x&quot;:126,&quot;y&quot;:157}],&quot;time&quot;:11428},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:126,&quot;y&quot;:160},{&quot;x&quot;:126,&quot;y&quot;:163},{&quot;x&quot;:127,&quot;y&quot;:166},{&quot;x&quot;:127,&quot;y&quot;:168}],&quot;time&quot;:11487},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:127,&quot;y&quot;:170},{&quot;x&quot;:127,&quot;y&quot;:172},{&quot;x&quot;:127,&quot;y&quot;:174}],&quot;time&quot;:11539},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:127,&quot;y&quot;:180},{&quot;x&quot;:127,&quot;y&quot;:182},{&quot;x&quot;:127,&quot;y&quot;:186}],&quot;time&quot;:11606},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:127,&quot;y&quot;:190},{&quot;x&quot;:127,&quot;y&quot;:193},{&quot;x&quot;:127,&quot;y&quot;:196}],&quot;time&quot;:11661},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:127,&quot;y&quot;:198},{&quot;x&quot;:127,&quot;y&quot;:200},{&quot;x&quot;:127,&quot;y&quot;:201},{&quot;x&quot;:128,&quot;y&quot;:201}],&quot;time&quot;:11722},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:129,&quot;y&quot;:202},{&quot;x&quot;:129,&quot;y&quot;:203},{&quot;x&quot;:130,&quot;y&quot;:203},{&quot;x&quot;:131,&quot;y&quot;:204}],&quot;time&quot;:11790},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:132,&quot;y&quot;:205},{&quot;x&quot;:135,&quot;y&quot;:205},{&quot;x&quot;:137,&quot;y&quot;:205}],&quot;time&quot;:11841},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:139,&quot;y&quot;:206},{&quot;x&quot;:141,&quot;y&quot;:206},{&quot;x&quot;:143,&quot;y&quot;:206}],&quot;time&quot;:11894},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:148,&quot;y&quot;:206},{&quot;x&quot;:151,&quot;y&quot;:206}],&quot;time&quot;:11946},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:158,&quot;y&quot;:207},{&quot;x&quot;:162,&quot;y&quot;:208},{&quot;x&quot;:164,&quot;y&quot;:208}],&quot;time&quot;:12008},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:166,&quot;y&quot;:209},{&quot;x&quot;:168,&quot;y&quot;:209},{&quot;x&quot;:170,&quot;y&quot;:209}],&quot;time&quot;:12065},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:171,&quot;y&quot;:209},{&quot;x&quot;:173,&quot;y&quot;:209},{&quot;x&quot;:175,&quot;y&quot;:208},{&quot;x&quot;:177,&quot;y&quot;:208}],&quot;time&quot;:12123},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:179,&quot;y&quot;:207},{&quot;x&quot;:183,&quot;y&quot;:207},{&quot;x&quot;:184,&quot;y&quot;:206}],&quot;time&quot;:12177},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:185,&quot;y&quot;:205},{&quot;x&quot;:186,&quot;y&quot;:204},{&quot;x&quot;:188,&quot;y&quot;:203}],&quot;time&quot;:12241},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:189,&quot;y&quot;:203},{&quot;x&quot;:191,&quot;y&quot;:201},{&quot;x&quot;:192,&quot;y&quot;:201},{&quot;x&quot;:193,&quot;y&quot;:201}],&quot;time&quot;:12319},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:194,&quot;y&quot;:201},{&quot;x&quot;:195,&quot;y&quot;:200}],&quot;time&quot;:12371},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:195,&quot;y&quot;:200},{&quot;x&quot;:195,&quot;y&quot;:199}],&quot;time&quot;:12436},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:196,&quot;y&quot;:199},{&quot;x&quot;:197,&quot;y&quot;:198},{&quot;x&quot;:198,&quot;y&quot;:196}],&quot;time&quot;:12491},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:198,&quot;y&quot;:194},{&quot;x&quot;:198,&quot;y&quot;:192},{&quot;x&quot;:198,&quot;y&quot;:188},{&quot;x&quot;:197,&quot;y&quot;:182}],&quot;time&quot;:12553},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:195,&quot;y&quot;:176},{&quot;x&quot;:191,&quot;y&quot;:165}],&quot;time&quot;:12611},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:190,&quot;y&quot;:161},{&quot;x&quot;:189,&quot;y&quot;:158},{&quot;x&quot;:188,&quot;y&quot;:154},{&quot;x&quot;:188,&quot;y&quot;:149}],&quot;time&quot;:12675},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:188,&quot;y&quot;:145},{&quot;x&quot;:187,&quot;y&quot;:141},{&quot;x&quot;:186,&quot;y&quot;:137},{&quot;x&quot;:186,&quot;y&quot;:134}],&quot;time&quot;:12742},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:186,&quot;y&quot;:130},{&quot;x&quot;:186,&quot;y&quot;:125},{&quot;x&quot;:186,&quot;y&quot;:122},{&quot;x&quot;:186,&quot;y&quot;:118}],&quot;time&quot;:12810},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:186,&quot;y&quot;:115},{&quot;x&quot;:186,&quot;y&quot;:114},{&quot;x&quot;:186,&quot;y&quot;:112},{&quot;x&quot;:186,&quot;y&quot;:109}],&quot;time&quot;:12872},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:186,&quot;y&quot;:107},{&quot;x&quot;:186,&quot;y&quot;:105},{&quot;x&quot;:185,&quot;y&quot;:103},{&quot;x&quot;:185,&quot;y&quot;:101}],&quot;time&quot;:12945},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:185,&quot;y&quot;:99},{&quot;x&quot;:184,&quot;y&quot;:95}],&quot;time&quot;:12997},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:184,&quot;y&quot;:92},{&quot;x&quot;:184,&quot;y&quot;:90},{&quot;x&quot;:183,&quot;y&quot;:87},{&quot;x&quot;:182,&quot;y&quot;:83}],&quot;time&quot;:13054},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:181,&quot;y&quot;:80},{&quot;x&quot;:180,&quot;y&quot;:76},{&quot;x&quot;:180,&quot;y&quot;:74},{&quot;x&quot;:179,&quot;y&quot;:71}],&quot;time&quot;:13120},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:178,&quot;y&quot;:69},{&quot;x&quot;:178,&quot;y&quot;:68},{&quot;x&quot;:178,&quot;y&quot;:65}],&quot;time&quot;:13180},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:177,&quot;y&quot;:63},{&quot;x&quot;:176,&quot;y&quot;:60},{&quot;x&quot;:175,&quot;y&quot;:58},{&quot;x&quot;:174,&quot;y&quot;:56}],&quot;time&quot;:13242},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:174,&quot;y&quot;:54},{&quot;x&quot;:173,&quot;y&quot;:53},{&quot;x&quot;:173,&quot;y&quot;:52},{&quot;x&quot;:172,&quot;y&quot;:52}],&quot;time&quot;:13306},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:172,&quot;y&quot;:50},{&quot;x&quot;:171,&quot;y&quot;:50}],&quot;time&quot;:13503},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:171,&quot;y&quot;:51},{&quot;x&quot;:170,&quot;y&quot;:55}],&quot;time&quot;:13558},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:168,&quot;y&quot;:58},{&quot;x&quot;:167,&quot;y&quot;:60},{&quot;x&quot;:166,&quot;y&quot;:62},{&quot;x&quot;:166,&quot;y&quot;:64}],&quot;time&quot;:13622},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:164,&quot;y&quot;:65},{&quot;x&quot;:163,&quot;y&quot;:67},{&quot;x&quot;:163,&quot;y&quot;:68},{&quot;x&quot;:162,&quot;y&quot;:69}],&quot;time&quot;:13688},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:161,&quot;y&quot;:70},{&quot;x&quot;:159,&quot;y&quot;:71},{&quot;x&quot;:157,&quot;y&quot;:72},{&quot;x&quot;:156,&quot;y&quot;:73}],&quot;time&quot;:13755},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:155,&quot;y&quot;:73},{&quot;x&quot;:153,&quot;y&quot;:73},{&quot;x&quot;:151,&quot;y&quot;:73},{&quot;x&quot;:150,&quot;y&quot;:73}],&quot;time&quot;:13820},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:149,&quot;y&quot;:73},{&quot;x&quot;:148,&quot;y&quot;:73}],&quot;time&quot;:13872},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:145,&quot;y&quot;:73},{&quot;x&quot;:142,&quot;y&quot;:69}],&quot;time&quot;:13934},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:138,&quot;y&quot;:66},{&quot;x&quot;:134,&quot;y&quot;:62},{&quot;x&quot;:132,&quot;y&quot;:60}],&quot;time&quot;:13996},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:131,&quot;y&quot;:60},{&quot;x&quot;:131,&quot;y&quot;:60},{&quot;x&quot;:131,&quot;y&quot;:60}],&quot;time&quot;:14265}],&quot;type&quot;:&quot;segmentation&quot;,&quot;tag&quot;:0,&quot;user&quot;:347,&quot;validity&quot;:true}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">54.228.220.100</stringProp>
+          <stringProp name="HTTPSampler.port">80</stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/wsmc/action.json?user=2</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <boolProp name="HTTPSampler.monitor">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>false</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="true">
+          <stringProp name="DurationAssertion.duration">2000</stringProp>
+        </DurationAssertion>
+        <hashTree/>
+        <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
+          <collectionProp name="Asserion.test_strings">
+            <stringProp name="357964818">mediaLocator</stringProp>
+            <stringProp name="0"></stringProp>
+          </collectionProp>
+          <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+          <boolProp name="Assertion.assume_success">false</boolProp>
+          <intProp name="Assertion.test_type">2</intProp>
+        </ResponseAssertion>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="GETCHOOSEIMGTAG_NEW" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">200</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">20</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <longProp name="ThreadGroup.start_time">1395492431000</longProp>
+        <longProp name="ThreadGroup.end_time">1395492431000</longProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="taskAPIvero" enabled="true">
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value"></stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">localhost</stringProp>
+          <stringProp name="HTTPSampler.port">80</stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/choose/imageandtag/leastused?limit=10&amp;collection=3</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <boolProp name="HTTPSampler.monitor">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>false</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="true">
+          <stringProp name="DurationAssertion.duration">500000</stringProp>
+        </DurationAssertion>
+        <hashTree/>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Content-Type</stringProp>
+              <stringProp name="Header.value">application/x-www-form-urlencoded</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Accept</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
+        <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
+          <collectionProp name="Asserion.test_strings">
+            <stringProp name="2524">OK</stringProp>
+          </collectionProp>
+          <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+          <boolProp name="Assertion.assume_success">false</boolProp>
+          <intProp name="Assertion.test_type">2</intProp>
+        </ResponseAssertion>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="GETCHOOSEIMG_NEW" enabled="false">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">50</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">10</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <longProp name="ThreadGroup.start_time">1395492431000</longProp>
+        <longProp name="ThreadGroup.end_time">1395492431000</longProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="taskAPIvero" enabled="true">
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value"></stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">localhost</stringProp>
+          <stringProp name="HTTPSampler.port">80</stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/choose/image/leastused?limit=10&amp;collection=2</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <boolProp name="HTTPSampler.monitor">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>false</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="true">
+          <stringProp name="DurationAssertion.duration">500000</stringProp>
+        </DurationAssertion>
+        <hashTree/>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Content-Type</stringProp>
+              <stringProp name="Header.value">application/x-www-form-urlencoded</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Accept</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
+        <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
+          <collectionProp name="Asserion.test_strings">
+            <stringProp name="2524">OK</stringProp>
+          </collectionProp>
+          <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+          <boolProp name="Assertion.assume_success">false</boolProp>
+          <intProp name="Assertion.test_type">2</intProp>
+        </ResponseAssertion>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="POSTACTION_NEW" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">100</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">20</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <longProp name="ThreadGroup.start_time">1395492431000</longProp>
+        <longProp name="ThreadGroup.end_time">1395492431000</longProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="taskAPIvero" enabled="true">
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&quot;image&quot;:849,&quot;session&quot;:516,&quot;points&quot;:[{&quot;x&quot;:67,&quot;y&quot;:106,&quot;end&quot;:false},{&quot;x&quot;:67,&quot;y&quot;:108,&quot;end&quot;:false},{&quot;x&quot;:65,&quot;y&quot;:108,&quot;end&quot;:false},{&quot;x&quot;:60,&quot;y&quot;:111,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:113,&quot;end&quot;:false},{&quot;x&quot;:57,&quot;y&quot;:115,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:117,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:118,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:120,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:122,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:129,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:130,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:134,&quot;end&quot;:false},{&quot;x&quot;:55,&quot;y&quot;:137,&quot;end&quot;:false},{&quot;x&quot;:57,&quot;y&quot;:142,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:146,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:149,&quot;end&quot;:false},{&quot;x&quot;:60,&quot;y&quot;:153,&quot;end&quot;:false},{&quot;x&quot;:62,&quot;y&quot;:156,&quot;end&quot;:false},{&quot;x&quot;:62,&quot;y&quot;:165,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:171,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:175,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:182,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:189,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:192,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:199,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:202,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:211,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:214,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:218,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:223,&quot;end&quot;:false},{&quot;x&quot;:62,&quot;y&quot;:226,&quot;end&quot;:false},{&quot;x&quot;:62,&quot;y&quot;:230,&quot;end&quot;:false},{&quot;x&quot;:60,&quot;y&quot;:235,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:238,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:245,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:250,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:254,&quot;end&quot;:false},{&quot;x&quot;:57,&quot;y&quot;:264,&quot;end&quot;:false},{&quot;x&quot;:57,&quot;y&quot;:266,&quot;end&quot;:false},{&quot;x&quot;:57,&quot;y&quot;:269,&quot;end&quot;:false},{&quot;x&quot;:57,&quot;y&quot;:274,&quot;end&quot;:false},{&quot;x&quot;:57,&quot;y&quot;:279,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:285,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:288,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:291,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:295,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:298,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:309,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:312,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:319,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:326,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:331,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:336,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:339,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:343,&quot;end&quot;:false},{&quot;x&quot;:58,&quot;y&quot;:345,&quot;end&quot;:false},{&quot;x&quot;:60,&quot;y&quot;:345,&quot;end&quot;:false},{&quot;x&quot;:62,&quot;y&quot;:346,&quot;end&quot;:false},{&quot;x&quot;:62,&quot;y&quot;:348,&quot;end&quot;:false},{&quot;x&quot;:63,&quot;y&quot;:348,&quot;end&quot;:false},{&quot;x&quot;:65,&quot;y&quot;:350,&quot;end&quot;:false},{&quot;x&quot;:67,&quot;y&quot;:351,&quot;end&quot;:false},{&quot;x&quot;:72,&quot;y&quot;:351,&quot;end&quot;:false},{&quot;x&quot;:75,&quot;y&quot;:351,&quot;end&quot;:false},{&quot;x&quot;:79,&quot;y&quot;:353,&quot;end&quot;:false},{&quot;x&quot;:82,&quot;y&quot;:353,&quot;end&quot;:false},{&quot;x&quot;:86,&quot;y&quot;:353,&quot;end&quot;:false},{&quot;x&quot;:94,&quot;y&quot;:353,&quot;end&quot;:false},{&quot;x&quot;:99,&quot;y&quot;:353,&quot;end&quot;:false},{&quot;x&quot;:111,&quot;y&quot;:355,&quot;end&quot;:false},{&quot;x&quot;:118,&quot;y&quot;:357,&quot;end&quot;:false},{&quot;x&quot;:122,&quot;y&quot;:357,&quot;end&quot;:false},{&quot;x&quot;:125,&quot;y&quot;:358,&quot;end&quot;:false},{&quot;x&quot;:129,&quot;y&quot;:358,&quot;end&quot;:false},{&quot;x&quot;:132,&quot;y&quot;:358,&quot;end&quot;:false},{&quot;x&quot;:134,&quot;y&quot;:358,&quot;end&quot;:false},{&quot;x&quot;:137,&quot;y&quot;:358,&quot;end&quot;:false},{&quot;x&quot;:141,&quot;y&quot;:357,&quot;end&quot;:false},{&quot;x&quot;:144,&quot;y&quot;:357,&quot;end&quot;:false},{&quot;x&quot;:147,&quot;y&quot;:355,&quot;end&quot;:false},{&quot;x&quot;:154,&quot;y&quot;:355,&quot;end&quot;:false},{&quot;x&quot;:156,&quot;y&quot;:353,&quot;end&quot;:false},{&quot;x&quot;:158,&quot;y&quot;:351,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:350,&quot;end&quot;:false},{&quot;x&quot;:163,&quot;y&quot;:348,&quot;end&quot;:false},{&quot;x&quot;:165,&quot;y&quot;:348,&quot;end&quot;:false},{&quot;x&quot;:168,&quot;y&quot;:345,&quot;end&quot;:false},{&quot;x&quot;:170,&quot;y&quot;:345,&quot;end&quot;:false},{&quot;x&quot;:171,&quot;y&quot;:345,&quot;end&quot;:false},{&quot;x&quot;:173,&quot;y&quot;:345,&quot;end&quot;:false},{&quot;x&quot;:175,&quot;y&quot;:343,&quot;end&quot;:false},{&quot;x&quot;:175,&quot;y&quot;:343,&quot;end&quot;:false},{&quot;x&quot;:175,&quot;y&quot;:341,&quot;end&quot;:false},{&quot;x&quot;:177,&quot;y&quot;:341,&quot;end&quot;:false},{&quot;x&quot;:178,&quot;y&quot;:339,&quot;end&quot;:false},{&quot;x&quot;:180,&quot;y&quot;:336,&quot;end&quot;:false},{&quot;x&quot;:180,&quot;y&quot;:333,&quot;end&quot;:false},{&quot;x&quot;:180,&quot;y&quot;:329,&quot;end&quot;:false},{&quot;x&quot;:180,&quot;y&quot;:322,&quot;end&quot;:false},{&quot;x&quot;:178,&quot;y&quot;:312,&quot;end&quot;:false},{&quot;x&quot;:175,&quot;y&quot;:302,&quot;end&quot;:false},{&quot;x&quot;:168,&quot;y&quot;:283,&quot;end&quot;:false},{&quot;x&quot;:166,&quot;y&quot;:276,&quot;end&quot;:false},{&quot;x&quot;:165,&quot;y&quot;:271,&quot;end&quot;:false},{&quot;x&quot;:163,&quot;y&quot;:264,&quot;end&quot;:false},{&quot;x&quot;:163,&quot;y&quot;:255,&quot;end&quot;:false},{&quot;x&quot;:163,&quot;y&quot;:249,&quot;end&quot;:false},{&quot;x&quot;:161,&quot;y&quot;:242,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:235,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:230,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:223,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:214,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:209,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:202,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:197,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:195,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:192,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:187,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:183,&quot;end&quot;:false},{&quot;x&quot;:159,&quot;y&quot;:180,&quot;end&quot;:false},{&quot;x&quot;:158,&quot;y&quot;:177,&quot;end&quot;:false},{&quot;x&quot;:158,&quot;y&quot;:173,&quot;end&quot;:false},{&quot;x&quot;:158,&quot;y&quot;:170,&quot;end&quot;:false},{&quot;x&quot;:156,&quot;y&quot;:163,&quot;end&quot;:false},{&quot;x&quot;:156,&quot;y&quot;:158,&quot;end&quot;:false},{&quot;x&quot;:156,&quot;y&quot;:154,&quot;end&quot;:false},{&quot;x&quot;:154,&quot;y&quot;:149,&quot;end&quot;:false},{&quot;x&quot;:153,&quot;y&quot;:142,&quot;end&quot;:false},{&quot;x&quot;:151,&quot;y&quot;:137,&quot;end&quot;:false},{&quot;x&quot;:149,&quot;y&quot;:130,&quot;end&quot;:false},{&quot;x&quot;:149,&quot;y&quot;:127,&quot;end&quot;:false},{&quot;x&quot;:147,&quot;y&quot;:122,&quot;end&quot;:false},{&quot;x&quot;:146,&quot;y&quot;:118,&quot;end&quot;:false},{&quot;x&quot;:146,&quot;y&quot;:117,&quot;end&quot;:false},{&quot;x&quot;:146,&quot;y&quot;:111,&quot;end&quot;:false},{&quot;x&quot;:144,&quot;y&quot;:108,&quot;end&quot;:false},{&quot;x&quot;:142,&quot;y&quot;:103,&quot;end&quot;:false},{&quot;x&quot;:141,&quot;y&quot;:99,&quot;end&quot;:false},{&quot;x&quot;:139,&quot;y&quot;:96,&quot;end&quot;:false},{&quot;x&quot;:139,&quot;y&quot;:93,&quot;end&quot;:false},{&quot;x&quot;:137,&quot;y&quot;:91,&quot;end&quot;:false},{&quot;x&quot;:137,&quot;y&quot;:89,&quot;end&quot;:false},{&quot;x&quot;:135,&quot;y&quot;:89,&quot;end&quot;:false},{&quot;x&quot;:135,&quot;y&quot;:86,&quot;end&quot;:false},{&quot;x&quot;:134,&quot;y&quot;:86,&quot;end&quot;:false},{&quot;x&quot;:134,&quot;y&quot;:87,&quot;end&quot;:false},{&quot;x&quot;:132,&quot;y&quot;:94,&quot;end&quot;:false},{&quot;x&quot;:129,&quot;y&quot;:99,&quot;end&quot;:false},{&quot;x&quot;:127,&quot;y&quot;:103,&quot;end&quot;:false},{&quot;x&quot;:125,&quot;y&quot;:106,&quot;end&quot;:false},{&quot;x&quot;:125,&quot;y&quot;:110,&quot;end&quot;:false},{&quot;x&quot;:122,&quot;y&quot;:111,&quot;end&quot;:false},{&quot;x&quot;:120,&quot;y&quot;:115,&quot;end&quot;:false},{&quot;x&quot;:120,&quot;y&quot;:117,&quot;end&quot;:false},{&quot;x&quot;:118,&quot;y&quot;:118,&quot;end&quot;:false},{&quot;x&quot;:117,&quot;y&quot;:120,&quot;end&quot;:false},{&quot;x&quot;:113,&quot;y&quot;:122,&quot;end&quot;:false},{&quot;x&quot;:110,&quot;y&quot;:123,&quot;end&quot;:false},{&quot;x&quot;:108,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:106,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:103,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:99,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:98,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:96,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:94,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:89,&quot;y&quot;:125,&quot;end&quot;:false},{&quot;x&quot;:84,&quot;y&quot;:118,&quot;end&quot;:false},{&quot;x&quot;:77,&quot;y&quot;:113,&quot;end&quot;:false},{&quot;x&quot;:70,&quot;y&quot;:106,&quot;end&quot;:false},{&quot;x&quot;:67,&quot;y&quot;:103,&quot;end&quot;:false},{&quot;x&quot;:65,&quot;y&quot;:103,&quot;end&quot;:false},{&quot;x&quot;:65,&quot;y&quot;:103,&quot;end&quot;:true},{&quot;x&quot;:65,&quot;y&quot;:103,&quot;end&quot;:true}],&quot;history&quot;:[{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:132,&quot;y&quot;:62},{&quot;x&quot;:132,&quot;y&quot;:63}],&quot;time&quot;:10586},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:131,&quot;y&quot;:63},{&quot;x&quot;:128,&quot;y&quot;:65},{&quot;x&quot;:127,&quot;y&quot;:66}],&quot;time&quot;:10652},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:126,&quot;y&quot;:67},{&quot;x&quot;:125,&quot;y&quot;:68},{&quot;x&quot;:125,&quot;y&quot;:69}],&quot;time&quot;:10704},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:125,&quot;y&quot;:70},{&quot;x&quot;:125,&quot;y&quot;:71},{&quot;x&quot;:125,&quot;y&quot;:73}],&quot;time&quot;:10774},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:125,&quot;y&quot;:75},{&quot;x&quot;:125,&quot;y&quot;:76},{&quot;x&quot;:125,&quot;y&quot;:78}],&quot;time&quot;:10843},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:125,&quot;y&quot;:80},{&quot;x&quot;:126,&quot;y&quot;:83}],&quot;time&quot;:10902},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:127,&quot;y&quot;:85},{&quot;x&quot;:127,&quot;y&quot;:87},{&quot;x&quot;:128,&quot;y&quot;:89}],&quot;time&quot;:10971},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:129,&quot;y&quot;:91},{&quot;x&quot;:129,&quot;y&quot;:96},{&quot;x&quot;:130,&quot;y&quot;:100}],&quot;time&quot;:11050},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:130,&quot;y&quot;:102},{&quot;x&quot;:130,&quot;y&quot;:106},{&quot;x&quot;:130,&quot;y&quot;:110},{&quot;x&quot;:130,&quot;y&quot;:112}],&quot;time&quot;:11105},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:130,&quot;y&quot;:116},{&quot;x&quot;:130,&quot;y&quot;:118},{&quot;x&quot;:130,&quot;y&quot;:123}],&quot;time&quot;:11176},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:130,&quot;y&quot;:125},{&quot;x&quot;:130,&quot;y&quot;:127},{&quot;x&quot;:130,&quot;y&quot;:130},{&quot;x&quot;:129,&quot;y&quot;:132}],&quot;time&quot;:11237},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:129,&quot;y&quot;:134},{&quot;x&quot;:128,&quot;y&quot;:137},{&quot;x&quot;:127,&quot;y&quot;:139}],&quot;time&quot;:11300},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:127,&quot;y&quot;:143},{&quot;x&quot;:127,&quot;y&quot;:146},{&quot;x&quot;:127,&quot;y&quot;:148}],&quot;time&quot;:11372},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:126,&quot;y&quot;:154},{&quot;x&quot;:126,&quot;y&quot;:155},{&quot;x&quot;:126,&quot;y&quot;:157}],&quot;time&quot;:11428},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:126,&quot;y&quot;:160},{&quot;x&quot;:126,&quot;y&quot;:163},{&quot;x&quot;:127,&quot;y&quot;:166},{&quot;x&quot;:127,&quot;y&quot;:168}],&quot;time&quot;:11487},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:127,&quot;y&quot;:170},{&quot;x&quot;:127,&quot;y&quot;:172},{&quot;x&quot;:127,&quot;y&quot;:174}],&quot;time&quot;:11539},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:127,&quot;y&quot;:180},{&quot;x&quot;:127,&quot;y&quot;:182},{&quot;x&quot;:127,&quot;y&quot;:186}],&quot;time&quot;:11606},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:127,&quot;y&quot;:190},{&quot;x&quot;:127,&quot;y&quot;:193},{&quot;x&quot;:127,&quot;y&quot;:196}],&quot;time&quot;:11661},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:127,&quot;y&quot;:198},{&quot;x&quot;:127,&quot;y&quot;:200},{&quot;x&quot;:127,&quot;y&quot;:201},{&quot;x&quot;:128,&quot;y&quot;:201}],&quot;time&quot;:11722},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:129,&quot;y&quot;:202},{&quot;x&quot;:129,&quot;y&quot;:203},{&quot;x&quot;:130,&quot;y&quot;:203},{&quot;x&quot;:131,&quot;y&quot;:204}],&quot;time&quot;:11790},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:132,&quot;y&quot;:205},{&quot;x&quot;:135,&quot;y&quot;:205},{&quot;x&quot;:137,&quot;y&quot;:205}],&quot;time&quot;:11841},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:139,&quot;y&quot;:206},{&quot;x&quot;:141,&quot;y&quot;:206},{&quot;x&quot;:143,&quot;y&quot;:206}],&quot;time&quot;:11894},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:148,&quot;y&quot;:206},{&quot;x&quot;:151,&quot;y&quot;:206}],&quot;time&quot;:11946},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:158,&quot;y&quot;:207},{&quot;x&quot;:162,&quot;y&quot;:208},{&quot;x&quot;:164,&quot;y&quot;:208}],&quot;time&quot;:12008},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:166,&quot;y&quot;:209},{&quot;x&quot;:168,&quot;y&quot;:209},{&quot;x&quot;:170,&quot;y&quot;:209}],&quot;time&quot;:12065},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:171,&quot;y&quot;:209},{&quot;x&quot;:173,&quot;y&quot;:209},{&quot;x&quot;:175,&quot;y&quot;:208},{&quot;x&quot;:177,&quot;y&quot;:208}],&quot;time&quot;:12123},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:179,&quot;y&quot;:207},{&quot;x&quot;:183,&quot;y&quot;:207},{&quot;x&quot;:184,&quot;y&quot;:206}],&quot;time&quot;:12177},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:185,&quot;y&quot;:205},{&quot;x&quot;:186,&quot;y&quot;:204},{&quot;x&quot;:188,&quot;y&quot;:203}],&quot;time&quot;:12241},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:189,&quot;y&quot;:203},{&quot;x&quot;:191,&quot;y&quot;:201},{&quot;x&quot;:192,&quot;y&quot;:201},{&quot;x&quot;:193,&quot;y&quot;:201}],&quot;time&quot;:12319},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:194,&quot;y&quot;:201},{&quot;x&quot;:195,&quot;y&quot;:200}],&quot;time&quot;:12371},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:195,&quot;y&quot;:200},{&quot;x&quot;:195,&quot;y&quot;:199}],&quot;time&quot;:12436},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:196,&quot;y&quot;:199},{&quot;x&quot;:197,&quot;y&quot;:198},{&quot;x&quot;:198,&quot;y&quot;:196}],&quot;time&quot;:12491},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:198,&quot;y&quot;:194},{&quot;x&quot;:198,&quot;y&quot;:192},{&quot;x&quot;:198,&quot;y&quot;:188},{&quot;x&quot;:197,&quot;y&quot;:182}],&quot;time&quot;:12553},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:195,&quot;y&quot;:176},{&quot;x&quot;:191,&quot;y&quot;:165}],&quot;time&quot;:12611},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:190,&quot;y&quot;:161},{&quot;x&quot;:189,&quot;y&quot;:158},{&quot;x&quot;:188,&quot;y&quot;:154},{&quot;x&quot;:188,&quot;y&quot;:149}],&quot;time&quot;:12675},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:188,&quot;y&quot;:145},{&quot;x&quot;:187,&quot;y&quot;:141},{&quot;x&quot;:186,&quot;y&quot;:137},{&quot;x&quot;:186,&quot;y&quot;:134}],&quot;time&quot;:12742},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:186,&quot;y&quot;:130},{&quot;x&quot;:186,&quot;y&quot;:125},{&quot;x&quot;:186,&quot;y&quot;:122},{&quot;x&quot;:186,&quot;y&quot;:118}],&quot;time&quot;:12810},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:186,&quot;y&quot;:115},{&quot;x&quot;:186,&quot;y&quot;:114},{&quot;x&quot;:186,&quot;y&quot;:112},{&quot;x&quot;:186,&quot;y&quot;:109}],&quot;time&quot;:12872},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:186,&quot;y&quot;:107},{&quot;x&quot;:186,&quot;y&quot;:105},{&quot;x&quot;:185,&quot;y&quot;:103},{&quot;x&quot;:185,&quot;y&quot;:101}],&quot;time&quot;:12945},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:185,&quot;y&quot;:99},{&quot;x&quot;:184,&quot;y&quot;:95}],&quot;time&quot;:12997},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:184,&quot;y&quot;:92},{&quot;x&quot;:184,&quot;y&quot;:90},{&quot;x&quot;:183,&quot;y&quot;:87},{&quot;x&quot;:182,&quot;y&quot;:83}],&quot;time&quot;:13054},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:181,&quot;y&quot;:80},{&quot;x&quot;:180,&quot;y&quot;:76},{&quot;x&quot;:180,&quot;y&quot;:74},{&quot;x&quot;:179,&quot;y&quot;:71}],&quot;time&quot;:13120},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:178,&quot;y&quot;:69},{&quot;x&quot;:178,&quot;y&quot;:68},{&quot;x&quot;:178,&quot;y&quot;:65}],&quot;time&quot;:13180},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:177,&quot;y&quot;:63},{&quot;x&quot;:176,&quot;y&quot;:60},{&quot;x&quot;:175,&quot;y&quot;:58},{&quot;x&quot;:174,&quot;y&quot;:56}],&quot;time&quot;:13242},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:174,&quot;y&quot;:54},{&quot;x&quot;:173,&quot;y&quot;:53},{&quot;x&quot;:173,&quot;y&quot;:52},{&quot;x&quot;:172,&quot;y&quot;:52}],&quot;time&quot;:13306},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:172,&quot;y&quot;:50},{&quot;x&quot;:171,&quot;y&quot;:50}],&quot;time&quot;:13503},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:171,&quot;y&quot;:51},{&quot;x&quot;:170,&quot;y&quot;:55}],&quot;time&quot;:13558},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:168,&quot;y&quot;:58},{&quot;x&quot;:167,&quot;y&quot;:60},{&quot;x&quot;:166,&quot;y&quot;:62},{&quot;x&quot;:166,&quot;y&quot;:64}],&quot;time&quot;:13622},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:164,&quot;y&quot;:65},{&quot;x&quot;:163,&quot;y&quot;:67},{&quot;x&quot;:163,&quot;y&quot;:68},{&quot;x&quot;:162,&quot;y&quot;:69}],&quot;time&quot;:13688},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:161,&quot;y&quot;:70},{&quot;x&quot;:159,&quot;y&quot;:71},{&quot;x&quot;:157,&quot;y&quot;:72},{&quot;x&quot;:156,&quot;y&quot;:73}],&quot;time&quot;:13755},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:155,&quot;y&quot;:73},{&quot;x&quot;:153,&quot;y&quot;:73},{&quot;x&quot;:151,&quot;y&quot;:73},{&quot;x&quot;:150,&quot;y&quot;:73}],&quot;time&quot;:13820},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:149,&quot;y&quot;:73},{&quot;x&quot;:148,&quot;y&quot;:73}],&quot;time&quot;:13872},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:145,&quot;y&quot;:73},{&quot;x&quot;:142,&quot;y&quot;:69}],&quot;time&quot;:13934},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:138,&quot;y&quot;:66},{&quot;x&quot;:134,&quot;y&quot;:62},{&quot;x&quot;:132,&quot;y&quot;:60}],&quot;time&quot;:13996},{&quot;size&quot;:5,&quot;color&quot;:&quot;rgb(255, 0, 0)&quot;,&quot;points&quot;:[{&quot;x&quot;:131,&quot;y&quot;:60},{&quot;x&quot;:131,&quot;y&quot;:60},{&quot;x&quot;:131,&quot;y&quot;:60}],&quot;time&quot;:14265}],&quot;type&quot;:&quot;segmentation&quot;,&quot;tag&quot;:0,&quot;user&quot;:347,&quot;validity&quot;:true}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">localhost</stringProp>
+          <stringProp name="HTTPSampler.port">80</stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          <stringProp name="HTTPSampler.protocol"></stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/action</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <boolProp name="HTTPSampler.monitor">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>false</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Duration Assertion" enabled="true">
+          <stringProp name="DurationAssertion.duration">500000</stringProp>
+        </DurationAssertion>
+        <hashTree/>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+          <collectionProp name="HeaderManager.headers">
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Content-Type</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+            <elementProp name="" elementType="Header">
+              <stringProp name="Header.name">Accept</stringProp>
+              <stringProp name="Header.value">application/json</stringProp>
+            </elementProp>
+          </collectionProp>
+        </HeaderManager>
+        <hashTree/>
+        <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
+          <collectionProp name="Asserion.test_strings">
+            <stringProp name="2524">OK</stringProp>
+          </collectionProp>
+          <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+          <boolProp name="Assertion.assume_success">false</boolProp>
+          <intProp name="Assertion.test_type">2</intProp>
+        </ResponseAssertion>
+        <hashTree/>
+        <ResultSaver guiclass="ResultSaverGui" testclass="ResultSaver" testname="provissima" enabled="false">
+          <stringProp name="FileSaver.filename">/Users/chiarapasini/Downloads/apache-jmeter-2.11/prosssss</stringProp>
+          <boolProp name="FileSaver.errorsonly">true</boolProp>
+          <boolProp name="FileSaver.skipautonumber">false</boolProp>
+          <boolProp name="FileSaver.skipsuffix">false</boolProp>
+          <boolProp name="FileSaver.successonly">false</boolProp>
+        </ResultSaver>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
