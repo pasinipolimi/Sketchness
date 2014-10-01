@@ -712,11 +712,11 @@ div.avatarIcon {
 	list-style-type: none;
 	background: url('../images/favicon.png') no-repeat top left;
 	background-size: 40px 40px;
-	height: 46px;
+	height: auto;
 	width: 120px;
 	word-wrap: break-word;
 	padding-left: 40px;
-	padding-top: 10px;
+	padding-top: 25px;
 	color: black;
 	font-weight: bold;
 }
@@ -725,7 +725,7 @@ div.avatarChat {
 	list-style-type: none;
 	background: url('../images/favicon.png') no-repeat top left;
 	background-size: 20px 20px;
-	height: 46px;
+	height: auto;
 	width: 120px;
 	word-wrap: break-word;
 	padding-left: 10px;
