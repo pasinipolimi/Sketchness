@@ -435,19 +435,22 @@ public class CMS {
 			final History h = new History();
 			final ArrayNode jpoints = (ArrayNode) histoPezzo.get("points");
 			final JsonNode first = jpoints.get(0);
-			String color = first.get("color").asText();
-			if (color.equals("end")) {
-				color = lastColor;
-			} else {
-				lastColor = color;
+			if (first != null) {
+
+				String color = first.get("color").asText();
+				if (color.equals("end")) {
+					color = lastColor;
+				} else {
+					lastColor = color;
+				}
+				h.setColor(color);
+				final List<Point> points = readHistoPoints(histoPezzo);
+				h.setPoints(points);
+				h.setSize(first.get("size").asInt());
+				h.setTime(histoPezzo.get("time").asInt());
+				// h.setTime(i++);
+				hs.add(h);
 			}
-			h.setColor(color);
-			final List<Point> points = readHistoPoints(histoPezzo);
-			h.setPoints(points);
-			h.setSize(first.get("size").asInt());
-			h.setTime(histoPezzo.get("time").asInt());
-			// h.setTime(i++);
-			hs.add(h);
 
 		}
 
@@ -963,6 +966,43 @@ public class CMS {
 						roomChannel));
 	}
 
+	public static List<User> getAllUsers() throws CMSException, JSONException {
+		final HashMap<String, String> params = new HashMap<String, String>();
+		params.put("populate", "true");
+		final List<utils.CMS.models.User> users = CMS.getAllObjs(User.class,
+				"user", params, "users");
+		return users;
+	}
+
+	private static <T extends CMSObject> List<T> getAllObjs(
+			final Class<T> claz,
+			final String service, final HashMap<String, String> params,
+			final String response)
+					throws CMSException {
+
+		final CMSJsonReader jsonReader = new CMSJsonReader();
+		final List<JsonNode> result = jsonReader.readJsonAllFromUrl(rootUrl,
+				service,
+				params, response);
+
+		// lista = Json.fromJson(result, lista.getClass());
+
+		final List<T> lista = new ArrayList<>();
+
+		if (result != null) {
+			for (final JsonNode json : result) {
+				for (final JsonNode jsonNodeInner : json) {
+					final T mobj = Json.fromJson(jsonNodeInner, claz);
+					lista.add(mobj);
+				}
+			}
+
+		}
+
+		return lista;
+
+	}
+
 	public static List<User> getUsers() throws CMSException, JSONException {
 		//return getObjs(User.class, "user?populate=true", "users");
 		/*
@@ -975,7 +1015,6 @@ public class CMS {
 		final List<utils.CMS.models.User> users = new ArrayList<utils.CMS.models.User>();
 		String max_id = "null";
 		final String count = String.valueOf(100);
-		final int i = 0;
 
 		while(!end){
 			final HashMap<String, String> params = new HashMap<String, String>();
@@ -992,7 +1031,6 @@ public class CMS {
 				}
 			} catch (final CMSException e) {
 				Logger.error("Unable to read users from cms", e);
-				Logger.info("Unable to read users from cms " + e);
 				throw new JSONException("Unable to read users from cms");
 			}
 
@@ -1091,7 +1129,10 @@ public class CMS {
 		params.put("image", String.valueOf(imageId));
 		params.put("tag", String.valueOf(tagId));
 		final List<Mask> masks = getObjs(Mask.class, "mask", params, "masks");
-		return masks.get(0);
+		if (masks != null && masks.size() > 1) {
+			return masks.get(0);
+		}
+		return null;
 	}
 
 	public static List<Collection> getCollections() throws CMSException {
@@ -1274,6 +1315,7 @@ public class CMS {
 		params.put("completed", "true");
 
 		return getObjs(utils.CMS.models.Action.class, "action", params, "actions");
+
 
 
 	}

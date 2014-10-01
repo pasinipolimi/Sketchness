@@ -44,19 +44,19 @@ public class CMSUtilities {
 			sorting.setId(String.valueOf(i.getId()));
 			sorting.setMedia(rootUrl + i.getMediaLocator());
 
-			try {
-				num = CMS.getSegmentationCount();
-			} catch (final CMSException e) {
-				Logger.error("Unable to read segmentations from CMS", e);
-				throw new JSONException("Unable to read segmentations from CMS");
-			}
+			// try {
+			// num = CMS.getSegmentationCount();
+			num = 655;
+			// } catch (final CMSException e) {
+			// Logger.error("Unable to read segmentations from CMS", e);
+			// throw new JSONException("Unable to read segmentations from CMS");
+			// }
 
 			sorting.setNum(num);
 			tempList.add(j, sorting);
 			num = 0;
 
 		}
-
 
 
 		Collections.sort(tempList, new Comparator<SortObject>() {
@@ -187,8 +187,10 @@ public class CMSUtilities {
 	 * @throws JSONException
 	 */
 	public static String retriveMaskInfo(final Mask mask) throws JSONException {
-
 		final JSONArray info = new JSONArray();
+		if (mask == null) {
+			return info.toString();
+		}
 
 		JSONObject element;
 
@@ -235,15 +237,15 @@ public class CMSUtilities {
 			element.put("id", id);
 			imageIds.put(element);
 		}
-		*/
+		 */
 		for (final Integer id : c.getImages()) {
-			Image im = CMS.getImage(id);
+			final Image im = CMS.getImage(id);
 			element = new JSONObject();
 			element.put("id", id);
 			element.put("media", rootUrl + im.getMediaLocator());
 			imageIds.put(element);
 		}
-		
+
 
 		finalElement = new JSONObject();
 		finalElement.put("images", imageIds);

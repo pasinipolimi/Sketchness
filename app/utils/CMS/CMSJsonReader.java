@@ -1,11 +1,12 @@
 package utils.CMS;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import play.Logger;
 import play.Play;
 import play.libs.F.Promise;
 import play.libs.WS;
@@ -106,6 +107,69 @@ public class CMSJsonReader {
 			final String response)
 					throws CMSException {
 		return readJsonFromUrl(url, service + "/" + id, params, response);
+	}
+
+	public List<JsonNode> readJsonAllFromUrl(final String url,
+			final String service, final HashMap<String, String> params,
+			final String response) throws CMSException {
+
+		final List<JsonNode> reslist = new ArrayList<>();
+		Promise<WS.Response> res;
+		Boolean end = false;
+		String max_id = "null";
+		while (!end) {
+
+			final WSRequestHolder wsurl = WS.url(url + "/" + service)
+					.setHeader("Accept", "application/json")
+					.setTimeout(timeout);
+			if (params != null) {
+				if (!max_id.equals("null")) {
+					params.put("max_id", max_id);
+					params.put("count", "100");
+				}
+
+				final Iterator<Entry<String, String>> it = params.entrySet()
+						.iterator();
+				while (it.hasNext()) {
+					final Map.Entry<java.lang.String, java.lang.String> param = it
+							.next();
+					wsurl.setQueryParameter(param.getKey(), param.getValue());
+				}
+			}
+
+			res = wsurl.get();
+			if (res != null) {
+				final Response result = res.get(1000000L);
+				final JsonNode json = result.asJson();
+				// with a system out i can see that the json is parsed correctly
+
+				if (json.get("status").asText().equals("OK")) {
+
+					if (json.get("search_metadata").has("next_results")) {
+						final String nextResult = json.get("search_metadata")
+								.get("next_results")
+								.asText();
+						final String[] tokens = nextResult.split("=");
+						max_id = tokens[1].split("&")[0];
+						// count = tokens[2];
+
+					} else {
+						end = true;
+					}
+					final JsonNode lista = json.get(response);
+					reslist.add(lista);
+
+
+				} else {
+					throw new CMSException(
+							"Internal Server Error while invoking CMS: "
+									+ json.get("error"));
+				}
+			} else {
+				throw new IllegalStateException("CMS response timeout.");
+			}
+		}
+		return reslist;
 	}
 
 }

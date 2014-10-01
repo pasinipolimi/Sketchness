@@ -15,23 +15,17 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.Map.Entry;
+import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
 
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,9 +34,9 @@ import play.Logger;
 import play.Play;
 import play.libs.Akka;
 import play.libs.F;
+import play.libs.F.Promise;
 import play.libs.Json;
 import play.libs.WS;
-import play.libs.F.Promise;
 import play.libs.WS.Response;
 import play.libs.WS.WSRequestHolder;
 import play.mvc.WebSocket;
@@ -53,11 +47,9 @@ import utils.CMS.CMS;
 import utils.CMS.CMSException;
 import utils.CMS.CMSJsonReader;
 import utils.CMS.CMSUtilities;
-import utils.CMS.SortObject;
 import utils.CMS.models.Action;
 import utils.CMS.models.Collection;
 import utils.CMS.models.Mask;
-import utils.CMS.models.MicroTask;
 import utils.CMS.models.Point;
 import utils.CMS.models.Task;
 import utils.CMS.models.User;
@@ -68,10 +60,7 @@ import akka.actor.Props;
 import akka.actor.UntypedActor;
 import akka.pattern.Patterns;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
@@ -152,46 +141,46 @@ public class Renderer extends UntypedActor {
 		Image toReturn = null;
 		Boolean found = false;
 		if (actions != null && actions.size() > 0) {
-		 final int numberTraces = actions.size();
-		 final ArrayList<String> toAggregate = new ArrayList<>();
-		 for (int i = 0; i < numberTraces; i++) {
-		// final JavascriptColor c = colors[i % colors.length];
-			 final Action action = actions.get(i);
-			 Integer action_id = action.getId();
-			 Action current = CMS.getAction(action_id);
-			 final Integer tag = current.getTag();
-			 found = true;
-		 	 List<Point> p = current.getSegmentation().getPoints();
-			 /*final ObjectMapper mapper = new ObjectMapper();
+			final int numberTraces = actions.size();
+			final ArrayList<String> toAggregate = new ArrayList<>();
+			for (int i = 0; i < numberTraces; i++) {
+				// final JavascriptColor c = colors[i % colors.length];
+				final Action action = actions.get(i);
+				final Integer action_id = action.getId();
+				final Action current = CMS.getAction(action_id);
+				final Integer tag = current.getTag();
+				found = true;
+				final List<Point> p = current.getSegmentation().getPoints();
+				/*final ObjectMapper mapper = new ObjectMapper();
 			 final JsonFactory factory = mapper.getJsonFactory();
 			 final String toParse = p.toString().replace("\\", "");
 			 final JsonParser jp = factory.createJsonParser(toParse);
 			 final JsonNode actualObj = mapper.readTree(jp);*/
-		 	 JSONObject element = null;
-		 	final JSONArray actualObj = new JSONArray();
-		 	for(int j=0;j<p.size();j++){
-		 		element = new JSONObject();
-		 		element.put("x", p.get(j).getX());
-		 		element.put("y", p.get(j).getY());
-		 		actualObj.put(element);
-		 	}
-			 toAggregate.add(actualObj.toString());
-		}
-		if (found && !networkOn) {
-			final String[] toAggregateString = new String[toAggregate.size()];
-			for (int i = 0; i < toAggregate.size(); i++) {
-				toAggregateString[i] = toAggregate.get(i);
+				JSONObject element = null;
+				final JSONArray actualObj = new JSONArray();
+				for(int j=0;j<p.size();j++){
+					element = new JSONObject();
+					element.put("x", p.get(j).getX());
+					element.put("y", p.get(j).getY());
+					actualObj.put(element);
+				}
+				toAggregate.add(actualObj.toString());
 			}
-			toReturn = ContourAggregator.simpleAggregator(toAggregateString, imWidth, imHeight);
-			if (transparentMask) {
-				final BufferedImage transparent = imageToBufferedImage(toReturn);
-				toReturn = makeColorTransparent(transparent, Color.WHITE);
+			if (found && !networkOn) {
+				final String[] toAggregateString = new String[toAggregate.size()];
+				for (int i = 0; i < toAggregate.size(); i++) {
+					toAggregateString[i] = toAggregate.get(i);
+				}
+				toReturn = ContourAggregator.simpleAggregator(toAggregateString, imWidth, imHeight);
+				if (transparentMask) {
+					final BufferedImage transparent = imageToBufferedImage(toReturn);
+					toReturn = makeColorTransparent(transparent, Color.WHITE);
+				}
+			} else if (!networkOn) {
+				LoggerUtils.error("[AGGREGATOR] Cannot retrieve mask for image "+ imageId + " with tag " + requiredTag,"NOT FOUND");
+				throw new Exception("[AGGREGATOR] Tag " + requiredTag+ " not found for image " + imageId);
 			}
-		} else if (!networkOn) {
-			LoggerUtils.error("[AGGREGATOR] Cannot retrieve mask for image "+ imageId + " with tag " + requiredTag,"NOT FOUND");
-			throw new Exception("[AGGREGATOR] Tag " + requiredTag+ " not found for image " + imageId);
 		}
-	}
 		return toReturn;
 		//return null;
 	}
@@ -313,27 +302,24 @@ public class Renderer extends UntypedActor {
 	 * 
 	 * @return the list of images' ids and task' ids in the system
 	 * @throws JSONException
-	 * @throws CMSException 
+	 * @throws CMSException
 	 */
 	public static String webToolAjax(final String max_id, final String count) throws JSONException, CMSException {
 
 		List<utils.CMS.models.Image> images;
-		final List<utils.CMS.models.Task> tasks;
+		final List<utils.CMS.models.Task> tasks = null;
 		final HashMap<String, String> params = new HashMap<String,String>();
-
 		if(!max_id.equals("null")){
 			params.put("max_id", max_id);
 			params.put("count", count);
 		}
-	
 		try {
 			images = CMS.getObjs(utils.CMS.models.Image.class, "image", params, "images");
-			tasks = CMS.getTasks();
+			// tasks = CMS.getTasks();
 		} catch (final CMSException e) {
 			Logger.error("Unable to read images and tasks from cms", e);
 			throw new JSONException("Unable to read images and tasks from cms");
 		}
-
 		JSONArray imagesJ = new JSONArray();
 
 		JSONArray tasksJ = new JSONArray();
@@ -357,26 +343,26 @@ public class Renderer extends UntypedActor {
 			element.append("taskType", "");
 			tasksJ.put(element);
 		}
+
 		result.append("image", imagesJ);
 		result.append("task", tasksJ);
 		result.append("check", check);
-		
+
 		//GET next result: max_id, count
 		final String service = "image";
 		final String response = "search_metadata";
-		
+
 		Promise<WS.Response> res;
 		final WSRequestHolder wsurl = WS.url(rootUrl + "/" + service).setHeader("Accept", "application/json").setTimeout(timeout);
 		if (params != null) {
-				final Iterator<Entry<String, String>> it = params.entrySet()
-						.iterator();
-				while (it.hasNext()) {
-					final Map.Entry<java.lang.String, java.lang.String> param = it
-							.next();
-					wsurl.setQueryParameter(param.getKey(), param.getValue());
-				}
+			final Iterator<Entry<String, String>> it = params.entrySet()
+					.iterator();
+			while (it.hasNext()) {
+				final Map.Entry<java.lang.String, java.lang.String> param = it
+						.next();
+				wsurl.setQueryParameter(param.getKey(), param.getValue());
+			}
 		}
-
 		res = wsurl.get();
 		String new_max_id = "";
 		String new_count = "";
@@ -388,8 +374,8 @@ public class Renderer extends UntypedActor {
 			if (json.get("status").asText().equals("OK")) {
 				node = json.get(response);
 				if(node.has("next_results")){
-					String nextResult = node.get("next_results").asText();
-					String[] tokens = nextResult.split("=");
+					final String nextResult = node.get("next_results").asText();
+					final String[] tokens = nextResult.split("=");
 					new_max_id = tokens[1].split("&")[0];
 					new_count = tokens[2];
 				}
@@ -403,7 +389,6 @@ public class Renderer extends UntypedActor {
 		}
 		result.append("max_id", new_max_id);
 		result.append("count", new_count);
-
 		final String options = result.toString();
 		return options;
 	}
@@ -464,7 +449,7 @@ public class Renderer extends UntypedActor {
 			Logger.error("Unable to read stats", e);
 			throw new net.sf.json.JSONException();
 		}
-		
+
 
 		final JSONObject result = new JSONObject();
 
@@ -499,7 +484,8 @@ public class Renderer extends UntypedActor {
 	public static String loadUsersStats() throws JSONException {
 		final List<User> users;
 		try {
-			users = CMS.getUsers();
+			// users = CMS.getUsers();
+			users = CMS.getAllUsers();
 		} catch (final CMSException e) {
 			Logger.error("Unable to read users from CMS", e);
 			throw new JSONException("Unable to read users from CMS");
@@ -509,7 +495,6 @@ public class Renderer extends UntypedActor {
 
 		final JSONArray usersInfo = new JSONArray();
 		JSONObject element;
-		final JsonNode object;
 
 		final int i = 0;
 
@@ -577,12 +562,11 @@ public class Renderer extends UntypedActor {
 	public static String maskAjaxCall(final String imageId, final String tagId)
 			throws JSONException {
 
-		Mask mask;
+		Mask mask = null;
 		try {
 			mask = CMS.getMask(Integer.valueOf(imageId), Integer.valueOf(tagId));
 		} catch (final Exception e) {
 			Logger.error("Unable to read mask from CMS", e);
-			throw new JSONException("Unable to read mask from CMS");
 		}
 
 		final String info = CMSUtilities.retriveMaskInfo(mask);
@@ -805,7 +789,7 @@ public class Renderer extends UntypedActor {
 	 *            the id of the collection
 	 * @return the info that i retrived
 	 * @throws JSONException
-	 * @throws CMSException 
+	 * @throws CMSException
 	 */
 	public static String collectionImagesAjaxCall(final String collectionId)
 			throws JSONException, CMSException {
@@ -821,7 +805,7 @@ public class Renderer extends UntypedActor {
 
 		return images;
 	}
-	
+
 
 	public static String initializeSlider()
 			throws JSONException, ClientProtocolException, IOException, CMSException {
@@ -830,20 +814,20 @@ public class Renderer extends UntypedActor {
 		final JsonNode statistics = jsonReader.readJsonFromUrl2(rootUrl, "statistics", null, "statistics");
 		JSONObject element = null;
 		final JSONArray info = new JSONArray();
-		
+
 		if(statistics.has("actions")){
-				element = new JSONObject();
-				element.put("min", statistics.get("actions").get("segmentations_per_image").get("min"));
-				element.put("max", statistics.get("actions").get("segmentations_per_image").get("max"));
-			}
+			element = new JSONObject();
+			element.put("min", statistics.get("actions").get("segmentations_per_image").get("min"));
+			element.put("max", statistics.get("actions").get("segmentations_per_image").get("max"));
+		}
 
 		info.put(element);
 		return info.toString();
-		
+
 
 	}
-	
-	public static String annotationRange(final String min, final String max, String max_id, String count) throws JSONException, ClientProtocolException, IOException, CMSException {
+
+	public static String annotationRange(final String min, final String max, final String max_id, final String count) throws JSONException, ClientProtocolException, IOException, CMSException {
 
 		List<utils.CMS.models.Image> images;
 		final HashMap<String, String> params = new HashMap<String,String>();
@@ -854,7 +838,7 @@ public class Renderer extends UntypedActor {
 		}
 		params.put("max_segmentations", max);
 		params.put("min_segmentations", min);
-	
+
 		try {
 			images = CMS.getObjs(utils.CMS.models.Image.class, "image", params, "images");
 		} catch (final CMSException e) {
@@ -863,29 +847,29 @@ public class Renderer extends UntypedActor {
 		}
 
 		JSONArray imagesJ = new JSONArray();
-		JSONObject element;
+		final JSONObject element;
 		final JSONObject result = new JSONObject();
 
 		if (images != null && images.size() > 0) {
 			imagesJ = CMSUtilities.buildImageId(images);
 		}
-		
+
 		result.append("image", imagesJ);
-		
+
 		//GET next result: max_id, count
 		final String service = "image";
 		final String response = "search_metadata";
-		
+
 		Promise<WS.Response> res;
 		final WSRequestHolder wsurl = WS.url(rootUrl + "/" + service).setHeader("Accept", "application/json").setTimeout(timeout);
 		if (params != null) {
-				final Iterator<Entry<String, String>> it = params.entrySet()
-						.iterator();
-				while (it.hasNext()) {
-					final Map.Entry<java.lang.String, java.lang.String> param = it
-							.next();
-					wsurl.setQueryParameter(param.getKey(), param.getValue());
-				}
+			final Iterator<Entry<String, String>> it = params.entrySet()
+					.iterator();
+			while (it.hasNext()) {
+				final Map.Entry<java.lang.String, java.lang.String> param = it
+						.next();
+				wsurl.setQueryParameter(param.getKey(), param.getValue());
+			}
 		}
 
 		res = wsurl.get();
@@ -899,8 +883,8 @@ public class Renderer extends UntypedActor {
 			if (json.get("status").asText().equals("OK")) {
 				node = json.get(response);
 				if(node.has("next_results")){
-					String nextResult = node.get("next_results").asText();
-					String[] tokens = nextResult.split("=");
+					final String nextResult = node.get("next_results").asText();
+					final String[] tokens = nextResult.split("=");
 					new_max_id = tokens[1].split("&")[0];
 					new_count = tokens[2];
 				}
@@ -918,11 +902,11 @@ public class Renderer extends UntypedActor {
 		final String options = result.toString();
 		return options;
 	}
-	
+
 	public static String getTraces(final String imageId, final String tagId)
 			throws JSONException, CMSException {
-		
-		JSONArray result = new JSONArray();
+
+		final JSONArray result = new JSONArray();
 		List<utils.CMS.models.Action> actions;
 		try {
 			actions = CMS.getBestSegmentation(Integer.valueOf(imageId),Integer.valueOf(tagId));
@@ -930,15 +914,15 @@ public class Renderer extends UntypedActor {
 			Logger.error("Unable to read segmentation for image " + imageId, e);
 			throw new JSONException("Unable to read segmentation from cms");
 		}
-		
+
 
 		JSONObject element;
 		JsonNode points = null;
-		
+
 		for (int j = 0; j < actions.size(); j++) {
 			final utils.CMS.models.Action a = actions.get(j);
-		    Integer action_id = a.getId();
-		    utils.CMS.models.Action action = CMS.getAction(action_id);
+			final Integer action_id = a.getId();
+			final utils.CMS.models.Action action = CMS.getAction(action_id);
 			element = new JSONObject();
 			points = Json.toJson(action.getSegmentation().getPoints());
 			element.put("points", points);
@@ -946,7 +930,7 @@ public class Renderer extends UntypedActor {
 		}
 
 		return result.toString();
-	
+
 	}
 
 
