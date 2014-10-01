@@ -18,7 +18,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 		});
         
         var guessed_sound = new Howl({
-			urls: ['assets/sounds/effects/guesses_sound.ogg']
+			urls: ['assets/sounds/effects/guessed_sound.ogg']
 		});
 	
 		var sketchness = {
@@ -1041,7 +1041,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 
                                 guessed_sound.play();
 
-							}
+							} 
 						},
 						score: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] score");
