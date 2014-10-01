@@ -13,9 +13,13 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
             timeOut: 5000
         }
 
-		//var background_music = new Howl({
-		//	urls: ['assets/sounds/music/background.ogg']
-		//});
+        var guess_sound = new Howl({
+			urls: ['assets/sounds/effects/guess_sound.ogg']
+		});
+        
+        var guessed_sound = new Howl({
+			urls: ['assets/sounds/effects/guesses_sound.ogg']
+		});
 	
 		var sketchness = {
 			players: [],
@@ -1011,6 +1015,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
 						guess: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] guess");
 							that.chat.guess(sk.players[content.user].name, content.word, content.affinity, content.user == sk.myself);
+							guess_sound.play();
 						},
 						guessed: function(e, content) {
 						    console.log("[RECEIVED MESSAGE] guessed");
@@ -1034,7 +1039,7 @@ function( Class,   Chat,   StateMachine,   Communicator,   Time,   Writer,   Pai
                                     },animation.timeOut);
                                 });
 
-
+                                guessed_sound.play();
 
 							}
 						},
