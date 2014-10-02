@@ -771,7 +771,10 @@ public class Game extends GameRoom {
 		status.put("roomName", roomChannel.getRoom());
 		status.put("currentPlayers", playersVect.size());
 		status.put("maxPlayers", requiredPlayers);
-		status.put("visible", playersVect.size() < requiredPlayers);
+                if(playersVect.isEmpty())
+                    status.put("visible", false);
+                else
+                    status.put("visible", playersVect.size() < requiredPlayers);
 		GameEvent join = null;
 		try {
 			join = new GameEvent(GameMessages.composeGameListUpdate(status),
@@ -801,13 +804,12 @@ public class Game extends GameRoom {
 						new GameEvent(GameMessages.composeQuit(quitter),
 								GameManager.getInstance().getLobby()));
 				// End the game if there's just one player or less
-				if (((requiredPlayers - disconnectedPlayers) == 1)
+				if ((playersVect.size() == 1)
 						&& gameStarted) {
 					Logger.info("[GAME] Just one player left, closing the game.");
 					gameEnded();
-				} else if (((requiredPlayers - disconnectedPlayers) <= 0)
-						&& gameStarted) {
-					publishLobbyEvent(); // publishLobbyEvent(GameEventType.matchEnd);
+				} else if ((playersVect.size() <= 0)) {
+					publishLobbyEvent();
 				}
 
 			}
