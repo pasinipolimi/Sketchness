@@ -10,8 +10,10 @@ function caricaStatisticheUsers(){
              
              users = result.usersInfo[0];
              var cubrik_userid, name, app_id, actions, sessions, quality;
-             var table = $("#statisticheUsers");
-
+             var $table = $("#statisticheUsers");
+             var $body = $("#statisticheUsersbody");
+             
+             
              $.each(users, function(i,d){
             	    
             	 	cubrik_userid = d.id;
@@ -21,9 +23,11 @@ function caricaStatisticheUsers(){
             	 	actions = d.num_actions;
             	 	quality = d.quality;
              		//table.append("<tr><td class='infoValue'>"+cubrik_userid+"</td><td class='infoValue'>"+app_id+"</td><td class='infoValue'>"+name+"</td><td class='infoValue'>"+sessions+"</td><td class='infoValue'>"+actions+"</td><td class='infoValue'>"+quality+"</td></tr>");
-            	 	table.append("<tr><td class='infoValue'>"+name+"</td><td class='infoValue'>"+app_id+"</td><td class='infoValue'>"+sessions+"</td><td class='infoValue'>"+actions+"</td><td class='infoValue'>"+quality+"</td></tr>");
+            	 	$body.append("<tr><td class='infoValue'>"+name+"</td><td class='infoValue'>"+sessions+"</td><td class='infoValue'>"+actions+"</td><td class='infoValue'>"+quality+"</td></tr>");
             	 	//table.append("<tr><td class='infoValue'>"+cubrik_userid+"</td><td class='infoValue'>"+app_id+"</td><td class='infoValue'>"+app_user_id+"</td><td class='infoValue'>"+d.number_of_plays+"</td><td class='infoValue'>"+d.number_of_annotations+"</td><td class='infoValue'>"+0+"</td></tr>");
              });
+             
+             $table.DataTable( {"pageLength": 100, "order": []});
 
 
           }

@@ -7,11 +7,18 @@ public class Point {
 	public Point() {
 
 	}
-	
+
 	public Point(final Integer x, final Integer y) {
 		super();
 		this.x = x;
 		this.y = y;
+	}
+
+	public Point(final Integer x, final Integer y, final boolean end) {
+		super();
+		this.x = x;
+		this.y = y;
+		this.end = end;
 	}
 
 	private Integer x;
@@ -23,7 +30,7 @@ public class Point {
 		return end;
 	}
 
-	public void setEnd(Boolean end) {
+	public void setEnd(final Boolean end) {
 		this.end = end;
 	}
 
@@ -43,6 +50,6 @@ public class Point {
 		this.y = y;
 	}
 
-	
+
 }
 

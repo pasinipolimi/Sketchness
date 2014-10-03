@@ -49,6 +49,7 @@ import utils.CMS.CMSJsonReader;
 import utils.CMS.CMSUtilities;
 import utils.CMS.models.Action;
 import utils.CMS.models.Collection;
+import utils.CMS.models.History;
 import utils.CMS.models.Mask;
 import utils.CMS.models.Point;
 import utils.CMS.models.Task;
@@ -903,13 +904,14 @@ public class Renderer extends UntypedActor {
 		return options;
 	}
 
-	public static String getTraces(final String imageId, final String tagId)
+	public static String getTracesChaira(final String imageId, final String tagId)
 			throws JSONException, CMSException {
 
 		final JSONArray result = new JSONArray();
 		List<utils.CMS.models.Action> actions;
 		try {
-			actions = CMS.getBestSegmentation(Integer.valueOf(imageId),Integer.valueOf(tagId));
+			actions =
+					CMS.getBestSegmentation(Integer.valueOf(imageId),Integer.valueOf(tagId));
 		} catch (final CMSException e) {
 			Logger.error("Unable to read segmentation for image " + imageId, e);
 			throw new JSONException("Unable to read segmentation from cms");
@@ -933,6 +935,61 @@ public class Renderer extends UntypedActor {
 
 	}
 
+	public static String getTraces(final String imageId, final String tagId)
+			throws JSONException, CMSException {
+
+		final JSONArray result = new JSONArray();
+		List<utils.CMS.models.Action> actions;
+		try {
+			actions = CMS.getBestSegmentation(Integer.valueOf(imageId),
+					Integer.valueOf(tagId));
+		} catch (final CMSException e) {
+			Logger.error("Unable to read segmentation for image " + imageId, e);
+			throw new JSONException("Unable to read segmentation from cms");
+		}
+
+
+		JSONObject element;
+		JsonNode points = null;
+
+		for (int j = 0; j < actions.size(); j++) {
+			final utils.CMS.models.Action a = actions.get(j);
+			if (!a.getValidity()) {
+				continue;
+			}
+			final Integer action_id = a.getId();
+			final utils.CMS.models.Action action = CMS.getAction(action_id);
+			element = new JSONObject();
+
+			// final List<Point> pointsL = convertHistoryIntoPoints(action
+			// .getSegmentation().getHistory());
+			// points = Json.toJson(pointsL);
+			points = Json.toJson(action.getSegmentation().getPoints());
+			if (points.size() == 0) {
+				continue;
+			}
+			element.put("points", points);
+			result.put(element);
+		}
+
+		return result.toString();
+
+	}
+
+	private static List<Point> convertHistoryIntoPoints(
+			final List<History> history) {
+		final List<Point> ps = new ArrayList<>();
+		for (final History h : history) {
+			final List<Point> points = h.getPoints();
+			final Iterator<Point> it = points.iterator();
+			while (it.hasNext()) {
+				final Point point = it.next();
+				ps.add(new Point(point.getX(), point.getY(), it.hasNext()));
+			}
+
+		}
+		return ps;
+	}
 
 }
 

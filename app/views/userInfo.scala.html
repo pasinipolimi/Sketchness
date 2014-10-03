@@ -22,6 +22,7 @@ and open the template in the editor.
 		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/bootstrap/bootstrap-responsive.min.css")">
 		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/ResponsiveFullWidthGrid/default.css")" >
 		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/ResponsiveFullWidthGrid/component.css")">
+		<link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/lib/jquery.dataTables.min.css")">
 		<script src="js/modernizr.custom.js"></script>
     </head>
     <body class="cf">
@@ -30,13 +31,16 @@ and open the template in the editor.
 	<div class="statsCont">
 	    <div class="panelTitle">Users Info</div>
 		<table id="statisticheUsers"  class="infoTable">
+			<thead>
 			<tr>
-				<td class="infoLabel">Name</td>
-				<td class="infoLabel">Application ID</td>
-				<td class="infoLabel">Number of plays</td>
-				<td class="infoLabel">Number of annotations</td>
-				<td class="infoLabel">Quality</td>
+				<th class="infoLabel">Name</th>
+				<th class="infoLabel">Number of plays</th>
+				<th class="infoLabel">Number of annotations</th>
+				<th class="infoLabel">Quality</th>
 			</tr>
+			</thead>
+			<tbody id="statisticheUsersbody">
+			</tbody>
 		</table>
     </div>
 
@@ -69,6 +73,7 @@ and open the template in the editor.
     <script src="@routes.Assets.at("javascripts/renderer/bootstrap/boostrap.js")"></script>
     <script src="@routes.Assets.at("javascripts/renderer/bootstrap/boostrap.min.js")"></script>
     <script src="@routes.Assets.at("javascripts/renderer/ResponsiveFullWidthGrid/modernizr.custom.js")"></script>
+    <script src="@routes.Assets.at("javascripts/lib/jquery.dataTables.min.js")"></script>
     <script>google.load('visualization', '1', {'packages':['corechart']});</script>
     <script>
         window.onload = function(){
