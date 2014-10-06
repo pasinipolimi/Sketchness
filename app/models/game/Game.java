@@ -811,7 +811,6 @@ public class Game extends GameRoom {
 				} else if ((playersVect.size() <= 0)) {
 					publishLobbyEvent();
 				}
-
 			}
 		}
 		if (playersVect.isEmpty()) {
