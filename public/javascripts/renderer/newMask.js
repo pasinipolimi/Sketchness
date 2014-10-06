@@ -166,7 +166,7 @@ function drawTraces( data, textStatus, jqXHR ) {
         
         
         
-        if(newPointX-oldPointX > 3 || newPointX-oldPointX < 3 || newPointY-oldPointY >3 || newPointY-oldPointY < 3){
+        if(newPointX-oldPointX > 40 || newPointX-oldPointX < -40 || newPointY-oldPointY >40 || newPointY-oldPointY < -40){
         	taskContext.stroke();
         	taskContext.beginPath();
             taskContext.moveTo( newPointX, newPointY );

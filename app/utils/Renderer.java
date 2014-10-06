@@ -505,6 +505,7 @@ public class Renderer extends UntypedActor {
 			// element.put("cubrik_userid",
 			// object.get("cubrik_userid").toString());
 			element.put("app_id", u.getApp_id());
+			element.put("id", u.getId());
 			element.put("app_user_id", u.getApp_user_id());
 			//element.put("quality", u.getQuality());
 			element.put("quality", 0);

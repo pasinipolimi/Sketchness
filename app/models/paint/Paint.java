@@ -1,17 +1,16 @@
 package models.paint;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.awt.image.BufferedImage;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import models.Painter;
 import models.Point;
 import models.Segment;
 import models.factory.GameRoom;
+
 import org.json.JSONException;
+
 import utils.LanguagePicker;
 import utils.LoggerUtils;
 import utils.gamebus.GameBus;
@@ -19,6 +18,11 @@ import utils.gamebus.GameMessages;
 import utils.gamebus.GameMessages.GameEvent;
 import utils.gamebus.GameMessages.Join;
 import utils.gamebus.GameMessages.Room;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class Paint extends GameRoom {
 
@@ -66,8 +70,8 @@ public class Paint extends GameRoom {
 								killActor();
 								gameStarted = false;
 								break;
-                                                        case "waiting":
-                                                                waitingPlayers();
+							case "waiting":
+								waitingPlayers();
 								break;
 							case "loading":
 								gameLoading();
@@ -125,20 +129,20 @@ public class Paint extends GameRoom {
 							case "point":
 								notifyPoint(event.get("content"));
 								break;
-                                                        case "image":
+							case "image":
 								notifyImage(event.get("content"));
 								break;
 							case "endPath":
 								notifyEndPath();
 								break;
-                                                        case "error":
-                                                                notifyError();
-                                                                break;
+							case "error":
+								notifyError();
+								break;
 							case "trace":
 								addTrace(event.get("content"));
 								break;
 							case "roundEnd":
-                                                            roundEnd(event.get("content"));
+								roundEnd(event.get("content"));
 								break;
 							}
 						}
@@ -161,7 +165,7 @@ public class Paint extends GameRoom {
 			final int height = json.get("height").asInt();
 			notifyAll(GameMessages
 					.composeImage(id, medialocator, width, height));
-                        saveTraces();
+			saveTraces();
 		} catch (final Exception ex) {
 			LoggerUtils.error("Round termination error:",ex.toString());
 		}
@@ -182,6 +186,8 @@ public class Paint extends GameRoom {
 		final GameEvent tracesMessage = new GameEvent(
 				GameMessages.composeFinalTraces(taskUrl, guessWord, filtered,
 						traces, taskId), roomChannel);
+		currentSegment = new Segment("rgba(255,255,255,1.0)");
+		traces = new ObjectNode(factory);
 		GameBus.getInstance().publish(tracesMessage);
 	}
 
@@ -289,9 +295,9 @@ public class Paint extends GameRoom {
 		notifyAll(GameMessages.composePoint(x, y));
 
 	}
-        
-        private void notifyImage(final JsonNode task) throws Exception {
-		ObjectNode message = GameMessages.composeImage(task.get("user").asText(),task.get("id").asText(),task.get("url").asText(),task.get("width").asInt(),task.get("height").asInt());
+
+	private void notifyImage(final JsonNode task) throws Exception {
+		final ObjectNode message = GameMessages.composeImage(task.get("user").asText(),task.get("id").asText(),task.get("url").asText(),task.get("width").asInt(),task.get("height").asInt());
 		notifySingle(message,task.get("user").asText());
 	}
 
@@ -304,8 +310,8 @@ public class Paint extends GameRoom {
 		final ObjectNode toSend = (ObjectNode) task;
 		notifyAll(GameMessages.composeLeaderboard(toSend));
 	}
-        
-        private void notifyError() throws Exception {
+
+	private void notifyError() throws Exception {
 		notifyAll(GameMessages.composeHandleError(new ObjectNode(factory)));
 	}
 
@@ -328,11 +334,11 @@ public class Paint extends GameRoom {
 			painter.channel.write(json);
 		}
 	}
-        
-        private void notifySingle(final JsonNode json, String user) {
+
+	private void notifySingle(final JsonNode json, final String user) {
 		for (final Painter painter : painters.values()) {
-                    if(painter.name.equals(user))
-			painter.channel.write(json);
+			if(painter.name.equals(user))
+				painter.channel.write(json);
 		}
 	}
 
@@ -341,10 +347,10 @@ public class Paint extends GameRoom {
 	 */
 	private void handleJoin(final Join message) {
 		final String username = message.getUsername();
-                if(roomChannel.getRequiredPlayers()>1)
-                    GameBus.getInstance().publish(new GameEvent(GameMessages.composeWaiting(),roomChannel));
-                else
-                    GameBus.getInstance().publish(new GameEvent(GameMessages.composeLoading(),roomChannel));
+		if(roomChannel.getRequiredPlayers()>1)
+			GameBus.getInstance().publish(new GameEvent(GameMessages.composeWaiting(),roomChannel));
+		else
+			GameBus.getInstance().publish(new GameEvent(GameMessages.composeLoading(),roomChannel));
 		if (painters.containsKey(username)) {
 			getSender().tell(
 					play.i18n.Messages.get(LanguagePicker.retrieveLocale(),
@@ -371,8 +377,8 @@ public class Paint extends GameRoom {
 			entry.getValue().channel.write(GameMessages.composeLoading());
 		}
 	}
-        
-        private void waitingPlayers() {
+
+	private void waitingPlayers() {
 		for (final Map.Entry<String, Painter> entry : painters.entrySet()) {
 			entry.getValue().channel.write(GameMessages.composeWaiting());
 		}
@@ -388,6 +394,8 @@ public class Paint extends GameRoom {
 		for (final Map.Entry<String, Painter> entry : painters.entrySet()) {
 			entry.getValue().channel.write(GameMessages.composeSkip());
 		}
+		traces = new ObjectNode(factory);
+		currentSegment = new Segment("rgba(255,255,255,1.0)");
 	}
 
 	/*
