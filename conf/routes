@@ -26,6 +26,7 @@ GET     /cleanCMS                     controllers.Utilities.cleanCMS
 
 
 GET		/admin					          controllers.Utilities.newRendererCall
+GET		/image					          controllers.Utilities.newRendererImageCall(imageID: String)
 GET     /WebToolAjax                      controllers.Utilities.webToolAjaxCall
 GET     /LoadStats                        controllers.Utilities.loadStatsCall
 GET     /WebInfoAjax                      controllers.Utilities.webInfoAjaxCall

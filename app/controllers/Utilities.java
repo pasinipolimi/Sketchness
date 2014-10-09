@@ -9,7 +9,6 @@ import javax.imageio.ImageIO;
 import org.apache.http.client.ClientProtocolException;
 import org.json.JSONException;
 
-import play.Logger;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.WebSocket;
@@ -18,6 +17,7 @@ import utils.Renderer;
 import utils.CMS.CMS;
 import utils.CMS.CMSException;
 import views.html.admin_home;
+import views.html.admin_image;
 import views.html.renderer;
 import views.html.systemInfo;
 import views.html.tasks;
@@ -66,7 +66,7 @@ public class Utilities extends Controller {
 	}
 
 	public static Result retrieveMaskImage(final String media) throws CMSException {
-		
+
 		try {
 			final BufferedImage img = Renderer.retrieveMaskImage(media);
 			final File result = new File("Mask_.png");
@@ -114,9 +114,11 @@ public class Utilities extends Controller {
 	}
 
 	public static Result newRendererCall() {
-		//return ok(newRenderer.render());
 		return ok(admin_home.render());
+	}
 
+	public static Result newRendererImageCall(final String imageId) {
+		return ok(admin_image.render(imageId));
 	}
 
 	public static Result webToolAjaxCall() throws JSONException, CMSException {
@@ -265,15 +267,15 @@ public class Utilities extends Controller {
 		final String result = Renderer.maskFashionistaAjaxCall(imageId,tagName);
 		return ok(result);
 	}
-	
+
 	public static Result initializeSlider() throws JSONException, ClientProtocolException, IOException, CMSException {
-		
+
 		final String result = Renderer.initializeSlider();
 		return ok(result);
 	}
-	
+
 	public static Result annotationRange() throws JSONException, ClientProtocolException, IOException, CMSException {
-		
+
 		final String max_id = request().getHeader("max_id");
 		final String count = request().getHeader("count");
 		final String max = request().getHeader("max");
@@ -281,10 +283,10 @@ public class Utilities extends Controller {
 		final String result = Renderer.annotationRange(min,max,max_id,count);
 		return ok(result);
 	}
-	
+
 
 	public static Result getTraces() throws JSONException, CMSException {
-		
+
 		final String imageId = request().getHeader("idImage");
 		final String name = request().getHeader("tagName");
 		final String tagId = String.valueOf(CMS.getTagId(name));
@@ -292,7 +294,7 @@ public class Utilities extends Controller {
 		return ok(result);
 
 
-	}		
+	}
 
 
 

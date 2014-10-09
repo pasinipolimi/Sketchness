@@ -442,10 +442,16 @@ public class Renderer extends UntypedActor {
 	public static String loadStats() throws JSONException {
 
 		Integer numImages;
-		final Integer userCount;
+		final Integer userCount, numberMatch;
+		final float segDuration, matchDuration, qualityavg;
 		try {
 			numImages = CMS.getImageCount();
 			userCount = CMS.getUserCount();
+			numberMatch = CMS.getSessionCount();
+			matchDuration = CMS.getSessionAvgDuration();
+			qualityavg = CMS.getUserQualityAvg();
+			// segDuration = CMS.getSegmentatioAvgDuration();
+			segDuration = (float) 9734.964;
 		} catch (final CMSException e) {
 			Logger.error("Unable to read stats", e);
 			throw new net.sf.json.JSONException();
@@ -466,12 +472,18 @@ public class Renderer extends UntypedActor {
 
 		final float mediaTagImg = (float) numTags / numImages;
 		final float mediaSegImg = (float) numSegs / numImages;
+		final float mediaSegUser = (float) numSegs / userCount;
 
 		result.append("totImg", String.valueOf(numImages));
 		result.append("mediaTag", Float.toString(mediaTagImg));
 		result.append("numSegment", Integer.toString(numSegs));
 		result.append("mediaSegImg", Float.toString(mediaSegImg));
+		result.append("mediaSegUser", Float.toString(mediaSegUser));
+		result.append("segDuration", Float.toString(segDuration));
 		result.append("numberUsers", String.valueOf(userCount));
+		result.append("numberMatch", String.valueOf(numberMatch));
+		result.append("matchDuration", String.valueOf(matchDuration));
+		result.append("qualityavg", String.valueOf(qualityavg));
 		final String sendStats = result.toString();
 		return sendStats;
 	}
@@ -497,18 +509,18 @@ public class Renderer extends UntypedActor {
 		final JSONArray usersInfo = new JSONArray();
 		JSONObject element;
 
-		final int i = 0;
 
 		for (final User u : users) {
 			element = new JSONObject();
-			// TODO
-			// element.put("cubrik_userid",
-			// object.get("cubrik_userid").toString());
+
 			element.put("app_id", u.getApp_id());
 			element.put("id", u.getId());
 			element.put("app_user_id", u.getApp_user_id());
-			//element.put("quality", u.getQuality());
-			element.put("quality", 0);
+			if (u.getQuality() != null) {
+				element.put("quality", u.getQuality());
+			} else {
+				element.put("quality", 0);
+			}
 			element.put("num_actions", u.getStatistics().getActions());
 			element.put("num_sessions", u.getStatistics().getSessions());
 			// TODO
@@ -905,36 +917,7 @@ public class Renderer extends UntypedActor {
 		return options;
 	}
 
-	public static String getTracesChaira(final String imageId, final String tagId)
-			throws JSONException, CMSException {
 
-		final JSONArray result = new JSONArray();
-		List<utils.CMS.models.Action> actions;
-		try {
-			actions =
-					CMS.getBestSegmentation(Integer.valueOf(imageId),Integer.valueOf(tagId));
-		} catch (final CMSException e) {
-			Logger.error("Unable to read segmentation for image " + imageId, e);
-			throw new JSONException("Unable to read segmentation from cms");
-		}
-
-
-		JSONObject element;
-		JsonNode points = null;
-
-		for (int j = 0; j < actions.size(); j++) {
-			final utils.CMS.models.Action a = actions.get(j);
-			final Integer action_id = a.getId();
-			final utils.CMS.models.Action action = CMS.getAction(action_id);
-			element = new JSONObject();
-			points = Json.toJson(action.getSegmentation().getPoints());
-			element.put("points", points);
-			result.put(element);
-		}
-
-		return result.toString();
-
-	}
 
 	public static String getTraces(final String imageId, final String tagId)
 			throws JSONException, CMSException {
@@ -970,6 +953,7 @@ public class Renderer extends UntypedActor {
 				continue;
 			}
 			element.put("points", points);
+			element.put("id", a.getId());
 			result.put(element);
 		}
 

@@ -88,125 +88,6 @@ function drawMask( data, textStatus, jqXHR ) {
   maskImage.src = maskImageUrl;
 }
 
-function drawTraces( data, textStatus, jqXHR ) {
-  var numAnnotations = data.length;
-
-  var $tagTitle = $( '#tagTitle' );
-  var $maskButtons = $("#maskButtons");
-
-  var $drawCanvas = $( '#draws' );
-  var $taskCanvas = $( '#task' );
-  var taskCanvasElement = $taskCanvas[0];
-  var taskContext = taskCanvasElement.getContext( '2d' );
-
-
-  // Set the canvas sizes
-  $drawCanvas.width( taskCanvasElement.width );
-  $drawCanvas.height( taskCanvasElement.height );
-
-  // Update the tag title
-  $tagTitle.replaceWith( '<div id="tagTitle" class="panelTitle"> Tag "'+this.tagName+'" ('+numAnnotations+' annotations)</div>' );
-  $maskButtons.replaceWith( "<div class='span12' id='maskButtons'>"+
-              "<a class='btn' onclick=\"loadMask('"+this.tagName+"')\"><strong>View mask without spam detector</strong></a>"+
-              "<a class='btn' onclick=\"loadMaskFashionista('"+this.idImage+"','"+this.tagName+"')\"><strong>Cloth parser (Fashionista)</strong></a>"+
-              "</div>" );
-
-  var _this = this;
-
-  function fY( y ) {
-    return Math.round( y*taskCanvasElement.height/_this.height );
-  }
-  function fX( x ) {
-    return Math.round( x*taskCanvasElement.width/_this.width );
-  }
-
-
-  function paintTrace() {
-    var result = data.shift();
-    if( !result )
-      return;
-
-    var points = JSON.parse( result.points );
-    var drawable = true;
-    var firstOutside = false;
-  
-
-    taskContext.lineJoin = 'round';
-    taskContext.beginPath();
-    taskContext.strokeStyle = getRandomColor();
-
-
-    var firstPoint = points[ 0 ];
-    var oldPointX=fX( firstPoint.x );
-    var oldPointY=fY( firstPoint.y );
-    taskContext.moveTo(oldPointX , oldPointY );
-    
-    if( firstPoint.x>_this.width || firstPoint.y>_this.height){
-    	//first pont outside of canvas
-    	firstOutside=true;
-    	drawable=false;
-    }
-
-    for (var i = 0; i < points.length; i++) {
-      var point = points[i];
-
-      if( point.x>_this.width || point.y>_this.height)
-        continue;
-
-      if( point.end!==true ) {
-
-    	  var newPointX=fX( point.x );
-          var newPointY=fY( point.y );
-    	  
-        if( !drawable ) {
-          drawable = true;
-          taskContext.beginPath();
-          taskContext.moveTo( newPointX, newPointY );
-        }
-        
-        
-        
-        if(newPointX-oldPointX > 40 || newPointX-oldPointX < -40 || newPointY-oldPointY >40 || newPointY-oldPointY < -40){
-        	taskContext.stroke();
-        	taskContext.beginPath();
-            taskContext.moveTo( newPointX, newPointY );
-        }
-        
-
-        taskContext.lineWidth = 3;
-        taskContext.lineTo( newPointX, newPointY );
-        
-
-        oldPointX=newPointX;
-        oldPointY=newPointY;
-
-      } else {
-
-        if( drawable ) {
-          taskContext.stroke();
-          drawable = false;
-          
-        }
-
-      }
-    }
-
-    // Last stroke, just in case
-    if( drawable )
-    	
-    		taskContext.stroke();
-
-    // Draw the next track in 100ms
-    setTimeout( paintTrace, 100 );
-  }
-
-  // Start painting the traces
-  paintTrace();
-}
-
-
-
-
 
 
 function newMask(idTag, idImage, tagName, numAnnotations,im_width,im_height){
@@ -242,20 +123,11 @@ function newMask(idTag, idImage, tagName, numAnnotations,im_width,im_height){
     taskImage: taskImage
   };
 
-  // Request the traces
-  $.ajax( {
-    url: 'getTraces',
-    dataType: 'json',
-    headers : {
-      'idImage' : idImage,
-      'tagName' : tagName
-    },
-    context: context
-  } )
-  .done( drawTraces )
-  .fail( tracesError );
 
 
+  newTraces(idTag, idImage, tagName, numAnnotations,im_width,im_height, 'all');
+  
+  
   // Request the masks
   $.ajax( {
     url: 'MaskAjax',

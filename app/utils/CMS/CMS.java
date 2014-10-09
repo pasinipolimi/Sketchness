@@ -37,6 +37,7 @@ import utils.CMS.models.MicroTask;
 import utils.CMS.models.Point;
 import utils.CMS.models.SegmentToClose;
 import utils.CMS.models.Segmentation;
+import utils.CMS.models.Session;
 import utils.CMS.models.Tag;
 import utils.CMS.models.Task;
 import utils.CMS.models.User;
@@ -1318,6 +1319,11 @@ public class CMS {
 		params.put("completed", "true");
 		params.put("validity", "true");
 
+		// final Action a = getAction(37361);
+		// final List<Action> ss = new ArrayList<>();
+		// ss.add(a);
+		// return ss;
+
 		return getObjs(utils.CMS.models.Action.class, "action", params,
 				"actions");
 
@@ -1327,6 +1333,93 @@ public class CMS {
 		postObj2(null, "action/" + actionId);
 		LoggerUtils.debug("CMS", "Closing action " + actionId);
 
+	}
+
+	public static float getSegmentatioAvgDuration() throws CMSException {
+
+
+		final List<Action> as = getAllSegmentations();
+
+		Integer tot = 0;
+		Double durations = (double) 0;
+		Action a;
+		for (final Action amin : as) {
+			Logger.info("Downloading action: " + amin.getId());
+			a = getAction(amin.getId());
+			if (a.getSegmentation().getHistory() != null
+					&& a.getSegmentation().getHistory().size() > 0) {
+				final int start = a.getSegmentation().getHistory().get(0).getTime();
+				final int end = a.getSegmentation().getHistory()
+						.get(a.getSegmentation().getHistory().size() - 1).getTime();
+				durations += (end - start);
+				tot++;
+			}
+		}
+		return (float) (durations / tot);
+
+	}
+
+
+
+	private static List<Action> getAllSegmentations() throws CMSException {
+		Logger.debug("Downloading segs");
+		final HashMap<String, String> params = new HashMap<String, String>();
+		params.put("completed", "true");
+		params.put("type", "segmentation");
+
+		final List<utils.CMS.models.Action> as = CMS.getAllObjs(Action.class,
+				"action", params, "actions");
+		Logger.debug("Downloading segs end");
+		return as;
+	}
+
+	public static Integer getSessionCount() throws CMSException {
+		final Integer count = getCount("session");
+		return count;
+	}
+
+	public static float getSessionAvgDuration() throws CMSException {
+
+		Integer tot = 0;
+		Double durations = (double) 0;
+		final List<Session> actions = getAllClosedSessions();
+		for (final Session a : actions) {
+			final String completed = a.getCompleted_at();
+
+
+			final String started = a.getCreated_at();
+			final Calendar date = javax.xml.bind.DatatypeConverter
+					.parseDateTime(started);
+			final Calendar end = javax.xml.bind.DatatypeConverter
+					.parseDateTime(completed);
+			durations += end.getTimeInMillis() - date.getTimeInMillis();
+			tot++;
+		}
+		return (float) (durations / tot);
+	}
+
+	private static List<Session> getAllClosedSessions() throws CMSException {
+		Logger.debug("Downloading sessions");
+		final HashMap<String, String> params = new HashMap<String, String>();
+		params.put("completed", "true");
+
+		final List<utils.CMS.models.Session> as = CMS.getAllObjs(Session.class,
+				"session", params, "sessions");
+		Logger.debug("Downloading sessions end");
+		return as;
+	}
+
+	public static float getUserQualityAvg() throws CMSException, JSONException {
+		final List<utils.CMS.models.User> as = getAllUsers();
+		Integer tot = 0;
+		Double durations = (double) 0;
+		for (final User u : as) {
+			if (u.getQuality() != null) {
+				durations += u.getQuality();
+				tot++;
+			}
+		}
+		return (float) (durations / tot);
 	}
 
 }

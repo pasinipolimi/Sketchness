@@ -1,3 +1,4 @@
+@(imageID: String)
 
 <!--
 To change this template, choose Tools | Templates
@@ -8,7 +9,7 @@ and open the template in the editor.
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width">
-        <title>Sketchness AdminUI</title>
+        <title>Sketchness AdminUI Image</title>
         
         <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/style.css")">
         <link rel="stylesheet" type="text/css" href="@routes.Assets.at("stylesheets/renderer/dropkick.css")">
@@ -88,7 +89,7 @@ and open the template in the editor.
 		</div>
 		
 
-		<div class = "imagesCont">
+		<!-- <div class = "imagesCont">
                 	<div class="panelTitle">Images</div>
 					<form action="#" method="get" id="filterFormImage" >
 						<div class="input-group">
@@ -99,7 +100,7 @@ and open the template in the editor.
 								<input id="slider" type="range" name="range" min="1" max="100" value="50" onchange="numberAnnotations();"> 
 								
 								-->
-								<!--  <span>Num Annotations</span>-->
+								<!--  <span>Num Annotations</span>--><!-- 
 								<div id="slider"></div>
 								<span id="resSlider"></span>
 								<a class='btn' id="filter"><strong>Filter Num Annotations</strong></a>
@@ -118,7 +119,7 @@ and open the template in the editor.
 					<span id="images_scroll" style="float:left;color: rgb(255,255,255);">Loading...</span>
         </div>
         
-        
+         -->
 
   	}
 
@@ -142,11 +143,9 @@ and open the template in the editor.
     <script src="@routes.Assets.at("javascripts/renderer/download.js")"></script>
     <script src="@routes.Assets.at("javascripts/renderer/imgPreview.js")"></script>
     <script src="@routes.Assets.at("javascripts/renderer/visualizzaCollection.js")?nocache=@(new Date().getTime())"></script>
-    <script src="@routes.Assets.at("javascripts/renderer/newTraces.js")?nocache=@(new Date().getTime())"></script>
     <script src="@routes.Assets.at("javascripts/renderer/newMask.js")?nocache=@(new Date().getTime())"></script>
+    <script src="@routes.Assets.at("javascripts/renderer/newTraces.js")?nocache=@(new Date().getTime())"></script>
     <script src="@routes.Assets.at("javascripts/renderer/loadMaskFashionista.js")"></script>
-    <script src="https://www.google.com/jsapi"></script>
-    <script>google.load('visualization', '1', {'packages':['corechart']});</script> 
     <script src="@routes.Assets.at("javascripts/renderer/jquery/jquery-1.10.2.min.js")"></script>
 	<script src="@routes.Assets.at("javascripts/renderer/jquery/jquery.inview.js")"></script>
 	<script src="@routes.Assets.at("javascripts/renderer/jquery/jAjax.js")"></script>
@@ -154,8 +153,10 @@ and open the template in the editor.
     <script>
 
         window.onload = function(){
-
-            popolaSelectionAjax(null,100,true);
+        	
+            var url= "@play.Play.application().configuration().getString("cmsUrl")";
+            var id=this.window.location.search.substring(1).split("=")[1]
+            imgPreview(url+"/storage/image/"+id+".jpg",id);
 
         };
 
