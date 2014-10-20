@@ -5,11 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -105,10 +102,7 @@ public class Game extends GameRoom {
 	private Integer missingPlayers = requiredPlayers;
 	private Integer disconnectedPlayers = 0;
 	private Boolean shownImages = false;
-	List<ObjectNode> queueImages = Collections
-			.synchronizedList(new LinkedList<ObjectNode>());
-	private final List<ObjectNode> priorityTaskQueue = Collections
-			.synchronizedList(new LinkedList<ObjectNode>());
+	GameInit gameInit = new GameInit();
 
 	private final HashMap<String, Integer> openActionsSeg = new HashMap<>();
 	private final HashMap<String, Integer> openActionsTag = new HashMap<>();
@@ -230,15 +224,14 @@ public class Game extends GameRoom {
 	private ObjectNode retrieveTaskImage() throws Exception {
 		guessObject = null;
 		// If we have task prioritized, then use them first
-		if (priorityTaskQueue.size() > 0) {
-			guessObject = priorityTaskQueue.remove(0);
 
-		}
+		guessObject = gameInit.getPriorityTask();
 
 		if (guessObject == null) {
 
-			if (queueImages.size() > 0) {
-				guessObject = queueImages.remove(0);
+			// if (queueImages.size() > 0) {
+			if (gameInit.hasImages(sketcherPainter.name)) {
+				guessObject = gameInit.getImage(sketcherPainter.name);
 
 				final Integer user = CMS.postUser(sketcherPainter.name);
 				final Integer image = guessObject.get("id").asInt();
@@ -270,14 +263,14 @@ public class Game extends GameRoom {
 	private void endSegmentation(final String user) throws Exception {
 		final GameEvent eventGuesser = new GameEvent(GameMessages.composeScore(
 				user, guesserPointsRemaining), roomChannel);
-                for (final Painter painter : playersVect) {
+		for (final Painter painter : playersVect) {
 			// If the current painter is the guesser, has not guessed before and
 			// it is not the sketcher, update his points
 			if (painter.name.equals(user)) {
 				painter.setPoints(painter.getPoints() + guesserPointsRemaining);
-                                break;
-                        }
-                }
+				break;
+			}
+		}
 		GameBus.getInstance().publish(eventGuesser);
 		GameBus.getInstance().publish(
 				new GameEvent(GameMessages.composeSaveTraces(), roomChannel));
@@ -689,10 +682,10 @@ public class Game extends GameRoom {
 							try {
 								trials++;
 								if (!fixGroundTruth)
-									CMS.taskSetInitialization(
-											priorityTaskQueue,
-											queueImages, roomChannel,
-											maxRound);
+									gameInit.taskSetInitialization(
+											roomChannel, maxRound,
+											playersVect.size() == 1,
+											false);
 								else
 									// CMS.fixGroundTruth(groundTruthId,
 									// priorityTaskQueue,
@@ -722,8 +715,7 @@ public class Game extends GameRoom {
 							return;
 						}
 
-						if (priorityTaskQueue.size() == 0
-								&& queueImages.size() == 0) {
+						if (gameInit.hasImagesOrTasks()) {
 							try {
 								gameEnded();
 							} catch (final Exception e) {
@@ -771,10 +763,10 @@ public class Game extends GameRoom {
 		status.put("roomName", roomChannel.getRoom());
 		status.put("currentPlayers", playersVect.size());
 		status.put("maxPlayers", requiredPlayers);
-                if(playersVect.isEmpty())
-                    status.put("visible", false);
-                else
-                    status.put("visible", playersVect.size() < requiredPlayers);
+		if (playersVect.isEmpty())
+			status.put("visible", false);
+		else
+			status.put("visible", playersVect.size() < requiredPlayers);
 		GameEvent join = null;
 		try {
 			join = new GameEvent(GameMessages.composeGameListUpdate(status),
@@ -804,8 +796,7 @@ public class Game extends GameRoom {
 						new GameEvent(GameMessages.composeQuit(quitter),
 								GameManager.getInstance().getLobby()));
 				// End the game if there's just one player or less
-				if ((playersVect.size() == 1)
-						&& gameStarted) {
+				if ((playersVect.size() == 1) && gameStarted) {
 					Logger.info("[GAME] Just one player left, closing the game.");
 					gameEnded();
 				} else if ((playersVect.size() <= 0)) {
@@ -981,7 +972,7 @@ public class Game extends GameRoom {
 
 	private void skipTask() throws Exception {
 		final Integer userid = CMS.postUser(sketcherPainter.name);
-		final String tagS=guessObject.get("tag").asText();
+		final String tagS = guessObject.get("tag").asText();
 		Integer tag = null;
 		if (!tagS.equals("empty")) {
 			tag = CMS.saveTag(tagS);
@@ -1006,9 +997,8 @@ public class Game extends GameRoom {
 				actionId = openActionsSeg.get(String.valueOf(imgid)
 						+ String.valueOf(tag));
 			} else {
-				actionId =  CMS.postAction(Action
-						.createSkipActionSeg(sessionId, guessObject.get("id")
-								.asInt(), userid, true, tag));
+				actionId = CMS.postAction(Action.createSkipActionSeg(sessionId,
+						guessObject.get("id").asInt(), userid, true, tag));
 				CMS.closeAction(actionId);
 			}
 		}
@@ -1024,6 +1014,7 @@ public class Game extends GameRoom {
 		nextRound();
 
 	}
+
 	private void tagReceived(final String word) throws Exception {
 		taskImage.remove("tag");
 		taskImage.put("tag", word);
@@ -1121,10 +1112,8 @@ public class Game extends GameRoom {
 		return false;
 	}
 
-
 	private static final Map<String, String[]> synonymousTags;
-	static
-	{
+	static {
 		synonymousTags = new HashMap<String, String[]>();
 
 		final String[] bag = { "bag" };
@@ -1168,12 +1157,7 @@ public class Game extends GameRoom {
 
 	}
 
-
-
 }
-
-
-
 
 enum CountdownTypes {
 	round, tag

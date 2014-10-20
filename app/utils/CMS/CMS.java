@@ -3,7 +3,6 @@ package utils.CMS;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -23,7 +22,6 @@ import play.libs.WS;
 import play.libs.WS.Response;
 import play.libs.WS.WSRequestHolder;
 import scala.concurrent.duration.Duration;
-import utils.LanguagePicker;
 import utils.LoggerUtils;
 import utils.CMS.models.Action;
 import utils.CMS.models.CMSObject;
@@ -41,9 +39,6 @@ import utils.CMS.models.Session;
 import utils.CMS.models.Tag;
 import utils.CMS.models.Task;
 import utils.CMS.models.User;
-import utils.gamebus.GameBus;
-import utils.gamebus.GameMessages;
-import utils.gamebus.GameMessages.Room;
 import akka.actor.Cancellable;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -66,16 +61,11 @@ public class CMS {
 	private final static String useImageWithNoTags = Play.application()
 			.configuration().getString("useImageWithNoTags");
 
-	private final static String policy = Play.application().configuration()
-			.getString("policy");
+
 	private static final long MAX_OPEN_ACTION = 1800000;
 
 	private static HashMap<String, Cancellable> runningThreads = new HashMap<String, Cancellable>();
 
-	// Minimum tags that an image should have to avoid asking to the
-	// users for new tags
-	private static Integer minimumTags = Integer.parseInt(Play.application()
-			.configuration().getString("minimumTags"));
 
 	public static List<Image> getImages() throws CMSException {
 		return getObjs(Image.class, "image", "images");
@@ -560,85 +550,9 @@ public class CMS {
 		}
 	}
 
-	public static void taskSetInitialization(
-			final List<ObjectNode> priorityTaskHashSet,
-			final List<ObjectNode> queueImages, final Room roomChannel,
-			final Integer maxRound) throws Error, Exception {
-		int uploadedTasks = 0;
-		try {
-			uploadedTasks = retrieveTasks(maxRound, priorityTaskHashSet,
-					roomChannel);
-		} catch (final Exception e) {
-			LoggerUtils.error("CMS", "Unable to read tasks");
-		}
 
-		int tasksToAdd = maxRound - uploadedTasks;
-		if (tasksToAdd > 0 && useImageWithNoTags.equals("true")) {
-			uploadedTasks = retrieveImagesWithoutTag(tasksToAdd, queueImages,
-					roomChannel, uploadedTasks > 0, uploadedTasks);
 
-		}
-		tasksToAdd = maxRound - uploadedTasks;
-		if (tasksToAdd > 0) {
-			retrieveImagesCERT(tasksToAdd, queueImages, roomChannel,
-					uploadedTasks > 0);
 
-		}
-
-		LoggerUtils.debug("CMS", "Task init from CMS end");
-	}
-
-	private static int retrieveImagesWithoutTag(final Integer tasksToAdd,
-			final List<ObjectNode> queueImages, final Room roomChannel,
-			boolean taskSent, int uploadedTasks) {
-
-		final List<ChooseImage> imgs;
-		final List<ChooseImageTag> imgtgs = new ArrayList<>();
-		try {
-			LoggerUtils.debug("CMS", "Requested image list to CMS");
-			imgs = CMS.getChooseImageOnly(collection, tasksToAdd.toString());
-			if (imgs != null) {
-				for (final ChooseImage imgtg : imgs) {
-					if (imgtg.getCount() >= minimumTags) {
-						break;
-					}
-					imgtgs.add(0, new ChooseImageTag(imgtg.getImage(), -1));
-				}
-			}
-			LoggerUtils.debug("CMS", "Requested image list to CMS end");
-		} catch (final Exception e) {
-			throw new RuntimeException(
-					"[CMS] The request to the CMS is malformed");
-		}
-
-		for (final ChooseImageTag imgtg : imgtgs) {
-			// Save information related to the image
-			final Integer id = imgtg.getImage();
-
-			final ObjectNode guessWord = Json.newObject();
-			guessWord.put("type", "task");
-			guessWord.put("id", String.valueOf(id));
-			// Find the valid tags for this task.
-
-			try {
-				buildGuessWordSegment(guessWord, imgtg.getTag(),
-						CMS.getImage(id));
-				uploadedTasks = uploadedTasks + 1;
-			} catch (final CMSException e) {
-				Logger.error("Unable to read image, ignoring...", e);
-			}
-
-			queueImages.add(guessWord);
-
-			if (!taskSent) {
-				taskSent = true;
-				LoggerUtils.debug("CMS", "Send task aquired for image:" + id
-						+ ", rooomChanel: " + roomChannel);
-				sendTaskAcquired(roomChannel);
-			}
-		}
-		return uploadedTasks;
-	}
 
 	public static void cleanOpenActions() throws CMSException {
 		// final String[] invalid = { "20254" };
@@ -683,104 +597,7 @@ public class CMS {
 
 	}
 
-	private static void retrieveImages(final Integer tasksToAdd,
-			final List<ObjectNode> queueImages, final Room roomChannel,
-			boolean taskSent) throws Exception {
 
-		List<ChooseImageTag> imgtgs;
-		try {
-			LoggerUtils.debug("CMS", "Requested image list to CMS");
-
-			imgtgs = CMS.getChoose(collection, tasksToAdd.toString(), policy);
-
-			LoggerUtils.debug("CMS", "Requested image list to CMS end");
-		} catch (final Exception e) {
-			throw new Exception("[CMS] The request to the CMS is malformed", e);
-		}
-
-		for (final ChooseImageTag imgtg : imgtgs) {
-			// Save information related to the image
-			final Integer id = imgtg.getImage();
-
-			final ObjectNode guessWord = Json.newObject();
-			guessWord.put("type", "task");
-			guessWord.put("id", String.valueOf(id));
-			// Find the valid tags for this task.
-
-			try {
-				buildGuessWordSegment(guessWord, imgtg.getTag(),
-						CMS.getImage(id));
-			} catch (final CMSException e) {
-				Logger.error("Unable to read image, ignoring...", e);
-			}
-
-			queueImages.add(guessWord);
-
-			if (!taskSent) {
-				taskSent = true;
-				LoggerUtils.debug("CMS", "Send task aquired for image:" + id
-						+ ", rooomChanel: " + roomChannel);
-				sendTaskAcquired(roomChannel);
-			}
-		}
-
-	}
-
-	private static void retrieveImagesCERT(final Integer tasksToAdd,
-			final List<ObjectNode> queueImages, final Room roomChannel,
-			final boolean taskSent) throws Exception {
-
-		List<ChooseImageTag> imgtgs = new ArrayList<>();
-		final List<ChooseImageTag> imgtgsDress;
-		try {
-			LoggerUtils.debug("CMS", "Requested image list to CMS");
-
-			final int tot = tasksToAdd - 3;
-			imgtgs = CMS.getChoose(1, "3", policy);
-			imgtgsDress = CMS.getChoose(4, String.valueOf(tot), policy);
-			imgtgs.addAll(imgtgsDress);
-
-			LoggerUtils.debug("CMS", "Requested image list to CMS end");
-		} catch (final Exception e) {
-			throw new Exception("[CMS] The request to the CMS is malformed", e);
-		}
-
-		Collections.shuffle(imgtgs);
-
-		for (final ChooseImageTag imgtg : imgtgs) {
-
-			addImgToQueue(imgtg, queueImages, roomChannel, taskSent);
-
-		}
-
-	}
-
-	private static void addImgToQueue(final ChooseImageTag imgtg,
-			final List<ObjectNode> queueImages, final Room roomChannel,
-			boolean taskSent) {
-		final Integer id = imgtg.getImage();
-
-		final ObjectNode guessWord = Json.newObject();
-		guessWord.put("type", "task");
-		guessWord.put("id", String.valueOf(id));
-		// Find the valid tags for this task.
-
-		try {
-			buildGuessWordSegment(guessWord, imgtg.getTag(), CMS.getImage(id));
-		} catch (final CMSException e) {
-			Logger.error("Unable to read image, ignoring...", e);
-		}
-
-		queueImages.add(guessWord);
-
-		if (!taskSent) {
-			taskSent = true;
-			LoggerUtils.debug("CMS", "Send task aquired for image:" + id
-					+ ", rooomChanel: " + roomChannel);
-			sendTaskAcquired(roomChannel);
-		}
-
-	}
 
 	private static void openAction(final Integer image, final Integer session,
 			final Integer tagId, final Integer userId) throws CMSException {
@@ -789,17 +606,19 @@ public class CMS {
 		postAction(action);
 	}
 
-	private static List<ChooseImageTag> getChoose(final Integer collection2,
-			final String limit, final String policy) throws CMSException {
+	public static List<ChooseImageTag> getChoose(final Integer collection2,
+			final Integer maxelements, final String policy)
+					throws CMSException {
 		final HashMap<String, String> params = new HashMap<>();
-		params.put("limit", limit);
+		params.put("limit", String.valueOf(maxelements));
 		params.put("collection", String.valueOf(collection2));
 		return getObjs(ChooseImageTag.class, "choose/imageandtag/" + policy,
 				params, "results");
 	}
 
-	private static List<ChooseImage> getChooseImageOnly(
-			final Integer collection2, final String limit) throws CMSException {
+	public static List<ChooseImage> getChooseImageOnly(
+			final Integer collection2, final String limit, final String policy)
+					throws CMSException {
 		final HashMap<String, String> params = new HashMap<>();
 		params.put("limit", limit);
 		params.put("collection", String.valueOf(collection2));
@@ -807,103 +626,11 @@ public class CMS {
 				"results");
 	}
 
-	private static int retrieveTasks(final Integer maxRound,
-			final List<ObjectNode> priorityTaskHashSet, final Room roomChannel) {
-		boolean taskSent = false;
 
-		int uploadedTasks = 0;
 
-		final List<Task> tasklist;
-		try {
-			LoggerUtils.debug("CMS", "Requested task list to CMS "
-					+ roomChannel);
 
-			tasklist = getTaskCollection(collection);
 
-			LoggerUtils.debug("CMS", "Requested task list to CMS end "
-					+ roomChannel);
-
-		} catch (final CMSException e) {
-			throw new RuntimeException(
-					"[CMS] Unable to download collection from CMS");
-		}
-
-		if (tasklist == null || tasklist.size() == 0) {
-			return 0;
-		}
-		try {
-			// for (final Task taskId : tasklist) {
-			for (final Task t : tasklist) {
-				final Integer taskId = t.getId();
-				// final utils.CMS.models.Task t = getTask(taskId);
-
-				final List<MicroTask> uTasks = CMS.getMicroTasks(String
-						.valueOf(taskId));
-				if (uTasks == null || uTasks.size() > 0) {
-					continue;
-				}
-
-				final Integer imageId = t.getImage();
-				final Image image = getImage(imageId);
-
-				for (final MicroTask utask : uTasks) {
-
-					final ObjectNode guessWord = Json.newObject();
-					guessWord.put("type", "task");
-					guessWord.put("id", imageId);
-
-					final String type = utask.getType();
-					switch (type) {
-					case "tagging":
-						buildGuessWordTagging(guessWord, image, utask, taskId);
-						priorityTaskHashSet.add(guessWord);
-						uploadedTasks++;
-						if (!taskSent) {
-							taskSent = true;
-							sendTaskAcquired(roomChannel);
-						}
-						break;
-					case "segmentation":
-						final Integer tagid = t.getTag();
-
-						buildGuessWordSegmentTask(guessWord, tagid, image,
-								String.valueOf(taskId), utask);
-
-						priorityTaskHashSet.add(guessWord);
-						uploadedTasks++;
-						if (!taskSent) {
-							taskSent = true;
-							sendTaskAcquired(roomChannel);
-						}
-						break;
-					}
-					break;
-
-				}
-
-			}
-		} catch (final CMSException e) {
-			throw new RuntimeException("[CMS] Unable to download task from CMS");
-		}
-		return uploadedTasks;
-	}
-
-	private static void buildGuessWordSegment(final ObjectNode guessWord,
-			final Integer tagId, final Image image) throws CMSException {
-		// Add one tag among the ones that have been retrieved following
-		// a particular policy
-		final Tag t = CMS.getTag(tagId);
-		final String tag = t.getName();
-
-		guessWord.put("tag", tag);
-		guessWord.put("lang", LanguagePicker.retrieveIsoCode());
-		guessWord.put("image", rootUrl + image.getMediaLocator());
-		guessWord.put("width", image.getWidth());
-		guessWord.put("height", image.getHeight());
-
-	}
-
-	private static Tag getTag(final Integer tagId) throws CMSException {
+	public static Tag getTag(final Integer tagId) throws CMSException {
 		if (tagId >= 0)
 			return getObj(Tag.class, "tag", tagId, "tag");
 		else
@@ -911,33 +638,15 @@ public class CMS {
 			return new Tag("empty");
 	}
 
-	private static void buildGuessWordSegmentTask(final ObjectNode guessWord,
-			final Integer tagId, final Image image, final String taskId,
-			final MicroTask utask) throws CMSException {
-		buildGuessWordSegment(guessWord, tagId, image);
-		guessWord.put("utaskid", utask.getId());
-		guessWord.put("taskid", taskId);
 
-	}
 
-	private static List<Task> getTaskCollection(final Integer collection2)
+	public static List<Task> getTaskCollection(final Integer collection2)
 			throws CMSException {
 		return getObjs(Task.class, "collection/" + collection2 + "/task",
 				"tasks");
 	}
 
-	private static void buildGuessWordTagging(final ObjectNode guessWord,
-			final Image image, final MicroTask utask, final Integer taskId) {
-		// devono taggare, non aggiungo tag
-		guessWord.put("tag", "");
-		guessWord.put("lang", LanguagePicker.retrieveIsoCode());
-		guessWord.put("image", rootUrl + image.getMediaLocator());
-		guessWord.put("width", image.getWidth());
-		guessWord.put("height", image.getHeight());
-		guessWord.put("utaskid", utask.getId());
-		guessWord.put("taskid", String.valueOf(taskId));
 
-	}
 
 	private static MicroTask getMicroTask(final Integer utaskid)
 			throws CMSException {
@@ -958,15 +667,7 @@ public class CMS {
 		return getObjs(utils.CMS.models.Task.class, "task", "tasks");
 	}
 
-	/*
-	 * Inform the game that at least one task is ready and we can start the game
-	 */
-	private static void sendTaskAcquired(final Room roomChannel) {
-		LoggerUtils.debug("CMS", "CMS sends task aquired... ");
-		GameBus.getInstance().publish(
-				new GameMessages.GameEvent(GameMessages.composeTaskAcquired(),
-						roomChannel));
-	}
+
 
 	public static List<User> getAllUsers() throws CMSException, JSONException {
 		final HashMap<String, String> params = new HashMap<String, String>();
